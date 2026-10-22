@@ -957,7 +957,7 @@ function destroy(w){if(w==="prof"&&profChart){profChart.destroy();profChart=null
 /* ---------- SWIMMERS VIEW ---------- */
 let recent=[];try{recent=JSON.parse(localStorage.getItem("smt-recent")||"[]")}catch(e){}
 function rememberSwimmer(id){recent=[id,...recent.filter(x=>x!==id)].slice(0,8);try{localStorage.setItem("smt-recent",JSON.stringify(recent))}catch(e){}}
-function openSwimmer(id){ui.sel=id;ui.ev=null;ui.openSplit=null;rememberSwimmer(id);renderRoster();renderProfile()}
+function openSwimmer(id){ui.sel=id;ui.selAuto=false;ui.ev=null;ui.openSplit=null;rememberSwimmer(id);renderRoster();renderProfile()}
 function renderRoster(){
   $("#swCount").textContent=state.swimmers.length?`· ${state.swimmers.length.toLocaleString()} swimmers`:"";
   const list=recent.filter(id=>swimmerById(id));
@@ -987,9 +987,9 @@ function renderProfile(){
   if(!state.swimmers.length){destroy("prof");el.innerHTML=`<div class="empty"><h2>No swimmers yet</h2><p>Results appear here after the first meet is uploaded.</p></div>`;return}
   if(ui.waitSel&&ui.sel===ui.waitSel&&!swimmerById(ui.sel)){destroy("prof");el.innerHTML=`<div class="empty">Updating…</div>`;return}
   ui.waitSel=null;
-  if(!swimmerById(ui.sel))ui.sel=state.swimmers.slice().sort((a,b)=>a.name.localeCompare(b.name,"th"))[0].id;
+  if(!swimmerById(ui.sel)){ui.sel=state.swimmers.slice().sort((a,b)=>a.name.localeCompare(b.name,"th"))[0].id;ui.selAuto=true}
   const s=swimmerById(ui.sel),evs=eventsOf(s.id);
-  if(!state.demo&&recent[0]!==s.id)rememberSwimmer(s.id);
+  if(!state.demo&&!ui.selAuto&&recent[0]!==s.id)rememberSwimmer(s.id);
   const keys=[...evs.keys()].filter(k=>summary(evs.get(k))).sort((a,b)=>{const[sa,da,ca]=a.split("|"),[sb,db,cb]=b.split("|");return ca.localeCompare(cb)||STROKES.indexOf(sa)-STROKES.indexOf(sb)||da-db});
   if(!keys.includes(ui.ev))ui.ev=keys.slice().sort((a,b)=>evs.get(b).length-evs.get(a).length)[0]||null;
   let h=ui.editing===s.id?editHtml(s):idCard(s);
@@ -2428,7 +2428,8 @@ const fileSafe=t=>String(t||"").replace(/[\\/:*?"<>|]+/g," ").replace(/\s+/g,"_"
 let rpSel=null,rpQ="";
 function renderReports(){
   // portfolio
-  const s=swimmerById(rpSel)||swimmerById(ui.sel)||null;if(s)rpSel=s.id;
+  /* starts empty; afterwards it shows the last swimmer this visitor looked at (kept on their own device) */
+  const s=(state.demo?null:swimmerById(recent[0]))||swimmerById(rpSel)||null;if(s)rpSel=s.id;
   const toks=fold(rpQ).split(/\s+/).filter(Boolean);
   const hits=toks.join("").length>=2?state.swimmers.filter(o=>{const h=fold([o.nameEn,o.nameTh,o.club].join(" "));return toks.every(t=>h.includes(t))}).sort((a,b)=>a.name.localeCompare(b.name,"th")).slice(0,8):[];
   $("#rpHits").innerHTML=hits.map(o=>`<button type="button" data-rp="${esc(o.id)}"><b>${esc(o.name)}</b> <span class="hint">${esc([altName(o),o.club,o.birthYear?"born "+o.birthYear:""].filter(Boolean).join(" · "))}</span></button>`).join("")+(toks.join("").length>=2&&!hits.length?`<span class="hint">No swimmer matches.</span>`:"");
@@ -2447,7 +2448,7 @@ function renderReports(){
   if(canEdit()&&!$("#orgCard").contains(document.activeElement)){$("#oNameTh").value=org.nameTh||"";$("#oNameEn").value=org.nameEn||"";$("#oSigner").value=org.signer||"";$("#oTitleTh").value=org.titleTh||"";$("#oTitleEn").value=org.titleEn||""}
 }
 $("#rpQ").addEventListener("input",e=>{rpQ=e.target.value;renderReports()});
-$("#rpHits").onclick=e=>{const b=e.target.closest("[data-rp]");if(b){rpSel=b.dataset.rp;rpQ="";$("#rpQ").value="";$("#rpFrom").value="";$("#rpTo").value="";renderReports()}};
+$("#rpHits").onclick=e=>{const b=e.target.closest("[data-rp]");if(b){rpSel=b.dataset.rp;if(!state.demo)rememberSwimmer(rpSel);rpQ="";$("#rpQ").value="";$("#rpFrom").value="";$("#rpTo").value="";renderReports()}};
 $("#rpGo").onclick=()=>{const s=swimmerById(rpSel);if(!s)return;let f=+$("#rpFrom").value,t=+$("#rpTo").value;if(f>t)[f,t]=[t,f];
   openReport(()=>buildPortfolio(s,{from:f,to:t,history:$("#rpHist").checked}),`Portfolio_${fileSafe(s.nameEn||s.nameTh)}_${today()}.pdf`)};
 $("#rrTop").onchange=e=>{e.target.dataset.touched="1"};
