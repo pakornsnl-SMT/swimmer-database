@@ -1038,7 +1038,7 @@ function renderProfile(){
   h+=`<div class="legend-note">${sm.n} swims · ${sm.n>1?`improved ${sm.impr.toFixed(1)}% from ${fmt(sm.first.time)} to a best of ${fmt(sm.best.time)}`:`best ${fmt(sm.best.time)}`}. Each point is the fastest swim at a meet; gold points are new personal bests.</div>`;
   let prev=null,run=Infinity;const meta2=new Map();
   sortByDate(all).forEach(r=>{if(!valid(r)){meta2.set(r.id,{delta:null,isPb:false});return}meta2.set(r.id,{delta:prev?r.time-prev.time:null,isPb:r.time<run});if(r.time<run)run=r.time;prev=r});
-  const rows=sortByDate(all).reverse();const ed=canEdit();
+  const ed=canEdit();const rows=sortByDate(ed?all:all.filter(r=>!isDns(r))).reverse();
   h+=`<div class="tbl-wrap"><table class="t-hist"><thead><tr><th>Date</th><th>Meet</th><th>Round</th><th class="num">Place</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">vs previous</th><th></th><th></th></tr></thead><tbody>`+rows.map(r=>{if(ui.editRow===r.id)return editRowHtml(r,10);const m=meta2.get(r.id);const hasSp=r.splits&&r.splits.length>1;const open=ui.openSplit===r.id;
     return`<tr><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"—")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${placeTxt(r)}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t ${m.delta==null?"":m.delta<0?"up":m.delta>0?"down":""}">${!valid(r)?"":m.delta==null?"first":(m.delta<0?"−":"+")+Math.abs(m.delta).toFixed(2)}</td><td>${m.isPb?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${hasSp?` <button class="lnk" data-split="${esc(r.id)}" aria-expanded="${open}">Splits</button>`:""}</td><td class="num">${ed?`<button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button><span data-del="${esc(r.id)}"><button class="x" title="Delete this time" aria-label="Delete this time">×</button></span>`:""}</td></tr>`+(open?`<tr class="splits"><td colspan="10">${splitHtml(r)}</td></tr>`:"")}).join("")+`</tbody></table></div>`;
   el.innerHTML=h;
@@ -1047,20 +1047,22 @@ function renderProfile(){
 /* entry time vs result: negative = swam faster than the entry */
 /* teams a swimmer swam for other than clubs: school, province, region, country */
 function representation(s){
-  const m=new Map();resOf(s.id).forEach(r=>{const t=r.teamType||"C";if(t==="C"||!r.team)return;const k=t+"|"+r.team;const o=m.get(k)||{t,team:r.team,years:new Set(),meets:new Set()};o.years.add(r.date.slice(0,4));o.meets.add(r.meet);m.set(k,o)});
+  const m=new Map();resOf(s.id).forEach(r=>{const t=r.teamType||"C";if(t==="C"||!r.team||isDns(r))return;const k=t+"|"+r.team;const o=m.get(k)||{t,team:r.team,years:new Set(),meets:new Set()};o.years.add(r.date.slice(0,4));o.meets.add(r.meet);m.set(k,o)});
   const order="NRPS";return[...m.values()].map(o=>({...o,years:[...o.years].sort(),meets:[...o.meets]})).sort((a,b)=>order.indexOf(a.t)-order.indexOf(b.t)||a.team.localeCompare(b.team));
 }
 /* place shown in tables: exhibition swims (status EXH, or a negative place from Splash) show "EXH" */
 const isExh=r=>/^EXH/i.test(r.status||"")||(r.place!=null&&r.place<0&&!r.status);
 const placeTxt=r=>isExh(r)?'<span class="chip course" title="Exhibition swim">EXH</span>':(r.place>0?r.place:"");
 function vsEntry(r){if(!(r.entry>0&&valid(r)))return`<td class="num t"></td>`;const d=r.time-r.entry;return`<td class="num t ${d<0?"up":d>0?"down":""}">${d<0?"−":d>0?"+":"±"}${Math.abs(d).toFixed(2)}</td>`}
+/* entered but did not start: left out of the swimmer page for visitors and out of portfolios; never counted */
+const isDns=r=>/^(DNS|WDR)/i.test(r.status||"");
 function entryStats(list){const e=list.filter(r=>r.entry>0&&valid(r));const beat=e.filter(r=>r.time<r.entry).length;return{n:e.length,beat}}
 function idCard(s){
   const all=resOf(s.id);const ok=all.filter(valid);
   const byDate=sortByDate(ok);const first=byDate[0],last=byDate[byDate.length-1];
-  const meets=new Set(all.map(mKey)).size;const evs=new Set(ok.map(r=>evKey(r.stroke,r.distance,r.course))).size;
+  const real=all.filter(r=>!isDns(r));const meets=new Set(real.map(mKey)).size;const evs=new Set(ok.map(r=>evKey(r.stroke,r.distance,r.course))).size;
   const yr=new Date().getFullYear();const pbsYr=(()=>{const best=new Map();byDate.forEach(r=>{const k=evKey(r.stroke,r.distance,r.course);const b=best.get(k);if(!b||r.time<b.time)best.set(k,r)});return[...best.values()].filter(r=>r.date.slice(0,4)===String(yr)).length})();
-  const es=entryStats(all);
+  const es=entryStats(real);
   const g=s.gender==="F"?"Female":s.gender==="M"?"Male":"";
   const fact=(k,v,sub)=>v?`<div><dt>${k}</dt><dd>${v}${sub?`<small>${sub}</small>`:""}</dd></div>`:"";
   return`<div class="idcard"><div class="idmain"><span class="lane">${esc(initials(s.name))}</span><div style="min-width:0"><div class="tags">${s.prefix?`<span class="tag">${esc(s.prefix)}</span>`:""}${g?`<span class="tag">${g}</span>`:""}${s.nation?`<span class="tag">${esc(s.nation)}</span>`:""}</div><h2>${esc(s.name)}</h2>${altName(s)?`<div class="th">${esc(altName(s))}</div>`:""}<div class="cardacts"><button class="ghost editbtn" type="button" data-portfolio="${esc(s.id)}">Portfolio PDF</button>${canEdit()?`<button class="ghost editbtn" data-edit="profile">✎ Edit swimmer</button>`:""}</div></div></div>
@@ -1073,7 +1075,7 @@ function idCard(s){
       ${(()=>{const rep=representation(s);return rep.length?`<div style="grid-column:1/-1"><dt>Represented</dt><dd>${rep.map(x=>`${ttEn(x.t)}: <b>${esc(x.team)}</b> <small style="display:inline">(${x.years.join(", ")}${x.meets.length?" · "+esc(x.meets.slice(0,2).join(", "))+(x.meets.length>2?", …":""):""})</small>`).join("<br>")}</dd></div>`:""})()}
       ${fact("First meet",first?esc(first.meet||"—"):"",first?fdate(first.date):"")}
       ${fact("Latest meet",last?esc(last.meet||"—"):"",last?fdate(last.date):"")}
-      ${fact("Meets",String(meets),`${all.length} swims`)}
+      ${fact("Meets",String(meets),`${real.length} swims`)}
       ${fact("Events",String(evs),pbsYr?`${pbsYr} best time${pbsYr>1?"s":""} set in ${yr}`:"")}
       ${fact("Entry times beaten",es.n?`${es.beat} of ${es.n}`:"",es.n?`${Math.round(es.beat/es.n*100)}% of swims with an entry time`:"")}
     </dl></div>`;
@@ -1228,9 +1230,13 @@ function meetsHtml(s){
   let run=new Map();const pbIds=new Set();sortByDate(all.filter(valid)).forEach(r=>{const k=evKey(r.stroke,r.distance,r.course);const b=run.get(k);if(b==null||r.time<b){pbIds.add(r.id);run.set(k,r.time)}});
   const es=entryStats(all);
   let h=`<div class="hint" style="margin-bottom:4px">Entry time is the seed time the swimmer entered with. “vs entry” in green means they swam faster than their entry. ${es.n?`Overall: faster than entry in ${es.beat} of ${es.n} swims.`:""}</div>`;
-  h+=list.map(rs=>{const m0=rs[0];const e=entryStats(rs);
+  /* DNS entries are left out for visitors (a meet with only DNS disappears); staff still see them to correct mistakes */
+  const ed=canEdit();
+  h+=list.map(rsAll=>{const m0=rsAll[0];const real=rsAll.filter(r=>!isDns(r));
+    if(!ed&&!real.length)return"";
+    const rs=ed?rsAll:real;const e=entryStats(rs);const dnsLink="";
     const rows=rs.slice().sort((a,b)=>STROKES.indexOf(a.stroke)-STROKES.indexOf(b.stroke)||a.distance-b.distance||(a.date<b.date?-1:1));
-    return`<div class="meetblk"><h4>${esc(m0.meet||"(no name)")}</h4><div class="hint">${meetPeriod(m0)} · ${[...new Set(rs.map(r=>poolName(r.course)))].join(", ")} pool · ${rs.length} swim${rs.length>1?"s":""}${e.n?` · faster than entry in ${e.beat} of ${e.n}`:""}</div>
+    return`<div class="meetblk"><h4>${esc(m0.meet||"(no name)")}</h4><div class="hint">${meetPeriod(m0)} · ${[...new Set(rs.map(r=>poolName(r.course)))].join(", ")} pool · ${real.length?`${real.length} swim${real.length>1?"s":""}`:"entered, did not swim"}${e.n?` · faster than entry in ${e.beat} of ${e.n}`:""}${dnsLink}</div>
       <div class="tbl-wrap" style="margin-top:0"><table class="t-mr"><thead><tr><th>Event</th><th>Round</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">Place</th><th></th>${canEdit()?"<th></th>":""}</tr></thead><tbody>${rows.map(r=>ui.editRow===r.id?editRowHtml(r,canEdit()?8:7):`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[r.stroke]})"></span>${evH(r.stroke,r.distance)}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t">${placeTxt(r)}</td><td>${pbIds.has(r.id)?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}</td>${canEdit()?`<td class="num"><button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button></td>`:""}</tr>`).join("")}</tbody></table></div></div>`}).join("");
   return h;
 }
@@ -2363,7 +2369,7 @@ async function buildPortfolio(s,o){
 
   if(o.history){
     B.push(sec("ประวัติการแข่งขัน","Competition history"));
-    const hist=sortByDate(all.filter(r=>{const y=+r.date.slice(0,4);return y>=y0&&y<=y1})).reverse();
+    const hist=sortByDate(all.filter(r=>{const y=+r.date.slice(0,4);return y>=y0&&y<=y1&&!isDns(r)})).reverse();
     B.push({t:"table",cols:[{h:hb("วันที่","Date")},{h:hb("รายการแข่งขัน","Meet")},{h:hb("ประเภท","Event")},{h:hb("รอบ","Round")},{h:hb("เวลา","Time"),cls:"num"},{h:hb("อันดับ","Place"),cls:"num"}],
       rows:hist.map(r=>[rDate(r.date),esc(r.meet||""),`${evTh(r.stroke,r.distance)} · ${r.course}<br><span class="en">${evEn(r.stroke,r.distance)}${r.relay?" (relay lead-off)":""}</span>`,esc(r.round||""),valid(r)?fmt(r.time):esc(r.status||"—"),isExh(r)?"EXH":(r.place>0?r.place:"")])});
   }
