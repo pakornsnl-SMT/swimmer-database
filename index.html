@@ -203,6 +203,12 @@ form .full{grid-column:1/-1}
 .rkbox thead th{position:sticky;top:0;background:var(--surface);z-index:1}
 .rkbox td,.rkbox th{padding:6px 8px}
 .rkbox .namebtn{font-size:14px}
+/* Top lists side by side: the club sits under the name so time, points and date always fit without sideways scrolling */
+.t-rk7{table-layout:fixed;width:100%}
+.t-rk7 th:nth-child(1){width:34px}.t-rk7 th:nth-child(3){width:40px}.t-rk7 th:nth-child(4){width:84px}.t-rk7 th:nth-child(5){width:46px}.t-rk7 th:nth-child(6){width:102px}
+.t-rk7 td{overflow:hidden}
+.t-rk7 .namebtn{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-club{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .finder{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;max-width:640px}
 .suggest{position:absolute;top:100%;left:0;right:0;z-index:4;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);max-height:360px;overflow:auto}
 .suggest button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 12px;cursor:pointer;color:var(--fg);font:inherit}
@@ -437,11 +443,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   .t-mr td:nth-child(7){grid-column:1;grid-row:4}
   .t-mr td:nth-child(7):empty,.t-mr td:nth-child(8):empty{display:none}
   .t-mr td:nth-child(8){grid-column:2;grid-row:4;text-align:right}
-  .t-rk7 th:nth-child(6),.t-rk7 td:nth-child(6),.t-rk7 th:nth-child(7),.t-rk7 td:nth-child(7){display:none}
+  .t-rk7 th:nth-child(5),.t-rk7 td:nth-child(5),.t-rk7 th:nth-child(6),.t-rk7 td:nth-child(6){display:none}
   .t-rk9 th:nth-child(4),.t-rk9 td:nth-child(4),.t-rk9 th:nth-child(7),.t-rk9 td:nth-child(7),.t-rk9 th:nth-child(8),.t-rk9 td:nth-child(8),.t-rk9 th:nth-child(9),.t-rk9 td:nth-child(9){display:none}
   #rankTbl th:nth-child(4),#rankTbl td:nth-child(4),#rankTbl th:nth-child(6),#rankTbl td:nth-child(6),#rankTbl th:nth-child(7),#rankTbl td:nth-child(7),#rankTbl th:nth-child(8),#rankTbl td:nth-child(8){display:none}
-  .t-rk7 td:nth-child(4),.t-rk9 td:nth-child(5){max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .t-rk7 td:nth-child(2),.t-rk9 td:nth-child(2){white-space:normal}
+  .t-rk9 td:nth-child(5){max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t-rk9 td:nth-child(2){white-space:normal}
   table{font-size:13.5px}
   th,td{padding:7px 6px}
   td.swimt{font-size:14.5px}
@@ -458,8 +464,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   table{font-size:13px}
   th,td{padding:6px 4px}
   td.swimt{font-size:14px}
-  .t-rk7 td:nth-child(4),.t-rk9 td:nth-child(5){max-width:78px}
-  .t-rk7 td:nth-child(2),.t-rk9 td:nth-child(2){max-width:118px}
+  .t-rk9 td:nth-child(5){max-width:78px}
+  .t-rk9 td:nth-child(2){max-width:118px}
   .rkbox td,.rkbox th{padding:5px 4px}
   .t-ev td:nth-child(5) .pts{font-size:12.5px}
   #rankTbl th:nth-child(2){font-size:0}
@@ -480,7 +486,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <button role="tab" id="tab-records" data-view="records" aria-selected="false">Records</button>
       <button role="tab" id="tab-compare" data-view="compare" aria-selected="false">Compare</button>
       <button role="tab" id="tab-reports" data-view="reports" aria-selected="false">Reports</button>
-      <button role="tab" id="tab-manage" data-view="manage" aria-selected="false" hidden>Upload results</button>
+      <button role="tab" id="tab-manage" data-view="manage" aria-selected="false" hidden>Admin</button>
     </nav>
   </div>
 </header>
@@ -1306,7 +1312,7 @@ function rankRows(list,compact){
   return list.slice(0,ui.kTop).map((r,i)=>{if(r.time!==prevT){rank=i+1;prevT=r.time}const s=swimmerById(r.swimmerId);const p=points(r,s.gender);const a=rankAge(s);
     const name=`<button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>${altName(s)&&!compact?`<br><span class="hint">${esc(altName(s))}</span>`:""}`;
     return compact
-      ?`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r))}"><td>${rank}</td><td>${name}</td><td class="num t">${a??""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td></tr>`
+      ?`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r))}"><td>${rank}</td><td>${name}${s.club?`<span class="rk-club" title="${esc(s.club)}">${esc(s.club)}</span>`:""}</td><td class="num t">${a??""}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td></tr>`
       :`<tr class="rk${rank}"><td>${rank}</td><td>${name}</td><td class="num t">${a??""}</td><td class="num t">${s.birthYear||""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td></tr>`}).join("");
 }
 function periodText(){
@@ -1357,7 +1363,7 @@ function renderRankings(){
     $("#rkTitle").textContent=`Top ${ui.kTop} ${ui.kCourse}`;
     $("#rkSub").textContent=`${poolName(ui.kCourse)} pool · ${filt} · every stroke and distance, women and men · best time per swimmer`;
     if(!secs.length){$("#rkBody").innerHTML=`<div class="empty">No ${poolName(ui.kCourse)} pool times for this period${ageText}${ui.kClub?" and team":""} yet.</div>`;return}
-    const col=(g,list)=>`<div class="gcol"><span class="lbl">${g==="F"?"Women":"Men"} · ${list.length?`${Math.min(ui.kTop,list.length)} of ${list.length}`:"no times"}</span>${list.length?`<div class="rkbox"><table class="rank t-rk7"><thead><tr><th>#</th><th>Swimmer</th><th class="num">Age</th><th>Club</th><th class="num">Time</th><th class="num">Pts</th><th>Date</th></tr></thead><tbody>${rankRows(list,true)}</tbody></table></div>`:""}</div>`;
+    const col=(g,list)=>`<div class="gcol"><span class="lbl">${g==="F"?"Women":"Men"} · ${list.length?`${Math.min(ui.kTop,list.length)} of ${list.length}`:"no times"}</span>${list.length?`<div class="rkbox"><table class="rank t-rk7"><thead><tr><th>#</th><th>Swimmer · club</th><th class="num">Age</th><th class="num">Time</th><th class="num">Pts</th><th>Date</th></tr></thead><tbody>${rankRows(list,true)}</tbody></table></div>`:""}</div>`;
     $("#rkBody").innerHTML=`<nav class="jump" aria-label="Jump to event">${secs.map(s=>`<a href="#ev-${s.st}-${s.d}" data-jump="ev-${s.st}-${s.d}"><span class="lg">${s.d} ${SHORT[s.st]}</span><span class="sm">${s.d} ${ABBR[s.st]}</span></a>`).join("")}</nav>`+
       secs.map(s=>`<section class="evsec" id="ev-${s.st}-${s.d}"><h3><span class="dot" style="background:var(${STROKE_COLOR[s.st]})"></span>${s.d}m ${esc(s.st)}</h3><div class="gcols">${col("F",s.L.F)}${col("M",s.L.M)}</div></section>`).join("")+
       (emptyEv.length?`<div class="hint" style="margin-top:20px">No times yet: ${emptyEv.join(", ")}.</div>`:"");
@@ -1644,7 +1650,7 @@ function show(v){if(v==="manage"&&!state.isStaff)v="swimmers";ui.view=v;VIEWS.fo
 function render(){
   $("#demoBanner").hidden=!state.demo;
   $("#tab-manage").hidden=!state.isStaff;
-  if(state.demo)$("#demoText").textContent=state.isStaff?"These swimmers are samples so you can see how the app works. Upload your first Splash results file under “Upload results” and the examples disappear.":!state.live?"These swimmers are samples. The shared results can't be loaded in this view.":"These swimmers are samples so you can see how the app works. Real results appear here once the coach uploads them.";
+  if(state.demo)$("#demoText").textContent=state.isStaff?"These swimmers are samples so you can see how the app works. Upload your first Splash results file under “Admin” and the examples disappear.":!state.live?"These swimmers are samples. The shared results can't be loaded in this view.":"These swimmers are samples so you can see how the app works. Real results appear here once the coach uploads them.";
   if(ui.view==="swimmers"){renderProfile();renderRoster()}
   else if(ui.view==="compare")renderCompare();
   else if(ui.view==="rankings")renderRankings();
@@ -2179,7 +2185,7 @@ function dupScan(){
   return[...out.values()].filter(p=>swimmerById(p.a)&&swimmerById(p.b)).sort((x,y)=>rank[y.level]-rank[x.level]);
 }
 function scheduleDupScan(){if(!state.isStaff||state.demo)return;clearTimeout(dupTimer);dupTimer=setTimeout(()=>{dupPairs=dupScan();updateDupBadge();if(ui.view==="manage")renderDupes()},600)}
-function updateDupBadge(){const n=dupPairs.filter(p=>p.level!=="low").length;$("#tab-manage").innerHTML=`Upload results${n?`<span class="badge" title="${n} possible duplicate swimmers">${n}</span>`:""}`}
+function updateDupBadge(){const n=dupPairs.filter(p=>p.level!=="low").length;$("#tab-manage").innerHTML=`Admin${n?`<span class="badge" title="${n} possible duplicate swimmers">${n}</span>`:""}`}
 /* Thai citizen ID check digit: a wrong check digit almost always means a typo */
 function thaiIdOk(id){if(!/^\d{13}$/.test(id))return null;let sum=0;for(let i=0;i<12;i++)sum+=+id[i]*(13-i);return(11-sum%11)%10===+id[12]}
 function dupSide(s,other,keep){
