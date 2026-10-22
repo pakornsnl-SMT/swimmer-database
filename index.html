@@ -362,6 +362,9 @@ form .full{grid-column:1/-1}
 .chip.rec.agr{background:var(--navy);color:var(--surface)}
 .chip.rec.former{opacity:.55}
 .t-rec td,.t-rec th{white-space:nowrap}
+/* holders with a profile look the same as the others; they are still tappable (underline on hover) */
+.t-rec .namebtn{font:inherit;color:inherit}
+.t-rec .namebtn:hover{text-decoration:underline}
 .t-rec td:nth-child(3),.t-rec td:nth-child(7){white-space:normal}
 @media (max-width:640px){.t-rec td:nth-child(3){white-space:nowrap}.t-rec .namebtn{font-size:inherit}}
 @media (max-width:640px){.t-rec th:nth-child(4),.t-rec td:nth-child(4),.t-rec th:nth-child(5),.t-rec td:nth-child(5),.t-rec th:nth-child(7),.t-rec td:nth-child(7){display:none}}
@@ -513,6 +516,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
         <div class="field" id="kAgeCustom" hidden><span class="lbl">Ages from – to</span><div class="period"><input type="number" id="kAgeLo" min="4" max="99" placeholder="10" aria-label="Youngest age" style="width:80px;flex:0 0 80px"><span>to</span><input type="number" id="kAgeHi" min="4" max="99" placeholder="12" aria-label="Oldest age" style="width:80px;flex:0 0 80px"></div></div>
         <div class="field"><label class="lbl" for="kClub">Team</label><select id="kClub"></select></div>
         <div class="field"><label class="lbl" for="kNat">Nationality</label><select id="kNat"><option value="tha">Thai swimmers only</option><option value="all">All swimmers</option><option value="non">Non-Thai only</option></select></div>
+        <div class="field"><span class="lbl">Show</span><div class="seg" id="kTop" role="group" aria-label="How many swimmers to show"><button data-n="10" aria-pressed="false">Top 10</button><button data-n="20" aria-pressed="false">Top 20</button><button data-n="50" aria-pressed="false">Top 50</button><button data-n="100" aria-pressed="true">Top 100</button></div></div>
       </div>
       <div class="hint" id="ageNote"></div>
       <div class="one-ev">
@@ -1299,7 +1303,7 @@ function topList(pool,st,d){
 }
 function rankRows(list,compact){
   let rank=0,prevT=null;
-  return list.slice(0,100).map((r,i)=>{if(r.time!==prevT){rank=i+1;prevT=r.time}const s=swimmerById(r.swimmerId);const p=points(r,s.gender);const a=rankAge(s);
+  return list.slice(0,ui.kTop).map((r,i)=>{if(r.time!==prevT){rank=i+1;prevT=r.time}const s=swimmerById(r.swimmerId);const p=points(r,s.gender);const a=rankAge(s);
     const name=`<button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>${altName(s)&&!compact?`<br><span class="hint">${esc(altName(s))}</span>`:""}`;
     return compact
       ?`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r))}"><td>${rank}</td><td>${name}</td><td class="num t">${a??""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td></tr>`
@@ -1317,6 +1321,8 @@ function presetList(){
 }
 function eventsForCourse(c){return STROKES.map(st=>[st,distsFor(st).filter(d=>BT[c][`${st}|${d}`]||state.results.some(r=>r.stroke===st&&+r.distance===d&&r.course===c))])}
 function renderRankings(){
+  document.querySelectorAll("#kTop button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.n===ui.kTop));
+  document.querySelectorAll("#shortcuts .shortcut b").forEach(b=>b.textContent=`Top ${ui.kTop} ${b.parentElement.dataset.sc}`);
   const allMode=ui.kMode==="all";
   document.querySelectorAll("#shortcuts .shortcut").forEach(b=>b.setAttribute("aria-pressed",allMode&&b.dataset.sc===ui.kCourse));
   document.querySelectorAll("#kGender button").forEach(b=>b.setAttribute("aria-pressed",!allMode&&b.dataset.g===ui.kGender));
@@ -1348,10 +1354,10 @@ function renderRankings(){
     const pools={F:rankPool(ui.kCourse,"F"),M:rankPool(ui.kCourse,"M")};
     const secs=[],emptyEv=[];
     evs.forEach(([st,ds])=>ds.forEach(d=>{const L={F:topList(pools.F,st,d),M:topList(pools.M,st,d)};if(L.F.length||L.M.length)secs.push({st,d,L});else emptyEv.push(`${d}m ${SHORT[st]}`)}));
-    $("#rkTitle").textContent=`Top 100 ${ui.kCourse}`;
+    $("#rkTitle").textContent=`Top ${ui.kTop} ${ui.kCourse}`;
     $("#rkSub").textContent=`${poolName(ui.kCourse)} pool · ${filt} · every stroke and distance, women and men · best time per swimmer`;
     if(!secs.length){$("#rkBody").innerHTML=`<div class="empty">No ${poolName(ui.kCourse)} pool times for this period${ageText}${ui.kClub?" and team":""} yet.</div>`;return}
-    const col=(g,list)=>`<div class="gcol"><span class="lbl">${g==="F"?"Women":"Men"} · ${list.length?`${Math.min(100,list.length)} of ${list.length}`:"no times"}</span>${list.length?`<div class="rkbox"><table class="rank t-rk7"><thead><tr><th>#</th><th>Swimmer</th><th class="num">Age</th><th>Club</th><th class="num">Time</th><th class="num">Pts</th><th>Date</th></tr></thead><tbody>${rankRows(list,true)}</tbody></table></div>`:""}</div>`;
+    const col=(g,list)=>`<div class="gcol"><span class="lbl">${g==="F"?"Women":"Men"} · ${list.length?`${Math.min(ui.kTop,list.length)} of ${list.length}`:"no times"}</span>${list.length?`<div class="rkbox"><table class="rank t-rk7"><thead><tr><th>#</th><th>Swimmer</th><th class="num">Age</th><th>Club</th><th class="num">Time</th><th class="num">Pts</th><th>Date</th></tr></thead><tbody>${rankRows(list,true)}</tbody></table></div>`:""}</div>`;
     $("#rkBody").innerHTML=`<nav class="jump" aria-label="Jump to event">${secs.map(s=>`<a href="#ev-${s.st}-${s.d}" data-jump="ev-${s.st}-${s.d}"><span class="lg">${s.d} ${SHORT[s.st]}</span><span class="sm">${s.d} ${ABBR[s.st]}</span></a>`).join("")}</nav>`+
       secs.map(s=>`<section class="evsec" id="ev-${s.st}-${s.d}"><h3><span class="dot" style="background:var(${STROKE_COLOR[s.st]})"></span>${s.d}m ${esc(s.st)}</h3><div class="gcols">${col("F",s.L.F)}${col("M",s.L.M)}</div></section>`).join("")+
       (emptyEv.length?`<div class="hint" style="margin-top:20px">No times yet: ${emptyEv.join(", ")}.</div>`:"");
@@ -1360,8 +1366,8 @@ function renderRankings(){
   const[st,d]=ui.kEvent.split("|");
   const all=topList(gPool,st,d);
   const gName=ui.kGender==="F"?"Women":"Men";
-  $("#rkTitle").textContent=`Top 100 · ${gName} ${d}m ${st}`;
-  $("#rkSub").textContent=`${poolName(ui.kCourse)} pool · ${filt} · ${all.length} swimmer${all.length===1?"":"s"} ranked, best time per swimmer${all.length>100?", top 100 shown":""}`;
+  $("#rkTitle").textContent=`Top ${ui.kTop} · ${gName} ${d}m ${st}`;
+  $("#rkSub").textContent=`${poolName(ui.kCourse)} pool · ${filt} · ${all.length} swimmer${all.length===1?"":"s"} ranked, best time per swimmer${all.length>ui.kTop?`, top ${ui.kTop} shown`:""}`;
   if(!all.length){$("#rkBody").innerHTML=`<div class="empty">No ${gName.toLowerCase()} have a ${d}m ${st} time in a ${poolName(ui.kCourse)} pool for ${periodText()}${ageText} yet.</div>`;return}
   $("#rkBody").innerHTML=`<div class="tbl-wrap"><table class="rank t-rk9"><thead><tr><th>#</th><th>Swimmer</th><th class="num">Age</th><th class="num">Born</th><th>Club</th><th class="num">Time</th><th class="num">Points</th><th>Date</th><th>Meet</th></tr></thead><tbody>${rankRows(all,false)}</tbody></table></div>`;
 }
@@ -2495,7 +2501,7 @@ $("#fOrg").addEventListener("submit",async e=>{e.preventDefault();const m=$("#oM
   const v={nameTh:norm($("#oNameTh").value),nameEn:norm($("#oNameEn").value),signer:norm($("#oSigner").value),titleTh:norm($("#oTitleTh").value),titleEn:norm($("#oTitleEn").value),updatedAt:new Date().toISOString()};
   try{await db.doc("settings/org").set(v);org=v;msg(m,"Saved. New reports use these details.",true)}catch(err){msg(m,permErr(err),false)}});
 
-$("#rkReport").onclick=()=>{show("reports");setTimeout(()=>$("#rrGo").focus(),50)};
+$("#rkReport").onclick=()=>{$("#rrTop").value=String(ui.kTop);$("#rrTop").dataset.touched="1";show("reports");setTimeout(()=>$("#rrGo").focus(),50)};
 /* ---- Rankings as an Excel file: the lists on screen, with the same filters ---- */
 async function downloadRankingsXlsx(topN,m){
   if(!window.XLSX){msg(m,"The Excel tools didn't load. Reload the page and try again.",false);return}
@@ -2518,7 +2524,10 @@ async function downloadRankingsXlsx(topN,m){
   try{await saveFile(`Rankings_${ui.kMode==="all"?"Top_"+ui.kCourse:ui.kEvent.replace("|","_")+"_"+ui.kGender}_${today()}.xlsx`,blob);msg(m,`Saved ${rows.length} rows.`,true)}
   catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":"Couldn't save the file. Try again.",c==="declined")}
 }
-$("#rkXlsx").onclick=()=>downloadRankingsXlsx(100,$("#rkXlsxMsg"));
+$("#rkXlsx").onclick=()=>downloadRankingsXlsx(ui.kTop,$("#rkXlsxMsg"));
+/* how many swimmers per list: remembered on this device */
+try{const n=+localStorage.getItem("smt-ktop");ui.kTop=[10,20,50,100].includes(n)?n:100}catch(e){ui.kTop=100}
+$("#kTop").onclick=e=>{const b=e.target.closest("[data-n]");if(!b)return;ui.kTop=+b.dataset.n;try{localStorage.setItem("smt-ktop",ui.kTop)}catch(_){}renderRankings()};
 $("#rrXlsx").onclick=()=>downloadRankingsXlsx(+$("#rrTop").value,$("#rrMsg"));
 document.addEventListener("click",e=>{const b=e.target.closest("[data-portfolio]");if(!b)return;const s=swimmerById(b.dataset.portfolio);if(!s)return;
   const yrs=resOf(s.id).filter(valid).map(r=>+r.date.slice(0,4));if(!yrs.length)return;
