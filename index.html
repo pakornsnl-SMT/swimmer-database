@@ -119,6 +119,9 @@ select,input[type=text],input[type=date],input[type=number]{padding:9px 10px;bor
 .seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
 .rank td:first-child{font:700 18px var(--display);width:30px}
 .rank input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+/* small screens: short stroke names (50 FR) and short swimmer names (first name + initial) */
+.sm{display:none}
+@media (max-width:640px){.lg{display:none}.sm{display:inline}}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .empty{color:var(--muted);padding:30px 10px;text-align:center}
 
@@ -229,6 +232,7 @@ form .full{grid-column:1/-1}
 .recent button{font:500 13px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 12px;cursor:pointer}
 .recent button:hover{border-color:var(--accent)}
 .recent button[aria-current="true"]{border-color:var(--accent);color:var(--accent)}
+.recent .rc-clear{border:0;background:none;color:var(--muted);text-decoration:underline;padding:5px 6px}
 .idcard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--line)}
 @media (max-width:820px){.idcard{grid-template-columns:minmax(0,1fr)}}
 .idmain{display:flex;gap:16px;align-items:flex-start;min-width:0}
@@ -341,9 +345,11 @@ form .full{grid-column:1/-1}
 /* the swim time column in result tables: the number people look for first */
 @media (min-width:641px){
   .t-mr{table-layout:fixed}
-  .t-mr th:nth-child(1){width:21%}.t-mr th:nth-child(2){width:14%}.t-mr th:nth-child(3){width:10%}.t-mr th:nth-child(4){width:11%}
-  .t-mr th:nth-child(5){width:10%}.t-mr th:nth-child(6){width:7%}.t-mr th:nth-child(7){width:21%}.t-mr th:nth-child(8){width:6%}
+  /* times get fixed room so they are never cut (e.g. 1:10.48 on a phone turned sideways); text columns share the rest */
+  .t-mr th:nth-child(1){width:24%}.t-mr th:nth-child(2){width:14%}.t-mr th:nth-child(3){width:86px}.t-mr th:nth-child(4){width:100px}
+  .t-mr th:nth-child(5){width:74px}.t-mr th:nth-child(6){width:56px}.t-mr th:nth-child(8){width:44px}
   .t-mr td{overflow:hidden;text-overflow:ellipsis}
+  .t-mr td.t,.t-mr td.num{overflow:visible;text-overflow:clip;white-space:nowrap}
   .t-mr td:nth-child(2){white-space:normal}
   .t-mr td:nth-child(7){white-space:normal;overflow:visible;line-height:1.9}   /* PB and record badges: always shown in full */
 }
@@ -357,6 +363,7 @@ form .full{grid-column:1/-1}
 .chip.rec.former{opacity:.55}
 .t-rec td,.t-rec th{white-space:nowrap}
 .t-rec td:nth-child(3),.t-rec td:nth-child(7){white-space:normal}
+@media (max-width:640px){.t-rec td:nth-child(3){white-space:nowrap}.t-rec .namebtn{font-size:inherit}}
 @media (max-width:640px){.t-rec th:nth-child(4),.t-rec td:nth-child(4),.t-rec th:nth-child(5),.t-rec td:nth-child(5),.t-rec th:nth-child(7),.t-rec td:nth-child(7){display:none}}
 th.swimt{color:var(--navy)}
 td.swimt{font-weight:700;color:var(--navy);background:color-mix(in srgb,var(--navy) 8%,transparent);font-size:15px}
@@ -761,6 +768,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
 const STROKES=["Freestyle","Backstroke","Breaststroke","Butterfly","IM"];
 const BASE_DISTS={Freestyle:[50,100,200,400,800,1500],Backstroke:[50,100,200],Breaststroke:[50,100,200],Butterfly:[50,100,200],IM:[100,200,400]};
 const SHORT={Freestyle:"Free",Backstroke:"Back",Breaststroke:"Breast",Butterfly:"Fly",IM:"IM"};
+const ABBR={Freestyle:"FR",Backstroke:"BK",Breaststroke:"BR",Butterfly:"FLY",IM:"IM"};
+const evH=(st,d)=>`<span class="lg">${d}m ${esc(st)}</span><span class="sm">${d} ${ABBR[st]||esc(st)}</span>`;
+/* "ณัชฐานันตร์ จันทร์กระจ่าง" -> "ณัชฐานันตร์ จ."; Thai leading vowels are skipped so the initial is the first consonant */
+function shortName(n){const t=String(n||"").trim().split(/\s+/);if(t.length<2)return t[0]||"";const last=t[t.length-1].replace(/^[เแโใไ]+/,"");return`${t[0]} ${(last||t[t.length-1]).charAt(0)}.`}
+const nameH=n=>{const sh=shortName(n);return sh===n?esc(n):`<span class="lg">${esc(n)}</span><span class="sm">${esc(sh)}</span>`};
 /* World Aquatics points base times (LCM 2026, SCM 2025/26), seconds. Order: F,M */
 const BT={
  LCM:{"Freestyle|50":[23.61,20.91],"Freestyle|100":[51.71,46.40],"Freestyle|200":[112.23,102.00],"Freestyle|400":[234.18,219.96],"Freestyle|800":[484.12,452.12],"Freestyle|1500":[920.48,870.67],
@@ -955,13 +967,15 @@ function chartBase(){
 function destroy(w){if(w==="prof"&&profChart){profChart.destroy();profChart=null}if(w==="cmp"&&cmpChart){cmpChart.destroy();cmpChart=null}}
 
 /* ---------- SWIMMERS VIEW ---------- */
-let recent=[];try{recent=JSON.parse(localStorage.getItem("smt-recent")||"[]")}catch(e){}
+let recent=[];try{recent=JSON.parse(localStorage.getItem("smt-recent")||"[]");
+  /* an earlier version filled this list by itself; start it fresh once */
+  if(localStorage.getItem("smt-recent-v")!=="2"){recent=[];localStorage.setItem("smt-recent","[]");localStorage.setItem("smt-recent-v","2")}}catch(e){}
 function rememberSwimmer(id){recent=[id,...recent.filter(x=>x!==id)].slice(0,8);try{localStorage.setItem("smt-recent",JSON.stringify(recent))}catch(e){}}
-function openSwimmer(id){ui.sel=id;ui.selAuto=false;ui.ev=null;ui.openSplit=null;rememberSwimmer(id);renderRoster();renderProfile()}
+function openSwimmer(id){ui.sel=id;ui.ev=null;ui.openSplit=null;rememberSwimmer(id);renderRoster();renderProfile()}
 function renderRoster(){
   $("#swCount").textContent=state.swimmers.length?`· ${state.swimmers.length.toLocaleString()} swimmers`:"";
   const list=recent.filter(id=>swimmerById(id));
-  $("#recent").innerHTML=list.length?`<span class="lbl">Recently viewed</span>`+list.map(id=>`<button data-id="${esc(id)}" aria-current="${id===ui.sel}">${esc(swimmerById(id).name)}</button>`).join(""):"";
+  $("#recent").innerHTML=list.length&&!state.demo?`<span class="lbl">Recently viewed</span>`+list.map(id=>`<button data-id="${esc(id)}" aria-current="${id===ui.sel}">${esc(swimmerById(id).name)}</button>`).join("")+`<button type="button" class="rc-clear" data-clear="1" aria-label="Clear recently viewed">Clear</button>`:"";
 }
 /* search box on the Swimmers page */
 let qSugg=[],qIdx=0,qTimer=null;
@@ -987,9 +1001,18 @@ function renderProfile(){
   if(!state.swimmers.length){destroy("prof");el.innerHTML=`<div class="empty"><h2>No swimmers yet</h2><p>Results appear here after the first meet is uploaded.</p></div>`;return}
   if(ui.waitSel&&ui.sel===ui.waitSel&&!swimmerById(ui.sel)){destroy("prof");el.innerHTML=`<div class="empty">Updating…</div>`;return}
   ui.waitSel=null;
-  if(!swimmerById(ui.sel)){ui.sel=state.swimmers.slice().sort((a,b)=>a.name.localeCompare(b.name,"th"))[0].id;ui.selAuto=true}
+  /* no swimmer chosen: returning visitors get the last one they opened; new visitors start with an empty page (the samples still show one) */
+  if(!swimmerById(ui.sel)){
+    const last=state.demo?null:recent.find(id=>swimmerById(id));
+    if(last)ui.sel=last;
+    else if(state.demo)ui.sel=state.swimmers.slice().sort((a,b)=>a.name.localeCompare(b.name,"th"))[0].id;
+    else{destroy("prof");ui.sel=null;
+      const lm=meetList()[0];
+      el.innerHTML=`<div class="empty" style="padding:44px 16px"><h2 style="margin:0 0 8px;color:var(--fg)">Find a swimmer</h2><p style="margin:0 auto;max-width:440px">Type a name in English or Thai, or a club, in the search box above to see results, personal bests and progress.</p>${lm?`<p class="hint" style="margin-top:14px">Latest meet: ${esc(lm.meet||"")} · ${esc(lm.period||"")}</p>`:""}</div>`;
+      return}
+  }
   const s=swimmerById(ui.sel),evs=eventsOf(s.id);
-  if(!state.demo&&!ui.selAuto&&recent[0]!==s.id)rememberSwimmer(s.id);
+  if(!state.demo&&recent[0]!==s.id)rememberSwimmer(s.id);
   const keys=[...evs.keys()].filter(k=>summary(evs.get(k))).sort((a,b)=>{const[sa,da,ca]=a.split("|"),[sb,db,cb]=b.split("|");return ca.localeCompare(cb)||STROKES.indexOf(sa)-STROKES.indexOf(sb)||da-db});
   if(!keys.includes(ui.ev))ui.ev=keys.slice().sort((a,b)=>evs.get(b).length-evs.get(a).length)[0]||null;
   let h=ui.editing===s.id?editHtml(s):idCard(s);
@@ -1198,7 +1221,7 @@ function meetsHtml(s){
   h+=list.map(rs=>{const m0=rs[0];const e=entryStats(rs);
     const rows=rs.slice().sort((a,b)=>STROKES.indexOf(a.stroke)-STROKES.indexOf(b.stroke)||a.distance-b.distance||(a.date<b.date?-1:1));
     return`<div class="meetblk"><h4>${esc(m0.meet||"(no name)")}</h4><div class="hint">${meetPeriod(m0)} · ${[...new Set(rs.map(r=>poolName(r.course)))].join(", ")} pool · ${rs.length} swim${rs.length>1?"s":""}${e.n?` · faster than entry in ${e.beat} of ${e.n}`:""}</div>
-      <div class="tbl-wrap" style="margin-top:0"><table class="t-mr"><thead><tr><th>Event</th><th>Round</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">Place</th><th></th>${canEdit()?"<th></th>":""}</tr></thead><tbody>${rows.map(r=>ui.editRow===r.id?editRowHtml(r,canEdit()?8:7):`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[r.stroke]})"></span>${r.distance}m ${esc(r.stroke)}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t">${placeTxt(r)}</td><td>${pbIds.has(r.id)?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}</td>${canEdit()?`<td class="num"><button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button></td>`:""}</tr>`).join("")}</tbody></table></div></div>`}).join("");
+      <div class="tbl-wrap" style="margin-top:0"><table class="t-mr"><thead><tr><th>Event</th><th>Round</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">Place</th><th></th>${canEdit()?"<th></th>":""}</tr></thead><tbody>${rows.map(r=>ui.editRow===r.id?editRowHtml(r,canEdit()?8:7):`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[r.stroke]})"></span>${evH(r.stroke,r.distance)}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t">${placeTxt(r)}</td><td>${pbIds.has(r.id)?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}</td>${canEdit()?`<td class="num"><button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button></td>`:""}</tr>`).join("")}</tbody></table></div></div>`}).join("");
   return h;
 }
 function splitHtml(r){
@@ -1242,7 +1265,7 @@ function overviewHtml(s,evs,keys){
   h+=`<h3>All strokes · ${hasPts?"points":"improvement"} over time</h3><div class="chart-box"><canvas id="profChart"></canvas></div>
     <div class="legend-note">${hasPts?"World Aquatics points put every stroke, distance and pool on one scale: higher is better, 1000 equals the world record base time. Each point is the stroke's best swim at that meet. Base times: 50 m pool "+btLabel("LCM")+", 25 m pool "+btLabel("SCM")+".":"Add the swimmer's gender to see World Aquatics points. Showing % faster than the first swim in each event instead."}</div>`;
   h+=`<h3 style="margin-top:20px">Every event</h3><div class="tbl-wrap" style="margin-top:0"><table class="t-ev"><thead><tr><th>Event</th><th>Pool</th><th class="num">First swim</th><th class="num">Best</th><th class="num">Improved</th><th>Points</th><th class="num">Swims</th><th>Meet (best time)</th></tr></thead><tbody>`+
-    rows.map(r=>`<tr class="ov-row" data-ev="${esc(r.k)}" tabindex="0" title="Open this event"><td><span class="dot" style="background:var(${STROKE_COLOR[r.st]})"></span>${r.d}m ${esc(r.st)}</td><td>${poolName(r.c)}</td><td class="num t">${fmt(r.sm.first.time)}</td><td class="num t"><b>${fmt(r.sm.best.time)}</b></td><td class="num t ${r.sm.impr>0?"up":""}">${r.sm.n>1?r.sm.impr.toFixed(1)+"%":"—"}</td><td>${r.pts!=null?`<span class="ptsbar" style="width:${Math.round(r.pts/maxPts*70)}px"></span><span class="pts">${r.pts}</span>`:"—"}</td><td class="num t">${r.sm.n}</td><td class="wrapok">${esc(r.sm.best.meet||"—")}<br><span class="hint">${fdate(r.sm.best.date)}</span></td></tr>`).join("")+`</tbody></table></div>`;
+    rows.map(r=>`<tr class="ov-row" data-ev="${esc(r.k)}" tabindex="0" title="Open this event"><td><span class="dot" style="background:var(${STROKE_COLOR[r.st]})"></span>${evH(r.st,r.d)}</td><td>${poolName(r.c)}</td><td class="num t">${fmt(r.sm.first.time)}</td><td class="num t"><b>${fmt(r.sm.best.time)}</b></td><td class="num t ${r.sm.impr>0?"up":""}">${r.sm.n>1?r.sm.impr.toFixed(1)+"%":"—"}</td><td>${r.pts!=null?`<span class="ptsbar" style="width:${Math.round(r.pts/maxPts*70)}px"></span><span class="pts">${r.pts}</span>`:"—"}</td><td class="num t">${r.sm.n}</td><td class="wrapok">${esc(r.sm.best.meet||"—")}<br><span class="hint">${fdate(r.sm.best.date)}</span></td></tr>`).join("")+`</tbody></table></div>`;
   return h;
 }
 function drawOverview(s,evs,keys){
@@ -1277,7 +1300,7 @@ function topList(pool,st,d){
 function rankRows(list,compact){
   let rank=0,prevT=null;
   return list.slice(0,100).map((r,i)=>{if(r.time!==prevT){rank=i+1;prevT=r.time}const s=swimmerById(r.swimmerId);const p=points(r,s.gender);const a=rankAge(s);
-    const name=`<button class="namebtn" data-open="${esc(s.id)}">${esc(s.name)}</button>${altName(s)&&!compact?`<br><span class="hint">${esc(altName(s))}</span>`:""}`;
+    const name=`<button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>${altName(s)&&!compact?`<br><span class="hint">${esc(altName(s))}</span>`:""}`;
     return compact
       ?`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r))}"><td>${rank}</td><td>${name}</td><td class="num t">${a??""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td></tr>`
       :`<tr class="rk${rank}"><td>${rank}</td><td>${name}</td><td class="num t">${a??""}</td><td class="num t">${s.birthYear||""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td></tr>`}).join("");
@@ -1329,7 +1352,7 @@ function renderRankings(){
     $("#rkSub").textContent=`${poolName(ui.kCourse)} pool · ${filt} · every stroke and distance, women and men · best time per swimmer`;
     if(!secs.length){$("#rkBody").innerHTML=`<div class="empty">No ${poolName(ui.kCourse)} pool times for this period${ageText}${ui.kClub?" and team":""} yet.</div>`;return}
     const col=(g,list)=>`<div class="gcol"><span class="lbl">${g==="F"?"Women":"Men"} · ${list.length?`${Math.min(100,list.length)} of ${list.length}`:"no times"}</span>${list.length?`<div class="rkbox"><table class="rank t-rk7"><thead><tr><th>#</th><th>Swimmer</th><th class="num">Age</th><th>Club</th><th class="num">Time</th><th class="num">Pts</th><th>Date</th></tr></thead><tbody>${rankRows(list,true)}</tbody></table></div>`:""}</div>`;
-    $("#rkBody").innerHTML=`<nav class="jump" aria-label="Jump to event">${secs.map(s=>`<a href="#ev-${s.st}-${s.d}" data-jump="ev-${s.st}-${s.d}">${s.d} ${SHORT[s.st]}</a>`).join("")}</nav>`+
+    $("#rkBody").innerHTML=`<nav class="jump" aria-label="Jump to event">${secs.map(s=>`<a href="#ev-${s.st}-${s.d}" data-jump="ev-${s.st}-${s.d}"><span class="lg">${s.d} ${SHORT[s.st]}</span><span class="sm">${s.d} ${ABBR[s.st]}</span></a>`).join("")}</nav>`+
       secs.map(s=>`<section class="evsec" id="ev-${s.st}-${s.d}"><h3><span class="dot" style="background:var(${STROKE_COLOR[s.st]})"></span>${s.d}m ${esc(s.st)}</h3><div class="gcols">${col("F",s.L.F)}${col("M",s.L.M)}</div></section>`).join("")+
       (emptyEv.length?`<div class="hint" style="margin-top:20px">No times yet: ${emptyEv.join(", ")}.</div>`:"");
     return;
@@ -1372,7 +1395,7 @@ function renderCompare(){
   const colorOf=id=>cols[chosen.findIndex(s=>s.id===id)%cols.length];
   $("#cChips").innerHTML=pickedList.map(id=>{const sw=swimmerById(id);const on=chosen.some(s=>s.id===id);return`<span class="chipx${on?"":" off"}">${on?`<span class="dot" style="background:${colorOf(id)}"></span>`:""}${esc(sw.name)}${on?"":` <span class="hint">· no ${ui.cDist}m ${SHORT[ui.cStroke]} ${poolName(ui.cCourse)}</span>`}<button data-unpick="${esc(id)}" aria-label="Remove ${esc(sw.name)}">×</button></span>`}).join("")+(pickedList.length?`<button class="lnk" id="clearPicks">Clear all</button>`:"");
   const leader=stats[0];const shown=ui.rankAll?stats:stats.slice(0,50);
-  $("#rankTbl").innerHTML=stats.length?`<thead><tr><th>#</th><th>Chart</th><th>Swimmer</th><th>Club</th><th class="num">Best</th><th class="num">Gap</th><th class="num">Improved</th><th class="num">Swims</th></tr></thead><tbody>`+shown.map((s,i)=>{const sw=swimmerById(s.id);const on=ui.picked.has(s.id);return`<tr><td>${i+1}</td><td><input type="checkbox" data-pick="${esc(s.id)}" ${on?"checked":""} aria-label="Show ${esc(sw.name)} on chart"></td><td>${on?`<span class="dot" style="background:${colorOf(s.id)}"></span>`:""}${esc(sw.name)}<br><span class="hint">${sw.birthYear?"born "+sw.birthYear+" · ":""}best on ${fdate(s.best.date)}</span></td><td>${esc(sw.club||"")}</td><td class="num t">${fmt(s.best.time)}</td><td class="num t">${i?"+"+(s.best.time-leader.best.time).toFixed(2):"—"}</td><td class="num t ${s.impr>0?"up":""}">${s.n>1?s.impr.toFixed(1)+"%":"—"}</td><td class="num t">${s.n}</td></tr>`}).join("")+`</tbody>`+(stats.length>50&&!ui.rankAll?`<tfoot><tr><td colspan="8"><button class="lnk" id="rankMore">Show all ${stats.length} swimmers</button></td></tr></tfoot>`:""):`<tbody><tr><td class="empty">Nobody matching these filters has swum ${evName(ui.cStroke,ui.cDist)} in a ${ui.cCourse==="LCM"?"50 m":"25 m"} pool yet.</td></tr></tbody>`;
+  $("#rankTbl").innerHTML=stats.length?`<thead><tr><th>#</th><th>Chart</th><th>Swimmer</th><th>Club</th><th class="num">Best</th><th class="num">Gap</th><th class="num">Improved</th><th class="num">Swims</th></tr></thead><tbody>`+shown.map((s,i)=>{const sw=swimmerById(s.id);const on=ui.picked.has(s.id);return`<tr><td>${i+1}</td><td><input type="checkbox" data-pick="${esc(s.id)}" ${on?"checked":""} aria-label="Show ${esc(sw.name)} on chart"></td><td>${on?`<span class="dot" style="background:${colorOf(s.id)}"></span>`:""}${nameH(sw.name)}<br><span class="hint">${sw.birthYear?"born "+sw.birthYear+" · ":""}best on ${fdate(s.best.date)}</span></td><td>${esc(sw.club||"")}</td><td class="num t">${fmt(s.best.time)}</td><td class="num t">${i?"+"+(s.best.time-leader.best.time).toFixed(2):"—"}</td><td class="num t ${s.impr>0?"up":""}">${s.n>1?s.impr.toFixed(1)+"%":"—"}</td><td class="num t">${s.n}</td></tr>`}).join("")+`</tbody>`+(stats.length>50&&!ui.rankAll?`<tfoot><tr><td colspan="8"><button class="lnk" id="rankMore">Show all ${stats.length} swimmers</button></td></tr></tfoot>`:""):`<tbody><tr><td class="empty">Nobody matching these filters has swum ${evName(ui.cStroke,ui.cDist)} in a ${ui.cCourse==="LCM"?"50 m":"25 m"} pool yet.</td></tr></tbody>`;
   const byAge=ui.cAxis==="age";
   document.querySelectorAll("#cAxis button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.a===ui.cAxis));
   $("#cModeField").hidden=byAge;$("#ageBox").hidden=!byAge;
@@ -1640,7 +1663,8 @@ $("#q").addEventListener("keydown",e=>{
 $("#qList").addEventListener("mousedown",e=>e.preventDefault());
 $("#qList").onclick=e=>{const b=e.target.closest("[data-qs]");if(b)qChoose(+b.dataset.qs)};
 $("#q").addEventListener("blur",()=>setTimeout(()=>{$("#qList").hidden=true;$("#q").setAttribute("aria-expanded","false")},150));
-$("#recent").onclick=e=>{const b=e.target.closest("button[data-id]");if(b)openSwimmer(b.dataset.id)};
+$("#recent").onclick=e=>{if(e.target.closest("[data-clear]")){recent=[];try{localStorage.setItem("smt-recent","[]")}catch(_){}ui.sel=null;renderRoster();renderProfile();return}
+  const b=e.target.closest("button[data-id]");if(b)openSwimmer(b.dataset.id)};
 $("#profile").addEventListener("keydown",e=>{const row=e.target.closest(".ov-row");if(row&&(e.key==="Enter"||e.key===" ")){e.preventDefault();ui.ev=row.dataset.ev;ui.pmode="event";renderProfile()}});
 $("#profile").addEventListener("submit",e=>{e.preventDefault();const s=swimmerById(ui.sel);if(!s||!canEdit())return;
   if(e.target.id==="fEdit")saveProfile(s);else if(e.target.dataset.rform)saveRow(e.target)});
@@ -2588,7 +2612,7 @@ function renderRecords(){
   const rows=list.filter(x=>x.cat===cat&&x.g===g&&(x.ag||"")===ag).sort((a,b)=>(a.relay-b.relay)||STROKES.indexOf(a.st)-STROKES.indexOf(b.st)||a.d-b.d);
   $("#recTitle").textContent=`${cat==="NR"?"National records":`Age group records ${agLabel(ag)}`} · ${g==="F"?(cat==="NR"?"Women":"Girls"):(cat==="NR"?"Men":"Boys")}`;
   $("#recBody").innerHTML=rows.length?`<div class="tbl-wrap"><table class="t-rec"><thead><tr><th>Event</th><th class="num swimt">Time</th><th>Holder</th><th class="num">Age</th><th>Club</th><th>Date</th><th>Place</th></tr></thead><tbody>${rows.map(x=>{const sid=recIdx.holder.get(recKey(x));const s=sid&&swimmerById(sid);
-    return`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[x.st]})"></span>${esc(recEvent(x))}</td><td class="num t swimt">${fmt(x.t)}</td><td>${s?`<button class="namebtn" data-open="${esc(s.id)}">${esc(s.name)}</button>`:esc(x.name)}</td><td class="num t">${x.age||""}</td><td>${esc(x.club||"")}</td><td>${x.date?fdate(x.date):'<span class="hint">not recorded</span>'}</td><td class="wrapok">${esc(x.place||"")}</td></tr>`}).join("")}</tbody></table></div>`
+    return`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[x.st]})"></span>${x.relay?`<span class="lg">${esc(recEvent(x))}</span><span class="sm">${x.legs||4}×${x.d} ${x.st==="IM"?"MED":ABBR[x.st]||esc(x.st)}</span>`:evH(x.st,x.d)}</td><td class="num t swimt">${fmt(x.t)}</td><td>${s?`<button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>`:nameH(x.name)}</td><td class="num t">${x.age||""}</td><td>${esc(x.club||"")}</td><td>${x.date?`<span class="lg">${fdate(x.date)}</span><span class="sm">${fdate(x.date).replace(/ (\d\d)(\d\d)$/," $2")}</span>`:'<span class="hint"><span class="lg">not recorded</span><span class="sm">—</span></span>'}</td><td class="wrapok">${esc(x.place||"")}</td></tr>`}).join("")}</tbody></table></div>`
     :`<div class="empty">No records in this group.</div>`;
 }
 
@@ -2649,7 +2673,7 @@ async function loadPublicData(){
   try{const r=await fetch("data/public.json",{cache:"no-cache"});if(!r.ok)return;const d=await r.json();if(!d||!Array.isArray(d.swimmers))return;
     meetsById=new Map(Object.entries(d.meets||{}));recDoc=d.records||{};btSaved=d.basetimes||null;org={...org,...(d.org||{})};
     state.public=true;state.live=false;state.isStaff=false;
-    if(d.swimmers.length){setSwimmers(d.swimmers);state.demo=false}
+    if(d.swimmers.length){if(state.demo)ui.sel=null;setSwimmers(d.swimmers);state.demo=false}
     const pub=document.getElementById("pubStamp");if(pub&&d.published)pub.textContent="Results updated "+fdate(d.published.slice(0,10));
   }catch(e){}
 }
@@ -2739,7 +2763,7 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
     if(h==="manage"&&state.isStaff)show("manage");
     let rawSw=null,meetsReady=false;
     const applySwimmers=list=>{
-      if(!list.length)useDemo();else{setSwimmers(list);state.demo=false}
+      if(!list.length)useDemo();else{if(state.demo)ui.sel=null;setSwimmers(list);state.demo=false}
       scheduleDupScan();
       if(ui.view==="manage")renderManage();else if(ui.view==="swimmers"&&(ui.editing||ui.editRow)&&$("#profile").contains(document.activeElement)&&document.activeElement.tagName!=="BUTTON")renderRoster();else render();
       $("#demoBanner").hidden=!state.demo;
