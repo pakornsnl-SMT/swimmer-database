@@ -580,6 +580,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       </div>
       <div class="chart-box"><canvas id="cmpChart" aria-label="Comparison chart"></canvas></div>
       <div class="legend-note" id="cmpNote">Faster times sit higher on the chart.</div>
+      <div id="yearBox" hidden>
+        <h3 style="margin-top:20px">Best time each year</h3>
+        <div class="tbl-wrap" style="margin-top:0"><table class="agetbl" id="yearTbl"></table></div>
+        <div class="hint">Each cell is the swimmer's best time that year; gold marks the fastest swimmer each year. The small number shows the change from the year before. Point at a time to see the meet.</div>
+      </div>
       <div id="ageBox" hidden>
         <h3 style="margin-top:20px">Best time at each age</h3>
         <div class="tbl-wrap" style="margin-top:0"><table class="agetbl" id="ageTbl"></table></div>
@@ -1416,7 +1421,8 @@ function renderCompare(){
   $("#rankTbl").innerHTML=stats.length?`<thead><tr><th>#</th><th>Chart</th><th>Swimmer</th><th>Club</th><th class="num">Best</th><th class="num">Gap</th><th class="num">Improved</th><th class="num">Swims</th></tr></thead><tbody>`+shown.map((s,i)=>{const sw=swimmerById(s.id);const on=ui.picked.has(s.id);return`<tr><td>${i+1}</td><td><input type="checkbox" data-pick="${esc(s.id)}" ${on?"checked":""} aria-label="Show ${esc(sw.name)} on chart"></td><td>${on?`<span class="dot" style="background:${colorOf(s.id)}"></span>`:""}${nameH(sw.name)}<br><span class="hint">${sw.birthYear?"born "+sw.birthYear+" · ":""}best on ${fdate(s.best.date)}</span></td><td>${esc(sw.club||"")}</td><td class="num t">${fmt(s.best.time)}</td><td class="num t">${i?"+"+(s.best.time-leader.best.time).toFixed(2):"—"}</td><td class="num t ${s.impr>0?"up":""}">${s.n>1?s.impr.toFixed(1)+"%":"—"}</td><td class="num t">${s.n}</td></tr>`}).join("")+`</tbody>`+(stats.length>50&&!ui.rankAll?`<tfoot><tr><td colspan="8"><button class="lnk" id="rankMore">Show all ${stats.length} swimmers</button></td></tr></tfoot>`:""):`<tbody><tr><td class="empty">Nobody matching these filters has swum ${evName(ui.cStroke,ui.cDist)} in a ${ui.cCourse==="LCM"?"50 m":"25 m"} pool yet.</td></tr></tbody>`;
   const byAge=ui.cAxis==="age";
   document.querySelectorAll("#cAxis button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.a===ui.cAxis));
-  $("#cModeField").hidden=byAge;$("#ageBox").hidden=!byAge;
+  $("#cModeField").hidden=byAge;$("#ageBox").hidden=!byAge;$("#yearBox").hidden=byAge||!chosen.length;
+  if(!byAge&&chosen.length)renderYearTable(chosen,colorOf);
   ui.cGender="";ui.cYear="";ui.cClub="";
   $("#cmpNote").textContent=chosen.length?`Faster times sit higher on the chart. ${chosen.length} swimmer${chosen.length>1?"s":""} shown.${chosen.length<8?" Search above to add more.":""}`:pickedList.length?`None of the chosen swimmers has a ${ui.cDist}m ${ui.cStroke} time in a ${poolName(ui.cCourse)} pool yet.`:"Search for a swimmer above to start comparing.";
   destroy("cmp");const cv=$("#cmpChart");
@@ -1430,6 +1436,19 @@ function renderCompare(){
   cmpChart=new Chart(cv,{type:"line",data:{datasets},options:o});
 }
 
+/* table under the date chart: best time per calendar year for each chosen swimmer, plus their personal best */
+function renderYearTable(chosen,colorOf){
+  const rows=chosen.map(s=>{const m=new Map();s.sorted.forEach(r=>{const y=+r.date.slice(0,4);const b=m.get(y);if(!b||r.time<b.time)m.set(y,r)});return{s,m}});
+  const ys=[...new Set(rows.flatMap(x=>[...x.m.keys()]))].sort((a,b)=>a-b);
+  const span=ys.length?Array.from({length:ys[ys.length-1]-ys[0]+1},(_,i)=>ys[0]+i):[];
+  const fastest=new Map();span.forEach(y=>{let best=null;rows.forEach(x=>{const r=x.m.get(y);if(r&&(best==null||r.time<best))best=r.time});fastest.set(y,best)});
+  $("#yearTbl").innerHTML=`<thead><tr><th>Swimmer</th>${span.map(y=>`<th class="num">${y}</th>`).join("")}<th class="num">Best ever</th></tr></thead><tbody>`+
+    rows.map(({s,m})=>{let prev=null;const sw=swimmerById(s.id);
+      return`<tr><th scope="row"><span class="dot" style="background:${colorOf(s.id)}"></span>${nameH(sw.name)}${sw.birthYear?`<br><span class="hint" style="font-weight:400">born ${sw.birthYear}</span>`:""}</th>`+span.map(y=>{const r=m.get(y);if(!r)return`<td class="num nil">—</td>`;
+        const d=prev?r.time-prev.time:null;prev=r;const fast=rows.length>1&&r.time===fastest.get(y);
+        return`<td class="num t${fast?" fast":""}" title="${esc((r.meet||"")+" · "+fdate(r.date))}">${fmt(r.time)}${d!=null?`<span class="dlt ${d<0?"up":d>0?"down":""}">${d<0?"−":"+"}${Math.abs(d).toFixed(2)}</span>`:""}</td>`}).join("")+
+        `<td class="num t" title="${esc((s.best.meet||"")+" · "+fdate(s.best.date))}"><b>${fmt(s.best.time)}</b><span class="dlt">${fdate(s.best.date)}</span></td></tr>`}).join("")+`</tbody>`;
+}
 /* Same-age comparison: age = year of the swim − birth year */
 function renderAgeCompare(chosen,colorOf,cv){
   const withBY=chosen.filter(s=>swimmerById(s.id).birthYear);
