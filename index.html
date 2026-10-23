@@ -175,7 +175,14 @@ form .full{grid-column:1/-1}
 .evb[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .evb[data-n="0"]{color:var(--muted);opacity:.55}
 .evb sup{font:500 10px var(--body);margin-left:3px;opacity:.8}
-.rk1 td:first-child,.rk2 td:first-child,.rk3 td:first-child{color:var(--gold)}
+/* top 3 in rankings: gold, silver and bronze medals with a light tint on the row */
+.medal{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font:700 15px var(--display);line-height:1}
+.medal.m1{background:linear-gradient(145deg,#f9dc7c,#d4a017);color:#3a2a00;box-shadow:inset 0 0 0 1px #b8860b}
+.medal.m2{background:linear-gradient(145deg,#f1f4f7,#aab4bf);color:#26303a;box-shadow:inset 0 0 0 1px #8b96a2}
+.medal.m3{background:linear-gradient(145deg,#f3be93,#c4783a);color:#341806;box-shadow:inset 0 0 0 1px #a5622b}
+.rk1 td{background:color-mix(in srgb,#d4a017 9%,transparent)}
+.rk2 td{background:color-mix(in srgb,#9aa6b2 10%,transparent)}
+.rk3 td{background:color-mix(in srgb,#c4783a 9%,transparent)}
 .namebtn{background:none;border:0;padding:0;color:var(--fg);font:600 15px var(--body);cursor:pointer;text-align:left}
 .namebtn:hover{color:var(--accent);text-decoration:underline}
 .rk-ctl{display:flex;flex-direction:column;gap:14px}
@@ -205,7 +212,7 @@ form .full{grid-column:1/-1}
 .rkbox .namebtn{font-size:14px}
 /* Top lists side by side: the club sits under the name so time, points and date always fit without sideways scrolling */
 .t-rk7{table-layout:fixed;width:100%}
-.t-rk7 th:nth-child(1){width:34px}.t-rk7 th:nth-child(3){width:40px}.t-rk7 th:nth-child(4){width:84px}.t-rk7 th:nth-child(5){width:46px}.t-rk7 th:nth-child(6){width:102px}
+.t-rk7 th:nth-child(1){width:42px}.t-rk7 th:nth-child(3){width:40px}.t-rk7 th:nth-child(4){width:84px}.t-rk7 th:nth-child(5){width:46px}.t-rk7 th:nth-child(6){width:102px}
 .t-rk7 td{overflow:hidden}
 .t-rk7 .namebtn{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rk-club{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
@@ -1076,7 +1083,7 @@ function idCard(s){
       ${state.isStaff&&priv.has(s.id)?fact("Citizen ID / passport",`<span class="mono">${esc(fmtCid(priv.get(s.id).cid))||"—"}</span>`,`${priv.get(s.id).dob?"born "+fmtDob(priv.get(s.id).dob)+" · ":""}only you can see this`):""}
       ${fact("Club",esc(s.club||""),s.clubCode?esc(s.clubCode):"")}
       ${(()=>{if(!recIdx)buildRecIdx();const cur=recIdx.bySwimmer.get(s.id)||[];const old=(recIdx.formerBySwimmer.get(s.id)||[]).filter(x=>!cur.some(y=>recKey(y)===recKey(x)));
-        return cur.length||old.length?`<div style="grid-column:1/-1"><dt>Records</dt><dd>${cur.map(x=>`<span class="chip rec ${x.cat==="NR"?"nr":"agr"}">${recShort(x)}${x.cat==="AG"?" "+agLabel(x.ag):""}</span> ${esc(recEvent(x))} ${x.course==="LCM"?"50 m":"25 m"} · <b>${fmt(x.t)}</b>`).join("<br>")}${old.length?`<small style="display:block">Former: ${old.map(x=>`${recShort(x)}${x.cat==="AG"?" "+agLabel(x.ag):""} ${esc(recEvent(x))} ${fmt(x.t)}`).join(" · ")}</small>`:""}</dd></div>`:""})()}
+        return cur.length||old.length?`<div style="grid-column:1/-1"><dt>Records</dt><dd>${cur.map(x=>`<span class="chip rec ${x.cat==="NR"?"nr":"agr"}">${recShort(x)}${x.cat==="AG"?" "+agLabel(x.ag):""}</span> ${esc(recEvent(x))} ${x.course} · <b>${fmt(x.t)}</b>`).join("<br>")}${old.length?`<small style="display:block">Former: ${old.map(x=>`${recShort(x)}${x.cat==="AG"?" "+agLabel(x.ag):""} ${esc(recEvent(x))} ${fmt(x.t)}`).join(" · ")}</small>`:""}</dd></div>`:""})()}
       ${(()=>{const rep=representation(s);return rep.length?`<div style="grid-column:1/-1"><dt>Represented</dt><dd>${rep.map(x=>`${ttEn(x.t)}: <b>${esc(x.team)}</b> <small style="display:inline">(${x.years.join(", ")}${x.meets.length?" · "+esc(x.meets.slice(0,2).join(", "))+(x.meets.length>2?", …":""):""})</small>`).join("<br>")}</dd></div>`:""})()}
       ${fact("First meet",first?esc(first.meet||"—"):"",first?fdate(first.date):"")}
       ${fact("Latest meet",last?esc(last.meet||"—"):"",last?fdate(last.date):"")}
@@ -1321,10 +1328,11 @@ function topList(pool,st,d){
 function rankRows(list,compact){
   let rank=0,prevT=null;
   return list.slice(0,ui.kTop).map((r,i)=>{if(r.time!==prevT){rank=i+1;prevT=r.time}const s=swimmerById(r.swimmerId);const p=points(r,s.gender);const a=rankAge(s);
+    const medal=rank<=3?`<span class="medal m${rank}" aria-label="Rank ${rank}">${rank}</span>`:rank;
     const name=`<button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>${altName(s)&&!compact?`<br><span class="hint">${esc(altName(s))}</span>`:""}`;
     return compact
-      ?`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r))}"><td>${rank}</td><td>${name}${s.club?`<span class="rk-club" title="${esc(s.club)}">${esc(s.club)}</span>`:""}</td><td class="num t">${a??""}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td></tr>`
-      :`<tr class="rk${rank}"><td>${rank}</td><td>${name}</td><td class="num t">${a??""}</td><td class="num t">${s.birthYear||""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td></tr>`}).join("");
+      ?`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r))}"><td>${medal}</td><td>${name}${s.club?`<span class="rk-club" title="${esc(s.club)}">${esc(s.club)}</span>`:""}</td><td class="num t">${a??""}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td></tr>`
+      :`<tr class="rk${rank}"><td>${medal}</td><td>${name}</td><td class="num t">${a??""}</td><td class="num t">${s.birthYear||""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td></tr>`}).join("");
 }
 function periodText(){
   if(!ui.kFrom&&!ui.kTo)return"all time";
