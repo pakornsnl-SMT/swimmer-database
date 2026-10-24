@@ -351,6 +351,12 @@ form .full{grid-column:1/-1}
 .dupfoot{display:flex;justify-content:flex-end;margin-top:8px}
 
 /* ---- pictures: share cards, split chart, record history, where-I-stand, stroke profile, targets ---- */
+/* while the real data loads, show "Loading results…" instead of the sample swimmers */
+html:not(.ready) main{display:none}
+.boot{display:none;padding:60px 16px;text-align:center;color:var(--muted);font-size:15px}
+html:not(.ready) .boot{display:block}
+.boot-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:10px;vertical-align:1px;animation:bootp 1s ease-in-out infinite alternate}
+@keyframes bootp{from{opacity:.25}to{opacity:1}}
 .sh-modal{position:fixed;inset:0;z-index:60;background:rgba(4,16,20,.66);display:flex;align-items:center;justify-content:center;padding:16px}
 .sh-modal[hidden]{display:none}
 .sh-box{background:var(--surface);border-radius:12px;padding:14px;width:min(520px,100%);max-height:100%;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.35)}
@@ -527,6 +533,19 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   .t-ev th:nth-child(4),.t-ev td:nth-child(4){display:none}
   .brand b{font-size:18px}
 }
+/* phone turned sideways (short screen): a one-line header that scrolls away, so the content gets the whole screen */
+@media (max-height:520px) and (min-width:560px){
+  header{position:static}
+  .hd{flex-wrap:nowrap;padding-block:6px;gap:12px}
+  .brand{flex:none}
+  .brand b{font-size:18px;white-space:nowrap}
+  .brand small{display:none}
+  nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:0;flex:1 1 auto;min-width:0}
+  nav::-webkit-scrollbar{display:none}
+  nav button{font-size:13px;padding:6px 9px;white-space:nowrap;flex:none}
+  .lang{order:3}
+  main{padding-block:10px 40px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -546,6 +565,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   </div>
 </header>
 
+<div class="boot wrap" id="bootMsg" role="status"><span class="boot-dot"></span>Loading results…</div>
 <main class="wrap">
   <div class="banner" id="demoBanner" hidden><b>Example data</b><span id="demoText">These swimmers are samples so you can see how the app works. Real results appear here once they are uploaded.</span></div>
 
@@ -570,6 +590,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
         <button class="shortcut" data-sc="SCM" aria-pressed="false"><b>Top 100 SCM</b><span>25 m pool · every event · women &amp; men</span></button>
       </div>
       <div class="rk-top">
+        <div class="field"><span class="lbl">Show</span><div class="seg" id="kTop" role="group" aria-label="How many swimmers to show"><button data-n="10" aria-pressed="false">Top 10</button><button data-n="20" aria-pressed="false">Top 20</button><button data-n="50" aria-pressed="false">Top 50</button><button data-n="100" aria-pressed="true">Top 100</button></div></div>
         <div class="field"><label class="lbl" for="kFrom">From</label><input type="date" id="kFrom"></div>
         <div class="field"><label class="lbl" for="kTo">To</label><input type="date" id="kTo"></div>
         <div class="field"><span class="lbl">Quick period</span><div class="presets" id="kPresets"></div></div>
@@ -577,7 +598,6 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
         <div class="field" id="kAgeCustom" hidden><span class="lbl">Ages from – to</span><div class="period"><input type="number" id="kAgeLo" min="4" max="99" placeholder="10" aria-label="Youngest age" style="width:80px;flex:0 0 80px"><span>to</span><input type="number" id="kAgeHi" min="4" max="99" placeholder="12" aria-label="Oldest age" style="width:80px;flex:0 0 80px"></div></div>
         <div class="field"><label class="lbl" for="kClub">Team</label><select id="kClub"></select></div>
         <div class="field"><label class="lbl" for="kNat">Nationality</label><select id="kNat"><option value="tha">Thai swimmers only</option><option value="all">All swimmers</option><option value="non">Non-Thai only</option></select></div>
-        <div class="field"><span class="lbl">Show</span><div class="seg" id="kTop" role="group" aria-label="How many swimmers to show"><button data-n="10" aria-pressed="false">Top 10</button><button data-n="20" aria-pressed="false">Top 20</button><button data-n="50" aria-pressed="false">Top 50</button><button data-n="100" aria-pressed="true">Top 100</button></div></div>
       </div>
       <div class="hint" id="ageNote"></div>
       <div class="one-ev">
@@ -3259,6 +3279,8 @@ try{window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",
 new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 
 /* ---------- boot ---------- */
+const ready=()=>document.documentElement.classList.add("ready");
+setTimeout(ready,10000);   // never leave the page blank, even if loading stalls
 useDemo();
 let db=null;
 const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
@@ -3267,7 +3289,7 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
     const user=await window.claude?.use?.("user");
     if(user){try{state.isOwner=!!(await user.isOwner())}catch(e){}try{state.isStaff=state.isOwner||!!(await user.canEdit())}catch(e){state.isStaff=state.isOwner}}
     db=await window.claude?.use?.("db");
-    if(!db){if(!window.claude)await loadPublicData();render();return}
+    if(!db){if(!window.claude)await loadPublicData();render();ready();return}
     state.live=true;render();
     db.doc("settings/records").onSnapshot(d=>{recDoc=d.exists?d.data():{};recIdx=null;if(ui.view==="manage")renderRecordsAdmin();else if(state.swimmers.length)render()},()=>{});
     db.doc("settings/standards").onSnapshot(d=>{stdDoc=d.exists?d.data():{lists:[]};if(!stdDoc.lists)stdDoc.lists=[];if(ui.view==="manage")renderStdAdmin();else if(state.swimmers.length)render()},()=>{});
@@ -3284,15 +3306,15 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
       if(!list.length)useDemo();else{if(state.demo)ui.sel=null;setSwimmers(list);state.demo=false}
       scheduleDupScan();
       if(ui.view==="manage")renderManage();else if(ui.view==="swimmers"&&(ui.editing||ui.editRow)&&$("#profile").contains(document.activeElement)&&document.activeElement.tagName!=="BUTTON")renderRoster();else render();
-      $("#demoBanner").hidden=!state.demo;
+      $("#demoBanner").hidden=!state.demo;ready();
     };
     db.collection("meets").onSnapshot(sn=>{const m=new Map();sn.docs.forEach(d=>m.set(d.id,d.data()));meetsById=m;meetsReady=true;if(rawSw)applySwimmers(rawSw)},()=>{meetsReady=true;if(rawSw)applySwimmers(rawSw)});
     db.collection("swimmers").onSnapshot(s=>{
       rawSw=s.docs.map(d=>({id:d.id,...d.data()}));
       if(!meetsReady&&rawSw.some(d=>d.rs&&Object.keys(d.rs).length))return;
       applySwimmers(rawSw);
-    },()=>{});
-  }catch(e){render()}
+    },()=>{ready()});
+  }catch(e){render();ready()}
 })();
 })();
 </script>
