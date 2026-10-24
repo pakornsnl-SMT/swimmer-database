@@ -349,6 +349,47 @@ form .full{grid-column:1/-1}
 .dupside .mono mark{background:var(--gold);color:var(--accent-ink);border-radius:2px}
 .dupside .acts{margin-top:6px}
 .dupfoot{display:flex;justify-content:flex-end;margin-top:8px}
+
+/* ---- pictures: share cards, split chart, record history, where-I-stand, stroke profile, targets ---- */
+.sh-modal{position:fixed;inset:0;z-index:60;background:rgba(4,16,20,.66);display:flex;align-items:center;justify-content:center;padding:16px}
+.sh-modal[hidden]{display:none}
+.sh-box{background:var(--surface);border-radius:12px;padding:14px;width:min(520px,100%);max-height:100%;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.sh-box img{width:100%;border-radius:8px;display:block;background:var(--surface-2);aspect-ratio:1/1}
+.sh-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.viz2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}
+@media (max-width:760px){.viz2{grid-template-columns:minmax(0,1fr)}}
+.vcard{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface);min-width:0}
+.vcard h4{margin:0 0 8px;font:700 16px var(--display);text-transform:uppercase;letter-spacing:.04em}
+.vbig{font:700 34px var(--display);line-height:1}
+.vbig small{font:500 15px var(--body);color:var(--muted);margin-left:6px}
+.vsvg{width:100%;height:auto;display:block;overflow:visible}
+.vsvg text{font-family:var(--body);fill:var(--muted)}
+.tg{padding:9px 0;border-top:1px solid var(--line)}
+.tg:first-of-type{border-top:0}
+.tg .row1{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.tg .nm{font-weight:600}
+.tg .vals{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.tgbar{height:8px;border-radius:4px;background:var(--surface-2);margin-top:6px;overflow:hidden}
+.tgbar i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+.tgbar i.done{background:var(--good)}
+.tg .st{font-size:13px;margin-top:4px}
+.tg .st.ok{color:var(--good);font-weight:600}
+.splitviz{margin-top:10px;max-width:640px}
+.sv{display:grid;grid-template-columns:auto minmax(0,1fr) 52px;gap:6px 10px;align-items:center;font-size:13px}
+.sv-b{display:grid;grid-template-columns:1fr 1fr;border-left:0;position:relative}
+.sv-b .sv-h{height:16px;display:flex}
+.sv-b .sv-h:first-child{justify-content:flex-end;border-right:2px solid var(--line)}
+.sv-b i{display:block;height:100%;border-radius:3px}
+.sv-b i.f{background:var(--good)}.sv-b i.s{background:var(--bad)}
+.sv-d{font-family:var(--mono);font-size:12px;text-align:right}
+.sv-d.f{color:var(--good)}.sv-d.s{color:var(--bad)}
+.stand-ax{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+.rhrow td{background:var(--surface-2)!important;white-space:normal!important}
+.rh-btn{font-size:12px;padding:1px 6px;margin-left:4px}
+.rhtbl td,.rhtbl th{padding:5px 8px;font-size:13px}
+.radarwrap{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:center}
+@media (max-width:640px){.radarwrap{grid-template-columns:minmax(0,1fr)}}
+.qfact li{margin:2px 0}
 .badge.club{background:#8a5a2b;color:#fff;margin-left:4px}
 .badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--red);color:var(--red-ink);font:700 12px var(--body);letter-spacing:0;vertical-align:1px}
 .meetblk h4{margin:0;font:700 19px var(--display);text-transform:uppercase;letter-spacing:.03em}
@@ -703,6 +744,15 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div id="recCands"></div>
     </div>
 
+    <div class="panel" style="margin-bottom:18px" id="stdPanel">
+      <div class="dup-hd"><h3 style="margin:0">Qualifying times</h3><span class="hint" id="stdNow"></span></div>
+      <div class="hint" style="margin:6px 0 12px">Load a meet's qualifying (standard) times exported from Splash as Lenex (.lxf or .lef). Swimmers then see how close they are on their Personal Best page, and their profile lists the events they have qualified in. Age is counted by birth year in the year you enter.</div>
+      <label class="drop" for="stdFile" style="padding:14px"><b style="font-size:16px">Choose qualifying times file</b><span class="hint">Splash time standards: Lenex (.lxf / .lef)</span><input type="file" id="stdFile" accept=".lxf,.lef,.xml"></label>
+      <div id="stdPreview"></div>
+      <div class="msg" id="stdMsg" role="status"></div>
+      <div id="stdList" style="margin-top:10px"></div>
+    </div>
+
     <div class="panel" style="margin-bottom:18px" id="btPanel">
       <div class="dup-hd"><h3 style="margin:0">Points base times</h3><span class="hint" id="btNow"></span></div>
       <div class="hint" style="margin:6px 0 12px">World Aquatics publishes new base times every year: the 50 m pool (LCM) table in January, the 25 m pool (SCM) table in September. Enter the new times here and every swimmer's points update straight away, including past swims. Leave an event empty if it has no base time.</div>
@@ -787,6 +837,12 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   </section>
 </main>
 
+<div class="sh-modal" id="shareModal" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+  <div class="sh-box"><div class="dup-hd" style="margin-bottom:10px"><h3 style="margin:0" id="shareTitle">Share this swim</h3><button class="x" type="button" id="shareClose" aria-label="Close">×</button></div>
+    <img id="shareImg" alt="">
+    <div class="sh-acts"><button class="primary" type="button" id="shareGo">Share</button><button class="ghost" type="button" id="shareDl">Download image</button><span class="msg" id="shareMsg" role="status"></span></div>
+    <div class="hint" style="margin-top:8px">A square picture for Facebook, LINE or Instagram.</div></div>
+</div>
 <div class="rpt-modal" id="rptModal" hidden role="dialog" aria-modal="true" aria-labelledby="rptTitle">
   <div class="rpt-bar"><div class="rpt-bar-t"><b id="rptTitle">Report</b><span class="msg" id="rptMsg" role="status"></span></div><div class="rpt-acts"><button class="primary" type="button" id="rptDl">Download PDF</button><button class="ghost" type="button" id="rptClose">Close</button></div></div>
   <div class="rpt-view" id="rptView"><div class="rpt-scale" id="rptScale"></div></div>
@@ -1054,12 +1110,13 @@ function renderProfile(){
   const pbPts=points(sm.best,s.gender);
   h+=`<h3>${evName(st,d)} · ${c==="LCM"?"50 m pool":c==="SCM"?"25 m pool":c} · progress${pbPts?` · best ${pbPts} pts`:""}</h3>`;
   h+=`<div class="chart-box"><canvas id="profChart"></canvas></div>`;
-  h+=`<div class="legend-note">${sm.n} swims · ${sm.n>1?`improved ${sm.impr.toFixed(1)}% from ${fmt(sm.first.time)} to a best of ${fmt(sm.best.time)}`:`best ${fmt(sm.best.time)}`}. Each point is the fastest swim at a meet; gold points are new personal bests.</div>`;
+  h+=`<div class="legend-note">${sm.n} swims · ${sm.n>1?`improved ${sm.impr.toFixed(1)}% from ${fmt(sm.first.time)} to a best of ${fmt(sm.best.time)}`:`best ${fmt(sm.best.time)}`}. Each point is the fastest swim at a meet; gold points are new personal bests. ${shareBtn(sm.best).replace(">Share<",">Share best time<")}</div>`;
+  {const a=standHtml(s,st,d,c),b=targetsHtml(s,st,d,c,sm.best.time);if(a||b)h+=`<div class="viz2">${a}${b}</div>`}
   let prev=null,run=Infinity;const meta2=new Map();
   sortByDate(all).forEach(r=>{if(!valid(r)){meta2.set(r.id,{delta:null,isPb:false});return}meta2.set(r.id,{delta:prev?r.time-prev.time:null,isPb:r.time<run});if(r.time<run)run=r.time;prev=r});
   const ed=canEdit();const rows=sortByDate(ed?all:all.filter(r=>!isDns(r))).reverse();
   h+=`<div class="tbl-wrap"><table class="t-hist"><thead><tr><th>Date</th><th>Meet</th><th>Round</th><th class="num">Place</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">vs previous</th><th></th><th></th></tr></thead><tbody>`+rows.map(r=>{if(ui.editRow===r.id)return editRowHtml(r,10);const m=meta2.get(r.id);const hasSp=r.splits&&r.splits.length>1;const open=ui.openSplit===r.id;
-    return`<tr><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"—")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${placeTxt(r)}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t ${m.delta==null?"":m.delta<0?"up":m.delta>0?"down":""}">${!valid(r)?"":m.delta==null?"first":(m.delta<0?"−":"+")+Math.abs(m.delta).toFixed(2)}</td><td>${m.isPb?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${hasSp?` <button class="lnk" data-split="${esc(r.id)}" aria-expanded="${open}">Splits</button>`:""}</td><td class="num">${ed?`<button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button><span data-del="${esc(r.id)}"><button class="x" title="Delete this time" aria-label="Delete this time">×</button></span>`:""}</td></tr>`+(open?`<tr class="splits"><td colspan="10">${splitHtml(r)}</td></tr>`:"")}).join("")+`</tbody></table></div>`;
+    return`<tr><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"—")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${placeTxt(r)}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t ${m.delta==null?"":m.delta<0?"up":m.delta>0?"down":""}">${!valid(r)?"":m.delta==null?"first":(m.delta<0?"−":"+")+Math.abs(m.delta).toFixed(2)}</td><td>${m.isPb?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${valid(r)&&(m.isPb||recBadges(r))?" "+shareBtn(r):""}${hasSp?` <button class="lnk" data-split="${esc(r.id)}" aria-expanded="${open}">Splits</button>`:""}</td><td class="num">${ed?`<button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button><span data-del="${esc(r.id)}"><button class="x" title="Delete this time" aria-label="Delete this time">×</button></span>`:""}</td></tr>`+(open?`<tr class="splits"><td colspan="10">${splitHtml(r)}</td></tr>`:"")}).join("")+`</tbody></table></div>`;
   el.innerHTML=h;
   drawProf(sm.sorted);
 }
@@ -1094,6 +1151,7 @@ function idCard(s){
         return(cur.length?`<div style="grid-column:1/-1"><dt>Current records</dt><dd class="reclist">${cur.map(x=>line(x,x.cat==="NR"?"nr":"agr")).join("<br>")}</dd></div>`:"")+
           (old.length?`<div style="grid-column:1/-1"><dt>Former records</dt><dd class="reclist">${old.map(x=>line(x,"fmr")).join("<br>")}</dd></div>`:"")})()}
       ${(()=>{const rep=representation(s);return rep.length?`<div style="grid-column:1/-1"><dt>Represented</dt><dd>${rep.map(x=>`${ttEn(x.t)}: <b>${esc(x.team)}</b> <small style="display:inline">(${x.years.join(", ")}${x.meets.length?" · "+esc(x.meets.slice(0,2).join(", "))+(x.meets.length>2?", …":""):""})</small>`).join("<br>")}</dd></div>`:""})()}
+      ${(()=>{const Q=qualifiedFor(s);return Q.length?`<div style="grid-column:1/-1"><dt>Qualifying times</dt><dd><ul class="qfact" style="margin:0;padding-left:18px">${Q.map(q=>`<li><b>${esc(q.L.name)}</b> <small style="display:inline">(age ${q.age})</small>: ${q.ok.length?`<span style="color:var(--good);font-weight:600">✓ qualified in ${q.ok.length} event${q.ok.length>1?"s":""}</span> · ${q.ok.map(x=>`${x.d}m ${SHORT[x.st]} ${x.c}`).join(", ")}`:"not qualified yet"}${q.close&&!q.ok.length?` · closest: ${q.close.d}m ${SHORT[q.close.st]} ${q.close.c}, ${q.close.gap.toFixed(2)} s to go`:""}</li>`).join("")}</ul></dd></div>`:""})()}
       ${fact("First meet",first?esc(first.meet||"—"):"",first?fdate(first.date):"")}
       ${fact("Latest meet",last?esc(last.meet||"—"):"",last?fdate(last.date):"")}
       ${fact("Meets",String(meets),`${real.length} swims`)}
@@ -1258,12 +1316,253 @@ function meetsHtml(s){
     const rs=ed?rsAll:real;const e=entryStats(rs);const dnsLink="";
     const rows=rs.slice().sort((a,b)=>STROKES.indexOf(a.stroke)-STROKES.indexOf(b.stroke)||a.distance-b.distance||(a.date<b.date?-1:1));
     return`<div class="meetblk"><h4>${esc(m0.meet||"(no name)")}</h4><div class="hint">${meetPeriod(m0)} · ${[...new Set(rs.map(r=>poolName(r.course)))].join(", ")} pool · ${real.length?`${real.length} swim${real.length>1?"s":""}`:"entered, did not swim"}${e.n?` · faster than entry in ${e.beat} of ${e.n}`:""}${dnsLink}</div>
-      <div class="tbl-wrap" style="margin-top:0"><table class="t-mr"><thead><tr><th>Event</th><th>Round</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">Place</th><th></th>${canEdit()?"<th></th>":""}</tr></thead><tbody>${rows.map(r=>ui.editRow===r.id?editRowHtml(r,canEdit()?8:7):`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[r.stroke]})"></span>${evH(r.stroke,r.distance)}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t">${placeTxt(r)}</td><td>${pbIds.has(r.id)?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}</td>${canEdit()?`<td class="num"><button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button></td>`:""}</tr>`).join("")}</tbody></table></div></div>`}).join("");
+      <div class="tbl-wrap" style="margin-top:0"><table class="t-mr"><thead><tr><th>Event</th><th>Round</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">Place</th><th></th>${canEdit()?"<th></th>":""}</tr></thead><tbody>${rows.map(r=>ui.editRow===r.id?editRowHtml(r,canEdit()?8:7):`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[r.stroke]})"></span>${evH(r.stroke,r.distance)}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t">${placeTxt(r)}</td><td>${pbIds.has(r.id)?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${valid(r)&&(pbIds.has(r.id)||recBadges(r))?" "+shareBtn(r):""}</td>${canEdit()?`<td class="num"><button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button></td>`:""}</tr>`).join("")}</tbody></table></div></div>`}).join("");
   return h;
 }
 function splitHtml(r){
   const sp=r.splits||[];const step=r.distance/sp.length;let prev=0;
-  return`<div class="laps">${r.reaction?`<span><b>Reaction</b>${r.reaction.toFixed(2)}</span>`:""}${sp.map((t,i)=>{const lap=t-prev;prev=t;return`<span><b>${Math.round(step*(i+1))}m</b>${fmt(t)} <span style="color:var(--muted)">(${lap.toFixed(2)})</span></span>`}).join("")}</div>`}
+  return splitViz(r)+`<div class="laps">${r.reaction?`<span><b>Reaction</b>${r.reaction.toFixed(2)}</span>`:""}${sp.map((t,i)=>{const lap=t-prev;prev=t;return`<span><b>${Math.round(step*(i+1))}m</b>${fmt(t)} <span style="color:var(--muted)">(${lap.toFixed(2)})</span></span>`}).join("")}</div>`}
+
+/* ================= PICTURES ================= */
+/* --- 1. share cards: a 1080×1080 picture of one swim (PB or record) drawn on a canvas --- */
+let shareBlob=null,shareName="";
+function shareKind(r){
+  if(!recIdx)buildRecIdx();
+  const recs=recIdx.bySwim.get(r.id)||[];
+  const pick=recs.slice().sort((a,b)=>(b.current?1:0)-(a.current?1:0)||(a.cat==="NR"?0:1)-(b.cat==="NR"?0:1))[0];
+  if(pick){const nr=pick.cat==="NR";return{label:(pick.current?"":"SET A ")+(nr?"NATIONAL RECORD":`AGE GROUP RECORD ${agLabel(pick.ag)}`),bg:nr?"#c4321b":"#2f6fd0",ink:"#ffffff",rec:pick}}
+  const prior=resOf(r.swimmerId).filter(x=>valid(x)&&x.id!==r.id&&x.stroke===r.stroke&&+x.distance===+r.distance&&x.course===r.course&&(x.date<r.date||(x.date===r.date&&x.time>r.time)));
+  const prev=prior.length?Math.min(...prior.map(x=>x.time)):null;
+  if(prev==null||r.time<prev)return{label:prev==null?"FIRST SWIM":"NEW PERSONAL BEST",bg:"#e0a91b",ink:"#2b1d00",gain:prev!=null?prev-r.time:null};
+  return{label:"RACE RESULT",bg:"#0a7c86",ink:"#ffffff"};
+}
+const ordinal=n=>n+(n%100>=11&&n%100<=13?"th":["th","st","nd","rd"][n%10]||"th");
+async function drawShareCard(r,s){
+  const k=shareKind(r);const W=1080;const cv=document.createElement("canvas");cv.width=W;cv.height=W;const g=cv.getContext("2d");
+  const D='"Barlow Condensed","Arial Narrow",sans-serif',B='Sarabun,system-ui,sans-serif',M='"IBM Plex Mono",ui-monospace,monospace';
+  try{await Promise.all([document.fonts.load(`700 80px ${D}`),document.fonts.load(`700 80px ${B}`,"กขABC"),document.fonts.load(`700 80px ${M}`,"0123456789:.")])}catch(e){}
+  const grd=g.createLinearGradient(0,0,W,W);grd.addColorStop(0,"#0b2530");grd.addColorStop(1,"#0a4a54");g.fillStyle=grd;g.fillRect(0,0,W,W);
+  g.globalAlpha=.07;g.strokeStyle="#ffffff";g.lineWidth=2;for(let y=150;y<W;y+=110){g.setLineDash([24,18]);g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}g.setLineDash([]);g.globalAlpha=1;
+  const rope=y=>{for(let x=0,i=0;x<W;x+=36,i++){g.fillStyle=i%2?"#0a9aa6":"#d9472b";g.fillRect(x,y,30,14)}};rope(0);rope(W-14);
+  const fit=(txt,font,size,max)=>{let z=size;g.font=`${font.replace("{z}",z)}`;while(g.measureText(txt).width>max&&z>18){z-=2;g.font=font.replace("{z}",z)}return z};
+  const P=72;
+  g.font=`700 44px ${D}`;const lw=g.measureText(k.label).width+56;g.fillStyle=k.bg;
+  g.beginPath();g.roundRect?g.roundRect(P,70,lw,74,37):g.rect(P,70,lw,74);g.fill();g.fillStyle=k.ink;g.textBaseline="middle";g.fillText(k.label,P+28,109);
+  g.textBaseline="alphabetic";g.fillStyle="#ffffff";
+  const ev=`${r.distance}M ${String(r.stroke).toUpperCase()} · ${r.course==="LCM"?"50 M POOL":r.course==="SCM"?"25 M POOL":r.course}`;
+  fit(ev,`600 {z}px ${D}`,62,W-2*P);g.fillText(ev,P,240);
+  g.fillStyle="#ffffff";fit(fmt(r.time),`700 {z}px ${M}`,210,W-2*P);g.fillText(fmt(r.time),P,445);
+  let y=510;g.font=`600 38px ${B}`;
+  if(k.gain>0){g.fillStyle="#7fe0a6";g.fillText(`▼ ${k.gain.toFixed(2)} s faster than previous best`,P,y);y+=58}
+  else if(k.rec&&k.rec.current===false){g.fillStyle="#cfe3e6";g.fillText("Record when it was set",P,y);y+=58}
+  else if(r.place>0&&r.place<=3){g.fillStyle="#f3cf6b";g.fillText(`${ordinal(r.place)} place`,P,y);y+=58}
+  const main=mainName(s),alt=altName(s);
+  g.fillStyle="#ffffff";fit(main,`700 {z}px ${B}`,76,W-2*P);g.fillText(main,P,Math.max(y+70,650));
+  let y2=Math.max(y+70,650)+56;
+  if(alt){g.fillStyle="#bcd6da";fit(alt,`500 {z}px ${B}`,40,W-2*P);g.fillText(alt,P,y2);y2+=56}
+  const club=r.team||s.club||"";if(club){g.fillStyle="#e3f1f3";fit(club,`500 {z}px ${B}`,38,W-2*P);g.fillText(club,P,y2);y2+=54}
+  g.fillStyle="#9fbcc2";const mt=`${r.meet||""}${r.date?" · "+fdate(r.date):""}`;fit(mt,`500 {z}px ${B}`,34,W-2*P);g.fillText(mt,P,Math.min(y2,930));
+  g.fillStyle="#ffffff";g.font=`700 46px ${D}`;g.fillText("SWIM MEETS THAILAND",P,1010);
+  const url=state.public?(location.host+location.pathname).replace(/index\.html$/,"").replace(/\/$/,""):"";
+  if(url){g.fillStyle="#9fbcc2";g.textAlign="right";fit(url,`500 {z}px ${B}`,28,520);g.fillText(url,W-P,1008);g.textAlign="left"}
+  return await new Promise(res=>cv.toBlob(res,"image/png"));
+}
+async function openShare(rid){
+  const r=state.results.find(x=>x.id===rid);const s=r&&swimmerById(r.swimmerId);if(!r||!s)return;
+  const m=$("#shareModal");m.hidden=false;$("#shareMsg").textContent="Drawing…";$("#shareImg").removeAttribute("src");
+  try{shareBlob=await drawShareCard(r,s);shareName=`SMT_${fileSafe(s.nameEn||s.nameTh)}_${r.distance}${SHORT[r.stroke]||r.stroke}_${r.date||""}.png`;
+    $("#shareImg").src=URL.createObjectURL(shareBlob);$("#shareImg").alt=`${shareKind(r).label}: ${mainName(s)}, ${r.distance}m ${r.stroke}, ${fmt(r.time)}`;$("#shareMsg").textContent="";
+    const canShare=!!(navigator.canShare&&navigator.canShare({files:[new File([shareBlob],shareName,{type:"image/png"})]}));$("#shareGo").hidden=!canShare}
+  catch(e){$("#shareMsg").textContent="Couldn't draw the picture.";}
+}
+$("#shareClose").onclick=()=>{$("#shareModal").hidden=true};
+$("#shareModal").addEventListener("click",e=>{if(e.target.id==="shareModal")$("#shareModal").hidden=true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#shareModal").hidden)$("#shareModal").hidden=true});
+$("#shareGo").onclick=async()=>{if(!shareBlob)return;try{await navigator.share({files:[new File([shareBlob],shareName,{type:"image/png"})],title:"Swim Meets Thailand"})}catch(e){}};
+$("#shareDl").onclick=async()=>{if(!shareBlob)return;const m=$("#shareMsg");try{await saveFile(shareName,shareBlob);msg(m,"Saved.",true)}catch(err){const c=err&&err.code;msg(m,c==="declined"?"Cancelled.":"Downloading isn't available in this view.",c==="declined")}};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-share]");if(b){e.preventDefault();e.stopPropagation();openShare(b.dataset.share)}},true);
+const shareBtn=r=>`<button class="lnk" type="button" data-share="${esc(r.id)}" title="Make a picture to share">Share</button>`;
+
+/* --- 2. split chart: lap-by-lap difference against the swimmer's best (or previous best) race with the same laps --- */
+function lapsOf(r){let p=0;return(r.splits||[]).map(t=>{const l=t-p;p=t;return l})}
+function splitViz(r){
+  const laps=lapsOf(r);if(laps.length<2)return"";
+  const same=resOf(r.swimmerId).filter(x=>valid(x)&&x.id!==r.id&&x.stroke===r.stroke&&+x.distance===+r.distance&&x.course===r.course&&(x.splits||[]).length===laps.length);
+  if(!same.length)return"";
+  const faster=same.filter(x=>x.time<r.time).sort((a,b)=>a.time-b.time);
+  const cmp=faster[0]||same.filter(x=>x.date<=r.date).sort((a,b)=>a.time-b.time)[0]||same.sort((a,b)=>a.time-b.time)[0];
+  const label=faster.length?"their best race":"the previous best";
+  const cl=lapsOf(cmp);const diff=laps.map((l,i)=>l-cl[i]);const mx=Math.max(.3,...diff.map(Math.abs));const step=r.distance/laps.length;
+  const rows=diff.map((d,i)=>{const w=(Math.abs(d)/mx*100).toFixed(1);const cls=d<0?"f":d>0?"s":"";
+    return`<div class="sv-l">${Math.round(step*(i+1))}m <span class="hint">${laps[i].toFixed(2)}</span></div><div class="sv-b"><div class="sv-h">${d<0?`<i class="f" style="width:${w}%"></i>`:""}</div><div class="sv-h">${d>0?`<i class="s" style="width:${w}%"></i>`:""}</div></div><div class="sv-d ${cls}">${d<0?"−":d>0?"+":"±"}${Math.abs(d).toFixed(2)}</div>`}).join("");
+  return`<div class="splitviz"><div class="hint" style="margin-bottom:6px">Each lap compared with ${label} (${fmt(cmp.time)}, ${esc(cmp.meet||"")} ${cmp.date?fdate(cmp.date):""}). <span style="color:var(--good)">Green</span> = faster lap, <span style="color:var(--bad)">red</span> = slower.</div>
+    <div class="sv" role="img" aria-label="Lap differences against ${label}"><div class="sv-l hint">Lap · time</div><div class="sv-b hint" style="display:flex;justify-content:space-between;white-space:nowrap;font-size:11px"><span>◂ faster</span><span>slower ▸</span></div><div></div>${rows}</div></div>`;
+}
+
+/* --- 3. how a record improved: the current record plus every former record for the same event --- */
+function recHistory(x){
+  const k=recKey(x),seen=new Set(),out=[];
+  [x,...(recDoc.hist||[]).filter(h=>recKey(h)===k)].forEach(h=>{const id=h.t.toFixed(2)+"|"+nmKeyR(h.name);if(seen.has(id))return;seen.add(id);out.push(h)});
+  return out.sort((a,b)=>b.t-a.t);   // slowest (oldest) first
+}
+function recHistHtml(x){
+  const L=recHistory(x);const dated=L.filter(h=>h.date).sort((a,b)=>a.date.localeCompare(b.date));
+  let svg="";
+  if(dated.length>=2){
+    const W=640,H=210,l=64,r=20,t=18,b=34;const t0=ts(dated[0].date),t1=Math.max(ts(dated[dated.length-1].date),t0+864e5*30);
+    const yMin=Math.min(...dated.map(h=>h.t)),yMax=Math.max(...dated.map(h=>h.t));const pad=Math.max((yMax-yMin)*.12,.05);
+    const X=d=>l+(ts(d)-t0)/(t1-t0)*(W-l-r),Y=v=>t+(v-(yMin-pad))/((yMax+pad)-(yMin-pad))*(H-t-b);   // faster = higher
+    let path="";dated.forEach((h,i)=>{const px=X(h.date),py=Y(h.t);path+=i?` H${px.toFixed(1)} V${py.toFixed(1)}`:`M${px.toFixed(1)} ${py.toFixed(1)}`});
+    path+=` H${(W-r).toFixed(1)}`;
+    const yrs=[...new Set(dated.map(h=>h.date.slice(0,4)))];const tick=yrs.filter((y,i)=>yrs.length<=8||i%Math.ceil(yrs.length/8)===0);
+    svg=`<svg class="vsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Record progression">
+      <text x="4" y="${t+8}" font-size="11">faster ▲</text>
+      ${tick.map(y=>{const x=Math.min(Math.max(X(y+"-07-01"),l+14),W-r-14);return`<text x="${x.toFixed(1)}" y="${H-10}" font-size="13" text-anchor="middle">${y}</text>`}).join("")}
+      <line x1="${l}" y1="${H-b}" x2="${W-r}" y2="${H-b}" stroke="var(--line)"/>
+      <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      ${dated.map((h,i)=>`<circle cx="${X(h.date).toFixed(1)}" cy="${Y(h.t).toFixed(1)}" r="${i===dated.length-1?6:4.5}" fill="${i===dated.length-1?"var(--gold)":"var(--surface)"}" stroke="${i===dated.length-1?"var(--gold)":"var(--accent)"}" stroke-width="2"><title>${esc(fmt(h.t)+" · "+h.name+" · "+fdate(h.date))}</title></circle>
+        <text x="${Math.min(Math.max(X(h.date),l+20),W-r-20).toFixed(1)}" y="${(Y(h.t)-10).toFixed(1)}" font-size="13" text-anchor="middle" style="fill:var(--fg)">${fmt(h.t)}</text>`).join("")}</svg>`;
+  }
+  let prev=null;
+  const rows=L.map(h=>{const d=prev!=null?prev-h.t:null;prev=h.t;return`<tr><td class="num t"><b>${fmt(h.t)}</b></td><td class="num t up">${d!=null?"−"+d.toFixed(2):""}</td><td>${esc(h.name)}</td><td>${h.date?fdate(h.date):'<span class="hint">not recorded</span>'}</td><td class="wrapok">${esc(h.place||"")}</td></tr>`}).reverse().join("");
+  return`<div style="padding:4px 2px">${svg}<div class="tbl-wrap" style="margin-top:6px"><table class="rhtbl"><thead><tr><th class="num">Time</th><th class="num">Better by</th><th>Holder</th><th>Date</th><th>Place</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${L.some(h=>!h.date)?`<div class="hint">Records without a date are listed but can't be placed on the chart.</div>`:""}</div>`;
+}
+
+/* --- 4. where I stand: rank among Thai swimmers of the same gender and birth year, best times in this event --- */
+function cohortRank(s,st,d,c){
+  if(!s.birthYear||!s.gender)return null;
+  const best=new Map();
+  for(const r of state.results){if(!valid(r)||r.stroke!==st||+r.distance!==+d||r.course!==c)continue;const o=swimmerById(r.swimmerId);
+    if(!o||o.gender!==s.gender||+o.birthYear!==+s.birthYear||(o.id!==s.id&&!isThai(o)))continue;const b=best.get(o.id);if(b==null||r.time<b)best.set(o.id,r.time)}
+  const mine=best.get(s.id);if(mine==null)return null;
+  const times=[...best.values()].sort((a,b)=>a-b);const rank=1+times.filter(t=>t<mine-.001).length;
+  return{rank,n:times.length,times,mine,beat:times.filter(t=>t>mine+.001).length};
+}
+function standHtml(s,st,d,c){
+  const R=cohortRank(s,st,d,c);if(!R)return"";
+  const age=new Date().getFullYear()-s.birthYear;const who=s.gender==="F"?(age<=18?"girls":"women"):(age<=18?"boys":"men");
+  const W=600,H=44,l=14,r=14;const a=R.times[0],b=R.times[R.times.length-1];const span=Math.max(b-a,.01);
+  const X=t=>l+(t-a)/span*(W-l-r);
+  const dots=R.times.map(t=>`<circle cx="${X(t).toFixed(1)}" cy="34" r="4" fill="var(--muted)" opacity=".45"/>`).join("");
+  const pct=R.n>1?Math.round(R.beat/(R.n-1)*100):100;
+  return`<div class="vcard"><h4>Where I stand</h4>
+    <div class="vbig">#${R.rank}<small>of ${R.n} Thai ${who} born ${s.birthYear}</small></div>
+    <div class="hint" style="margin-top:4px">${d}m ${esc(st)} ${c} · best times from every meet in the app${R.n>1?` · faster than ${pct}% of them`:""}</div>
+    <svg class="vsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Rank ${R.rank} of ${R.n}" style="margin-top:6px">
+      <line x1="${l}" y1="22" x2="${W-r}" y2="22" stroke="var(--line)" stroke-width="3"/>${dots.replace(/cy="34"/g,'cy="22"').replace(/r="4"/g,'r="6"')}
+      <circle cx="${X(R.mine).toFixed(1)}" cy="22" r="13" fill="var(--accent)" stroke="var(--surface)" stroke-width="4"><title>${fmt(R.mine)}</title></circle></svg>
+    <div class="stand-ax"><span>◂ faster · ${fmt(a)}</span><span>${fmt(b)} · slower ▸</span></div></div>`;
+}
+
+/* --- 5. stroke profile: best World Aquatics points in each stroke (any distance, any pool) --- */
+function radarHtml(s,evs,keys){
+  if(!s.gender)return"";
+  const best={};keys.forEach(k=>{const[st]=k.split("|");const sm=summary(evs.get(k));const p=points(sm.best,s.gender);if(p!=null&&(!best[st]||p>best[st].p))best[st]={p,k}});
+  const have=STROKES.filter(st=>best[st]);if(have.length<3)return"";
+  const top=Math.max(...have.map(st=>best[st].p));const scale=Math.max(100,Math.ceil(top/100)*100);
+  const W=300,cx=150,cy=150,R=100;const ang=i=>-Math.PI/2+i*2*Math.PI/5;const pt=(i,v)=>[cx+Math.cos(ang(i))*R*v,cy+Math.sin(ang(i))*R*v];
+  const ring=f=>STROKES.map((_,i)=>pt(i,f).map(n=>n.toFixed(1)).join(",")).join(" ");
+  const poly=STROKES.map((st,i)=>pt(i,best[st]?best[st].p/scale:0).map(n=>n.toFixed(1)).join(",")).join(" ");
+  const strong=have.slice().sort((a,b)=>best[b].p-best[a].p);
+  const lab=STROKES.map((st,i)=>{const[x,y]=pt(i,1.22);const v=best[st]?best[st].p:"—";
+    return`<text x="${x.toFixed(1)}" y="${(y-4).toFixed(1)}" font-size="15" text-anchor="middle" style="fill:var(--fg);font-weight:600">${SHORT[st]||st}</text><text x="${x.toFixed(1)}" y="${(y+13).toFixed(1)}" font-size="14" text-anchor="middle">${v}</text>`}).join("");
+  return`<div class="vcard" style="margin-top:16px"><h4>Stroke profile</h4><div class="radarwrap">
+    <svg class="vsvg" viewBox="-40 -40 380 380" role="img" aria-label="Best points by stroke">
+      ${[.25,.5,.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="var(--line)"/>`).join("")}
+      ${STROKES.map((_,i)=>{const[x,y]=pt(i,1);return`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--line)"/>`}).join("")}
+      <polygon points="${poly}" fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="2.5"/>
+      ${STROKES.map((st,i)=>best[st]?`<circle cx="${pt(i,best[st].p/scale)[0].toFixed(1)}" cy="${pt(i,best[st].p/scale)[1].toFixed(1)}" r="4" fill="var(--accent)"/>`:"").join("")}
+      ${lab}</svg>
+    <div><div class="vbig">${esc(strong[0])}<small>strongest stroke · ${best[strong[0]].p} pts</small></div>
+      <p class="hint" style="margin-top:8px">The shape shows the best World Aquatics points in each stroke, over any distance and pool. The outer ring is ${scale} points. A round shape means an all-rounder; a pointed shape means a specialist.${strong.length>1?` Next: ${strong.slice(1,3).map(st=>`${st} ${best[st].p}`).join(", ")}.`:""}${STROKES.length>have.length?` No points yet in ${STROKES.filter(st=>!best[st]).join(", ")}.`:""}</p></div></div></div>`;
+}
+
+/* --- 6. targets: qualifying times (settings/standards) and the records the swimmer could chase --- */
+let stdDoc={lists:[]},stdPending=null;
+function parseLenexStandards(xmlText){
+  const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))return null;
+  const ST={FREE:"Freestyle",BACK:"Backstroke",BREAST:"Breaststroke",FLY:"Butterfly",MEDLEY:"IM"};
+  const secs=t=>{const m=String(t||"").match(/^(\d+):(\d+):(\d+(?:\.\d+)?)$/);const v=m?(+m[1]*3600+ +m[2]*60+ +m[3]):0;return v>0?Math.round(v*100)/100:null};
+  const times=[],names=new Set();let skipped=0;
+  for(const L of doc.querySelectorAll("TIMESTANDARDLIST")){
+    const c=L.getAttribute("course");if(c!=="LCM"&&c!=="SCM"){skipped++;continue}
+    const gr=(L.getAttribute("gender")||"").toUpperCase();const g=gr==="F"||gr==="M"?gr:"X";if(L.getAttribute("name"))names.add(L.getAttribute("name"));
+    const ag=L.querySelector("AGEGROUP");const lo=ag?+ag.getAttribute("agemin"):-1,hi=ag?+ag.getAttribute("agemax"):-1;
+    for(const t of L.querySelectorAll("TIMESTANDARD")){const ss=t.querySelector("SWIMSTYLE");const st=ss&&ST[ss.getAttribute("stroke")];
+      if(!st||(+ss.getAttribute("relaycount")||1)>1){skipped++;continue}const v=secs(t.getAttribute("swimtime"));if(!v){skipped++;continue}
+      times.push({g,c,lo:isNaN(lo)?-1:lo,hi:isNaN(hi)?-1:hi,st,d:+ss.getAttribute("distance"),t:v})}}
+  return{times,names:[...names],skipped};
+}
+function stdTime(L,s,st,d,c){
+  if(!s.birthYear)return null;const age=(+L.ageYear||new Date().getFullYear())-s.birthYear;
+  const hit=L.times.filter(x=>x.c===c&&x.st===st&&+x.d===+d&&(x.g==="X"||x.g===s.gender)&&(x.lo<0||age>=x.lo)&&(x.hi<0||age<=x.hi));
+  return hit.length?{t:Math.max(...hit.map(x=>x.t)),age}:null;
+}
+function bestIn(sid,st,d,c,from,to){
+  const l=resOf(sid).filter(r=>valid(r)&&r.stroke===st&&+r.distance===+d&&r.course===c&&(!from||r.date>=from)&&(!to||r.date<=to));
+  return l.length?l.reduce((a,b)=>b.time<a.time?b:a):null;
+}
+function targetRow(name,sub,target,mine,held){
+  const ok=mine!=null&&mine<=target+.001;const pct=mine?Math.min(100,target/mine*100):0;
+  return`<div class="tg"><div class="row1"><span class="nm">${esc(name)}</span><span class="vals">${mine!=null?fmt(mine):"—"} → ${fmt(target)}</span></div>
+    ${sub?`<div class="hint">${esc(sub)}</div>`:""}<div class="tgbar"><i class="${ok?"done":""}" style="width:${pct.toFixed(1)}%"></i></div>
+    <div class="st ${ok?"ok":""}">${held?"✓ Holds this record":ok?(sub&&/qualif/i.test(sub)?"✓ Qualified":"✓ Faster than this time"):mine!=null?`${(mine-target).toFixed(2)} s to go · ${pct.toFixed(1)}% of the way`:"No time yet in the qualifying period"}</div></div>`;
+}
+function targetsHtml(s,st,d,c,pb){
+  const rows=[];
+  (stdDoc.lists||[]).forEach(L=>{const T=stdTime(L,s,st,d,c);if(!T)return;const b=bestIn(s.id,st,d,c,L.from,L.to);
+    rows.push(targetRow(L.name,`Qualifying time · age ${T.age} in ${L.ageYear}${L.from||L.to?` · times swum ${L.from?fdate(L.from):"…"} – ${L.to?fdate(L.to):"…"}`:""}`,T.t,b?b.time:null,false))});
+  if(!recIdx)buildRecIdx();
+  /* a record this swimmer set at a meet that isn't in the app is still an official time: use it when it is faster */
+  const own=[...(recIdx.bySwimmer.get(s.id)||[]),...(recIdx.formerBySwimmer.get(s.id)||[])].filter(x=>!x.relay&&x.course===c&&x.st===st&&+x.d===+d&&(pb==null||x.t<pb-.001)).sort((a,b)=>a.t-b.t)[0];
+  const best=own?own.t:pb;
+  if(own)rows.push(`<div class="hint" style="margin-bottom:4px">Record targets use ${esc(s.name)}'s official record swim of <b>${fmt(own.t)}</b>${own.date?" ("+fdate(own.date)+")":""}, from a meet that isn't in this app. ${s.gender==="M"?"His":"Her"} best in this app is ${pb!=null?fmt(pb):"—"}.</div>`);
+  if(s.gender&&s.birthYear){const a=agOf(new Date().getFullYear()-s.birthYear,c);const R=a&&recList(c).find(x=>x.cat==="AG"&&x.ag===a&&x.g===s.gender&&!x.relay&&x.st===st&&+x.d===+d);
+    if(R){const held=recIdx.holder.get(recKey(R))===s.id;rows.push(targetRow(`Age group record ${agLabel(a)}`,`${R.name}${R.date?" · "+fdate(R.date):""}`,R.t,held?Math.min(best??R.t,R.t):best,held))}}
+  if(s.gender){const N=recList(c).find(x=>x.cat==="NR"&&x.g===s.gender&&!x.relay&&x.st===st&&+x.d===+d);
+    if(N){const held=recIdx.holder.get(recKey(N))===s.id;rows.push(targetRow("National record",`${N.name}${N.date?" · "+fdate(N.date):""}`,N.t,held?Math.min(best??N.t,N.t):best,held))}}
+  if(!rows.length)return"";
+  return`<div class="vcard"><h4>Targets</h4>${rows.join("")}</div>`;
+}
+/* events a swimmer has qualified in, for each qualifying list (shown on the profile) */
+function qualifiedFor(s){
+  if(!s.birthYear||!s.gender)return[];
+  return(stdDoc.lists||[]).map(L=>{const age=(+L.ageYear||new Date().getFullYear())-s.birthYear;const seen=new Set(),ok=[];let close=null;
+    L.times.filter(x=>(x.g==="X"||x.g===s.gender)&&(x.lo<0||age>=x.lo)&&(x.hi<0||age<=x.hi)).forEach(x=>{const k=x.c+x.st+x.d;if(seen.has(k))return;seen.add(k);
+      const T=stdTime(L,s,x.st,x.d,x.c);const b=bestIn(s.id,x.st,x.d,x.c,L.from,L.to);if(!b)return;
+      if(b.time<=T.t+.001)ok.push({st:x.st,d:x.d,c:x.c,t:b.time});else{const gap=b.time-T.t;if(!close||gap/T.t<close.gap/close.T)close={st:x.st,d:x.d,c:x.c,gap,T:T.t}}});
+    ok.sort((a,b)=>STROKES.indexOf(a.st)-STROKES.indexOf(b.st)||a.d-b.d);return{L,age,ok,close}}).filter(q=>q.ok.length||q.close);
+}
+function renderStdAdmin(){
+  const pn=$("#stdPanel");if(!pn)return;if(!canEdit()){pn.hidden=true;return}pn.hidden=false;
+  const L=stdDoc.lists||[];$("#stdNow").textContent=L.length?`${L.length} list${L.length>1?"s":""} loaded`:"none loaded";
+  $("#stdList").innerHTML=L.map(x=>`<div class="clubpair"><div class="names"><b>${esc(x.name)}</b><span class="hint">Age counted in ${x.ageYear} · ${x.times.length} times${x.from||x.to?` · swims from ${x.from?fdate(x.from):"…"} to ${x.to?fdate(x.to):"…"}`:" · any swim counts"}</span></div>
+    <div class="acts"><button type="button" class="lnk" data-stddel="${esc(x.id)}" style="color:var(--bad)">Remove</button></div></div>`).join("");
+}
+$("#stdFile").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const m=$("#stdMsg"),pv=$("#stdPreview");m.textContent="";
+  let P;try{P=parseLenexStandards(await readLenexText(f))}catch(err){P=null}
+  if(!P||!P.times.length){stdPending=null;pv.innerHTML="";msg(m,"No qualifying times found. Export the time standards from Splash as Lenex (.lxf or .lef).",false);return}
+  stdPending=P;const yr=(String(P.names[0]||f.name).match(/20\d\d/)||[String(new Date().getFullYear()+1)])[0];
+  const by={};P.times.forEach(x=>{const k=`${x.c} ${x.g==="F"?"girls":x.g==="M"?"boys":"all"} ${x.lo<0?"":x.lo}${x.hi<0?"+":x.hi===x.lo?"":"–"+x.hi}`;by[k]=(by[k]||0)+1});
+  pv.innerHTML=`<div class="hint" style="color:var(--fg);margin-top:8px"><b>${P.times.length} qualifying times found</b> in ${esc(f.name)}: ${esc(Object.entries(by).slice(0,12).map(([k,n])=>`${k} (${n})`).join(" · "))}${Object.keys(by).length>12?" …":""}${P.skipped?` · ${P.skipped} relay or unreadable times skipped`:""}</div>
+    <form id="fStd" class="clubmerge" autocomplete="off" style="margin-top:8px">
+      <div class="field" style="flex:2 1 260px"><label class="lbl" for="stdName">Meet name</label><input type="text" id="stdName" value="${esc(P.names[0]||"")}" placeholder="e.g. Thailand National Age Group Championships 2027"></div>
+      <div class="field" style="flex:0 1 120px"><label class="lbl" for="stdYear">Age counted in</label><input type="number" id="stdYear" min="2000" max="2100" value="${yr}"></div>
+      <div class="field" style="flex:1 1 160px"><label class="lbl" for="stdFrom">Swims from (optional)</label><input type="date" id="stdFrom"></div>
+      <div class="field" style="flex:1 1 160px"><label class="lbl" for="stdTo">Swims until (optional)</label><input type="date" id="stdTo"></div>
+      <button class="primary" type="submit">Save</button><button class="ghost" type="button" id="stdCancel">Cancel</button></form>`};
+$("#stdPanel").addEventListener("click",async e=>{const m=$("#stdMsg");
+  if(e.target.id==="stdCancel"){stdPending=null;$("#stdPreview").innerHTML="";return}
+  const del=e.target.closest("[data-stddel]");if(del){if(!canEdit())return;
+    try{const next={lists:(stdDoc.lists||[]).filter(x=>x.id!==del.dataset.stddel)};await db.doc("settings/standards").set(next);stdDoc=next;renderStdAdmin();msg(m,"Removed.",true)}catch(err){msg(m,permErr(err),false)}}});
+$("#stdPanel").addEventListener("submit",async e=>{if(e.target.id!=="fStd")return;e.preventDefault();const m=$("#stdMsg");if(!stdPending||!canEdit())return;
+  const name=norm($("#stdName").value),yr=+$("#stdYear").value,from=$("#stdFrom").value,to=$("#stdTo").value;
+  if(!name){msg(m,"Enter the meet name.",false);return}if(!(yr>=2000&&yr<=2100)){msg(m,"Enter the year ages are counted in, e.g. 2027.",false);return}
+  if(from&&to&&to<from){msg(m,"The end date is before the start date.",false);return}
+  const L={id:"q"+Date.now().toString(36),name,ageYear:yr,from,to,times:stdPending.times,savedAt:new Date().toISOString()};
+  try{const next={lists:[...(stdDoc.lists||[]).filter(x=>x.name!==name),L]};await db.doc("settings/standards").set(next);stdDoc=next;stdPending=null;$("#stdPreview").innerHTML="";renderStdAdmin();
+    msg(m,`Saved “${name}”. Swimmers' pages now show it. Press Publish public data to put it on the website.`,true)}catch(err){msg(m,permErr(err),false)}});
 /* one point per meet: the fastest swim at that meet (heats, semis and finals collapse into one) */
 const bestPerMeet=list=>{const m=new Map();list.forEach(r=>{const k=mKey(r);const b=m.get(k);if(!b||r.time<b.time)m.set(k,r)});return[...m.values()].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.time-b.time)};
 function drawProf(sorted){
@@ -1299,6 +1598,7 @@ function overviewHtml(s,evs,keys){
     ${bigImp?`<div class="kpi"><span class="v up">${bigImp.sm.impr.toFixed(1)}%</span><span class="lbl">Most improved: ${bigImp.d}m ${SHORT[bigImp.st]}</span></div>`:""}
   </div>`;
   const hasPts=rows.some(r=>r.pts!=null);
+  h+=radarHtml(s,evs,keys);
   h+=`<h3>All strokes · ${hasPts?"points":"improvement"} over time</h3><div class="chart-box"><canvas id="profChart"></canvas></div>
     <div class="legend-note">${hasPts?"World Aquatics points put every stroke, distance and pool on one scale: higher is better, 1000 equals the world record base time. Each point is the stroke's best swim at that meet. Base times: 50 m pool "+btLabel("LCM")+", 25 m pool "+btLabel("SCM")+".":"Add the swimmer's gender to see World Aquatics points. Showing % faster than the first swim in each event instead."}</div>`;
   h+=`<h3 style="margin-top:20px">Every event</h3><div class="tbl-wrap" style="margin-top:0"><table class="t-ev"><thead><tr><th>Event</th><th>Pool</th><th class="num">First swim</th><th class="num">Best</th><th class="num" title="(first time − best time) ÷ first time × 100">Improved</th><th>Points</th><th class="num">Swims</th><th>Meet (best time)</th></tr></thead><tbody>`+
@@ -1507,6 +1807,7 @@ function renderManage(){
   renderClubs();
   renderTeamRemoval();
   renderBaseTimes();
+  renderStdAdmin();
   renderRecordsAdmin();
   renderNatTool();
 }
@@ -2813,7 +3114,8 @@ function renderRecords(){
   const rows=list.filter(x=>x.cat===cat&&x.g===g&&(x.ag||"")===ag).sort((a,b)=>(a.relay-b.relay)||STROKES.indexOf(a.st)-STROKES.indexOf(b.st)||a.d-b.d);
   $("#recTitle").textContent=`${cat==="NR"?"National records":`Age group records ${agLabel(ag)}`} · ${g==="F"?(cat==="NR"?"Women":"Girls"):(cat==="NR"?"Men":"Boys")}`;
   $("#recBody").innerHTML=rows.length?`<div class="tbl-wrap"><table class="t-rec"><thead><tr><th>Event</th><th class="num swimt">Time</th><th>Holder</th><th class="num">Age</th><th>Club</th><th>Date</th><th>Place</th></tr></thead><tbody>${rows.map(x=>{const sid=recIdx.holder.get(recKey(x));const s=sid&&swimmerById(sid);
-    return`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[x.st]})"></span>${x.relay?`<span class="lg">${esc(recEvent(x))}</span><span class="sm">${x.legs||4}×${x.d} ${x.st==="IM"?"MED":ABBR[x.st]||esc(x.st)}</span>`:evH(x.st,x.d)}</td><td class="num t swimt">${fmt(x.t)}</td><td>${s?`<button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>`:nameH(x.name)}</td><td class="num t">${x.age||""}</td><td>${esc(x.club||"")}</td><td>${x.date?`<span class="lg">${fdate(x.date)}</span><span class="sm">${fdate(x.date).replace(/ (\d\d)(\d\d)$/," $2")}</span>`:'<span class="hint"><span class="lg">not recorded</span><span class="sm">—</span></span>'}</td><td class="wrapok">${esc(x.place||"")}</td></tr>`}).join("")}</tbody></table></div>`
+    const hn=recHistory(x).length-1;const open=ui.recOpen===recKey(x);
+    return`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[x.st]})"></span>${x.relay?`<span class="lg">${esc(recEvent(x))}</span><span class="sm">${x.legs||4}×${x.d} ${x.st==="IM"?"MED":ABBR[x.st]||esc(x.st)}</span>`:evH(x.st,x.d)}${hn>0?` <button class="lnk rh-btn" type="button" data-rh="${esc(recKey(x))}" aria-expanded="${open}" title="How this record improved"><span class="lg">${open?"Hide":"History"} (${hn})</span><span class="sm">${open?"▾":"▸"}${hn}</span></button>`:""}</td><td class="num t swimt">${fmt(x.t)}</td><td>${s?`<button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>`:nameH(x.name)}</td><td class="num t">${x.age||""}</td><td>${esc(x.club||"")}</td><td>${x.date?`<span class="lg">${fdate(x.date)}</span><span class="sm">${fdate(x.date).replace(/ (\d\d)(\d\d)$/," $2")}</span>`:'<span class="hint"><span class="lg">not recorded</span><span class="sm">—</span></span>'}</td><td class="wrapok">${esc(x.place||"")}</td></tr>`+(open?`<tr class="rhrow"><td colspan="7">${recHistHtml(x)}</td></tr>`:"")}).join("")}</tbody></table></div>`
     :`<div class="empty">No records in this group.</div>`;
 }
 
@@ -2876,12 +3178,13 @@ $("#recPanel").addEventListener("click",async e=>{const m=$("#recMsg");
 $("#recPool").onclick=e=>{const b=e.target.closest("button");if(b){ui.recCourse=b.dataset.c;renderRecords()}};
 $("#recGender").onclick=e=>{const b=e.target.closest("button");if(b){ui.recG=b.dataset.g;renderRecords()}};
 $("#recCat").onchange=e=>{ui.recCat=e.target.value;renderRecords()};
+$("#recBody").addEventListener("click",e=>{const h=e.target.closest("[data-rh]");if(h){ui.recOpen=ui.recOpen===h.dataset.rh?null:h.dataset.rh;renderRecords()}});
 $("#recBody").onclick=e=>{const b=e.target.closest("[data-open]");if(b){ui.sel=b.dataset.open;ui.pmode="overview";ui.ev=null;show("swimmers");window.scrollTo(0,0)}};
 
 /* ---- the public website (GitHub Pages): read-only data from data/public.json, no sign-in ---- */
 async function loadPublicData(){
   try{const r=await fetch("data/public.json",{cache:"no-cache"});if(!r.ok)return;const d=await r.json();if(!d||!Array.isArray(d.swimmers))return;
-    meetsById=new Map(Object.entries(d.meets||{}));recDoc=d.records||{};btSaved=d.basetimes||null;org={...org,...(d.org||{})};
+    meetsById=new Map(Object.entries(d.meets||{}));recDoc=d.records||{};btSaved=d.basetimes||null;stdDoc=d.standards&&d.standards.lists?d.standards:{lists:[]};org={...org,...(d.org||{})};
     state.public=true;state.live=false;state.isStaff=false;
     if(d.swimmers.length){if(state.demo)ui.sel=null;setSwimmers(d.swimmers);state.demo=false}
     const pub=document.getElementById("pubStamp");if(pub&&d.published)pub.textContent="Results updated "+fdate(d.published.slice(0,10));
@@ -2908,7 +3211,7 @@ function publicSnapshot(){
     var meets=Object.fromEntries(meetsById);
   }finally{meetsById=live}
   const rec=JSON.parse(JSON.stringify(recDoc||{}));delete rec.dismissed;
-  return{format:1,published:new Date().toISOString(),swimmers,meets,records:rec,basetimes:btSaved||null,org:{nameTh:org.nameTh||"",nameEn:org.nameEn||"",signer:org.signer||"",titleTh:org.titleTh||"",titleEn:org.titleEn||""}};
+  return{format:1,published:new Date().toISOString(),swimmers,meets,records:rec,basetimes:btSaved||null,standards:{lists:(stdDoc.lists||[]).map(({id,name,ageYear,from,to,times})=>({id,name,ageYear,from,to,times}))},org:{nameTh:org.nameTh||"",nameEn:org.nameEn||"",signer:org.signer||"",titleTh:org.titleTh||"",titleEn:org.titleEn||""}};
 }
 $("#pubGo").onclick=async()=>{const m=$("#pubMsg");if(!canEdit())return;
   try{const snap=publicSnapshot();const txt=JSON.stringify(snap);
@@ -2963,6 +3266,7 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
     if(!db){if(!window.claude)await loadPublicData();render();return}
     state.live=true;render();
     db.doc("settings/records").onSnapshot(d=>{recDoc=d.exists?d.data():{};recIdx=null;if(ui.view==="manage")renderRecordsAdmin();else if(state.swimmers.length)render()},()=>{});
+    db.doc("settings/standards").onSnapshot(d=>{stdDoc=d.exists?d.data():{lists:[]};if(!stdDoc.lists)stdDoc.lists=[];if(ui.view==="manage")renderStdAdmin();else if(state.swimmers.length)render()},()=>{});
     db.doc("settings/basetimes").onSnapshot(d=>{btSaved=d.exists?d.data():null;if(state.swimmers.length&&ui.view!=="manage")render();else if(ui.view==="manage")renderBaseTimes()},()=>{});
     db.doc("settings/clubs").onSnapshot(d=>{const v=d.exists?d.data():{};clubAlias=v.alias||{};clubNotSame=new Set(v.notSame||[]);excludedTeams=new Set(v.excluded||[]);if(ui.view==="manage")renderTeamRemoval();if(ui.view==="manage")renderClubs()},()=>{});
     db.doc("settings/org").onSnapshot(d=>{if(d.exists)org={...org,...d.data()};if(ui.view==="reports")renderReports()},()=>{});
