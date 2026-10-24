@@ -357,6 +357,9 @@ html:not(.ready) main{display:none}
 html:not(.ready) .boot{display:block}
 .boot-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:10px;vertical-align:1px;animation:bootp 1s ease-in-out infinite alternate}
 @keyframes bootp{from{opacity:.25}to{opacity:1}}
+.combo{position:relative;min-width:0}
+.combo>input{width:100%}
+.combo .suggest{min-width:260px}
 .sh-modal{position:fixed;inset:0;z-index:60;background:rgba(4,16,20,.66);display:flex;align-items:center;justify-content:center;padding:16px}
 .sh-modal[hidden]{display:none}
 .sh-box{background:var(--surface);border-radius:12px;padding:14px;width:min(520px,100%);max-height:100%;overflow:auto;box-shadow:0 18px 50px rgba(0,0,0,.35)}
@@ -596,7 +599,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
         <div class="field"><span class="lbl">Quick period</span><div class="presets" id="kPresets"></div></div>
         <div class="field"><label class="lbl" for="kAge">Age</label><select id="kAge"></select></div>
         <div class="field" id="kAgeCustom" hidden><span class="lbl">Ages from – to</span><div class="period"><input type="number" id="kAgeLo" min="4" max="99" placeholder="10" aria-label="Youngest age" style="width:80px;flex:0 0 80px"><span>to</span><input type="number" id="kAgeHi" min="4" max="99" placeholder="12" aria-label="Oldest age" style="width:80px;flex:0 0 80px"></div></div>
-        <div class="field"><label class="lbl" for="kClub">Team</label><select id="kClub"></select></div>
+        <div class="field" hidden><label class="lbl" for="kClub">Team</label><select id="kClub"></select></div>
         <div class="field"><label class="lbl" for="kNat">Nationality</label><select id="kNat"><option value="tha">Thai swimmers only</option><option value="all">All swimmers</option><option value="non">Non-Thai only</option></select></div>
       </div>
       <div class="hint" id="ageNote"></div>
@@ -773,16 +776,6 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div id="stdList" style="margin-top:10px"></div>
     </div>
 
-    <div class="panel" style="margin-bottom:18px" id="btPanel">
-      <div class="dup-hd"><h3 style="margin:0">Points base times</h3><span class="hint" id="btNow"></span></div>
-      <div class="hint" style="margin:6px 0 12px">World Aquatics publishes new base times every year: the 50 m pool (LCM) table in January, the 25 m pool (SCM) table in September. Enter the new times here and every swimmer's points update straight away, including past swims. Leave an event empty if it has no base time.</div>
-      <div class="seg" id="btPool" style="margin-bottom:10px"><button type="button" data-btp="LCM" aria-pressed="true">50 m pool (LCM)</button><button type="button" data-btp="SCM" aria-pressed="false">25 m pool (SCM)</button></div>
-      <form id="fBT" autocomplete="off">
-        <div class="field" style="max-width:260px"><label class="lbl" for="btLabelIn">Valid for</label><input type="text" id="btLabelIn" placeholder="e.g. 2027 or 2026/27"></div>
-        <div class="tbl-wrap" style="margin-top:8px"><table id="btTbl"></table></div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px"><button class="primary" type="submit">Save base times</button><button class="ghost" type="button" id="btReset">Use the built-in table</button><span class="msg" id="btMsg" role="status"></span></div>
-      </form>
-    </div>
 
     <div class="panel" style="margin-bottom:18px" id="natPanel">
       <div class="dup-hd"><h3 style="margin:0">Change nationality</h3></div>
@@ -853,6 +846,16 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
           <div class="full" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="primary" type="submit" id="sBtn">Add swimmer</button><span class="msg" id="sMsg"></span></div>
         </form>
       </div>
+    </div>
+    <div class="panel" style="margin:18px 0" id="btPanel">
+      <div class="dup-hd"><h3 style="margin:0">Points base times</h3><span class="hint" id="btNow"></span></div>
+      <div class="hint" style="margin:6px 0 12px">World Aquatics publishes new base times every year: the 50 m pool (LCM) table in January, the 25 m pool (SCM) table in September. Enter the new times here and every swimmer's points update straight away, including past swims. Leave an event empty if it has no base time.</div>
+      <div class="seg" id="btPool" style="margin-bottom:10px"><button type="button" data-btp="LCM" aria-pressed="true">50 m pool (LCM)</button><button type="button" data-btp="SCM" aria-pressed="false">25 m pool (SCM)</button></div>
+      <form id="fBT" autocomplete="off">
+        <div class="field" style="max-width:260px"><label class="lbl" for="btLabelIn">Valid for</label><input type="text" id="btLabelIn" placeholder="e.g. 2027 or 2026/27"></div>
+        <div class="tbl-wrap" style="margin-top:8px"><table id="btTbl"></table></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px"><button class="primary" type="submit">Save base times</button><button class="ghost" type="button" id="btReset">Use the built-in table</button><span class="msg" id="btMsg" role="status"></span></div>
+      </form>
     </div>
   </section>
 </main>
@@ -1076,6 +1079,7 @@ let recent=[];try{recent=JSON.parse(localStorage.getItem("smt-recent")||"[]");
   /* an earlier version filled this list by itself; start it fresh once */
   if(localStorage.getItem("smt-recent-v")!=="2"){recent=[];localStorage.setItem("smt-recent","[]");localStorage.setItem("smt-recent-v","2")}}catch(e){}
 function rememberSwimmer(id){recent=[id,...recent.filter(x=>x!==id)].slice(0,8);try{localStorage.setItem("smt-recent",JSON.stringify(recent))}catch(e){}}
+function enhanceEdit(){const c=document.getElementById("eClub");if(c)suggestInput(c,()=>clubCatalog().map(x=>({t:x.name,sub:`${x.n} swimmer${x.n>1?"s":""}${x.codes&&x.codes.size?" · code "+[...x.codes.keys()].join(", "):""}`})))}
 function openSwimmer(id){ui.sel=id;ui.ev=null;ui.openSplit=null;rememberSwimmer(id);renderRoster();renderProfile()}
 function renderRoster(){
   $("#swCount").textContent=state.swimmers.length?`· ${state.swimmers.length.toLocaleString()} swimmers`:"";
@@ -1121,10 +1125,10 @@ function renderProfile(){
   const keys=[...evs.keys()].filter(k=>summary(evs.get(k))).sort((a,b)=>{const[sa,da,ca]=a.split("|"),[sb,db,cb]=b.split("|");return ca.localeCompare(cb)||STROKES.indexOf(sa)-STROKES.indexOf(sb)||da-db});
   if(!keys.includes(ui.ev))ui.ev=keys.slice().sort((a,b)=>evs.get(b).length-evs.get(a).length)[0]||null;
   let h=ui.editing===s.id?editHtml(s):idCard(s);
-  if(!keys.length){destroy("prof");el.innerHTML=h+`<div class="empty">No times recorded yet.</div>`;return}
+  if(!keys.length){destroy("prof");el.innerHTML=h+`<div class="empty">No times recorded yet.</div>`;enhanceEdit();return}
   h+=`<div class="subtabs seg" style="display:inline-flex" id="pmode"><button data-pm="overview" aria-pressed="${ui.pmode==="overview"}">Overall</button><button data-pm="event" aria-pressed="${ui.pmode==="event"}">Personal Best</button><button data-pm="meets" aria-pressed="${ui.pmode==="meets"}">All Meets Result</button></div>`;
-  if(ui.pmode==="overview"){el.innerHTML=h+overviewHtml(s,evs,keys);drawOverview(s,evs,keys);return}
-  if(ui.pmode==="meets"){destroy("prof");el.innerHTML=h+meetsHtml(s);return}
+  if(ui.pmode==="overview"){el.innerHTML=h+overviewHtml(s,evs,keys);drawOverview(s,evs,keys);enhanceEdit();return}
+  if(ui.pmode==="meets"){destroy("prof");el.innerHTML=h+meetsHtml(s);enhanceEdit();return}
   h+=`<h3>Personal bests</h3><div class="pbs">`+keys.map(k=>{const[st,d,c]=k.split("|");const sm=summary(evs.get(k));const dd=sm.n>1?sm.first.time-sm.best.time:0;return`<button class="pb" data-ev="${esc(k)}" aria-pressed="${k===ui.ev}"><span class="ev">${d}m ${SHORT[st]||st} <span class="chip course">${c}</span></span><span class="t">${fmt(sm.best.time)}</span><span class="d ${dd>0?"up":"lbl"}">${dd>0?"▲ "+dd.toFixed(2)+"s since first swim":sm.n+" swim"+(sm.n>1?"s":"")}</span></button>`}).join("")+`</div>`;
   const[st,d,c]=ui.ev.split("|");const all=evs.get(ui.ev);const sm=summary(all);
   const pbPts=points(sm.best,s.gender);
@@ -1138,7 +1142,7 @@ function renderProfile(){
   h+=`<div class="tbl-wrap"><table class="t-hist"><thead><tr><th>Date</th><th>Meet</th><th>Round</th><th class="num">Place</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">vs previous</th><th></th><th></th></tr></thead><tbody>`+rows.map(r=>{if(ui.editRow===r.id)return editRowHtml(r,10);const m=meta2.get(r.id);const hasSp=r.splits&&r.splits.length>1;const open=ui.openSplit===r.id;
     return`<tr><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"—")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${placeTxt(r)}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t ${m.delta==null?"":m.delta<0?"up":m.delta>0?"down":""}">${!valid(r)?"":m.delta==null?"first":(m.delta<0?"−":"+")+Math.abs(m.delta).toFixed(2)}</td><td>${m.isPb?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${valid(r)&&(m.isPb||recBadges(r))?" "+shareBtn(r):""}${hasSp?` <button class="lnk" data-split="${esc(r.id)}" aria-expanded="${open}">Splits</button>`:""}</td><td class="num">${ed?`<button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button><span data-del="${esc(r.id)}"><button class="x" title="Delete this time" aria-label="Delete this time">×</button></span>`:""}</td></tr>`+(open?`<tr class="splits"><td colspan="10">${splitHtml(r)}</td></tr>`:"")}).join("")+`</tbody></table></div>`;
   el.innerHTML=h;
-  drawProf(sm.sorted);
+  drawProf(sm.sorted);enhanceEdit();
 }
 /* entry time vs result: negative = swam faster than the entry */
 /* teams a swimmer swam for other than clubs: school, province, region, country */
@@ -1695,7 +1699,7 @@ function renderRankings(){
   $("#kAgeCustom").hidden=!isCustom;
   if(isCustom&&ui.kAge.startsWith("g:")&&document.activeElement!==$("#kAgeLo")&&document.activeElement!==$("#kAgeHi")){const[lo,hi]=ui.kAge.slice(2).split("-").map(Number);$("#kAgeLo").value=lo>0?lo:"";$("#kAgeHi").value=hi<99?hi:""}
   $("#ageNote").textContent=`Age is counted by year of birth only: ${ageRefYear()} − birth year${ui.kTo?" (the year the period ends)":""}. A swimmer born in ${ageRefYear()-12} is 12 for the whole of ${ageRefYear()}.`;
-  ui.kClub=teamVal(ui.kClub);$("#kClub").innerHTML=teamOptionsHtml(ui.kClub);if($("#kClub").value!==ui.kClub)ui.kClub="";
+  ui.kClub="";   // rankings are for all teams (the team filter is switched off)
   const ageLabel=v=>{const g=AGE_GROUPS.find(x=>x[0]===v);if(g)return g[1];const[lo,hi]=v.slice(2).split("-").map(Number);return lo<=0?`${hi} & under`:hi>=99?`${lo} & over`:lo===hi?String(lo):`${lo}–${hi}`};
   const ageText=ui.kAge?" · age "+(ui.kAge.startsWith("g:")?ageLabel(ui.kAge):ui.kAge.slice(2)):"";
   $("#kNat").value=ui.kNat||"tha";
@@ -1820,7 +1824,7 @@ function renderAgeCompare(chosen,colorOf,cv){
 /* ---------- MANAGE VIEW ---------- */
 function renderManage(){
   const cur=$("#rSwimmer").value;
-  fillSelect($("#rSwimmer"),state.demo?[["","Add a swimmer first"]]:state.swimmers.slice().sort((a,b)=>a.name.localeCompare(b.name,"th")).map(s=>[s.id,s.name+(s.club?" — "+s.club:"")]),cur||ui.sel);
+  fillSelect($("#rSwimmer"),state.demo?[["","Add a swimmer first"]]:state.swimmers.slice().sort((a,b)=>a.name.localeCompare(b.name,"th")).map(s=>[s.id,s.name+(altName(s)?" · "+altName(s):"")+(s.birthYear?" · "+s.birthYear:"")+(s.club?" — "+s.club:"")]),cur||ui.sel);
   const st=$("#rStroke").value||"Freestyle";fillSelect($("#rStroke"),STROKES.map(s=>[s,s]),st);
   const d=$("#rDist").value;fillSelect($("#rDist"),BASE_DISTS[st].map(x=>[x,x+" m"]),BASE_DISTS[st].includes(+d)?d:BASE_DISTS[st][1]||BASE_DISTS[st][0]);
   if(!$("#rDate").value)$("#rDate").value=today();
@@ -1836,7 +1840,7 @@ function renderManage(){
   renderNatTool();
 }
 /* ---------- Change nationality for many swimmers (staff) ---------- */
-let naUnticked=new Set(),naConfirm=false;
+let naUnticked=new Set(),naConfirm=false,naShowAll=false;
 function naMatches(){
   const team=$("#naTeam").value,now=$("#naNow").value,q=fold($("#naQ").value).split(/\s+/).filter(Boolean);
   return state.swimmers.filter(s=>(!team||s.club===team)&&(now===""||(now==="(none)"?!s.nation:String(s.nation||"").toUpperCase()===now))&&(!q.length||q.every(t=>fold([s.nameTh,s.nameEn].join(" ")).includes(t))))
@@ -1850,6 +1854,10 @@ function renderNatTool(){
   $("#naTeam").innerHTML=`<option value="">All teams</option>`+clubs.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");$("#naTeam").value=clubs.includes(t)?t:"";
   $("#naNow").innerHTML=`<option value="">Any</option>`+[...nats].sort((a,b)=>b[1]-a[1]).map(([k,c])=>`<option value="${esc(k)}">${esc(k==="(none)"?"Not set":k)} (${c})</option>`).join("");$("#naNow").value=nats.has(n)?n:"";
   $("#naCodes").innerHTML=[...nats.keys()].filter(k=>k!=="(none)").map(k=>`<option value="${esc(k)}">`).join("");
+  const filtered=!!($("#naTeam").value||$("#naNow").value||norm($("#naQ").value));
+  if(!filtered&&!naShowAll){naConfirm=false;$("#naGo").disabled=true;$("#naGo").textContent="Apply";
+    $("#naList").innerHTML=`<div class="hint">Choose a team, a current nationality or part of a name above to see the swimmers. <button type="button" class="lnk" id="naAllBtn">Show all ${state.swimmers.length.toLocaleString()} swimmers</button></div>`;return}
+  $("#naGo").disabled=false;
   const list=naMatches();const shown=list.slice(0,300);const sel=list.filter(s=>!naUnticked.has(s.id)).length;
   $("#naList").innerHTML=list.length?`<div class="tbl-wrap" style="margin-top:0;max-height:320px;overflow:auto"><table><thead><tr><th><input type="checkbox" id="naAll" ${naUnticked.size?"":"checked"} aria-label="Select all"></th><th>Swimmer</th><th>Club</th><th>Nationality</th><th class="num">Born</th></tr></thead><tbody>${shown.map(s=>`<tr class="trrow"><td><input type="checkbox" data-na="${esc(s.id)}" ${naUnticked.has(s.id)?"":"checked"} aria-label="Include ${esc(s.name)}"></td><td>${esc(s.name)}${altName(s)?`<br><span class="hint">${esc(altName(s))}</span>`:""}</td><td>${esc(s.club||"")}</td><td><span class="flagnt${isThai(s)?"":" foreign"}">${esc(s.nation||"—")}</span></td><td class="num t">${s.birthYear||""}</td></tr>`).join("")}</tbody></table></div>
     <div class="hint" style="margin-top:6px">${sel.toLocaleString()} of ${list.length.toLocaleString()} selected${list.length>shown.length?` · first ${shown.length} shown; all ${list.length.toLocaleString()} matching swimmers are included`:""}</div>`
@@ -1858,6 +1866,7 @@ function renderNatTool(){
 }
 ["#naTeam","#naNow"].forEach(id=>$(id).addEventListener("change",()=>{naUnticked=new Set();naConfirm=false;$("#naMsg").textContent="";renderNatTool()}));
 $("#naQ").addEventListener("input",()=>{clearTimeout(qTimer);qTimer=setTimeout(()=>{naUnticked=new Set();naConfirm=false;renderNatTool();const i=$("#naQ");i.focus()},250)});
+$("#naList").addEventListener("click",e=>{if(e.target.id==="naAllBtn"){naShowAll=true;renderNatTool()}});
 $("#naNew").addEventListener("input",()=>{naConfirm=false;$("#naGo").textContent="Apply"});
 $("#naList").addEventListener("change",e=>{
   if(e.target.id==="naAll"){naUnticked=e.target.checked?new Set():new Set(naMatches().map(s=>s.id))}
@@ -1872,7 +1881,7 @@ $("#naGo").onclick=async()=>{const m=$("#naMsg");
   naConfirm=false;$("#naGo").disabled=true;
   const res=await runJobs(ids.map(id=>[id,null]),sid=>{const s=swimmerById(sid);return withRetry(()=>db.collection("swimmers").doc(sid).update({nation:code,locked:[...new Set([...((s&&s.locked)||[]),"nation"])]}))},(n,t)=>{m.className="msg";m.textContent=`Updating swimmer ${n.toLocaleString()} of ${t.toLocaleString()}…`});
   msg(m,res.denied?permErr({code:"invalid_argument"}):res.failed?`Updated ${res.done} swimmers; ${res.failed} couldn't be updated. Apply again to finish.`:`Done. ${res.done.toLocaleString()} swimmer${res.done===1?"":"s"} set to ${code}.`,!res.denied&&!res.failed);
-  $("#naGo").disabled=false;naUnticked=new Set();renderNatTool()};
+  $("#naGo").disabled=false;naUnticked=new Set();naShowAll=false;renderNatTool()};
 /* ---------- Points base times (staff) ---------- */
 let btPool="LCM",btDirty=false;
 function btEvents(c){const keys=new Set([...Object.keys(BT.LCM),...Object.keys(BT.SCM),...Object.keys(btTable("LCM")),...Object.keys(btTable("SCM"))]);
@@ -1988,6 +1997,61 @@ async function mergeClub(from,to){
     msg(m,res.denied?permErr({code:"invalid_argument"}):res.failed?`Merged ${res.done} swimmers; ${res.failed} couldn't be updated. Merge again to finish.`:`Done. ${res.done} swimmer${res.done===1?"":"s"} moved to “${to}”. Future uploads with “${from}” go there too.`,!res.denied&&!res.failed);
   }catch(err){msg(m,permErr(err),false)}
 }
+
+/* ---- type-to-find for long lists: the select stays (hidden) and keeps all existing logic; a text box finds options by any part of their name ---- */
+function comboSelect(sel,ph){
+  if(!sel||sel.dataset.combo)return;sel.dataset.combo="1";
+  const wrap=document.createElement("div");wrap.className="combo";sel.parentNode.insertBefore(wrap,sel);wrap.appendChild(sel);
+  const inp=document.createElement("input");inp.type="text";inp.autocomplete="off";inp.id=sel.id+"In";inp.setAttribute("role","combobox");inp.setAttribute("aria-expanded","false");inp.setAttribute("aria-autocomplete","list");
+  const box=document.createElement("div");box.className="suggest";box.setAttribute("role","listbox");box.hidden=true;box.id=sel.id+"List";inp.setAttribute("aria-controls",box.id);
+  wrap.insertBefore(inp,sel);wrap.appendChild(box);sel.hidden=true;sel.tabIndex=-1;
+  const lab=document.querySelector(`label[for="${sel.id}"]`);if(lab)lab.htmlFor=inp.id;
+  let hits=[],idx=0;
+  const items=()=>[...sel.options].map(o=>({v:o.value,t:o.textContent,g:o.parentElement&&o.parentElement.tagName==="OPTGROUP"?o.parentElement.label:""}));
+  const blank=()=>items().find(o=>o.v==="");
+  const sync=()=>{const o=sel.selectedOptions[0];if(document.activeElement!==inp)inp.value=o&&o.value?o.textContent:"";const b=blank();inp.placeholder=b?b.t+" · type to search":(ph||"Type to search")};
+  const close=()=>{box.hidden=true;inp.setAttribute("aria-expanded","false")};
+  const draw=()=>{const q=fold(inp.value).trim(),toks=q.split(/\s+/).filter(Boolean),qq=q.replace(/\s/g,"");
+    const all=items();let list;
+    if(!toks.length)list=all.slice(0,12);
+    else list=all.filter(o=>o.v!=="").map(o=>{const n=fold(o.t),nn=n.replace(/\s/g,"");const sc=n.startsWith(q)?0:nn.includes(qq)?1:toks.every(t=>n.includes(t))?2:9;return{o,sc}})
+      .filter(x=>x.sc<9).sort((a,b)=>a.sc-b.sc).slice(0,12).map(x=>x.o);
+    hits=list;if(idx>=hits.length)idx=0;
+    box.innerHTML=hits.length?hits.map((o,i)=>`<button type="button" role="option" data-i="${i}" aria-selected="${i===idx}"><span class="nm">${esc(o.t)}</span>${o.g?`<span class="sub">${esc(o.g)}</span>`:""}</button>`).join(""):`<div class="none">Nothing matches “${esc(inp.value)}”.</div>`;
+    box.hidden=false;inp.setAttribute("aria-expanded","true")};
+  const pick=o=>{if(sel.value!==o.v){sel.value=o.v;sel.dispatchEvent(new Event("change",{bubbles:true}))}inp.value=o.v?o.t:"";close()};
+  inp.addEventListener("focus",()=>{inp.select();idx=0;draw()});
+  inp.addEventListener("input",()=>{idx=0;draw()});
+  inp.addEventListener("keydown",e=>{if(box.hidden&&e.key==="ArrowDown"){draw();return}if(box.hidden)return;
+    if(e.key==="ArrowDown"){e.preventDefault();idx=Math.min(idx+1,hits.length-1);draw()}
+    else if(e.key==="ArrowUp"){e.preventDefault();idx=Math.max(idx-1,0);draw()}
+    else if(e.key==="Enter"){e.preventDefault();if(hits[idx])pick(hits[idx])}
+    else if(e.key==="Escape"){close();sync()}});
+  box.addEventListener("mousedown",e=>e.preventDefault());
+  box.addEventListener("click",e=>{const b=e.target.closest("[data-i]");if(b)pick(hits[+b.dataset.i])});
+  inp.addEventListener("blur",()=>setTimeout(()=>{close();if(!inp.value.trim()&&blank()&&sel.value!=="")pick(blank());else sync()},120));
+  new MutationObserver(()=>sync()).observe(sel,{childList:true,subtree:true,attributes:true});
+  sel.addEventListener("change",sync);sync();
+}
+/* a free-text box with suggestions (e.g. a swimmer's club): suggestions come from a list the page supplies */
+function suggestInput(inp,getList){
+  if(!inp||inp.dataset.combo)return;inp.dataset.combo="1";inp.removeAttribute("list");
+  const wrap=document.createElement("div");wrap.className="combo";inp.parentNode.insertBefore(wrap,inp);wrap.appendChild(inp);
+  const box=document.createElement("div");box.className="suggest";box.hidden=true;wrap.appendChild(box);let hits=[],idx=0;
+  const close=()=>{box.hidden=true};
+  const draw=()=>{const q=fold(inp.value).trim(),toks=q.split(/\s+/).filter(Boolean),qq=q.replace(/\s/g,"");if(!toks.length){close();return}
+    hits=getList().map(o=>{const n=fold(o.t),nn=n.replace(/\s/g,"");const sc=n===q?9:n.startsWith(q)?0:nn.includes(qq)?1:toks.every(t=>n.includes(t))?2:9;return{o,sc}}).filter(x=>x.sc<9).sort((a,b)=>a.sc-b.sc).slice(0,12).map(x=>x.o);
+    if(!hits.length){close();return}if(idx>=hits.length)idx=0;
+    box.innerHTML=hits.map((o,i)=>`<button type="button" data-i="${i}" aria-selected="${i===idx}"><span class="nm">${esc(o.t)}</span>${o.sub?`<span class="sub">${esc(o.sub)}</span>`:""}</button>`).join("");box.hidden=false};
+  const pick=o=>{inp.value=o.t;inp.dispatchEvent(new Event("input",{bubbles:true}));close()};
+  inp.addEventListener("input",e=>{if(e.isTrusted){idx=0;draw()}});
+  inp.addEventListener("keydown",e=>{if(box.hidden)return;
+    if(e.key==="ArrowDown"){e.preventDefault();idx=Math.min(idx+1,hits.length-1);draw()}else if(e.key==="ArrowUp"){e.preventDefault();idx=Math.max(idx-1,0);draw()}
+    else if(e.key==="Enter"){e.preventDefault();if(hits[idx])pick(hits[idx])}else if(e.key==="Escape")close()});
+  box.addEventListener("mousedown",e=>e.preventDefault());box.addEventListener("click",e=>{const b=e.target.closest("[data-i]");if(b)pick(hits[+b.dataset.i])});
+  inp.addEventListener("blur",()=>setTimeout(close,120));
+}
+["kClub","naTeam","trTeam","rSwimmer","iPick"].forEach(id=>comboSelect(document.getElementById(id)));
 /* club pickers for merging: type any part of the name (or the club code), pick from the list */
 let clubPickList=[];
 function clubMatches(q){const k=fold(q).replace(/\s+/g," ").trim();if(!k)return[];const kk=k.replace(/\s/g,"");
