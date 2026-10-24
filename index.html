@@ -1459,7 +1459,11 @@ function standHtml(s,st,d,c){
 function radarHtml(s,evs,keys){
   if(!s.gender)return"";
   const best={};keys.forEach(k=>{const[st]=k.split("|");const sm=summary(evs.get(k));const p=points(sm.best,s.gender);if(p!=null&&(!best[st]||p>best[st].p))best[st]={p,k}});
-  const have=STROKES.filter(st=>best[st]);if(have.length<3)return"";
+  const have=STROKES.filter(st=>best[st]);if(!have.length)return"";
+  /* fewer than 3 strokes can't make a shape: show one bar per stroke instead */
+  if(have.length<3){const mx=Math.max(...have.map(st=>best[st].p));
+    return`<div class="vcard" style="margin-top:16px"><h4>Stroke profile</h4>${STROKES.map(st=>`<div class="tg"><div class="row1"><span class="nm">${st}</span><span class="vals">${best[st]?best[st].p+" pts":"no time yet"}</span></div><div class="tgbar"><i style="width:${best[st]?(best[st].p/Math.max(mx,1)*100).toFixed(1):0}%"></i></div></div>`).join("")}
+      <p class="hint" style="margin-top:8px">Best World Aquatics points in each stroke. The spider chart appears once there are times in at least 3 strokes.</p></div>`}
   const top=Math.max(...have.map(st=>best[st].p));const scale=Math.max(100,Math.ceil(top/100)*100);
   const W=300,cx=150,cy=150,R=100;const ang=i=>-Math.PI/2+i*2*Math.PI/5;const pt=(i,v)=>[cx+Math.cos(ang(i))*R*v,cy+Math.sin(ang(i))*R*v];
   const ring=f=>STROKES.map((_,i)=>pt(i,f).map(n=>n.toFixed(1)).join(",")).join(" ");
