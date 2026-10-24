@@ -614,7 +614,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
     <div class="rpt-grid">
       <div class="panel rcard">
         <h3>Swimmer portfolio</h3>
-        <p class="hint">For scholarships, school and university applications: profile, personal bests with points, best season rankings, progress chart and competition history. ID numbers and full birth dates are never included.</p>
+        <p class="hint">A formal, bilingual record of the swimmer's competition results for scholarships and school or university applications. It includes the swimmer's profile, personal best times with World Aquatics points, Thailand national and age-group records, season best times by year and, if chosen, the full competition history. All results come from swim meets run by Swim Meets Thailand. Each portfolio carries a reference code that anyone can check under “Verify a document”. ID numbers and full birth dates are never included.</p>
         <div class="field"><label class="lbl" for="rpQ">Swimmer</label><input type="text" id="rpQ" placeholder="Search name in Thai or English" autocomplete="off"></div>
         <div class="rphits" id="rpHits"></div>
         <div class="rpchosen" id="rpChosen"></div>
@@ -1089,7 +1089,7 @@ function idCard(s){
       ${fact("Born",s.birthYear?String(s.birthYear):"",s.birthYear?`age ${yr-s.birthYear} in ${yr}`:"")}
       ${state.isStaff&&priv.has(s.id)?fact("Citizen ID / passport",`<span class="mono">${esc(fmtCid(priv.get(s.id).cid))||"—"}</span>`,`${priv.get(s.id).dob?"born "+fmtDob(priv.get(s.id).dob)+" · ":""}only you can see this`):""}
       ${fact("Club",esc(s.club||""),s.clubCode?esc(s.clubCode):"")}
-      ${(()=>{if(!recIdx)buildRecIdx();const cur=recIdx.bySwimmer.get(s.id)||[];const old=formerRecs(s.id,cur);
+      ${(()=>{if(!recIdx)buildRecIdx();const cur=(recIdx.bySwimmer.get(s.id)||[]).slice().sort(recOrder);const old=formerRecs(s.id,cur);
         const line=(x,cls)=>`<span class="chip rec ${cls}">${recShort(x)}${x.cat==="AG"?" "+agLabel(x.ag):""}</span> ${esc(recEvent(x))} ${x.course} · <b>${fmt(x.t)}</b>${x.date?` <span class="recyr">${fdate(x.date)}</span>`:""}`;
         return(cur.length?`<div style="grid-column:1/-1"><dt>Current records</dt><dd class="reclist">${cur.map(x=>line(x,x.cat==="NR"?"nr":"agr")).join("<br>")}</dd></div>`:"")+
           (old.length?`<div style="grid-column:1/-1"><dt>Former records</dt><dd class="reclist">${old.map(x=>line(x,"fmr")).join("<br>")}</dd></div>`:"")})()}
@@ -2464,7 +2464,7 @@ async function buildPortfolio(s,o){
   const evKeys=[...evs.keys()].sort((a,b)=>{const[sa,da,ca]=a.split("|"),[sb,db,cb]=b.split("|");return ca.localeCompare(cb)||STROKES.indexOf(sa)-STROKES.indexOf(sb)||da-db});
   const doc={titleTh:"แฟ้มสะสมผลงานนักกีฬาว่ายน้ำ",titleEn:"Swimmer Performance Portfolio",issue,code:await portfolioCode(s,issue),
     sub:`${esc(s.nameTh||s.nameEn)}${s.nameTh&&s.nameEn?` · ${esc(s.nameEn)}`:""}<br>ช่วงเวลา / Period: ${y0===y1?y0:`${y0} – ${y1}`}`,
-    runSub:s.nameEn||s.nameTh,foot:"ข้อมูลจากบันทึกผลการแข่งขัน · Compiled from recorded competition results",blocks:[]};
+    runSub:s.nameEn||s.nameTh,foot:"ข้อมูลจากการแข่งขันที่ดำเนินการโดย Swim Meets Thailand · Compiled from meets run by Swim Meets Thailand",blocks:[]};
   const B=doc.blocks;
   const age=s.birthYear?new Date().getFullYear()-s.birthYear:null;
   B.push(sec("ข้อมูลนักกีฬา","Athlete profile"));
@@ -2472,6 +2472,7 @@ async function buildPortfolio(s,o){
     ["ปีเกิด","Year of birth",s.birthYear?`${s.birthYear} (พ.ศ. ${s.birthYear+543}) · อายุ ${age} ปีในปี ${new Date().getFullYear()} / age ${age} in ${new Date().getFullYear()}`:"—"],
     ["สังกัด","Club / team",esc([s.club,s.clubCode?`(${s.clubCode})`:""].filter(Boolean).join(" ")||"—")],["สัญชาติ","Nationality",esc(s.nation||"—")],
     ["ช่วงการแข่งขัน","Competition period",byDate.length?`${rDate(byDate[0].date)} – ${rDate(byDate[byDate.length-1].date)}`:"—"],
+    ["แหล่งข้อมูล","Source","ผลการแข่งขันที่ดำเนินการโดย Swim Meets Thailand · Results from swim meets run by Swim Meets Thailand"],
     ["สถิติรวม","Summary",`${meets} รายการแข่งขัน / meets · ${inP.length} ครั้งที่ลงแข่ง / swims · ${evKeys.length} ประเภท / events`]];
   B.push({t:"html",html:`<table class="rp-kv">${kv.map(([t,e,v])=>`<tr><th>${t}<br><span class="en">${e}</span></th><td>${v}</td></tr>`).join("")}</table>`});
 
@@ -2482,7 +2483,7 @@ async function buildPortfolio(s,o){
     note:`คะแนน World Aquatics คำนวณจากเวลามาตรฐานปีปัจจุบัน (1000 = เวลาฐานระดับสถิติโลก) · World Aquatics points use the current base times (50 m pool `+btLabel("LCM")+`, 25 m pool `+btLabel("SCM")+`; 1000 = world-record base time).<br>`+impNote(evKeys.map(k=>summary(evs.get(k))).find(sm=>sm.n>1&&sm.impr>0))});
 
   if(!recIdx)buildRecIdx();
-  const recCur=recIdx.bySwimmer.get(s.id)||[],recOld=formerRecs(s.id,recCur);
+  const recCur=(recIdx.bySwimmer.get(s.id)||[]).slice().sort(recOrder),recOld=formerRecs(s.id,recCur);
   if(recCur.length||recOld.length){B.push(sec("สถิติประเทศไทย","Thailand records"));
     const recTh=x=>x.cat==="NR"?"สถิติประเทศไทย":`สถิติประเทศไทยรุ่นอายุ ${agLabel(x.ag)} ปี`;
     B.push({t:"table",cols:[{h:hb("สถิติ","Record")},{h:hb("ประเภท","Event")},{h:hb("สระ","Pool")},{h:hb("เวลา","Time"),cls:"num"},{h:hb("วันที่","Date")},{h:hb("สถานะ","Status")}],
@@ -2603,7 +2604,8 @@ let rpSel=null,rpQ="";
 function renderReports(){
   // portfolio
   /* starts empty; afterwards it shows the last swimmer this visitor looked at (kept on their own device) */
-  const s=(state.demo?null:swimmerById(recent[0]))||swimmerById(rpSel)||null;if(s)rpSel=s.id;
+  /* starts empty every visit; a swimmer is chosen only by searching here */
+  const s=swimmerById(rpSel)||null;
   const toks=fold(rpQ).split(/\s+/).filter(Boolean);
   const hits=toks.join("").length>=2?state.swimmers.filter(o=>{const h=fold([o.nameEn,o.nameTh,o.club].join(" "));return toks.every(t=>h.includes(t))}).sort((a,b)=>a.name.localeCompare(b.name,"th")).slice(0,8):[];
   $("#rpHits").innerHTML=hits.map(o=>`<button type="button" data-rp="${esc(o.id)}"><b>${esc(o.name)}</b> <span class="hint">${esc([altName(o),o.club,o.birthYear?"born "+o.birthYear:""].filter(Boolean).join(" · "))}</span></button>`).join("")+(toks.join("").length>=2&&!hits.length?`<span class="hint">No swimmer matches.</span>`:"");
@@ -2773,11 +2775,13 @@ function buildRecIdx(){
   (recDoc.hist||[]).forEach(x=>attach(x,formerBySwimmer,false));
   recIdx={holder,bySwim,bySwimmer,formerBySwimmer};
 }
+/* order of a swimmer's records: national records first, then age groups from the oldest group down, then stroke and distance */
+const recOrder=(a,b)=>(a.cat==="NR"?0:1)-(b.cat==="NR"?0:1)||(parseInt(b.ag)||0)-(parseInt(a.ag)||0)||(a.course===b.course?0:a.course==="LCM"?-1:1)||STROKES.indexOf(a.st)-STROKES.indexOf(b.st)||a.d-b.d||(a.relay?1:0)-(b.relay?1:0);
 /* every record a swimmer used to hold, including ones they later broke themselves (shows how often they set the record), newest first */
 function formerRecs(sid,cur){
   const seen=new Set();return(recIdx.formerBySwimmer.get(sid)||[]).filter(x=>{const k=recKey(x)+"|"+x.t.toFixed(2);
     if(seen.has(k)||cur.some(y=>recKey(y)===recKey(x)&&Math.abs(y.t-x.t)<.001))return false;seen.add(k);return true})
-    .sort((a,b)=>(b.date||"").localeCompare(a.date||"")||a.t-b.t);
+    .sort((a,b)=>recOrder(a,b)||(b.date||"").localeCompare(a.date||"")||a.t-b.t);
 }
 const recBadges=r=>{if(!recIdx)return"";const l=recIdx.bySwim.get(r.id)||[];if(!l.length)return"";
   const seen=new Set();return l.filter(x=>{const k=recShort(x)+x.ag;if(seen.has(k))return false;seen.add(k);return true})
