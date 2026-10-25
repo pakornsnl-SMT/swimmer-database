@@ -383,13 +383,6 @@ html:not(.ready) .boot{display:block}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .ins-note{font-size:13px;margin-top:6px}
-/* ---- Talent ---- */
-.lvl-b{display:inline-block;padding:1px 8px;border-radius:999px;font:700 11px var(--body);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
-.lvl-b.g{background:#e0a91b;color:#2b1d00}.lvl-b.s{background:#aab4bf;color:#1d252c}.lvl-b.b{background:#c4783a;color:#fff}.lvl-b.q{background:var(--good);color:#fff}.lvl-b.n{background:var(--surface-2);color:var(--fg)}
-.t-tal td,.t-tal th{white-space:nowrap}
-.t-tal td.wrapok{white-space:normal}
-.tl-ev{margin-top:18px}
-.tl-ev h4{margin:0 0 4px;font:700 17px var(--display);text-transform:uppercase;letter-spacing:.03em}
 .combo{position:relative;min-width:0}
 .combo>input{width:100%}
 .combo .suggest{min-width:260px}
@@ -597,7 +590,6 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <button role="tab" id="tab-compare" data-view="compare" aria-selected="false">Compare</button>
       <button role="tab" id="tab-insights" data-view="insights" aria-selected="false">Insights</button>
       <button role="tab" id="tab-reports" data-view="reports" aria-selected="false">Reports</button>
-      <button role="tab" id="tab-talent" data-view="talent" aria-selected="false" hidden>Talent</button>
       <button role="tab" id="tab-manage" data-view="manage" aria-selected="false" hidden>Admin</button>
     </nav>
   </div>
@@ -717,29 +709,6 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       </div>
       <div class="hint" id="inWhen" style="margin-top:6px"></div>
       <div id="inBody"></div>
-    </div>
-  </section>
-
-  <section id="view-talent" hidden>
-    <div class="panel">
-      <div class="prof-hd" style="margin-bottom:4px"><h2>Talent</h2><span class="sub">Staff only. Thai swimmers measured against medal times from the last edition of an international meet, or against qualifying times.</span></div>
-      <div class="rk-top" style="margin-top:8px">
-        <div class="field" style="flex:2 1 280px"><label class="lbl" for="tlTarget">Compare with</label><select id="tlTarget"></select></div>
-        <div class="field" id="tlLevelF"><span class="lbl">Medal level</span><div class="seg" id="tlLevel"><button data-l="gold" aria-pressed="false">Gold</button><button data-l="silver" aria-pressed="false">Silver</button><button data-l="bronze" aria-pressed="true">Bronze</button></div></div>
-        <div class="field"><label class="lbl" for="tlShow">Show</label><select id="tlShow"><option value="1">Within 1%</option><option value="2">Within 2%</option><option value="3" selected>Within 3%</option><option value="5">Within 5%</option><option value="top3">Thai top 3 per event</option></select></div>
-        <div class="field"><label class="lbl" for="tlWin">Times from</label><select id="tlWin"><option value="12">Last 12 months</option><option value="24">Last 2 years</option><option value="0">All time</option></select></div>
-        <div class="field"><span class="lbl">Gender</span><div class="seg" id="tlG"><button data-g="" aria-pressed="true">Both</button><button data-g="F" aria-pressed="false">Girls</button><button data-g="M" aria-pressed="false">Boys</button></div></div>
-      </div>
-      <div id="tlSum" style="margin-top:10px"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0"><button class="ghost" type="button" id="tlXlsx">Download Excel</button><span class="msg" id="tlMsg" role="status"></span></div>
-      <div id="tlBody"></div>
-    </div>
-    <div class="panel" style="margin-top:18px" id="bmPanel">
-      <div class="dup-hd"><h3 style="margin:0">Medal times</h3><span class="hint" id="bmNow"></span></div>
-      <div class="hint" style="margin:6px 0 12px">Load the results of the last edition of a meet (Lenex .lxf / .lef from Splash). The app takes the gold, silver and bronze times of every individual event, gender and age group from the final (or timed final). Qualifying times loaded under Admin can be compared here too.</div>
-      <label class="drop" for="bmFile" style="padding:14px"><b style="font-size:16px">Choose results file of the last edition</b><span class="hint">Lenex (.lxf / .lef)</span><input type="file" id="bmFile" accept=".lxf,.lef,.xml"></label>
-      <div id="bmPreview"></div><div class="msg" id="bmMsg" role="status"></div>
-      <div id="bmList" style="margin-top:10px"></div>
     </div>
   </section>
 
@@ -2199,116 +2168,6 @@ $("#inScope").addEventListener("click",e=>{const b=e.target.closest("[data-sc]")
 $("#inNat").addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(b){ui.inNat=b.dataset.n;renderInsights()}});
 $("#inBody").addEventListener("click",e=>{const b=e.target.closest("#inCourse [data-c]");if(b){ui.inCourse=b.dataset.c;renderInsights()}});
 
-/* ================= TALENT (staff only) ================= */
-let bmDoc={sets:[]},bmPending=null;
-/* medal times from a Lenex results file: places 1-3 of each final (or timed final), per gender, stroke, distance and age group */
-function parseLenexMedals(xmlText){
-  const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))return null;
-  const meet=doc.querySelector("MEET");if(!meet)return null;const A=(e,k)=>e?e.getAttribute(k)||"":"";
-  const ST={FREE:"Freestyle",BACK:"Backstroke",BREAST:"Breaststroke",FLY:"Butterfly",MEDLEY:"IM"};
-  const secs=t=>{const m=String(t||"").match(/^(\d+):(\d+):(\d+(?:\.\d+)?)$/);const v=m?(+m[1]*3600+ +m[2]*60+ +m[3]):0;return v>0?Math.round(v*100)/100:null};
-  const time=new Map();doc.querySelectorAll("RESULT").forEach(r=>{const st=(A(r,"status")||"").toUpperCase();if(st&&st!=="EXH")return;const v=secs(A(r,"swimtime"));if(v)time.set(A(r,"resultid"),v)});
-  const course=A(meet,"course");const RANK={FIN:0,TIM:1,SOS:2,SEM:3,PRE:4};const best=new Map();
-  meet.querySelectorAll("SESSION").forEach(se=>se.querySelectorAll("EVENT").forEach(ev=>{
-    const ss=ev.querySelector("SWIMSTYLE");const st=ss&&ST[A(ss,"stroke")];if(!st||(+A(ss,"relaycount")||1)>1)return;const d=+A(ss,"distance");const g=A(ev,"gender");if(g!=="F"&&g!=="M")return;
-    const c=A(se,"course")||course;const rnd=RANK[A(ev,"round")]??5;
-    ev.querySelectorAll("AGEGROUP").forEach(ag=>{const lo=+A(ag,"agemin"),hi=+A(ag,"agemax");
-      const pl=[...ag.querySelectorAll("RANKING")].map(r=>({p:+A(r,"place"),t:time.get(A(r,"resultid"))})).filter(x=>x.p>=1&&x.p<=3&&x.t).sort((a,b)=>a.p-b.p);
-      if(!pl.length)return;const k=[g,c,st,d,lo,hi].join("|");const o=best.get(k);if(o&&o.rnd<=rnd)return;
-      const at=p=>{const x=pl.find(y=>y.p===p);return x?x.t:null};
-      best.set(k,{rnd,x:{g,c,lo:isNaN(lo)?-1:lo,hi:isNaN(hi)?-1:hi,st,d,gold:at(1),silver:at(2),bronze:at(3)}})})}));
-  const dates=[...meet.querySelectorAll("SESSION")].map(se=>A(se,"date")).filter(Boolean).sort();
-  return{name:A(meet,"name"),date:dates[0]||"",times:[...best.values()].map(v=>v.x).filter(x=>x.gold||x.silver||x.bronze)};
-}
-function renderBmAdmin(){
-  const L=bmDoc.sets||[];$("#bmNow").textContent=L.length?`${L.length} loaded`:"none loaded";
-  $("#bmList").innerHTML=L.map(x=>`<div class="clubpair"><div class="names"><b>${esc(x.name)}</b><span class="hint">From ${esc(x.source||"")}${x.date?" ("+fdate(x.date)+")":""} · age counted in ${x.ageYear} · ${x.times.length} events</span></div>
-    <div class="acts"><button type="button" class="lnk" data-bmdel="${esc(x.id)}" style="color:var(--bad)">Remove</button></div></div>`).join("");
-}
-$("#bmFile").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const m=$("#bmMsg"),pv=$("#bmPreview");m.textContent="";
-  let P;try{P=parseLenexMedals(await readLenexText(f))}catch(err){P=null}
-  if(!P||!P.times.length){bmPending=null;pv.innerHTML="";msg(m,"No medal times found. Use the full results of the meet exported from Splash as Lenex (.lxf or .lef).",false);return}
-  bmPending=P;const nx=(P.date?+P.date.slice(0,4):new Date().getFullYear())+1;
-  const ags=[...new Set(P.times.map(x=>x.lo<0&&x.hi<0?"Open":`${x.lo<0?"":x.lo}${x.hi<0?"+":x.hi===x.lo?"":"–"+x.hi}`))];
-  pv.innerHTML=`<div class="hint" style="color:var(--fg);margin-top:8px"><b>${P.times.length} events with medal times</b> from ${esc(P.name)}${P.date?" ("+fdate(P.date)+")":""} · age groups: ${esc(ags.join(", "))}</div>
-    <form id="fBm" class="clubmerge" autocomplete="off" style="margin-top:8px">
-      <div class="field" style="flex:2 1 260px"><label class="lbl" for="bmName">Use as medal times for</label><input type="text" id="bmName" value="${esc(P.name.replace(/20\d\d/,String(nx)))}"></div>
-      <div class="field" style="flex:0 1 120px"><label class="lbl" for="bmYear">Age counted in</label><input type="number" id="bmYear" min="2000" max="2100" value="${nx}"></div>
-      <button class="primary" type="submit">Save</button><button class="ghost" type="button" id="bmCancel">Cancel</button></form>`};
-$("#bmPanel").addEventListener("click",async e=>{const m=$("#bmMsg");
-  if(e.target.id==="bmCancel"){bmPending=null;$("#bmPreview").innerHTML="";return}
-  const del=e.target.closest("[data-bmdel]");if(del){if(!canEdit())return;try{const next={sets:(bmDoc.sets||[]).filter(x=>x.id!==del.dataset.bmdel)};await db.doc("settings/benchmarks").set(next);bmDoc=next;renderTalent();msg(m,"Removed.",true)}catch(err){msg(m,permErr(err),false)}}});
-$("#bmPanel").addEventListener("submit",async e=>{if(e.target.id!=="fBm")return;e.preventDefault();const m=$("#bmMsg");if(!bmPending||!canEdit())return;
-  const name=norm($("#bmName").value),yr=+$("#bmYear").value;if(!name){msg(m,"Enter a name.",false);return}if(!(yr>=2000&&yr<=2100)){msg(m,"Enter the year ages are counted in.",false);return}
-  const S={id:"b"+Date.now().toString(36),name,ageYear:yr,source:bmPending.name,date:bmPending.date,times:bmPending.times};
-  try{const next={sets:[...(bmDoc.sets||[]).filter(x=>x.name!==name),S]};await db.doc("settings/benchmarks").set(next);bmDoc=next;bmPending=null;$("#bmPreview").innerHTML="";ui.tlTarget="b:"+S.id;renderTalent();msg(m,`Saved medal times for “${name}”.`,true)}
-  catch(err){msg(m,permErr(err),false)}});
-/* the analysis */
-function talentTargets(){return[...(bmDoc.sets||[]).map(x=>["b:"+x.id,`Medal times · ${x.name}`]),...(stdDoc.lists||[]).map(x=>["q:"+x.id,`Qualifying times · ${x.name}`])]}
-function talentRows(){
-  const T=ui.tlTarget||"";const isB=T.startsWith("b:");const set=isB?(bmDoc.sets||[]).find(x=>"b:"+x.id===T):(stdDoc.lists||[]).find(x=>"q:"+x.id===T);if(!set)return null;
-  const lvl=ui.tlLevel||"bronze";const win=+(ui.tlWin??12);const gF=ui.tlG||"";const show=ui.tlShow||"3";
-  let from="";if(win){const a=new Date();a.setMonth(a.getMonth()-win);from=a.toISOString().slice(0,10)}
-  const ageYear=+set.ageYear||new Date().getFullYear();
-  const tgt=x=>isB?(x[lvl]||x.bronze||x.silver||x.gold):x.t;
-  const out=[];
-  /* best time per swimmer per event in the window (Thai swimmers only) */
-  const best=new Map();
-  for(const r of state.results){if(!valid(r)||(from&&r.date<from))continue;const s=swimmerById(r.swimmerId);if(!s||!isThai(s)||!s.birthYear||(gF&&s.gender!==gF))continue;
-    const k=r.swimmerId+"|"+r.stroke+"|"+r.distance+"|"+r.course;const b=best.get(k);if(!b||r.time<b.time)best.set(k,r)}
-  const byEv=new Map();best.forEach(r=>{const k=r.stroke+"|"+r.distance+"|"+r.course;(byEv.get(k)||byEv.set(k,[]).get(k)).push(r)});
-  for(const x of set.times){if(gF&&x.g!=="X"&&x.g!==gF)continue;const t=tgt(x);if(!t)continue;
-    const pool=(byEv.get(x.st+"|"+x.d+"|"+x.c)||[]).filter(r=>{const s=swimmerById(r.swimmerId);const a=ageYear-s.birthYear;return(x.g==="X"||s.gender===x.g)&&(x.lo<0||a>=x.lo)&&(x.hi<0||a<=x.hi)}).sort((a,b)=>a.time-b.time);
-    pool.forEach((r,i)=>{const rank=1+pool.filter(o=>o.time<r.time-.001).length;const gap=r.time-t,pct=gap/t*100;
-      if(show==="top3"?rank>3:pct>+show)return;
-      const s=swimmerById(r.swimmerId);
-      /* season bests for a simple trend: improvement per year from the last two seasons with a time */
-      const sb=new Map();resOf(s.id).forEach(o=>{if(valid(o)&&o.stroke===x.st&&+o.distance===+x.d&&o.course===x.c){const y=+o.date.slice(0,4);if(!sb.has(y)||o.time<sb.get(y))sb.set(y,o.time)}});
-      const yy=[...sb.keys()].sort((a,b)=>b-a);let rate=null,proj=null;
-      if(yy.length>=2){rate=(sb.get(yy[1])-sb.get(yy[0]))/(yy[0]-yy[1]);const ahead=Math.max(0,ageYear-yy[0]);const cap=r.time*.03*ahead;proj=ahead?r.time-Math.max(0,Math.min(rate*ahead,cap)):null}
-      let level="";if(isB){if(x.gold&&r.time<=x.gold+.001)level="g";else if(x.silver&&r.time<=x.silver+.001)level="s";else if(x.bronze&&r.time<=x.bronze+.001)level="b"}else if(r.time<=t+.001)level="q";
-      out.push({x,r,s,t,gap,pct,rank,n:pool.length,rate,proj,level,age:ageYear-s.birthYear})})}
-  out.sort((a,b)=>(a.x.g===b.x.g?0:a.x.g>b.x.g?1:-1)||STROKES.indexOf(a.x.st)-STROKES.indexOf(b.x.st)||a.x.d-b.x.d||(a.x.lo-b.x.lo)||a.pct-b.pct);
-  return{set,isB,out,ageYear,from};
-}
-const agTxt=x=>x.lo<0&&x.hi<0?"Open":`${x.lo<0?"":x.lo}${x.hi<0?"+":x.hi===x.lo?"":"–"+x.hi}`;
-function renderTalent(){
-  if(!state.isStaff){show("swimmers");return}
-  renderBmAdmin();
-  const T=talentTargets();if(!T.some(t=>t[0]===ui.tlTarget))ui.tlTarget=T[0]?T[0][0]:"";
-  $("#tlTarget").innerHTML=T.length?T.map(([v,l])=>`<option value="${esc(v)}"${v===ui.tlTarget?" selected":""}>${esc(l)}</option>`).join(""):`<option value="">Load medal times below, or qualifying times in Admin</option>`;
-  const isB=(ui.tlTarget||"").startsWith("b:");$("#tlLevelF").hidden=!isB;
-  document.querySelectorAll("#tlLevel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.l===(ui.tlLevel||"bronze")));
-  document.querySelectorAll("#tlG button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.g===(ui.tlG||"")));
-  $("#tlShow").value=ui.tlShow||"3";$("#tlWin").value=String(ui.tlWin??12);
-  const R=talentRows();if(!R){$("#tlSum").innerHTML="";$("#tlBody").innerHTML=`<div class="empty">Load the results of the last edition of a meet below to get its medal times.</div>`;return}
-  const L=R.out;const cnt=k=>L.filter(o=>o.level===k).length;const sw=new Set(L.map(o=>o.s.id)).size;
-  $("#tlSum").innerHTML=`<div class="hint" style="color:var(--fg)">${R.isB?`${cnt("g")} at <span class="lvl-b g">gold</span> level · ${cnt("s")} <span class="lvl-b s">silver</span> · ${cnt("b")} <span class="lvl-b b">bronze</span> · `:`${cnt("q")} <span class="lvl-b q">qualified</span> · `}${L.length} swims by ${sw} swimmer${sw===1?"":"s"} shown. Age counted in ${R.ageYear}. ${R.from?`Best times since ${fdate(R.from)}.`:"Best times of all time."}</div>`;
-  if(!L.length){$("#tlBody").innerHTML=`<div class="empty">No Thai swimmers ${ui.tlShow==="top3"?"in these events":"within "+(ui.tlShow||3)+"%"} yet. Try a wider range.</div>`;return}
-  const groups=new Map();L.forEach(o=>{const k=[o.x.g,o.x.st,o.x.d,o.x.c,o.x.lo,o.x.hi].join("|");(groups.get(k)||groups.set(k,[]).get(k)).push(o)});
-  const lvlB=o=>o.level?`<span class="lvl-b ${o.level}">${({g:"Gold",s:"Silver",b:"Bronze",q:"Qualified"})[o.level]}</span>`:`<span class="lvl-b n">${o.pct.toFixed(1)}%</span>`;
-  $("#tlBody").innerHTML=[...groups.values()].map(G=>{const x=G[0].x;
-    return`<div class="tl-ev"><h4><span class="dot" style="background:var(${STROKE_COLOR[x.st]})"></span>${x.d}m ${esc(x.st)} ${x.c} · ${x.g==="F"?"Girls":x.g==="M"?"Boys":"All"} ${agTxt(x)}</h4>
-      <div class="hint">${R.isB?`Gold ${x.gold?fmt(x.gold):"—"} · silver ${x.silver?fmt(x.silver):"—"} · bronze ${x.bronze?fmt(x.bronze):"—"} · gap measured to <b>${fmt(G[0].t)}</b>${x[ui.tlLevel||"bronze"]?"":` (no ${ui.tlLevel||"bronze"} time in that final)`}`:`Qualifying time ${fmt(x.t)}`}</div>
-      <div class="tbl-wrap" style="margin-top:4px"><table class="t-tal"><thead><tr><th class="num">Thai rank</th><th>Swimmer</th><th class="num">Age ${R.ageYear}</th><th class="num swimt">Best</th><th class="num">Gap</th><th>Level</th><th class="num" title="Average improvement per year from the last two seasons">Per year</th><th class="num" title="Estimate: best time minus the yearly improvement up to ${R.ageYear} (at most 3% a year)">Projected ${R.ageYear}</th><th>Club</th></tr></thead><tbody>
-      ${G.map(o=>`<tr><td class="num t">${o.rank} <span class="hint">/ ${o.n}</span></td><td><button class="namebtn" data-open="${esc(o.s.id)}">${nameH(o.s.name)}</button></td><td class="num t">${o.age}</td><td class="num t swimt">${fmt(o.r.time)}<br><span class="hint" style="font-family:var(--body)">${fdate(o.r.date)}</span></td>
-        <td class="num t ${o.gap<=0?"up":""}">${o.gap<=0?"−":"+"}${Math.abs(o.gap).toFixed(2)}</td><td>${lvlB(o)}</td><td class="num t ${o.rate>0?"up":""}">${o.rate!=null?(o.rate>0?"−":"+")+Math.abs(o.rate).toFixed(2):"—"}</td>
-        <td class="num t">${o.proj!=null?fmt(o.proj)+(o.proj<=o.t+.001?' <span class="up">✓</span>':""):"—"}</td><td class="wrapok">${esc(o.s.club||"")}</td></tr>`).join("")}</tbody></table></div></div>`}).join("")+
-    `<p class="hint" style="margin-top:12px">Rank is among Thai swimmers in that age group (age counted in ${R.ageYear}). “Per year” is the average change between the swimmer's last two season bests. “Projected” is only an estimate for coaches: young swimmers can improve much faster or slower.</p>`;
-}
-$("#tlTarget").onchange=e=>{ui.tlTarget=e.target.value;renderTalent()};
-$("#tlLevel").addEventListener("click",e=>{const b=e.target.closest("[data-l]");if(b){ui.tlLevel=b.dataset.l;renderTalent()}});
-$("#tlG").addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(b){ui.tlG=b.dataset.g;renderTalent()}});
-$("#tlShow").onchange=e=>{ui.tlShow=e.target.value;renderTalent()};
-$("#tlWin").onchange=e=>{ui.tlWin=+e.target.value;renderTalent()};
-$("#tlBody").addEventListener("click",e=>{const b=e.target.closest("[data-open]");if(b){ui.sel=b.dataset.open;ui.pmode="event";ui.ev=null;show("swimmers");window.scrollTo(0,0)}});
-$("#tlXlsx").onclick=async()=>{const m=$("#tlMsg");const R=talentRows();if(!R||!R.out.length){msg(m,"Nothing to download.",false);return}
-  if(!window.XLSX){msg(m,"The Excel tools didn't load. Reload the page and try again.",false);return}
-  const head=["Gender","Event","Pool","Age group","Thai rank","Of","Name (Thai)","Name (English)","Born","Age "+R.ageYear,"Club","Best time","Date","Meet",R.isB?"Gold":"Qualifying time",R.isB?"Silver":"",R.isB?"Bronze":"","Target used","Gap (s)","Gap (%)","Level","Per year (s)","Projected "+R.ageYear];
-  const rows=R.out.map(o=>[o.x.g==="F"?"Girls":o.x.g==="M"?"Boys":"All",`${o.x.d}m ${o.x.st}`,o.x.c,agTxt(o.x),o.rank,o.n,o.s.nameTh||"",o.s.nameEn||"",o.s.birthYear,o.age,o.s.club||"",fmt(o.r.time),o.r.date,o.r.meet||"",R.isB?(o.x.gold?fmt(o.x.gold):""):fmt(o.x.t),R.isB&&o.x.silver?fmt(o.x.silver):"",R.isB&&o.x.bronze?fmt(o.x.bronze):"",fmt(o.t),+o.gap.toFixed(2),+o.pct.toFixed(2),({g:"Gold",s:"Silver",b:"Bronze",q:"Qualified"})[o.level]||"",o.rate!=null?+(-o.rate).toFixed(2):"",o.proj!=null?fmt(o.proj):""]);
-  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet([head,...rows]);ws["!cols"]=head.map((h,i)=>({wch:i===6||i===7||i===10||i===13?26:12}));XLSX.utils.book_append_sheet(wb,ws,"Talent");
-  const blob=new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-  try{await saveFile(`Talent_${fileSafe(R.set.name)}_${today()}.xlsx`,blob);msg(m,`Saved ${rows.length} rows.`,true)}catch(err){const c=err&&err.code;msg(m,c==="declined"?"Cancelled.":"Couldn't save the file.",c==="declined")}};
 /* club pickers for merging: type any part of the name (or the club code), pick from the list */
 let clubPickList=[];
 function clubMatches(q){const k=fold(q).replace(/\s+/g," ").trim();if(!k)return[];const kk=k.replace(/\s/g,"");
@@ -2360,11 +2219,11 @@ $("#convGo").onclick=async()=>{
 };
 
 /* ---------- routing ---------- */
-const VIEWS=["swimmers","rankings","records","compare","insights","reports","talent","manage"];
-function show(v){if((v==="manage"||v==="talent")&&!state.isStaff)v="swimmers";ui.view=v;VIEWS.forEach(x=>{$("#view-"+x).hidden=x!==v;$("#tab-"+x).setAttribute("aria-selected",x===v)});render()}
+const VIEWS=["swimmers","rankings","records","compare","insights","reports","manage"];
+function show(v){if(v==="manage"&&!state.isStaff)v="swimmers";ui.view=v;VIEWS.forEach(x=>{$("#view-"+x).hidden=x!==v;$("#tab-"+x).setAttribute("aria-selected",x===v)});render()}
 function render(){
   $("#demoBanner").hidden=!state.demo;
-  $("#tab-manage").hidden=!state.isStaff;$("#tab-talent").hidden=!state.isStaff;
+  $("#tab-manage").hidden=!state.isStaff;
   if(state.demo)$("#demoText").textContent=state.isStaff?"These swimmers are samples so you can see how the app works. Upload your first Splash results file under “Admin” and the examples disappear.":!state.live?"These swimmers are samples. The shared results can't be loaded in this view.":"These swimmers are samples so you can see how the app works. Real results appear here once the coach uploads them.";
   if(ui.view==="swimmers"){renderProfile();renderRoster()}
   else if(ui.view==="compare")renderCompare();
@@ -2372,7 +2231,6 @@ function render(){
   else if(ui.view==="records")renderRecords();
   else if(ui.view==="reports")renderReports();
   else if(ui.view==="insights")renderInsights();
-  else if(ui.view==="talent")renderTalent();
   else renderManage();
 }
 
@@ -3696,7 +3554,6 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
     if(!db){if(!window.claude)await loadPublicData();render();ready();return}
     state.live=true;render();
     db.doc("settings/records").onSnapshot(d=>{recDoc=d.exists?d.data():{};recIdx=null;if(ui.view==="manage")renderRecordsAdmin();else if(state.swimmers.length)render()},()=>{});
-    if(state.isStaff)db.doc("settings/benchmarks").onSnapshot(d=>{bmDoc=d.exists?d.data():{sets:[]};if(!bmDoc.sets)bmDoc.sets=[];if(ui.view==="talent")renderTalent()},()=>{});
     db.doc("settings/standards").onSnapshot(d=>{stdDoc=d.exists?d.data():{lists:[]};if(!stdDoc.lists)stdDoc.lists=[];if(ui.view==="manage")renderStdAdmin();else if(state.swimmers.length)render()},()=>{});
     db.doc("settings/basetimes").onSnapshot(d=>{btSaved=d.exists?d.data():null;if(state.swimmers.length&&ui.view!=="manage")render();else if(ui.view==="manage")renderBaseTimes()},()=>{});
     db.doc("settings/clubs").onSnapshot(d=>{const v=d.exists?d.data():{};clubAlias=v.alias||{};clubNotSame=new Set(v.notSame||[]);excludedTeams=new Set(v.excluded||[]);if(ui.view==="manage")renderTeamRemoval();if(ui.view==="manage")renderClubs()},()=>{});
@@ -3705,7 +3562,7 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
     if(state.isStaff){
       db.collection("staff").onSnapshot(sn=>{const m=new Map();sn.docs.forEach(d=>{if(d.id.startsWith("priv-")){const b=d.data().m||{};Object.entries(b).forEach(([k,v])=>m.set(k,v))}if(d.id==="dupe-ignore")dupIgnore=new Set(Object.keys(d.data().pairs||{}))});priv=m;scheduleDupScan();
         if(ui.view==="swimmers"&&!(ui.editing&&$("#profile").contains(document.activeElement)))renderProfile()},()=>{})}
-    if((h==="manage"||h==="talent")&&state.isStaff)show(h);
+    if(h==="manage"&&state.isStaff)show("manage");
     let rawSw=null,meetsReady=false;
     const applySwimmers=list=>{
       if(!list.length)useDemo();else{if(state.demo)ui.sel=null;setSwimmers(list);state.demo=false}
