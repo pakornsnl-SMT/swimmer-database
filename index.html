@@ -391,6 +391,7 @@ html:not(.ready) .boot{display:block}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .ins-note{font-size:13px;margin-top:6px}
+.imp-t{border-collapse:collapse;margin-top:8px;font-size:13px;width:100%;max-width:520px}.imp-t th,.imp-t td{text-align:left;padding:5px 10px 5px 0;border-bottom:1px solid var(--line);vertical-align:top}.imp-t td:first-child{white-space:nowrap}.imp-t td:first-child{font-variant-numeric:tabular-nums}
 .combo{position:relative;min-width:0}
 .combo>input{width:100%}
 .combo .suggest{min-width:260px}
@@ -2156,6 +2157,7 @@ function renderInsights(){
   const bmx=Math.max(1,...band.map(b=>b.F+b.M));
   h+=`<div class="ins-sec"><h3>Age groups</h3><div class="hbars">${band.map(b=>`<div class="lab">${b.l}</div><div style="display:flex;height:14px"><i class="bar" style="width:${(b.F/bmx*100).toFixed(1)}%;background:var(--c6);border-radius:3px 0 0 3px"></i><i class="bar" style="width:${(b.M/bmx*100).toFixed(1)}%;background:var(--c7);border-radius:0 3px 3px 0"></i></div><div class="n">${b.F+b.M} <span class="hint">(${b.F} · ${b.M})</span></div>`).join("")}</div>
     <div class="legend"><span><i style="background:var(--c6)"></i>Girls</span><span><i style="background:var(--c7)"></i>Boys</span></div></div>`;
+  h+=improveByAge(thaiOnly);
   /* trend by year: returning vs new swimmers */
   const yr=new Map();for(const r of state.results){if(!valid(r))continue;const s=swimmerById(r.swimmerId);if(!s||(thaiOnly&&!isThai(s)))continue;const y=r.date.slice(0,4);(yr.get(y)||yr.set(y,new Set()).get(y)).add(s.id)}
   const ys=[...yr.keys()].sort().slice(-8);
@@ -2169,10 +2171,41 @@ function renderInsights(){
   h+=`<div class="ins-sec"><div class="dup-hd"><h3 style="margin:0">Swimmers per event</h3><div class="seg" id="inCourse"><button data-c="LCM" aria-pressed="${course==="LCM"}">50 m pool</button><button data-c="SCM" aria-pressed="${course==="SCM"}">25 m pool</button></div></div>
     ${evs.length?`<div class="hbars">${evs.map(([k,n])=>{const[st,d]=k.split("|");return`<div class="lab"><span class="dot" style="background:var(${STROKE_COLOR[st]})"></span>${evH(st,d)}</div><div><i class="bar" style="display:block;width:${(n/emx*100).toFixed(1)}%;background:var(${STROKE_COLOR[st]})"></i></div><div class="n">${n}</div>`}).join("")}</div>
     <p class="ins-note">Least crowded: ${evs.slice(-3).reverse().map(([k,n])=>{const[st,d]=k.split("|");return`${d}m ${esc(st)} (${n})`}).join(", ")}.</p>`:`<div class="hint">No ${poolName(course)} pool swims in this period.</div>`}</div>`;
-  /* clubs */
-  const cl=[...clubs].sort((a,b)=>b[1]-a[1]).slice(0,15);const cmx=Math.max(1,...cl.map(c=>c[1]));
-  h+=`<div class="ins-sec"><h3>Biggest clubs</h3><div class="hint">Swimmers listed under each club who swam in ${esc(S.label)}.</div><div class="hbars">${cl.map(([c,n])=>`<div class="lab" title="${esc(c)}">${esc(c)}</div><div><i class="bar" style="display:block;width:${(n/cmx*100).toFixed(1)}%"></i></div><div class="n">${n}</div>`).join("")}</div></div>`;
   $("#inBody").innerHTML=h;
+}
+/* improvement by age: best time per swimmer/event/pool at age a vs age a+1, all strokes together */
+const IMP_MIN=10;
+function improveByAge(thaiOnly){
+  const med=a=>{const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+  const best=new Map();
+  for(const r of state.results){if(!valid(r)||r.relay)continue;const s=swimmerById(r.swimmerId);if(!s||!s.birthYear||(s.gender!=="F"&&s.gender!=="M")||(thaiOnly&&!isThai(s)))continue;
+    const a=+r.date.slice(0,4)-s.birthYear;if(a<6||a>25)continue;const k=`${s.id}\u0001${r.stroke}|${r.distance}|${r.course}\u0001${a}`;const t=best.get(k);if(t==null||r.time<t)best.set(k,r.time)}
+  const per=new Map();
+  for(const[k,t]of best){const i=k.lastIndexOf("\u0001"),a=+k.slice(i+1);const nx=best.get(k.slice(0,i+1)+(a+1));if(nx==null)continue;
+    const pc=(t-nx)/t*100;if(Math.abs(pc)>30)continue;const kk=k.slice(0,k.indexOf("\u0001"))+"\u0001"+a;(per.get(kk)||per.set(kk,[]).get(kk)).push(pc)}
+  const g={F:new Map(),M:new Map()};
+  for(const[kk,arr]of per){const[id,a]=kk.split("\u0001");const s=swimmerById(id);const m=g[s.gender];(m.get(+a)||m.set(+a,[]).get(+a)).push(med(arr))}
+  const st={F:new Map(),M:new Map()};
+  for(const G of["F","M"])for(const[a,v]of g[G])if(v.length>=IMP_MIN)st[G].set(a,{n:v.length,m:med(v),up:v.filter(x=>x>0).length/v.length*100});
+  const ages=[...new Set([...st.F.keys(),...st.M.keys()])].sort((a,b)=>a-b);
+  const head=`<h3>Improvement by age</h3><div class="hint">How much faster swimmers got from one age to the next: each swimmer's best time in an event at one age vs the next age, same pool, all strokes together. Uses every year of results, not only the period above.</div>`;
+  if(!ages.length)return`<div class="ins-sec">${head}<div class="hint" style="margin-top:8px">Not enough swimmers yet who raced the same event at two ages in a row (at least ${IMP_MIN} needed per age).</div></div>`;
+  const a0=ages[0],a1=ages[ages.length-1],span=Math.max(1,a1-a0);
+  const vals=[...st.F.values(),...st.M.values()].map(o=>o.m);const lo=Math.min(0,Math.floor(Math.min(...vals))),hi=Math.max(1,Math.ceil(Math.max(...vals)));
+  const W=460,H=220,L=38,R=24,T=12,B=30;const X=a=>L+(a1===a0?(W-L-R)/2:(a-a0)/span*(W-L-R)),Y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  const step=hi-lo>12?4:hi-lo>6?2:1;let grid="";for(let v=Math.ceil(lo/step)*step;v<=hi;v+=step)grid+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" ${v===0?'stroke-width="1.5"':'stroke-dasharray="3 3"'}/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="var(--muted)">${v}%</text>`;
+  const every=span>7?2:1;let xl="";for(let a=a0;a<=a1;a++)if((a-a0)%every===0)xl+=`<text x="${X(a)}" y="${H-12}" text-anchor="middle" font-size="12" fill="var(--muted)">${a}→${a+1}</text>`;
+  const line=(G,col)=>{let d="",dots="",prev=null;for(let a=a0;a<=a1;a++){const o=st[G].get(a);if(!o){prev=null;continue}d+=`${prev==null?"M":"L"}${X(a).toFixed(1)},${Y(o.m).toFixed(1)}`;prev=a;
+      dots+=`<circle cx="${X(a).toFixed(1)}" cy="${Y(o.m).toFixed(1)}" r="4" fill="${col}"><title>${G==="F"?"Girls":"Boys"} ${a}→${a+1}: ${o.m.toFixed(1)}% faster (median, ${o.n} swimmers, ${Math.round(o.up)}% got faster)</title></circle>`}
+    return`<path d="${d}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>${dots}`};
+  const svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;display:block;margin-top:8px" role="img" aria-label="Median improvement by age, girls and boys">${grid}${xl}${line("F","var(--c6)")}${line("M","var(--c7)")}</svg>`;
+  const cell=o=>o?`<b>${o.m>=0?"":"−"}${Math.abs(o.m).toFixed(1)}%</b><br><span class="hint">${Math.round(o.up)}% faster · ${o.n}</span>`:`<span class="hint">—</span>`;
+  const tbl=`<div style="overflow-x:auto"><table class="imp-t"><thead><tr><th>Age</th><th>Girls</th><th>Boys</th></tr></thead><tbody>${ages.map(a=>`<tr><td>${a}→${a+1}</td><td>${cell(st.F.get(a))}</td><td>${cell(st.M.get(a))}</td></tr>`).join("")}</tbody></table></div>`;
+  const pct=v=>(v<0?"−":"")+Math.abs(v).toFixed(1)+"%";const say=(G,nm)=>{const e=[...st[G]];if(e.length<2)return"";const mx=e.reduce((p,c)=>c[1].m>p[1].m?c:p),mn=e.reduce((p,c)=>c[1].m<p[1].m?c:p);
+    return`${nm}: biggest improvement <b>${mx[0]}→${mx[0]+1}</b> (${pct(mx[1].m)}), slowest <b>${mn[0]}→${mn[0]+1}</b> (${pct(mn[1].m)}). `};
+  return`<div class="ins-sec">${head}${svg}<div class="legend"><span><i style="background:var(--c6)"></i>Girls</span><span><i style="background:var(--c7)"></i>Boys</span></div>
+    <p class="ins-note">${say("F","Girls")}${say("M","Boys")}</p>${tbl}
+    <p class="hint" style="margin-top:6px">The % is the middle value (median) across swimmers, so one big jump can't skew it. "% faster" is the share of swimmers who improved. Ages with fewer than ${IMP_MIN} swimmers are hidden. Swimmers who stopped racing aren't counted, so the numbers lean slightly positive.</p></div>`;
 }
 $("#inScope").addEventListener("click",e=>{const b=e.target.closest("[data-sc]");if(b){ui.inScope=b.dataset.sc;renderInsights()}});
 $("#inNat").addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(b){ui.inNat=b.dataset.n;renderInsights()}});
