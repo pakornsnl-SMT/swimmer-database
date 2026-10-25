@@ -357,6 +357,39 @@ html:not(.ready) main{display:none}
 html:not(.ready) .boot{display:block}
 .boot-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:10px;vertical-align:1px;animation:bootp 1s ease-in-out infinite alternate}
 @keyframes bootp{from{opacity:.25}to{opacity:1}}
+
+/* ---- Insights ---- */
+.ins-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:14px 0}
+.ins-sec{margin-top:22px}
+.ins-sec h3{margin:0 0 4px}
+.pyr{display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:3px 8px;align-items:center;font-size:13px;margin-top:8px}
+.pyr .l{display:flex;justify-content:flex-end;align-items:center;gap:6px}
+.pyr .r{display:flex;justify-content:flex-start;align-items:center;gap:6px}
+.pyr i{display:block;height:16px;border-radius:3px}
+.pyr .l i{background:var(--c6)}.pyr .r i{background:var(--c7)}
+.pyr .age{text-align:center;font-family:var(--mono);color:var(--muted)}
+.pyr .hd{font-weight:600;color:var(--fg)}
+.pyr .n{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:24px}
+.hbars{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr) auto;gap:5px 10px;align-items:center;font-size:13px;margin-top:8px}
+.hbars .bar{height:14px;border-radius:3px;background:var(--accent)}
+.hbars .n{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+.hbars .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.cols{display:flex;align-items:flex-end;gap:10px;height:190px;margin-top:10px;padding-top:18px;overflow-x:auto}
+.cols .c{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:42px;height:100%}
+.cols .stk{width:30px;display:flex;flex-direction:column-reverse;border-radius:4px 4px 0 0;overflow:hidden}
+.cols .stk i{display:block}
+.cols .c b{font:600 12px var(--mono);margin-bottom:3px}
+.cols .c span{font-size:12px;color:var(--muted);margin-top:4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.ins-note{font-size:13px;margin-top:6px}
+/* ---- Talent ---- */
+.lvl-b{display:inline-block;padding:1px 8px;border-radius:999px;font:700 11px var(--body);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.lvl-b.g{background:#e0a91b;color:#2b1d00}.lvl-b.s{background:#aab4bf;color:#1d252c}.lvl-b.b{background:#c4783a;color:#fff}.lvl-b.q{background:var(--good);color:#fff}.lvl-b.n{background:var(--surface-2);color:var(--fg)}
+.t-tal td,.t-tal th{white-space:nowrap}
+.t-tal td.wrapok{white-space:normal}
+.tl-ev{margin-top:18px}
+.tl-ev h4{margin:0 0 4px;font:700 17px var(--display);text-transform:uppercase;letter-spacing:.03em}
 .combo{position:relative;min-width:0}
 .combo>input{width:100%}
 .combo .suggest{min-width:260px}
@@ -562,7 +595,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <button role="tab" id="tab-rankings" data-view="rankings" aria-selected="false">Rankings</button>
       <button role="tab" id="tab-records" data-view="records" aria-selected="false">Records</button>
       <button role="tab" id="tab-compare" data-view="compare" aria-selected="false">Compare</button>
+      <button role="tab" id="tab-insights" data-view="insights" aria-selected="false">Insights</button>
       <button role="tab" id="tab-reports" data-view="reports" aria-selected="false">Reports</button>
+      <button role="tab" id="tab-talent" data-view="talent" aria-selected="false" hidden>Talent</button>
       <button role="tab" id="tab-manage" data-view="manage" aria-selected="false" hidden>Admin</button>
     </nav>
   </div>
@@ -673,12 +708,47 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   </section>
 
   <!-- REPORTS -->
+  <section id="view-insights" hidden>
+    <div class="panel">
+      <div class="prof-hd" style="margin-bottom:4px"><h2>Insights</h2><span class="sub">The Thai swimming community in numbers, from every meet in the app.</span></div>
+      <div class="rk-top" style="margin-top:8px">
+        <div class="field"><span class="lbl">Swimmers who swam in</span><div class="seg" id="inScope"></div></div>
+        <div class="field"><span class="lbl">Nationality</span><div class="seg" id="inNat"><button data-n="tha" aria-pressed="true">Thai</button><button data-n="all" aria-pressed="false">All</button></div></div>
+      </div>
+      <div class="hint" id="inWhen" style="margin-top:6px"></div>
+      <div id="inBody"></div>
+    </div>
+  </section>
+
+  <section id="view-talent" hidden>
+    <div class="panel">
+      <div class="prof-hd" style="margin-bottom:4px"><h2>Talent</h2><span class="sub">Staff only. Thai swimmers measured against medal times from the last edition of an international meet, or against qualifying times.</span></div>
+      <div class="rk-top" style="margin-top:8px">
+        <div class="field" style="flex:2 1 280px"><label class="lbl" for="tlTarget">Compare with</label><select id="tlTarget"></select></div>
+        <div class="field" id="tlLevelF"><span class="lbl">Medal level</span><div class="seg" id="tlLevel"><button data-l="gold" aria-pressed="false">Gold</button><button data-l="silver" aria-pressed="false">Silver</button><button data-l="bronze" aria-pressed="true">Bronze</button></div></div>
+        <div class="field"><label class="lbl" for="tlShow">Show</label><select id="tlShow"><option value="1">Within 1%</option><option value="2">Within 2%</option><option value="3" selected>Within 3%</option><option value="5">Within 5%</option><option value="top3">Thai top 3 per event</option></select></div>
+        <div class="field"><label class="lbl" for="tlWin">Times from</label><select id="tlWin"><option value="12">Last 12 months</option><option value="24">Last 2 years</option><option value="0">All time</option></select></div>
+        <div class="field"><span class="lbl">Gender</span><div class="seg" id="tlG"><button data-g="" aria-pressed="true">Both</button><button data-g="F" aria-pressed="false">Girls</button><button data-g="M" aria-pressed="false">Boys</button></div></div>
+      </div>
+      <div id="tlSum" style="margin-top:10px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0"><button class="ghost" type="button" id="tlXlsx">Download Excel</button><span class="msg" id="tlMsg" role="status"></span></div>
+      <div id="tlBody"></div>
+    </div>
+    <div class="panel" style="margin-top:18px" id="bmPanel">
+      <div class="dup-hd"><h3 style="margin:0">Medal times</h3><span class="hint" id="bmNow"></span></div>
+      <div class="hint" style="margin:6px 0 12px">Load the results of the last edition of a meet (Lenex .lxf / .lef from Splash). The app takes the gold, silver and bronze times of every individual event, gender and age group from the final (or timed final). Qualifying times loaded under Admin can be compared here too.</div>
+      <label class="drop" for="bmFile" style="padding:14px"><b style="font-size:16px">Choose results file of the last edition</b><span class="hint">Lenex (.lxf / .lef)</span><input type="file" id="bmFile" accept=".lxf,.lef,.xml"></label>
+      <div id="bmPreview"></div><div class="msg" id="bmMsg" role="status"></div>
+      <div id="bmList" style="margin-top:10px"></div>
+    </div>
+  </section>
+
   <section id="view-reports" hidden>
     <div class="prof-hd"><h2>Reports</h2><span class="sub">Formal Thai + English PDF documents with reference number, signature line and stamp box.</span></div>
     <div class="rpt-grid">
       <div class="panel rcard">
         <h3>Swimmer portfolio</h3>
-        <p class="hint">A formal, bilingual record of the swimmer's competition results for scholarships and school or university applications. It includes the swimmer's profile, personal best times with World Aquatics points, Thailand national and age-group records, season best times by year and, if chosen, the full competition history. All results come from swim meets run by Swim Meets Thailand. Each portfolio carries a reference code that anyone can check under “Verify a document”. ID numbers and full birth dates are never included.</p>
+        <p class="hint">A formal, bilingual record of the swimmer's competition results for scholarships and school or university applications. It includes the swimmer's profile, personal best times with World Aquatics points, Thailand national and age-group records, season best times by year and, if chosen, the full competition history. All results come from swim meets run or recorded by Swim Meets Thailand. Each portfolio carries a reference code that anyone can check under “Verify a document”. ID numbers and full birth dates are never included.</p>
         <div class="field"><label class="lbl" for="rpQ">Swimmer</label><input type="text" id="rpQ" placeholder="Search name in Thai or English" autocomplete="off"></div>
         <div class="rphits" id="rpHits"></div>
         <div class="rpchosen" id="rpChosen"></div>
@@ -718,7 +788,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   <!-- MANAGE (owner only) -->
   <section id="view-manage" hidden>
     <div class="panel import">
-      <div class="prof-hd" style="margin:0"><h2>Upload meet results</h2><span class="sub">Results export from Splash Meet Manager: Lenex (.lxf / .lef, recommended) or Excel (.xlsx, .xls, .csv). One file per meet.</span></div>
+      <div class="prof-hd" style="margin:0"><h2>Upload meet results</h2><span class="sub">Results from Splash Meet Manager (Lenex .lxf / .lef, recommended, or Excel) or Hy-Tek Meet Manager (.cl2, or the .zip it comes in). One file per meet.</span></div>
       <form id="fImport" autocomplete="off">
         <div class="field full"><label class="lbl" for="iPick">Upload to</label><select id="iPick"></select></div>
         <div class="field"><label class="lbl" for="iMeet">Meet name</label><input type="text" id="iMeet" placeholder="e.g. Thailand Age Group Championships 2026"></div>
@@ -727,7 +797,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
         <div class="field"><label class="lbl" for="iCourse">Pool, if the file has no COURSE</label><select id="iCourse"><option value="LCM">50 m (LCM)</option><option value="SCM">25 m (SCM)</option></select></div>
         <div class="field" style="justify-content:flex-end"><span class="hint">Left empty, name and dates come from the file's MEETNAME, MEETDATE and MEETENDDATE columns. A SESSIONDATE or EVENTDATE column gives each swim its own day.</span></div>
         <label class="full replace" id="replaceRow" hidden><input type="checkbox" id="iReplace" checked> <span><b>Replace this meet's results</b><br><span class="hint">Times that are not in the new file are removed. Untick to only add and update.</span></span></label>
-        <label class="drop full" id="drop" for="iFile"><b>Choose results file</b><span class="hint" id="fileName">Lenex (.lxf / .lef) or Excel (.xlsx) · or drop it here</span><input type="file" id="iFile" accept=".lxf,.lef,.xlsx,.xls,.csv"></label>
+        <label class="drop full" id="drop" for="iFile"><b>Choose results file</b><span class="hint" id="fileName">Splash Lenex (.lxf / .lef), Hy-Tek (.cl2 or its .zip) or Excel (.xlsx) · or drop it here</span><input type="file" id="iFile" accept=".lxf,.lef,.cl2,.zip,.xlsx,.xls,.csv"></label>
       </form>
       <div id="preview"></div>
     </div>
@@ -864,7 +934,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   <div class="sh-box"><div class="dup-hd" style="margin-bottom:10px"><h3 style="margin:0" id="shareTitle">Share this swim</h3><button class="x" type="button" id="shareClose" aria-label="Close">×</button></div>
     <img id="shareImg" alt="">
     <div class="sh-acts"><button class="primary" type="button" id="shareGo">Share</button><button class="ghost" type="button" id="shareDl">Download image</button><span class="msg" id="shareMsg" role="status"></span></div>
-    <div class="hint" style="margin-top:8px">A square picture for Facebook, LINE or Instagram.</div></div>
+    <div class="hint" style="margin-top:8px">A square picture for Facebook, LINE or Instagram. <b>On a phone:</b> tap <b>Share</b> and choose <b>Save Image</b> (iPhone) or <b>Save to gallery</b>, or press and hold the picture and choose <b>Save to Photos</b> / <b>Download image</b>.</div></div>
 </div>
 <div class="rpt-modal" id="rptModal" hidden role="dialog" aria-modal="true" aria-labelledby="rptTitle">
   <div class="rpt-bar"><div class="rpt-bar-t"><b id="rptTitle">Report</b><span class="msg" id="rptMsg" role="status"></span></div><div class="rpt-acts"><button class="primary" type="button" id="rptDl">Download PDF</button><button class="ghost" type="button" id="rptClose">Close</button></div></div>
@@ -1147,8 +1217,8 @@ function renderProfile(){
 /* entry time vs result: negative = swam faster than the entry */
 /* teams a swimmer swam for other than clubs: school, province, region, country */
 function representation(s){
-  const m=new Map();resOf(s.id).forEach(r=>{const t=r.teamType||"C";if(t==="C"||!r.team||isDns(r))return;const k=t+"|"+r.team;const o=m.get(k)||{t,team:r.team,years:new Set(),meets:new Set()};o.years.add(r.date.slice(0,4));o.meets.add(r.meet);m.set(k,o)});
-  const order="NRPS";return[...m.values()].map(o=>({...o,years:[...o.years].sort(),meets:[...o.meets]})).sort((a,b)=>order.indexOf(a.t)-order.indexOf(b.t)||a.team.localeCompare(b.team));
+  const m=new Map();resOf(s.id).forEach(r=>{const t=r.teamType||"C";if(t==="C"||!r.team||isDns(r))return;const k=t+"|"+r.team;const o=m.get(k)||{t,team:r.team,years:new Set(),meets:new Set(),when:new Map()};o.years.add(r.date.slice(0,4));o.meets.add(r.meet);o.when.set(mKey(r),{meet:r.meet,date:r.meetStart||r.date});m.set(k,o)});
+  const order="NRPS";return[...m.values()].map(o=>({...o,years:[...o.years].sort(),meets:[...o.meets],list:[...o.when.values()].sort((a,b)=>b.date.localeCompare(a.date))})).sort((a,b)=>order.indexOf(a.t)-order.indexOf(b.t)||a.team.localeCompare(b.team));
 }
 /* place shown in tables: exhibition swims (status EXH, or a negative place from Splash) show "EXH" */
 const isExh=r=>/^EXH/i.test(r.status||"")||(r.place!=null&&r.place<0&&!r.status);
@@ -1174,7 +1244,7 @@ function idCard(s){
         const line=(x,cls)=>`<span class="chip rec ${cls}">${recShort(x)}${x.cat==="AG"?" "+agLabel(x.ag):""}</span> ${esc(recEvent(x))} ${x.course} · <b>${fmt(x.t)}</b>${x.date?` <span class="recyr">${fdate(x.date)}</span>`:""}`;
         return(cur.length?`<div style="grid-column:1/-1"><dt>Current records</dt><dd class="reclist">${cur.map(x=>line(x,x.cat==="NR"?"nr":"agr")).join("<br>")}</dd></div>`:"")+
           (old.length?`<div style="grid-column:1/-1"><dt>Former records</dt><dd class="reclist">${old.map(x=>line(x,"fmr")).join("<br>")}</dd></div>`:"")})()}
-      ${(()=>{const rep=representation(s);return rep.length?`<div style="grid-column:1/-1"><dt>Represented</dt><dd>${rep.map(x=>`${ttEn(x.t)}: <b>${esc(x.team)}</b> <small style="display:inline">(${x.years.join(", ")}${x.meets.length?" · "+esc(x.meets.slice(0,2).join(", "))+(x.meets.length>2?", …":""):""})</small>`).join("<br>")}</dd></div>`:""})()}
+      ${(()=>{const rep=representation(s);return rep.length?`<div style="grid-column:1/-1"><dt>Represented</dt><dd>${rep.map(x=>`<div style="margin-top:2px">${ttEn(x.t)}: <b>${esc(x.team)}</b></div><ul class="qfact" style="margin:2px 0 6px;padding-left:20px">${x.list.map(m=>`<li>${esc(m.meet)} <small style="display:inline">· ${m.date?new Date(m.date+"T00:00:00").toLocaleDateString("en-GB",{month:"short",year:"numeric"}):""}</small></li>`).join("")}</ul>`).join("")}</dd></div>`:""})()}
       ${(()=>{const Q=qualifiedFor(s);return Q.length?`<div style="grid-column:1/-1"><dt>Qualifying times</dt><dd><ul class="qfact" style="margin:0;padding-left:18px">${Q.map(q=>`<li><b>${esc(q.L.name)}</b> <small style="display:inline">(age ${q.age})</small>: ${q.ok.length?`<span style="color:var(--good);font-weight:600">✓ qualified in ${q.ok.length} event${q.ok.length>1?"s":""}</span> · ${q.ok.map(x=>`${x.d}m ${SHORT[x.st]} ${x.c}`).join(", ")}`:"not qualified yet"}${q.close&&!q.ok.length?` · closest: ${q.close.d}m ${SHORT[q.close.st]} ${q.close.c}, ${q.close.gap.toFixed(2)} s to go`:""}</li>`).join("")}</ul></dd></div>`:""})()}
       ${fact("First meet",first?esc(first.meet||"—"):"",first?fdate(first.date):"")}
       ${fact("Latest meet",last?esc(last.meet||"—"):"",last?fdate(last.date):"")}
@@ -1395,7 +1465,8 @@ async function openShare(rid){
   const r=state.results.find(x=>x.id===rid);const s=r&&swimmerById(r.swimmerId);if(!r||!s)return;
   const m=$("#shareModal");m.hidden=false;$("#shareMsg").textContent="Drawing…";$("#shareImg").removeAttribute("src");
   try{shareBlob=await drawShareCard(r,s);shareName=`SMT_${fileSafe(s.nameEn||s.nameTh)}_${r.distance}${SHORT[r.stroke]||r.stroke}_${r.date||""}.png`;
-    $("#shareImg").src=URL.createObjectURL(shareBlob);$("#shareImg").alt=`${shareKind(r).label}: ${mainName(s)}, ${r.distance}m ${r.stroke}, ${fmt(r.time)}`;$("#shareMsg").textContent="";
+    /* a data: picture can be pressed-and-held on phones to save it to the photo gallery */
+    $("#shareImg").src=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(shareBlob)});$("#shareImg").alt=`${shareKind(r).label}: ${mainName(s)}, ${r.distance}m ${r.stroke}, ${fmt(r.time)}`;$("#shareMsg").textContent="";
     const canShare=!!(navigator.canShare&&navigator.canShare({files:[new File([shareBlob],shareName,{type:"image/png"})]}));$("#shareGo").hidden=!canShare}
   catch(e){$("#shareMsg").textContent="Couldn't draw the picture.";}
 }
@@ -1403,7 +1474,11 @@ $("#shareClose").onclick=()=>{$("#shareModal").hidden=true};
 $("#shareModal").addEventListener("click",e=>{if(e.target.id==="shareModal")$("#shareModal").hidden=true});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#shareModal").hidden)$("#shareModal").hidden=true});
 $("#shareGo").onclick=async()=>{if(!shareBlob)return;try{await navigator.share({files:[new File([shareBlob],shareName,{type:"image/png"})],title:"Swim Meets Thailand"})}catch(e){}};
-$("#shareDl").onclick=async()=>{if(!shareBlob)return;const m=$("#shareMsg");try{await saveFile(shareName,shareBlob);msg(m,"Saved.",true)}catch(err){const c=err&&err.code;msg(m,c==="declined"?"Cancelled.":"Downloading isn't available in this view.",c==="declined")}};
+$("#shareDl").onclick=async()=>{if(!shareBlob)return;const m=$("#shareMsg");
+  const phone=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent));
+  const f=new File([shareBlob],shareName,{type:"image/png"});
+  if(phone&&!window.claude&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});msg(m,"Choose “Save Image” to put it in your photos.",true)}catch(e){if(e&&e.name!=="AbortError")msg(m,"Press and hold the picture, then choose Save to Photos.",false)}return}
+  try{await saveFile(shareName,shareBlob);msg(m,phone?"Saved to Downloads. If you can't find it, press and hold the picture and choose Save to Photos.":"Saved.",true)}catch(err){const c=err&&err.code;msg(m,c==="declined"?"Cancelled.":"Press and hold the picture, then choose Save to Photos / Download image.",c==="declined")}};
 document.addEventListener("click",e=>{const b=e.target.closest("[data-share]");if(b){e.preventDefault();e.stopPropagation();openShare(b.dataset.share)}},true);
 const shareBtn=r=>`<button class="lnk" type="button" data-share="${esc(r.id)}" title="Make a picture to share">Share</button>`;
 
@@ -2052,6 +2127,188 @@ function suggestInput(inp,getList){
   inp.addEventListener("blur",()=>setTimeout(close,120));
 }
 ["kClub","naTeam","trTeam","rSwimmer","iPick"].forEach(id=>comboSelect(document.getElementById(id)));
+
+/* ================= INSIGHTS (public): the swimming population ================= */
+const AGE_BANDS=[["≤9",0,9],["10–11",10,11],["12–13",12,13],["14–15",14,15],["16–18",16,18],["19+",19,200]];
+function inScopeInfo(){
+  const yNow=new Date().getFullYear();const sc=ui.inScope||"12m";
+  if(sc==="all")return{label:"any year",ref:yNow,ok:d=>true};
+  if(sc==="12m"){const a=new Date();a.setFullYear(a.getFullYear()-1);const from=a.toISOString().slice(0,10);return{label:"the last 12 months",ref:yNow,ok:d=>d>=from}}
+  const y=sc.slice(5);return{label:y,ref:+y,ok:d=>d.slice(0,4)===y};
+}
+function renderInsights(){
+  const years=[...new Set(state.results.filter(valid).map(r=>r.date.slice(0,4)))].sort().reverse();
+  const opts=[["12m","Last 12 months"],...years.slice(0,4).map(y=>["year:"+y,y]),["all","All time"]];
+  if(!opts.some(o=>o[0]===(ui.inScope||"12m")))ui.inScope="12m";
+  $("#inScope").innerHTML=opts.map(([v,l])=>`<button data-sc="${v}" aria-pressed="${(ui.inScope||"12m")===v}">${l}</button>`).join("");
+  document.querySelectorAll("#inNat button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.n===(ui.inNat||"tha")));
+  const S=inScopeInfo();const thaiOnly=(ui.inNat||"tha")==="tha";
+  $("#inWhen").textContent=`Active = swam at least once in ${S.label}${thaiOnly?" · Thai swimmers":" · all nationalities"}.`;
+  const act=new Map();   // swimmer id -> {s, events:Set}
+  const meets=new Set();
+  for(const r of state.results){if(!valid(r)||!S.ok(r.date))continue;const s=swimmerById(r.swimmerId);if(!s||(thaiOnly&&!isThai(s)))continue;
+    meets.add(mKey(r));const o=act.get(s.id)||{s,ev:new Set()};o.ev.add(r.stroke+"|"+r.distance+"|"+r.course);act.set(s.id,o)}
+  const list=[...act.values()];
+  if(!list.length){$("#inBody").innerHTML=`<div class="empty">No swims in ${esc(S.label)} yet.</div>`;return}
+  const F=list.filter(o=>o.s.gender==="F").length,M=list.filter(o=>o.s.gender==="M").length;
+  const ageOf=s=>s.birthYear?S.ref-s.birthYear:null;
+  /* new swimmers: first ever swim falls inside the period */
+  const firstSwim=new Map();for(const r of state.results){if(!valid(r))continue;const f=firstSwim.get(r.swimmerId);if(!f||r.date<f)firstSwim.set(r.swimmerId,r.date)}
+  const newcomers=list.filter(o=>S.ok(firstSwim.get(o.s.id)||"")).length;
+  const clubs=new Map();list.forEach(o=>{if(o.s.club)clubs.set(o.s.club,(clubs.get(o.s.club)||0)+1)});
+  let h=`<div class="ins-kpis">
+    <div class="kpi"><span class="v">${list.length.toLocaleString()}</span><span class="lbl">Active swimmers</span></div>
+    <div class="kpi"><span class="v">${F.toLocaleString()} · ${M.toLocaleString()}</span><span class="lbl">Girls · boys</span></div>
+    <div class="kpi"><span class="v">${newcomers.toLocaleString()}</span><span class="lbl">New swimmers (first meet)</span></div>
+    <div class="kpi"><span class="v">${clubs.size.toLocaleString()}</span><span class="lbl">Clubs</span></div>
+    <div class="kpi"><span class="v">${meets.size.toLocaleString()}</span><span class="lbl">Meets</span></div></div>`;
+  /* age pyramid */
+  const byAge=new Map();list.forEach(o=>{const a=ageOf(o.s);if(a==null||a<4||a>60)return;const k=a>=25?25:a;const e=byAge.get(k)||{F:0,M:0};if(o.s.gender==="F"||o.s.gender==="M")e[o.s.gender]++;byAge.set(k,e)});
+  const ages=[...byAge.keys()].sort((a,b)=>b-a);const mx=Math.max(1,...[...byAge.values()].flatMap(e=>[e.F,e.M]));
+  const tot=a=>byAge.get(a).F+byAge.get(a).M;
+  const core=ages.filter(a=>a>=8&&a<=18);const big=core.slice().sort((a,b)=>tot(b)-tot(a))[0],small=core.slice().sort((a,b)=>tot(a)-tot(b))[0];
+  let drop=null;core.slice().sort((a,b)=>a-b).forEach(a=>{if(byAge.has(a+1)&&tot(a)>=10){const d=(tot(a+1)-tot(a))/tot(a);if(!drop||d<drop.d)drop={a,d}}});
+  h+=`<div class="ins-sec"><h3>Swimmers by age</h3><div class="hint">Age by birth year in ${S.ref}${(ui.inScope||"12m").startsWith("year")?"":" (this year)"}. Girls on the left, boys on the right.</div>
+    <div class="pyr"><div class="l hd">Girls</div><div class="age hd">Age</div><div class="r hd">Boys</div>
+    ${ages.map(a=>{const e=byAge.get(a);return`<div class="l"><span class="n">${e.F||""}</span><i style="width:${(e.F/mx*100).toFixed(1)}%"></i></div><div class="age">${a>=25?"25+":a}</div><div class="r"><i style="width:${(e.M/mx*100).toFixed(1)}%"></i><span class="n">${e.M||""}</span></div>`}).join("")}</div>
+    <p class="ins-note">${big!=null?`Most swimmers: <b>age ${big}</b> (${tot(big)}). `:""}${small!=null&&small!==big?`Fewest between 8 and 18: <b>age ${small}</b> (${tot(small)}). `:""}${drop&&drop.d<-.1?`Biggest drop: from age ${drop.a} to ${drop.a+1} (<b>${Math.round(drop.d*100)}%</b>), a sign swimmers stop at that age.`:""}</p></div>`;
+  /* age groups */
+  const band=AGE_BANDS.map(([l,lo,hi])=>{const m=list.filter(o=>{const a=ageOf(o.s);return a!=null&&a>=lo&&a<=hi});return{l,F:m.filter(o=>o.s.gender==="F").length,M:m.filter(o=>o.s.gender==="M").length}});
+  const bmx=Math.max(1,...band.map(b=>b.F+b.M));
+  h+=`<div class="ins-sec"><h3>Age groups</h3><div class="hbars">${band.map(b=>`<div class="lab">${b.l}</div><div style="display:flex;height:14px"><i class="bar" style="width:${(b.F/bmx*100).toFixed(1)}%;background:var(--c6);border-radius:3px 0 0 3px"></i><i class="bar" style="width:${(b.M/bmx*100).toFixed(1)}%;background:var(--c7);border-radius:0 3px 3px 0"></i></div><div class="n">${b.F+b.M} <span class="hint">(${b.F} · ${b.M})</span></div>`).join("")}</div>
+    <div class="legend"><span><i style="background:var(--c6)"></i>Girls</span><span><i style="background:var(--c7)"></i>Boys</span></div></div>`;
+  /* trend by year: returning vs new swimmers */
+  const yr=new Map();for(const r of state.results){if(!valid(r))continue;const s=swimmerById(r.swimmerId);if(!s||(thaiOnly&&!isThai(s)))continue;const y=r.date.slice(0,4);(yr.get(y)||yr.set(y,new Set()).get(y)).add(s.id)}
+  const ys=[...yr.keys()].sort().slice(-8);
+  if(ys.length>=2){const ymx=Math.max(...ys.map(y=>yr.get(y).size));
+    h+=`<div class="ins-sec"><h3>Swimmers each year</h3><div class="cols">${ys.map(y=>{const all=yr.get(y);let nw=0;all.forEach(id=>{if((firstSwim.get(id)||"").slice(0,4)===y)nw++});const old=all.size-nw;
+      return`<div class="c"><b>${all.size}</b><div class="stk" style="height:${(all.size/ymx*140).toFixed(0)}px"><i style="height:${(old/all.size*100).toFixed(1)}%;background:var(--accent)"></i><i style="height:${(nw/all.size*100).toFixed(1)}%;background:var(--gold)"></i></div><span>${y}</span></div>`}).join("")}</div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Swam in an earlier year too</span><span><i style="background:var(--gold)"></i>New that year</span></div></div>`}
+  /* events */
+  const evc=new Map();list.forEach(o=>o.ev.forEach(k=>evc.set(k,(evc.get(k)||0)+1)));
+  const course=ui.inCourse||"LCM";const evs=[...evc].filter(([k])=>k.endsWith("|"+course)).sort((a,b)=>b[1]-a[1]);const emx=Math.max(1,...evs.map(e=>e[1]));
+  h+=`<div class="ins-sec"><div class="dup-hd"><h3 style="margin:0">Swimmers per event</h3><div class="seg" id="inCourse"><button data-c="LCM" aria-pressed="${course==="LCM"}">50 m pool</button><button data-c="SCM" aria-pressed="${course==="SCM"}">25 m pool</button></div></div>
+    ${evs.length?`<div class="hbars">${evs.map(([k,n])=>{const[st,d]=k.split("|");return`<div class="lab"><span class="dot" style="background:var(${STROKE_COLOR[st]})"></span>${evH(st,d)}</div><div><i class="bar" style="display:block;width:${(n/emx*100).toFixed(1)}%;background:var(${STROKE_COLOR[st]})"></i></div><div class="n">${n}</div>`}).join("")}</div>
+    <p class="ins-note">Least crowded: ${evs.slice(-3).reverse().map(([k,n])=>{const[st,d]=k.split("|");return`${d}m ${esc(st)} (${n})`}).join(", ")}.</p>`:`<div class="hint">No ${poolName(course)} pool swims in this period.</div>`}</div>`;
+  /* clubs */
+  const cl=[...clubs].sort((a,b)=>b[1]-a[1]).slice(0,15);const cmx=Math.max(1,...cl.map(c=>c[1]));
+  h+=`<div class="ins-sec"><h3>Biggest clubs</h3><div class="hint">Swimmers listed under each club who swam in ${esc(S.label)}.</div><div class="hbars">${cl.map(([c,n])=>`<div class="lab" title="${esc(c)}">${esc(c)}</div><div><i class="bar" style="display:block;width:${(n/cmx*100).toFixed(1)}%"></i></div><div class="n">${n}</div>`).join("")}</div></div>`;
+  $("#inBody").innerHTML=h;
+}
+$("#inScope").addEventListener("click",e=>{const b=e.target.closest("[data-sc]");if(b){ui.inScope=b.dataset.sc;renderInsights()}});
+$("#inNat").addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(b){ui.inNat=b.dataset.n;renderInsights()}});
+$("#inBody").addEventListener("click",e=>{const b=e.target.closest("#inCourse [data-c]");if(b){ui.inCourse=b.dataset.c;renderInsights()}});
+
+/* ================= TALENT (staff only) ================= */
+let bmDoc={sets:[]},bmPending=null;
+/* medal times from a Lenex results file: places 1-3 of each final (or timed final), per gender, stroke, distance and age group */
+function parseLenexMedals(xmlText){
+  const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))return null;
+  const meet=doc.querySelector("MEET");if(!meet)return null;const A=(e,k)=>e?e.getAttribute(k)||"":"";
+  const ST={FREE:"Freestyle",BACK:"Backstroke",BREAST:"Breaststroke",FLY:"Butterfly",MEDLEY:"IM"};
+  const secs=t=>{const m=String(t||"").match(/^(\d+):(\d+):(\d+(?:\.\d+)?)$/);const v=m?(+m[1]*3600+ +m[2]*60+ +m[3]):0;return v>0?Math.round(v*100)/100:null};
+  const time=new Map();doc.querySelectorAll("RESULT").forEach(r=>{const st=(A(r,"status")||"").toUpperCase();if(st&&st!=="EXH")return;const v=secs(A(r,"swimtime"));if(v)time.set(A(r,"resultid"),v)});
+  const course=A(meet,"course");const RANK={FIN:0,TIM:1,SOS:2,SEM:3,PRE:4};const best=new Map();
+  meet.querySelectorAll("SESSION").forEach(se=>se.querySelectorAll("EVENT").forEach(ev=>{
+    const ss=ev.querySelector("SWIMSTYLE");const st=ss&&ST[A(ss,"stroke")];if(!st||(+A(ss,"relaycount")||1)>1)return;const d=+A(ss,"distance");const g=A(ev,"gender");if(g!=="F"&&g!=="M")return;
+    const c=A(se,"course")||course;const rnd=RANK[A(ev,"round")]??5;
+    ev.querySelectorAll("AGEGROUP").forEach(ag=>{const lo=+A(ag,"agemin"),hi=+A(ag,"agemax");
+      const pl=[...ag.querySelectorAll("RANKING")].map(r=>({p:+A(r,"place"),t:time.get(A(r,"resultid"))})).filter(x=>x.p>=1&&x.p<=3&&x.t).sort((a,b)=>a.p-b.p);
+      if(!pl.length)return;const k=[g,c,st,d,lo,hi].join("|");const o=best.get(k);if(o&&o.rnd<=rnd)return;
+      const at=p=>{const x=pl.find(y=>y.p===p);return x?x.t:null};
+      best.set(k,{rnd,x:{g,c,lo:isNaN(lo)?-1:lo,hi:isNaN(hi)?-1:hi,st,d,gold:at(1),silver:at(2),bronze:at(3)}})})}));
+  const dates=[...meet.querySelectorAll("SESSION")].map(se=>A(se,"date")).filter(Boolean).sort();
+  return{name:A(meet,"name"),date:dates[0]||"",times:[...best.values()].map(v=>v.x).filter(x=>x.gold||x.silver||x.bronze)};
+}
+function renderBmAdmin(){
+  const L=bmDoc.sets||[];$("#bmNow").textContent=L.length?`${L.length} loaded`:"none loaded";
+  $("#bmList").innerHTML=L.map(x=>`<div class="clubpair"><div class="names"><b>${esc(x.name)}</b><span class="hint">From ${esc(x.source||"")}${x.date?" ("+fdate(x.date)+")":""} · age counted in ${x.ageYear} · ${x.times.length} events</span></div>
+    <div class="acts"><button type="button" class="lnk" data-bmdel="${esc(x.id)}" style="color:var(--bad)">Remove</button></div></div>`).join("");
+}
+$("#bmFile").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const m=$("#bmMsg"),pv=$("#bmPreview");m.textContent="";
+  let P;try{P=parseLenexMedals(await readLenexText(f))}catch(err){P=null}
+  if(!P||!P.times.length){bmPending=null;pv.innerHTML="";msg(m,"No medal times found. Use the full results of the meet exported from Splash as Lenex (.lxf or .lef).",false);return}
+  bmPending=P;const nx=(P.date?+P.date.slice(0,4):new Date().getFullYear())+1;
+  const ags=[...new Set(P.times.map(x=>x.lo<0&&x.hi<0?"Open":`${x.lo<0?"":x.lo}${x.hi<0?"+":x.hi===x.lo?"":"–"+x.hi}`))];
+  pv.innerHTML=`<div class="hint" style="color:var(--fg);margin-top:8px"><b>${P.times.length} events with medal times</b> from ${esc(P.name)}${P.date?" ("+fdate(P.date)+")":""} · age groups: ${esc(ags.join(", "))}</div>
+    <form id="fBm" class="clubmerge" autocomplete="off" style="margin-top:8px">
+      <div class="field" style="flex:2 1 260px"><label class="lbl" for="bmName">Use as medal times for</label><input type="text" id="bmName" value="${esc(P.name.replace(/20\d\d/,String(nx)))}"></div>
+      <div class="field" style="flex:0 1 120px"><label class="lbl" for="bmYear">Age counted in</label><input type="number" id="bmYear" min="2000" max="2100" value="${nx}"></div>
+      <button class="primary" type="submit">Save</button><button class="ghost" type="button" id="bmCancel">Cancel</button></form>`};
+$("#bmPanel").addEventListener("click",async e=>{const m=$("#bmMsg");
+  if(e.target.id==="bmCancel"){bmPending=null;$("#bmPreview").innerHTML="";return}
+  const del=e.target.closest("[data-bmdel]");if(del){if(!canEdit())return;try{const next={sets:(bmDoc.sets||[]).filter(x=>x.id!==del.dataset.bmdel)};await db.doc("settings/benchmarks").set(next);bmDoc=next;renderTalent();msg(m,"Removed.",true)}catch(err){msg(m,permErr(err),false)}}});
+$("#bmPanel").addEventListener("submit",async e=>{if(e.target.id!=="fBm")return;e.preventDefault();const m=$("#bmMsg");if(!bmPending||!canEdit())return;
+  const name=norm($("#bmName").value),yr=+$("#bmYear").value;if(!name){msg(m,"Enter a name.",false);return}if(!(yr>=2000&&yr<=2100)){msg(m,"Enter the year ages are counted in.",false);return}
+  const S={id:"b"+Date.now().toString(36),name,ageYear:yr,source:bmPending.name,date:bmPending.date,times:bmPending.times};
+  try{const next={sets:[...(bmDoc.sets||[]).filter(x=>x.name!==name),S]};await db.doc("settings/benchmarks").set(next);bmDoc=next;bmPending=null;$("#bmPreview").innerHTML="";ui.tlTarget="b:"+S.id;renderTalent();msg(m,`Saved medal times for “${name}”.`,true)}
+  catch(err){msg(m,permErr(err),false)}});
+/* the analysis */
+function talentTargets(){return[...(bmDoc.sets||[]).map(x=>["b:"+x.id,`Medal times · ${x.name}`]),...(stdDoc.lists||[]).map(x=>["q:"+x.id,`Qualifying times · ${x.name}`])]}
+function talentRows(){
+  const T=ui.tlTarget||"";const isB=T.startsWith("b:");const set=isB?(bmDoc.sets||[]).find(x=>"b:"+x.id===T):(stdDoc.lists||[]).find(x=>"q:"+x.id===T);if(!set)return null;
+  const lvl=ui.tlLevel||"bronze";const win=+(ui.tlWin??12);const gF=ui.tlG||"";const show=ui.tlShow||"3";
+  let from="";if(win){const a=new Date();a.setMonth(a.getMonth()-win);from=a.toISOString().slice(0,10)}
+  const ageYear=+set.ageYear||new Date().getFullYear();
+  const tgt=x=>isB?(x[lvl]||x.bronze||x.silver||x.gold):x.t;
+  const out=[];
+  /* best time per swimmer per event in the window (Thai swimmers only) */
+  const best=new Map();
+  for(const r of state.results){if(!valid(r)||(from&&r.date<from))continue;const s=swimmerById(r.swimmerId);if(!s||!isThai(s)||!s.birthYear||(gF&&s.gender!==gF))continue;
+    const k=r.swimmerId+"|"+r.stroke+"|"+r.distance+"|"+r.course;const b=best.get(k);if(!b||r.time<b.time)best.set(k,r)}
+  const byEv=new Map();best.forEach(r=>{const k=r.stroke+"|"+r.distance+"|"+r.course;(byEv.get(k)||byEv.set(k,[]).get(k)).push(r)});
+  for(const x of set.times){if(gF&&x.g!=="X"&&x.g!==gF)continue;const t=tgt(x);if(!t)continue;
+    const pool=(byEv.get(x.st+"|"+x.d+"|"+x.c)||[]).filter(r=>{const s=swimmerById(r.swimmerId);const a=ageYear-s.birthYear;return(x.g==="X"||s.gender===x.g)&&(x.lo<0||a>=x.lo)&&(x.hi<0||a<=x.hi)}).sort((a,b)=>a.time-b.time);
+    pool.forEach((r,i)=>{const rank=1+pool.filter(o=>o.time<r.time-.001).length;const gap=r.time-t,pct=gap/t*100;
+      if(show==="top3"?rank>3:pct>+show)return;
+      const s=swimmerById(r.swimmerId);
+      /* season bests for a simple trend: improvement per year from the last two seasons with a time */
+      const sb=new Map();resOf(s.id).forEach(o=>{if(valid(o)&&o.stroke===x.st&&+o.distance===+x.d&&o.course===x.c){const y=+o.date.slice(0,4);if(!sb.has(y)||o.time<sb.get(y))sb.set(y,o.time)}});
+      const yy=[...sb.keys()].sort((a,b)=>b-a);let rate=null,proj=null;
+      if(yy.length>=2){rate=(sb.get(yy[1])-sb.get(yy[0]))/(yy[0]-yy[1]);const ahead=Math.max(0,ageYear-yy[0]);const cap=r.time*.03*ahead;proj=ahead?r.time-Math.max(0,Math.min(rate*ahead,cap)):null}
+      let level="";if(isB){if(x.gold&&r.time<=x.gold+.001)level="g";else if(x.silver&&r.time<=x.silver+.001)level="s";else if(x.bronze&&r.time<=x.bronze+.001)level="b"}else if(r.time<=t+.001)level="q";
+      out.push({x,r,s,t,gap,pct,rank,n:pool.length,rate,proj,level,age:ageYear-s.birthYear})})}
+  out.sort((a,b)=>(a.x.g===b.x.g?0:a.x.g>b.x.g?1:-1)||STROKES.indexOf(a.x.st)-STROKES.indexOf(b.x.st)||a.x.d-b.x.d||(a.x.lo-b.x.lo)||a.pct-b.pct);
+  return{set,isB,out,ageYear,from};
+}
+const agTxt=x=>x.lo<0&&x.hi<0?"Open":`${x.lo<0?"":x.lo}${x.hi<0?"+":x.hi===x.lo?"":"–"+x.hi}`;
+function renderTalent(){
+  if(!state.isStaff){show("swimmers");return}
+  renderBmAdmin();
+  const T=talentTargets();if(!T.some(t=>t[0]===ui.tlTarget))ui.tlTarget=T[0]?T[0][0]:"";
+  $("#tlTarget").innerHTML=T.length?T.map(([v,l])=>`<option value="${esc(v)}"${v===ui.tlTarget?" selected":""}>${esc(l)}</option>`).join(""):`<option value="">Load medal times below, or qualifying times in Admin</option>`;
+  const isB=(ui.tlTarget||"").startsWith("b:");$("#tlLevelF").hidden=!isB;
+  document.querySelectorAll("#tlLevel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.l===(ui.tlLevel||"bronze")));
+  document.querySelectorAll("#tlG button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.g===(ui.tlG||"")));
+  $("#tlShow").value=ui.tlShow||"3";$("#tlWin").value=String(ui.tlWin??12);
+  const R=talentRows();if(!R){$("#tlSum").innerHTML="";$("#tlBody").innerHTML=`<div class="empty">Load the results of the last edition of a meet below to get its medal times.</div>`;return}
+  const L=R.out;const cnt=k=>L.filter(o=>o.level===k).length;const sw=new Set(L.map(o=>o.s.id)).size;
+  $("#tlSum").innerHTML=`<div class="hint" style="color:var(--fg)">${R.isB?`${cnt("g")} at <span class="lvl-b g">gold</span> level · ${cnt("s")} <span class="lvl-b s">silver</span> · ${cnt("b")} <span class="lvl-b b">bronze</span> · `:`${cnt("q")} <span class="lvl-b q">qualified</span> · `}${L.length} swims by ${sw} swimmer${sw===1?"":"s"} shown. Age counted in ${R.ageYear}. ${R.from?`Best times since ${fdate(R.from)}.`:"Best times of all time."}</div>`;
+  if(!L.length){$("#tlBody").innerHTML=`<div class="empty">No Thai swimmers ${ui.tlShow==="top3"?"in these events":"within "+(ui.tlShow||3)+"%"} yet. Try a wider range.</div>`;return}
+  const groups=new Map();L.forEach(o=>{const k=[o.x.g,o.x.st,o.x.d,o.x.c,o.x.lo,o.x.hi].join("|");(groups.get(k)||groups.set(k,[]).get(k)).push(o)});
+  const lvlB=o=>o.level?`<span class="lvl-b ${o.level}">${({g:"Gold",s:"Silver",b:"Bronze",q:"Qualified"})[o.level]}</span>`:`<span class="lvl-b n">${o.pct.toFixed(1)}%</span>`;
+  $("#tlBody").innerHTML=[...groups.values()].map(G=>{const x=G[0].x;
+    return`<div class="tl-ev"><h4><span class="dot" style="background:var(${STROKE_COLOR[x.st]})"></span>${x.d}m ${esc(x.st)} ${x.c} · ${x.g==="F"?"Girls":x.g==="M"?"Boys":"All"} ${agTxt(x)}</h4>
+      <div class="hint">${R.isB?`Gold ${x.gold?fmt(x.gold):"—"} · silver ${x.silver?fmt(x.silver):"—"} · bronze ${x.bronze?fmt(x.bronze):"—"} · gap measured to <b>${fmt(G[0].t)}</b>${x[ui.tlLevel||"bronze"]?"":` (no ${ui.tlLevel||"bronze"} time in that final)`}`:`Qualifying time ${fmt(x.t)}`}</div>
+      <div class="tbl-wrap" style="margin-top:4px"><table class="t-tal"><thead><tr><th class="num">Thai rank</th><th>Swimmer</th><th class="num">Age ${R.ageYear}</th><th class="num swimt">Best</th><th class="num">Gap</th><th>Level</th><th class="num" title="Average improvement per year from the last two seasons">Per year</th><th class="num" title="Estimate: best time minus the yearly improvement up to ${R.ageYear} (at most 3% a year)">Projected ${R.ageYear}</th><th>Club</th></tr></thead><tbody>
+      ${G.map(o=>`<tr><td class="num t">${o.rank} <span class="hint">/ ${o.n}</span></td><td><button class="namebtn" data-open="${esc(o.s.id)}">${nameH(o.s.name)}</button></td><td class="num t">${o.age}</td><td class="num t swimt">${fmt(o.r.time)}<br><span class="hint" style="font-family:var(--body)">${fdate(o.r.date)}</span></td>
+        <td class="num t ${o.gap<=0?"up":""}">${o.gap<=0?"−":"+"}${Math.abs(o.gap).toFixed(2)}</td><td>${lvlB(o)}</td><td class="num t ${o.rate>0?"up":""}">${o.rate!=null?(o.rate>0?"−":"+")+Math.abs(o.rate).toFixed(2):"—"}</td>
+        <td class="num t">${o.proj!=null?fmt(o.proj)+(o.proj<=o.t+.001?' <span class="up">✓</span>':""):"—"}</td><td class="wrapok">${esc(o.s.club||"")}</td></tr>`).join("")}</tbody></table></div></div>`}).join("")+
+    `<p class="hint" style="margin-top:12px">Rank is among Thai swimmers in that age group (age counted in ${R.ageYear}). “Per year” is the average change between the swimmer's last two season bests. “Projected” is only an estimate for coaches: young swimmers can improve much faster or slower.</p>`;
+}
+$("#tlTarget").onchange=e=>{ui.tlTarget=e.target.value;renderTalent()};
+$("#tlLevel").addEventListener("click",e=>{const b=e.target.closest("[data-l]");if(b){ui.tlLevel=b.dataset.l;renderTalent()}});
+$("#tlG").addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(b){ui.tlG=b.dataset.g;renderTalent()}});
+$("#tlShow").onchange=e=>{ui.tlShow=e.target.value;renderTalent()};
+$("#tlWin").onchange=e=>{ui.tlWin=+e.target.value;renderTalent()};
+$("#tlBody").addEventListener("click",e=>{const b=e.target.closest("[data-open]");if(b){ui.sel=b.dataset.open;ui.pmode="event";ui.ev=null;show("swimmers");window.scrollTo(0,0)}});
+$("#tlXlsx").onclick=async()=>{const m=$("#tlMsg");const R=talentRows();if(!R||!R.out.length){msg(m,"Nothing to download.",false);return}
+  if(!window.XLSX){msg(m,"The Excel tools didn't load. Reload the page and try again.",false);return}
+  const head=["Gender","Event","Pool","Age group","Thai rank","Of","Name (Thai)","Name (English)","Born","Age "+R.ageYear,"Club","Best time","Date","Meet",R.isB?"Gold":"Qualifying time",R.isB?"Silver":"",R.isB?"Bronze":"","Target used","Gap (s)","Gap (%)","Level","Per year (s)","Projected "+R.ageYear];
+  const rows=R.out.map(o=>[o.x.g==="F"?"Girls":o.x.g==="M"?"Boys":"All",`${o.x.d}m ${o.x.st}`,o.x.c,agTxt(o.x),o.rank,o.n,o.s.nameTh||"",o.s.nameEn||"",o.s.birthYear,o.age,o.s.club||"",fmt(o.r.time),o.r.date,o.r.meet||"",R.isB?(o.x.gold?fmt(o.x.gold):""):fmt(o.x.t),R.isB&&o.x.silver?fmt(o.x.silver):"",R.isB&&o.x.bronze?fmt(o.x.bronze):"",fmt(o.t),+o.gap.toFixed(2),+o.pct.toFixed(2),({g:"Gold",s:"Silver",b:"Bronze",q:"Qualified"})[o.level]||"",o.rate!=null?+(-o.rate).toFixed(2):"",o.proj!=null?fmt(o.proj):""]);
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet([head,...rows]);ws["!cols"]=head.map((h,i)=>({wch:i===6||i===7||i===10||i===13?26:12}));XLSX.utils.book_append_sheet(wb,ws,"Talent");
+  const blob=new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  try{await saveFile(`Talent_${fileSafe(R.set.name)}_${today()}.xlsx`,blob);msg(m,`Saved ${rows.length} rows.`,true)}catch(err){const c=err&&err.code;msg(m,c==="declined"?"Cancelled.":"Couldn't save the file.",c==="declined")}};
 /* club pickers for merging: type any part of the name (or the club code), pick from the list */
 let clubPickList=[];
 function clubMatches(q){const k=fold(q).replace(/\s+/g," ").trim();if(!k)return[];const kk=k.replace(/\s/g,"");
@@ -2103,17 +2360,19 @@ $("#convGo").onclick=async()=>{
 };
 
 /* ---------- routing ---------- */
-const VIEWS=["swimmers","rankings","records","compare","reports","manage"];
-function show(v){if(v==="manage"&&!state.isStaff)v="swimmers";ui.view=v;VIEWS.forEach(x=>{$("#view-"+x).hidden=x!==v;$("#tab-"+x).setAttribute("aria-selected",x===v)});render()}
+const VIEWS=["swimmers","rankings","records","compare","insights","reports","talent","manage"];
+function show(v){if((v==="manage"||v==="talent")&&!state.isStaff)v="swimmers";ui.view=v;VIEWS.forEach(x=>{$("#view-"+x).hidden=x!==v;$("#tab-"+x).setAttribute("aria-selected",x===v)});render()}
 function render(){
   $("#demoBanner").hidden=!state.demo;
-  $("#tab-manage").hidden=!state.isStaff;
+  $("#tab-manage").hidden=!state.isStaff;$("#tab-talent").hidden=!state.isStaff;
   if(state.demo)$("#demoText").textContent=state.isStaff?"These swimmers are samples so you can see how the app works. Upload your first Splash results file under “Admin” and the examples disappear.":!state.live?"These swimmers are samples. The shared results can't be loaded in this view.":"These swimmers are samples so you can see how the app works. Real results appear here once the coach uploads them.";
   if(ui.view==="swimmers"){renderProfile();renderRoster()}
   else if(ui.view==="compare")renderCompare();
   else if(ui.view==="rankings")renderRankings();
   else if(ui.view==="records")renderRecords();
   else if(ui.view==="reports")renderReports();
+  else if(ui.view==="insights")renderInsights();
+  else if(ui.view==="talent")renderTalent();
   else renderManage();
 }
 
@@ -2296,8 +2555,9 @@ async function getSalt(){
 }
 
 /* .lxf is a zip holding one .lef; read it with the browser's own decompressor (no extra library) */
-async function readLenexText(file){
-  if(!/\.lxf$/i.test(file.name))return await file.text();
+async function readLenexText(file){return readZipText(file,/\.(lef|xml)$/i,/\.lxf$/i)}
+async function readZipText(file,want,zipName){
+  if(!(zipName||/\.zip$/i).test(file.name))return await file.text();
   const buf=await file.arrayBuffer(),dv=new DataView(buf);let e=-1;
   for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-66000);i--)if(dv.getUint32(i,true)===0x06054b50){e=i;break}
   if(e<0)throw new Error("not a zip");
@@ -2305,12 +2565,13 @@ async function readLenexText(file){
   for(let k=0;k<n;k++){if(dv.getUint32(p,true)!==0x02014b50)break;
     const method=dv.getUint16(p+10,true),size=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
     const name=new TextDecoder().decode(new Uint8Array(buf,p+46,nl));p+=46+nl+xl+cl;
-    if(!/\.(lef|xml)$/i.test(name))continue;
+    if(!want.test(name))continue;
     const start=off+30+dv.getUint16(off+26,true)+dv.getUint16(off+28,true);const raw=new Uint8Array(buf,start,size);
-    if(method===0)return new TextDecoder("utf-8").decode(raw);
-    if(method===8){const ds=new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return await new Response(ds).text()}
+    const enc=/\.(cl2|sd3|hy3)$/i.test(name)?"windows-1252":"utf-8";
+    if(method===0)return new TextDecoder(enc).decode(raw);
+    if(method===8){const ds=new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return new TextDecoder(enc).decode(await new Response(ds).arrayBuffer())}
     throw new Error("unsupported zip")}
-  throw new Error("no .lef inside");
+  throw new Error("no matching file inside");
 }
 /* Lenex results -> the same columns as the Splash Excel export, so both files go through one import.
    LICENSE carries the citizen ID (13 digits) or passport number, exactly like the Excel CITIZENID / LICENSE columns. */
@@ -2352,17 +2613,96 @@ function lenexResultRows(xmlText){
   }
   return{rows,athletes,relays,meetName:base.MEETNAME,start:base.MEETDATE,end:base.MEETENDDATE};
 }
+
+/* Hy-Tek results (.cl2, SDIF fixed columns), e.g. international meets run by others. Turned into the same columns as the
+   Splash export so one import handles everything. Thai IDs: Hy-Tek keeps 12 of the 13 digits; the 13th is the official
+   check digit, so the full citizen ID is rebuilt (or read from the D3 line when it is there). */
+const thaiCheck=d12=>{let s=0;for(let i=0;i<12;i++)s+=(+d12[i])*(13-i);return String((11-s%11)%10)};
+function cl2Rows(text){
+  const L=text.split(/\r?\n/);const cut=(l,a,b)=>(l.slice(a,b)||"").trim();
+  const md=v=>{const m=String(v||"").match(/^(\d\d)(\d\d)(\d{4})$/);return m?`${m[3]}-${m[1]}-${m[2]}`:""};
+  const CRS={L:"LCM",S:"SCM",Y:"SCY","3":"LCM","1":"SCM","2":"SCY"};const STK={"1":"Freestyle","2":"Backstroke","3":"Breaststroke","4":"Butterfly","5":"Medley","6":"Freestyle relay","7":"Medley relay"};
+  const STAT=t=>{const u=String(t||"").toUpperCase();return u==="DQ"?"DSQ":u==="NS"||u==="SCR"?"DNS":u==="DNF"?"DNF":""};
+  const fullId=(uss,d3)=>{if(/^\d{13}$/.test(d3||""))return d3;if(/^\d{12}$/.test(uss))return uss+thaiCheck(uss);return uss};
+  const splitName=n=>{const[a,b]=String(n).split(",");return b?{first:b.trim(),last:a.trim()}:{first:String(n).trim(),last:""}};
+  const head=["MEETNAME","MEETDATE","MEETENDDATE","SESSIONDATE","COURSE","EVENTNUMBER","STROKE","DISTANCE","RELAYCOUNT","ROUND","GENDER","CLUBNAME","CLUBCODE","CLUBNATION",
+    "FIRSTNAMEEN","LASTNAMEEN","BIRTHDATE","NATION","LICENSE","XSID","PLACE","STATUS","SWIMTIME","ENTRYTIME",...Array.from({length:30},(_,i)=>"SPLIT"+(i+1)*50),
+    "FIRSTNAMEEN1","LASTNAMEEN1","BIRTHDATE1","LICENSE1","NATION1","GENDER1","XSID1"];
+  const idx=Object.fromEntries(head.map((h,i)=>[h,i]));const rows=[head];
+  const put=o=>{const r=head.map(()=>"");Object.entries(o).forEach(([k,v])=>{if(k in idx)r[idx[k]]=v??""});rows.push(r)};
+  let meet={name:"",start:"",end:"",course:""},team={code:"",name:""};const items=[];
+  /* splits: G0 lines (cumulative or lap times) that follow a swim */
+  const readG=l=>{const out=[];const dist=+cut(l,58,62)||50,cum=l[62]!=="I";for(let i=0;i<10;i++){const v=cut(l,63+8*i,71+8*i);if(v)out.push(v)}return{dist,cum,times:out,round:l[143]||"F"}};
+  for(let i=0;i<L.length;i++){const l=L[i];const t=l.slice(0,2);
+    if(t==="B1"){const m=l.match(/(\d{8})(\d{8})/);meet={name:cut(l,11,41),start:m?md(m[1]):"",end:m?md(m[2]):"",course:CRS[l[149]]||""}}
+    else if(t==="C1")team={code:cut(l,11,17),name:cut(l,17,47)};
+    else if(t==="D0"){
+      const d3=(L[i+1]||"").startsWith("D3")?cut(L[i+1],2,15):"";const uss=cut(l,39,51);
+      const it={kind:"ind",team:{...team},nm:splitName(cut(l,11,39)),uss,id:fullId(uss,/^\d{13}$/.test(d3)?d3:""),birth:md(cut(l,55,63)),sex:l[65],cit:cut(l,52,55),
+        dist:cut(l,67,71),st:l[71],ev:cut(l,72,76),date:md(cut(l,80,88)),seed:cut(l,88,96),pre:cut(l,97,105),prec:l[105],fin:cut(l,115,123),finc:l[123],pp:cut(l,132,135),fp:cut(l,135,138),G:{}};
+      for(let j=i+1;j<L.length&&/^(D3|G0)/.test(L[j]);j++){if(L[j].startsWith("G0")){const g=readG(L[j]);(it.G[g.round]||(it.G[g.round]=[])).push(g)}}
+      items.push(it)}
+    else if(t==="E0"){
+      const it={kind:"rel",team:{...team},dist:+cut(l,21,25),st:l[25],ev:cut(l,26,30),sex:l[20],date:md(cut(l,37,45)),pre:cut(l,54,62),fin:cut(l,72,80),finc:l[80],legs:[]};
+      for(let j=i+1;j<L.length&&/^(F0|G0)/.test(L[j]);j++){const f=L[j];
+        if(f.startsWith("F0")){const uss=cut(f,50,62);const fid=cut(f,92,105);it.legs.push({nm:splitName(cut(f,22,50)),uss,id:fullId(uss,/^\d{13}$/.test(fid)?fid:""),birth:md(cut(f,65,73)),sex:f[75],legF:f[78],legP:f[76],G:[]})}
+        else if(it.legs.length)it.legs[it.legs.length-1].G.push(readG(f))}
+      items.push(it)}
+  }
+  const hasPrelims=items.some(x=>x.pre);const base={MEETNAME:meet.name,MEETDATE:meet.start,MEETENDDATE:meet.end&&meet.end!==meet.start?meet.end:""};
+  /* match swimmers the app already has: citizen ID first, then English name + birth date (+ gender) */
+  const byCid=new Map();priv.forEach((v,sid)=>{if(v&&v.cid)byCid.set(String(v.cid),sid)});
+  const nk=n=>fold(n).replace(/[^a-z฀-๿]/g,"");
+  const byName=new Map();state.swimmers.forEach(o=>{if(!o.nameEn)return;const parts=o.nameEn.trim().split(/\s+/);
+    [nk(o.nameEn),nk(parts.slice(1).join("")+parts[0])].forEach(k=>{if(k)(byName.get(k)||byName.set(k,[]).get(k)).push(o)})});
+  const unmatched=new Map();let matchedId=0,matchedName=0;
+  const match=(nm,birth,sex,id,isThaiTeam)=>{
+    if(id&&byCid.has(id)){matchedId++;return byCid.get(id)}
+    const k=nk(nm.first+nm.last);const c=(byName.get(k)||[]).filter(o=>(!o.gender||!sex||o.gender===sex)&&(!birth||!o.birthYear||+o.birthYear===+birth.slice(0,4))&&(!birth||!priv.get(o.id)||!priv.get(o.id).dob||priv.get(o.id).dob===birth));
+    if(c.length===1){matchedName++;return c[0].id}
+    if(isThaiTeam&&!id)unmatched.set(`${nm.first} ${nm.last}`,birth);
+    return"";
+  };
+  const split=(G,distance)=>{const o={};if(!G)return o;let acc=0,d=0;G.forEach(g=>g.times.forEach(v=>{const tt=parseTime(v);d+=g.dist;if(!tt)return;acc=g.cum?tt:acc+tt;if(d<=1500&&d%50===0)o["SPLIT"+d]=fmt(acc)}));return o};
+  const real=items.filter(it=>!/coach/i.test(it.team.name)&&!/-/.test(it.team.code));
+  for(const it of real){
+    const tc=it.team;const club={CLUBNAME:tc.name||tc.code,CLUBCODE:tc.code,CLUBNATION:/^[A-Z]{3}$/.test(tc.code)?tc.code:""};const isThaiTeam=/^THA$/i.test(tc.code);
+    if(it.kind==="ind"){
+      const who={FIRSTNAMEEN:it.nm.first,LASTNAMEEN:it.nm.last,BIRTHDATE:it.birth,NATION:it.cit||club.CLUBNATION,LICENSE:it.id,GENDER:it.sex,XSID:match(it.nm,it.birth,it.sex,/^\d{13}$/.test(it.id)?it.id:"",isThaiTeam)};
+      const common={...base,...club,...who,SESSIONDATE:it.date,EVENTNUMBER:it.ev,STROKE:STK[it.st]||"",DISTANCE:it.dist,RELAYCOUNT:1,ENTRYTIME:/\d/.test(it.seed)?it.seed:""};
+      const swim=(time,crs,place,round,G)=>put({...common,COURSE:CRS[crs]||meet.course,ROUND:round,PLACE:/^\d+$/.test(place)&&+place>0?place:"",STATUS:STAT(time),SWIMTIME:/\d/.test(time)?time:"",...split(G,+it.dist)});
+      if(it.pre)swim(it.pre,it.prec,it.pp,"PRE",it.G.P);
+      if(it.fin)swim(it.fin,it.finc,it.fp,hasPrelims&&it.pre?"FIN":hasPrelims?"FIN":"TIM",it.G.F||it.G.S);
+    }else{
+      const lead=it.legs.find(x=>x.legF==="1")||it.legs.find(x=>x.legP==="1")||it.legs[0];if(!lead||!it.dist)continue;
+      const leg=it.dist/Math.max(1,it.legs.filter(x=>x.legF&&x.legF!==" ").length||4);const time=it.fin||it.pre;
+      put({...base,...club,SESSIONDATE:it.date,COURSE:CRS[it.finc]||meet.course,EVENTNUMBER:it.ev,STROKE:STK[it.st]||"Freestyle relay",DISTANCE:leg,RELAYCOUNT:4,ROUND:hasPrelims?"FIN":"TIM",GENDER:it.sex,STATUS:STAT(time),
+        FIRSTNAMEEN1:lead.nm.first,LASTNAMEEN1:lead.nm.last,BIRTHDATE1:lead.birth,LICENSE1:lead.id,NATION1:club.CLUBNATION,GENDER1:lead.sex,XSID1:match(lead.nm,lead.birth,lead.sex,/^\d{13}$/.test(lead.id)?lead.id:"",isThaiTeam),...split(lead.G,leg)});
+    }
+  }
+  return{rows,meet,teams:[...new Set(real.map(x=>x.team.code))],unmatched,matchedId,matchedName,skippedCoaches:items.length-real.length};
+}
+let importNote="";
 async function readFile(file){
   const pv=$("#preview");$("#fileName").textContent=file.name;pending=null;
-  const isLenex=/\.(lef|lxf)$/i.test(file.name);
-  if(!window.XLSX&&!isLenex){pv.innerHTML=`<div class="msg err">The Excel reader didn't load. Reload the page and try again.</div>`;return}
+  const isLenex=/\.(lef|lxf)$/i.test(file.name);const isCl2=/\.(cl2|zip)$/i.test(file.name);importNote="";
+  if(!window.XLSX&&!isLenex&&!isCl2){pv.innerHTML=`<div class="msg err">The Excel reader didn't load. Reload the page and try again.</div>`;return}
   pv.innerHTML=`<div class="hint">Reading ${esc(file.name)}…</div>`;
   try{
     let rows=null,hIdx=-1;
     if(isLenex){let L;try{L=lenexResultRows(await readLenexText(file))}catch(err){pv.innerHTML=`<div class="msg err">Couldn't read this Lenex file. Export the results from Splash again as .lef or .lxf.</div>`;return}
       if(L.rows.length<2){pv.innerHTML=`<div class="msg err">No results found in this Lenex file.</div>`;return}
       rows=L.rows;hIdx=0}
-    const wb=isLenex?{SheetNames:[]}:XLSX.read(await file.arrayBuffer(),{type:"array"});
+    if(isCl2){let C;try{C=cl2Rows(await readZipText(file,/\.cl2$/i,/\.zip$/i))}catch(err){pv.innerHTML=`<div class="msg err">Couldn't read this file. Use the Hy-Tek results export (.cl2), on its own or inside its .zip.</div>`;return}
+      if(C.rows.length<2){pv.innerHTML=`<div class="msg err">No results found in this .cl2 file.</div>`;return}
+      rows=C.rows;hIdx=0;
+      /* international meets: teams are countries, and normally only the Thai team is wanted */
+      if(C.teams.every(t=>/^[A-Z]{3}$/.test(t))&&C.teams.length>1){$("#iTeam").value="N";$("#iThaiOnly").checked=true}
+      const un=[...C.unmatched];
+      importNote=`<div class="hint" style="color:var(--fg);margin-bottom:8px"><b>Hy-Tek file:</b> ${esc(C.meet.name)}${C.meet.start?" · "+esc(fperiod(C.meet.start,C.meet.end)):""}. Teams set to <b>${ttEn($("#iTeam").value)}</b>${$("#iThaiOnly").checked?", <b>Thai swimmers only</b>":""} (change above and choose the file again if needed).
+        ${C.matchedId+C.matchedName?` Matched to swimmers already in the app: ${C.matchedId} by citizen ID, ${C.matchedName} by English name and birth date.`:""}
+        ${un.length?`<br><span style="color:var(--bad)">${un.length} Thai swimmer${un.length>1?"s have":" has"} no ID and no match, so ${un.length>1?"they":"it"} will be added as new: ${esc(un.slice(0,15).map(([n,b])=>n+(b?" ("+b.slice(0,4)+")":"")).join(", "))}${un.length>15?", …":""}. Check Possible duplicates after uploading.</span>`:""}</div>`}
+    const wb=(isLenex||isCl2)?{SheetNames:[]}:XLSX.read(await file.arrayBuffer(),{type:"array"});
     for(const name of wb.SheetNames){const r=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:""});
       const i=r.findIndex(row=>{const u=row.map(c=>String(c).trim().toUpperCase());return u.includes("SWIMTIME")&&(u.includes("FIRSTNAME")||u.includes("FIRSTNAMEEN"))});
       if(i>=0){rows=r;hIdx=i;break}}
@@ -2400,7 +2740,7 @@ async function readFile(file){
       const birthDate=parseDate(g.BIRTHDATE);const birthYear=birthDate?+birthDate.slice(0,4):null;
       const idn=normId(g.CITIZENID)||normId(g.PASSPORT||g.PASSPORTNO)||licId(g.LICENSE)||licId(g.REGISTRATIONID);
       const cid=idn?idn.id:"";
-      const sid=await sidOf(idn?idn.key:"n:"+(nameEn||nameTh).toLowerCase()+"|"+(birthDate||""));
+      const sid=norm(g.XSID)||await sidOf(idn?idn.key:"n:"+(nameEn||nameTh).toLowerCase()+"|"+(birthDate||""));
       [nameEn,nameTh].forEach(n=>{if(n)fileByName.set(nmKey(n,birthDate),{sid,cid})});
       const course=mapCourse(g.COURSE,defCourse);
       const time=parseTime(g.SWIMTIME);
@@ -2439,7 +2779,7 @@ async function readFile(file){
       const nameEn=fEn||(thai(full)?"":full),nameTh=thai(full)?full:"";
       const idn=normId(g.CITIZENID1)||licId(g.LICENSE1);
       let sid=null,cid=idn?idn.id:"";
-      if(idn)sid=await sidOf(idn.key);
+      if(norm(g.XSID1))sid=norm(g.XSID1);else if(idn)sid=await sidOf(idn.key);
       if(!sid){const hit=[nameEn,nameTh,full].map(x=>x&&fileByName.get(nmKey(x,birthDate))).find(Boolean);if(hit){sid=hit.sid;cid=cid||hit.cid}}
       if(!sid&&!state.demo){const want=[nameEn,nameTh,full].filter(Boolean).map(fold);const ex=state.swimmers.filter(o=>want.some(w=>w===fold(o.nameEn)||w===fold(o.nameTh))&&(!birthYear||!o.birthYear||+o.birthYear===birthYear));if(ex.length===1)sid=ex[0].id}
       if(!sid)sid=await sidOf("n:"+(nameEn||nameTh).toLowerCase()+"|"+(birthDate||""));
@@ -2477,7 +2817,7 @@ async function readFile(file){
     const meetLine=[...firstOf.values()].map(r=>`${esc(r.meet)} · ${meetPeriod(r)}`).join("; ");
     const isExisting=inMeet.length>0;
     const teamsIn=[...new Set(recs.map(r=>r.rec.team).filter(Boolean))];
-    pv.innerHTML=`<div class="hint" style="font-size:14px;color:var(--fg)"><b>${isExisting?"Already in the app":"New meet"}:</b> ${meetLine}${isExisting?` (${inMeet.length} results stored now)`:""}</div>
+    pv.innerHTML=importNote+`<div class="hint" style="font-size:14px;color:var(--fg)"><b>${isExisting?"Already in the app":"New meet"}:</b> ${meetLine}${isExisting?` (${inMeet.length} results stored now)`:""}</div>
       <div class="hint">Teams: <b>${teamsIn.length} ${teamsIn.length===1?ttEn(teamType).toLowerCase():ttPl(teamType)}</b>${teamsIn.length?` (${esc(teamsIn.slice(0,6).join(", "))}${teamsIn.length>6?", …":""})`:""}. ${teamType==="C"?"Swimmers' clubs are updated from this meet.":`Swimmers' clubs are not changed; each swim is recorded as representing their ${ttEn(teamType).toLowerCase()}.`}</div>
       ${isExisting&&!replace?`<div class="hint">${picked?"Replace is off":"This meet is already in the app. To replace it, choose it under “Upload to”"}. Results are added and updated, nothing is removed.</div>`:""}
       <div class="stats">
@@ -2853,7 +3193,7 @@ async function buildPortfolio(s,o){
   const evKeys=[...evs.keys()].sort((a,b)=>{const[sa,da,ca]=a.split("|"),[sb,db,cb]=b.split("|");return ca.localeCompare(cb)||STROKES.indexOf(sa)-STROKES.indexOf(sb)||da-db});
   const doc={titleTh:"แฟ้มสะสมผลงานนักกีฬาว่ายน้ำ",titleEn:"Swimmer Performance Portfolio",issue,code:await portfolioCode(s,issue),
     sub:`${esc(s.nameTh||s.nameEn)}${s.nameTh&&s.nameEn?` · ${esc(s.nameEn)}`:""}<br>ช่วงเวลา / Period: ${y0===y1?y0:`${y0} – ${y1}`}`,
-    runSub:s.nameEn||s.nameTh,foot:"ข้อมูลจากการแข่งขันที่ดำเนินการโดย Swim Meets Thailand · Compiled from meets run by Swim Meets Thailand",blocks:[]};
+    runSub:s.nameEn||s.nameTh,foot:"ข้อมูลจากการแข่งขันที่ดำเนินการหรือบันทึกโดย Swim Meets Thailand · Compiled from meets run or recorded by Swim Meets Thailand",blocks:[]};
   const B=doc.blocks;
   const age=s.birthYear?new Date().getFullYear()-s.birthYear:null;
   B.push(sec("ข้อมูลนักกีฬา","Athlete profile"));
@@ -2861,7 +3201,7 @@ async function buildPortfolio(s,o){
     ["ปีเกิด","Year of birth",s.birthYear?`${s.birthYear} (พ.ศ. ${s.birthYear+543}) · อายุ ${age} ปีในปี ${new Date().getFullYear()} / age ${age} in ${new Date().getFullYear()}`:"—"],
     ["สังกัด","Club / team",esc([s.club,s.clubCode?`(${s.clubCode})`:""].filter(Boolean).join(" ")||"—")],["สัญชาติ","Nationality",esc(s.nation||"—")],
     ["ช่วงการแข่งขัน","Competition period",byDate.length?`${rDate(byDate[0].date)} – ${rDate(byDate[byDate.length-1].date)}`:"—"],
-    ["แหล่งข้อมูล","Source","ผลการแข่งขันที่ดำเนินการโดย Swim Meets Thailand · Results from swim meets run by Swim Meets Thailand"],
+    ["แหล่งข้อมูล","Source","ผลการแข่งขันที่ดำเนินการหรือบันทึกโดย Swim Meets Thailand · Results from swim meets run or recorded by Swim Meets Thailand"],
     ["สถิติรวม","Summary",`${meets} รายการแข่งขัน / meets · ${inP.length} ครั้งที่ลงแข่ง / swims · ${evKeys.length} ประเภท / events`]];
   B.push({t:"html",html:`<table class="rp-kv">${kv.map(([t,e,v])=>`<tr><th>${t}<br><span class="en">${e}</span></th><td>${v}</td></tr>`).join("")}</table>`});
 
@@ -3356,6 +3696,7 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
     if(!db){if(!window.claude)await loadPublicData();render();ready();return}
     state.live=true;render();
     db.doc("settings/records").onSnapshot(d=>{recDoc=d.exists?d.data():{};recIdx=null;if(ui.view==="manage")renderRecordsAdmin();else if(state.swimmers.length)render()},()=>{});
+    if(state.isStaff)db.doc("settings/benchmarks").onSnapshot(d=>{bmDoc=d.exists?d.data():{sets:[]};if(!bmDoc.sets)bmDoc.sets=[];if(ui.view==="talent")renderTalent()},()=>{});
     db.doc("settings/standards").onSnapshot(d=>{stdDoc=d.exists?d.data():{lists:[]};if(!stdDoc.lists)stdDoc.lists=[];if(ui.view==="manage")renderStdAdmin();else if(state.swimmers.length)render()},()=>{});
     db.doc("settings/basetimes").onSnapshot(d=>{btSaved=d.exists?d.data():null;if(state.swimmers.length&&ui.view!=="manage")render();else if(ui.view==="manage")renderBaseTimes()},()=>{});
     db.doc("settings/clubs").onSnapshot(d=>{const v=d.exists?d.data():{};clubAlias=v.alias||{};clubNotSame=new Set(v.notSame||[]);excludedTeams=new Set(v.excluded||[]);if(ui.view==="manage")renderTeamRemoval();if(ui.view==="manage")renderClubs()},()=>{});
@@ -3364,7 +3705,7 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
     if(state.isStaff){
       db.collection("staff").onSnapshot(sn=>{const m=new Map();sn.docs.forEach(d=>{if(d.id.startsWith("priv-")){const b=d.data().m||{};Object.entries(b).forEach(([k,v])=>m.set(k,v))}if(d.id==="dupe-ignore")dupIgnore=new Set(Object.keys(d.data().pairs||{}))});priv=m;scheduleDupScan();
         if(ui.view==="swimmers"&&!(ui.editing&&$("#profile").contains(document.activeElement)))renderProfile()},()=>{})}
-    if(h==="manage"&&state.isStaff)show("manage");
+    if((h==="manage"||h==="talent")&&state.isStaff)show(h);
     let rawSw=null,meetsReady=false;
     const applySwimmers=list=>{
       if(!list.length)useDemo();else{if(state.demo)ui.sel=null;setSwimmers(list);state.demo=false}
