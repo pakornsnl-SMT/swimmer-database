@@ -2511,7 +2511,7 @@ function lenexResultRows(xmlText){
   const STK={FREE:"Freestyle",BACK:"Backstroke",BREAST:"Breaststroke",FLY:"Butterfly",MEDLEY:"Medley",IMRELAY:"Medley"};
   const head=["MEETNAME","MEETDATE","MEETENDDATE","SESSIONDATE","COURSE","EVENTNUMBER","STROKE","DISTANCE","RELAYCOUNT","ROUND","GENDER","CLUBNAME","CLUBCODE","CLUBNATION",
     "FIRSTNAME","LASTNAME","FIRSTNAMEEN","LASTNAMEEN","NAMEPREFIX","BIRTHDATE","NATION","LICENSE","PLACE","STATUS","SWIMTIME","ENTRYTIME","REACTIONTIME",
-    ...Array.from({length:30},(_,i)=>"SPLIT"+(i+1)*50),"FIRSTNAME1","LASTNAME1","FIRSTNAMEEN1","LASTNAMEEN1","BIRTHDATE1","LICENSE1","NATION1","GENDER1","RT1"];
+    ...Array.from({length:30},(_,i)=>"SPLIT"+(i+1)*50),"FIRSTNAME1","LASTNAME1","FIRSTNAMEEN1","LASTNAMEEN1","BIRTHDATE1","LICENSE1","NATION1","GENDER1","RT1","XSID","XSID1"];
   const rows=[head];const idx=Object.fromEntries(head.map((h,i)=>[h,i]));
   const base={MEETNAME:A(meet,"name"),MEETDATE:dates[0]||"",MEETENDDATE:dates.length>1?dates[dates.length-1]:""};
   const rt=v=>{const n=parseInt(v,10);return n>0?(n/100).toFixed(2):""};   // Lenex reaction time is in 1/100 s, e.g. "+67"
@@ -2523,7 +2523,8 @@ function lenexResultRows(xmlText){
   for(const club of doc.querySelectorAll("CLUBS > CLUB")){
     const cl={CLUBNAME:A(club,"name"),CLUBCODE:A(club,"code"),CLUBNATION:A(club,"nation")};const byId=new Map();
     for(const a of club.querySelectorAll("ATHLETES > ATHLETE")){byId.set(A(a,"athleteid"),a);athletes++;
-      const who={FIRSTNAME:A(a,"firstname"),LASTNAME:A(a,"lastname"),FIRSTNAMEEN:A(a,"firstname.en"),LASTNAMEEN:A(a,"lastname.en"),NAMEPREFIX:A(a,"nameprefix"),
+      const enOnly=!A(a,"firstname.en")&&!A(a,"lastname.en")&&!/[\u0e00-\u0e7f]/.test(A(a,"firstname")+A(a,"lastname"));
+      const who={FIRSTNAME:enOnly?"":A(a,"firstname"),LASTNAME:enOnly?"":A(a,"lastname"),FIRSTNAMEEN:enOnly?A(a,"firstname"):A(a,"firstname.en"),LASTNAMEEN:enOnly?A(a,"lastname"):A(a,"lastname.en"),NAMEPREFIX:A(a,"nameprefix"),
         BIRTHDATE:A(a,"birthdate"),NATION:A(a,"nation"),LICENSE:A(a,"license"),GENDER:A(a,"gender")};
       for(const res of a.querySelectorAll("RESULTS > RESULT")){const e=ev.get(A(res,"eventid"));if(!e)continue;
         put({...cl,...who,...common(res,e),STROKE:STK[e.stroke]||e.stroke,DISTANCE:e.distance,RELAYCOUNT:1,REACTIONTIME:rt(A(res,"reactiontime"))})}}
@@ -2531,12 +2532,32 @@ function lenexResultRows(xmlText){
       const first=[...res.querySelectorAll("RELAYPOSITIONS > RELAYPOSITION")].find(x=>A(x,"number")==="1");
       const a=first&&(byId.get(A(first,"athleteid"))||doc.querySelector(`ATHLETE[athleteid="${A(first,"athleteid")}"]`));
       put({...cl,...common(res,e),STROKE:(STK[e.stroke]||e.stroke)+" relay",DISTANCE:e.distance,RELAYCOUNT:e.legs,GENDER:e.gender,
-        FIRSTNAME1:A(a,"firstname"),LASTNAME1:A(a,"lastname"),FIRSTNAMEEN1:A(a,"firstname.en"),LASTNAMEEN1:A(a,"lastname.en"),BIRTHDATE1:A(a,"birthdate"),
+        ...(()=>{const en=!A(a,"firstname.en")&&!A(a,"lastname.en")&&!/[\u0e00-\u0e7f]/.test(A(a,"firstname")+A(a,"lastname"));
+          return{FIRSTNAME1:en?"":A(a,"firstname"),LASTNAME1:en?"":A(a,"lastname"),FIRSTNAMEEN1:en?A(a,"firstname"):A(a,"firstname.en"),LASTNAMEEN1:en?A(a,"lastname"):A(a,"lastname.en")}})(),BIRTHDATE1:A(a,"birthdate"),
         LICENSE1:A(a,"license"),NATION1:A(a,"nation"),GENDER1:A(a,"gender"),RT1:rt(A(first,"reactiontime"))})}
   }
-  return{rows,athletes,relays,meetName:base.MEETNAME,start:base.MEETDATE,end:base.MEETENDDATE};
+  const clubs=[...doc.querySelectorAll("CLUBS > CLUB")].map(c=>({code:A(c,"code"),nation:A(c,"nation"),type:A(c,"type")}));
+  return{rows,athletes,relays,clubs,meetName:base.MEETNAME,start:base.MEETDATE,end:base.MEETENDDATE};
 }
 
+/* match swimmers the app already has: citizen ID first, then English name + birth date (+ gender).
+   Used for files from other organisers (Hy-Tek, foreign Lenex) that carry no Thai ID. */
+function nameMatcher(){
+  const byCid=new Map();priv.forEach((v,sid)=>{if(v&&v.cid)byCid.set(String(v.cid),sid)});
+  const nk=n=>fold(n).replace(/[^a-z฀-๿]/g,"");
+  const byName=new Map();state.swimmers.forEach(o=>{if(!o.nameEn)return;const parts=o.nameEn.trim().split(/\s+/);
+    [nk(o.nameEn),nk(parts.slice(1).join("")+parts[0])].forEach(k=>{if(k)(byName.get(k)||byName.set(k,[]).get(k)).push(o)})});
+  const unmatched=new Map(),n={id:0,name:0};
+  const match=(nm,birth,sex,id,isThaiTeam)=>{
+    if(state.demo)return"";
+    if(id&&byCid.has(id)){n.id++;return byCid.get(id)}
+    const k=nk(nm.first+nm.last);const c=(byName.get(k)||[]).filter(o=>(!o.gender||!sex||o.gender===sex)&&(!birth||!o.birthYear||+o.birthYear===+birth.slice(0,4))&&(!birth||!priv.get(o.id)||!priv.get(o.id).dob||priv.get(o.id).dob===birth));
+    if(c.length===1){n.name++;return c[0].id}
+    if(isThaiTeam&&!id)unmatched.set(`${nm.first} ${nm.last}`,birth);
+    return"";
+  };
+  return{match,unmatched,n};
+}
 /* Hy-Tek results (.cl2, SDIF fixed columns), e.g. international meets run by others. Turned into the same columns as the
    Splash export so one import handles everything. Thai IDs: Hy-Tek keeps 12 of the 13 digits; the 13th is the official
    check digit, so the full citizen ID is rebuilt (or read from the D3 line when it is there). */
@@ -2573,19 +2594,7 @@ function cl2Rows(text){
       items.push(it)}
   }
   const hasPrelims=items.some(x=>x.pre);const base={MEETNAME:meet.name,MEETDATE:meet.start,MEETENDDATE:meet.end&&meet.end!==meet.start?meet.end:""};
-  /* match swimmers the app already has: citizen ID first, then English name + birth date (+ gender) */
-  const byCid=new Map();priv.forEach((v,sid)=>{if(v&&v.cid)byCid.set(String(v.cid),sid)});
-  const nk=n=>fold(n).replace(/[^a-z฀-๿]/g,"");
-  const byName=new Map();state.swimmers.forEach(o=>{if(!o.nameEn)return;const parts=o.nameEn.trim().split(/\s+/);
-    [nk(o.nameEn),nk(parts.slice(1).join("")+parts[0])].forEach(k=>{if(k)(byName.get(k)||byName.set(k,[]).get(k)).push(o)})});
-  const unmatched=new Map();let matchedId=0,matchedName=0;
-  const match=(nm,birth,sex,id,isThaiTeam)=>{
-    if(id&&byCid.has(id)){matchedId++;return byCid.get(id)}
-    const k=nk(nm.first+nm.last);const c=(byName.get(k)||[]).filter(o=>(!o.gender||!sex||o.gender===sex)&&(!birth||!o.birthYear||+o.birthYear===+birth.slice(0,4))&&(!birth||!priv.get(o.id)||!priv.get(o.id).dob||priv.get(o.id).dob===birth));
-    if(c.length===1){matchedName++;return c[0].id}
-    if(isThaiTeam&&!id)unmatched.set(`${nm.first} ${nm.last}`,birth);
-    return"";
-  };
+  const MM=nameMatcher(),match=MM.match;
   const split=(G,distance)=>{const o={};if(!G)return o;let acc=0,d=0;G.forEach(g=>g.times.forEach(v=>{const tt=parseTime(v);d+=g.dist;if(!tt)return;acc=g.cum?tt:acc+tt;if(d<=1500&&d%50===0)o["SPLIT"+d]=fmt(acc)}));return o};
   const real=items.filter(it=>!/coach/i.test(it.team.name)&&!/-/.test(it.team.code));
   for(const it of real){
@@ -2603,7 +2612,7 @@ function cl2Rows(text){
         FIRSTNAMEEN1:lead.nm.first,LASTNAMEEN1:lead.nm.last,BIRTHDATE1:lead.birth,LICENSE1:lead.id,NATION1:club.CLUBNATION,GENDER1:lead.sex,XSID1:match(lead.nm,lead.birth,lead.sex,/^\d{13}$/.test(lead.id)?lead.id:"",isThaiTeam),...split(lead.G,leg)});
     }
   }
-  return{rows,meet,teams:[...new Set(real.map(x=>x.team.code))],unmatched,matchedId,matchedName,skippedCoaches:items.length-real.length};
+  return{rows,meet,teams:[...new Set(real.map(x=>x.team.code))],unmatched:MM.unmatched,matchedId:MM.n.id,matchedName:MM.n.name,skippedCoaches:items.length-real.length};
 }
 let importNote="";
 async function readFile(file){
@@ -2615,7 +2624,19 @@ async function readFile(file){
     let rows=null,hIdx=-1;
     if(isLenex){let L;try{L=lenexResultRows(await readLenexText(file))}catch(err){pv.innerHTML=`<div class="msg err">Couldn't read this Lenex file. Export the results from Splash again as .lef or .lxf.</div>`;return}
       if(L.rows.length<2){pv.innerHTML=`<div class="msg err">No results found in this Lenex file.</div>`;return}
-      rows=L.rows;hIdx=0}
+      rows=L.rows;hIdx=0;
+      /* national teams (Asian Games, SEA Games …): teams are countries, normally only the Thai team is wanted, and swimmers
+         without a licence are matched to the app's swimmers by English name and birth date */
+      const nat=L.clubs.length>1&&L.clubs.every(c=>/^[A-Z]{3}$/.test(c.code)&&(!c.nation||c.nation===c.code));
+      if(nat){$("#iTeam").value="N";$("#iThaiOnly").checked=true}
+      const MM=nameMatcher(),hx=Object.fromEntries(rows[0].map((h,i)=>[h,i]));
+      for(const r of rows.slice(1)){
+        if(!r[hx.LICENSE]&&(r[hx.FIRSTNAMEEN]||r[hx.LASTNAMEEN]))r[hx.XSID]=MM.match({first:r[hx.FIRSTNAMEEN],last:r[hx.LASTNAMEEN]},r[hx.BIRTHDATE],r[hx.GENDER],"",nat&&isThai({nation:r[hx.NATION]||r[hx.CLUBNATION]}));
+        if(!r[hx.LICENSE1]&&(r[hx.FIRSTNAMEEN1]||r[hx.LASTNAMEEN1]))r[hx.XSID1]=MM.match({first:r[hx.FIRSTNAMEEN1],last:r[hx.LASTNAMEEN1]},r[hx.BIRTHDATE1],r[hx.GENDER1],"",nat&&isThai({nation:r[hx.NATION1]||r[hx.CLUBNATION]}))}
+      if(nat||MM.n.name){const un=[...MM.unmatched];
+        importNote=`<div class="hint" style="color:var(--fg);margin-bottom:8px"><b>Lenex file:</b> ${esc(L.meetName)}${L.start?" · "+esc(fperiod(L.start,L.end)):""}.${nat?` Teams set to <b>${ttEn($("#iTeam").value)}</b>, <b>Thai swimmers only</b> (change above and choose the file again if needed).`:""}
+          ${MM.n.name?` Matched to swimmers already in the app by English name and birth date: ${MM.n.name} results.`:""}
+          ${un.length?`<br><span style="color:var(--bad)">${un.length} Thai swimmer${un.length>1?"s have":" has"} no match, so ${un.length>1?"they":"it"} will be added as new: ${esc(un.slice(0,15).map(([n,b])=>n+(b?" ("+b.slice(0,4)+")":"")).join(", "))}${un.length>15?", …":""}. Check Possible duplicates after uploading.</span>`:""}</div>`}}
     if(isCl2){let C;try{C=cl2Rows(await readZipText(file,/\.cl2$/i,/\.zip$/i))}catch(err){pv.innerHTML=`<div class="msg err">Couldn't read this file. Use the Hy-Tek results export (.cl2), on its own or inside its .zip.</div>`;return}
       if(C.rows.length<2){pv.innerHTML=`<div class="msg err">No results found in this .cl2 file.</div>`;return}
       rows=C.rows;hIdx=0;
