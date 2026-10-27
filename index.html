@@ -391,6 +391,8 @@ html:not(.ready) .boot{display:block}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .ins-note{font-size:13px;margin-top:6px}
+.imp-find{margin:8px 0 4px;padding-left:18px;font-size:14px;line-height:1.5}.imp-find li{margin-bottom:6px}.imp-find .hint{display:block}
+.imp-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
 .imp-t{border-collapse:collapse;margin-top:8px;font-size:13px;width:100%;max-width:520px}.imp-t th,.imp-t td{text-align:left;padding:5px 10px 5px 0;border-bottom:1px solid var(--line);vertical-align:top}.imp-t td:first-child{white-space:nowrap}.imp-t td:first-child{font-variant-numeric:tabular-nums}
 .combo{position:relative;min-width:0}
 .combo>input{width:100%}
@@ -2174,7 +2176,7 @@ function renderInsights(){
   $("#inBody").innerHTML=h;
 }
 /* improvement by age: best time per swimmer/event/pool at age a vs age a+1, all strokes together */
-const IMP_MIN=10;
+const IMP_MIN=20;
 function improveByAge(thaiOnly){
   const med=a=>{const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
   const best=new Map();
@@ -2188,7 +2190,7 @@ function improveByAge(thaiOnly){
   const st={F:new Map(),M:new Map()};
   for(const G of["F","M"])for(const[a,v]of g[G])if(v.length>=IMP_MIN)st[G].set(a,{n:v.length,m:med(v),up:v.filter(x=>x>0).length/v.length*100});
   const ages=[...new Set([...st.F.keys(),...st.M.keys()])].sort((a,b)=>a-b);
-  const head=`<h3>Improvement by age</h3><div class="hint">How much faster swimmers got from one age to the next: each swimmer's best time in an event at one age vs the next age, same pool, all strokes together. Uses every year of results, not only the period above.</div>`;
+  const head=`<h3>How much faster each year?</h3><div class="hint">How much a typical swimmer's time drops from one age to the next. The higher the line, the bigger the improvement.</div>`;
   if(!ages.length)return`<div class="ins-sec">${head}<div class="hint" style="margin-top:8px">Not enough swimmers yet who raced the same event at two ages in a row (at least ${IMP_MIN} needed per age).</div></div>`;
   const a0=ages[0],a1=ages[ages.length-1],span=Math.max(1,a1-a0);
   const vals=[...st.F.values(),...st.M.values()].map(o=>o.m);const lo=Math.min(0,Math.floor(Math.min(...vals))),hi=Math.max(1,Math.ceil(Math.max(...vals)));
@@ -2199,13 +2201,25 @@ function improveByAge(thaiOnly){
       dots+=`<circle cx="${X(a).toFixed(1)}" cy="${Y(o.m).toFixed(1)}" r="4" fill="${col}"><title>${G==="F"?"Girls":"Boys"} ${a}→${a+1}: ${o.m.toFixed(1)}% faster (median, ${o.n} swimmers, ${Math.round(o.up)}% got faster)</title></circle>`}
     return`<path d="${d}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>${dots}`};
   const svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;display:block;margin-top:8px" role="img" aria-label="Median improvement by age, girls and boys">${grid}${xl}${line("F","var(--c6)")}${line("M","var(--c7)")}</svg>`;
-  const cell=o=>o?`<b>${o.m>=0?"":"−"}${Math.abs(o.m).toFixed(1)}%</b><br><span class="hint">${Math.round(o.up)}% faster · ${o.n}</span>`:`<span class="hint">—</span>`;
-  const tbl=`<div style="overflow-x:auto"><table class="imp-t"><thead><tr><th>Age</th><th>Girls</th><th>Boys</th></tr></thead><tbody>${ages.map(a=>`<tr><td>${a}→${a+1}</td><td>${cell(st.F.get(a))}</td><td>${cell(st.M.get(a))}</td></tr>`).join("")}</tbody></table></div>`;
-  const pct=v=>(v<0?"−":"")+Math.abs(v).toFixed(1)+"%";const say=(G,nm)=>{const e=[...st[G]];if(e.length<2)return"";const mx=e.reduce((p,c)=>c[1].m>p[1].m?c:p),mn=e.reduce((p,c)=>c[1].m<p[1].m?c:p);
-    return`${nm}: biggest improvement <b>${mx[0]}→${mx[0]+1}</b> (${pct(mx[1].m)}), slowest <b>${mn[0]}→${mn[0]+1}</b> (${pct(mn[1].m)}). `};
-  return`<div class="ins-sec">${head}${svg}<div class="legend"><span><i style="background:var(--c6)"></i>Girls</span><span><i style="background:var(--c7)"></i>Boys</span></div>
-    <p class="ins-note">${say("F","Girls")}${say("M","Boys")}</p>${tbl}
-    <p class="hint" style="margin-top:6px">The % is the middle value (median) across swimmers, so one big jump can't skew it. "% faster" is the share of swimmers who improved. Ages with fewer than ${IMP_MIN} swimmers are hidden. Swimmers who stopped racing aren't counted, so the numbers lean slightly positive.</p></div>`;
+  const stage=m=>m>=4?["var(--good)","Big gain"]:m>=1?["var(--gold)","Steady"]:["var(--muted)","Small"];
+  const pct=v=>(v<0?"−":"")+Math.abs(v).toFixed(1)+"%";
+  const share=u=>u>=95?"almost all got faster":u>=55?`${Math.round(u/10)} in 10 got faster`:u>=45?"about half got faster":`only ${Math.round(u/10)} in 10 got faster`;
+  const cell=o=>o?`<span title="${o.n} swimmers"><i class="imp-dot" style="background:${stage(o.m)[0]}"></i><b>${pct(o.m)}</b> faster<br><span class="hint" style="padding-left:15px">${share(o.up)}</span></span>`:`<span class="hint">—</span>`;
+  const tbl=`<div style="overflow-x:auto"><table class="imp-t"><thead><tr><th>Age</th><th>Girls</th><th>Boys</th></tr></thead><tbody>${ages.map(a=>`<tr><td>${a} → ${a+1}</td><td>${cell(st.F.get(a))}</td><td>${cell(st.M.get(a))}</td></tr>`).join("")}</tbody></table></div>`;
+  /* plain-language findings */
+  const find=(G,nm,who)=>{const e=[...st[G]].sort((a,b)=>a[0]-b[0]);if(e.length<2)return"";
+    let big=null;for(const[a,o]of e){if(o.m>=4)big=a;else if(big!=null)break}
+    const small=e.find(([a,o])=>o.m<1&&(big==null||a>big));
+    const ex=e.find(([a])=>a===11)||e[Math.floor(e.length/2)];const t0=80,t1=t0*(1-ex[1].m/100);
+    let txt=`<b>${nm}</b> `;
+    txt+=big!=null?`improve a lot (4% or more a year) until about <b>age ${big+1}</b>`:`never reach big gains (4% a year) in this data`;
+    txt+=small?`, and gains become small (under 1% a year) from <b>age ${small[0]}</b>.`:".";
+    txt+=` <span class="hint">Example: a ${who} who swims 100 m in ${fmt(t0)} at age ${ex[0]} typically swims about ${fmt(t1)} at age ${ex[0]+1}.</span>`;
+    return`<li>${txt}</li>`};
+  return`<div class="ins-sec">${head}<ul class="imp-find">${find("F","Girls","girl")}${find("M","Boys","boy")}</ul>${svg}
+    <div class="legend"><span><i style="background:var(--c6)"></i>Girls</span><span><i style="background:var(--c7)"></i>Boys</span></div>
+    <div class="legend" style="margin-top:14px"><span><i class="imp-dot" style="background:var(--good)"></i>Big gain (4% or more)</span><span><i class="imp-dot" style="background:var(--gold)"></i>Steady (1–4%)</span><span><i class="imp-dot" style="background:var(--muted)"></i>Small (under 1%)</span></div>${tbl}
+    <details style="margin-top:8px"><summary class="hint">How is this worked out?</summary><p class="hint" style="margin-top:6px">For each swimmer, we compare their best time in an event at one age with their best time in the same event and pool length at the next age (age by birth year). All strokes and distances are counted together. The % shown is the typical (middle) swimmer, so one unusually big jump can't change it. Ages with fewer than ${IMP_MIN} swimmers are hidden. Swimmers who stopped racing aren't counted, so the numbers lean slightly positive. Uses every year of results, not only the period chosen above.</p></details></div>`;
 }
 $("#inScope").addEventListener("click",e=>{const b=e.target.closest("[data-sc]");if(b){ui.inScope=b.dataset.sc;renderInsights()}});
 $("#inNat").addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(b){ui.inNat=b.dataset.n;renderInsights()}});
