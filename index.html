@@ -254,6 +254,7 @@ form .full{grid-column:1/-1}
 .idmain .th{font-size:17px;color:var(--muted);margin-top:2px}
 .idmain .tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
 .tag{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--surface-2);color:var(--muted)}
+.tag.inactive{background:transparent;border:1px dashed var(--muted)}
 .facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 18px;margin:0}
 .facts div{min-width:0}
 .facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
@@ -634,8 +635,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       </div>
       <div class="rk-top">
         <div class="field"><span class="lbl">Show</span><div class="seg" id="kTop" role="group" aria-label="How many swimmers to show"><button data-n="10" aria-pressed="false">Top 10</button><button data-n="20" aria-pressed="false">Top 20</button><button data-n="50" aria-pressed="false">Top 50</button><button data-n="100" aria-pressed="true">Top 100</button></div></div>
-        <div class="field"><label class="lbl" for="kFrom">From</label><input type="date" id="kFrom"></div>
-        <div class="field"><label class="lbl" for="kTo">To</label><input type="date" id="kTo"></div>
+        <div class="field"><label class="lbl" for="kFrom">From</label><input type="date" min="1950-01-01" max="2100-12-31" id="kFrom"></div>
+        <div class="field"><label class="lbl" for="kTo">To</label><input type="date" min="1950-01-01" max="2100-12-31" id="kTo"></div>
         <div class="field"><span class="lbl">Quick period</span><div class="presets" id="kPresets"></div></div>
         <div class="field"><label class="lbl" for="kAge">Age</label><select id="kAge"></select></div>
         <div class="field" id="kAgeCustom" hidden><span class="lbl">Ages from – to</span><div class="period"><input type="number" id="kAgeLo" min="4" max="99" placeholder="10" aria-label="Youngest age" style="width:80px;flex:0 0 80px"><span>to</span><input type="number" id="kAgeHi" min="4" max="99" placeholder="12" aria-label="Oldest age" style="width:80px;flex:0 0 80px"></div></div>
@@ -774,7 +775,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <form id="fImport" autocomplete="off">
         <div class="field full"><label class="lbl" for="iPick">Upload to</label><select id="iPick"></select></div>
         <div class="field"><label class="lbl" for="iMeet">Meet name</label><input type="text" id="iMeet" placeholder="e.g. Thailand Age Group Championships 2026"></div>
-        <div class="field"><span class="lbl">Meet period</span><div class="period"><input type="date" id="iDate" aria-label="Start date"><span>to</span><input type="date" id="iEnd" aria-label="End date (optional)"></div><span class="hint">End date is optional for one-day meets.</span></div>
+        <div class="field"><span class="lbl">Meet period</span><div class="period"><input type="date" min="1950-01-01" max="2100-12-31" id="iDate" aria-label="Start date"><span>to</span><input type="date" min="1950-01-01" max="2100-12-31" id="iEnd" aria-label="End date (optional)"></div><span class="hint">End date is optional for one-day meets.</span></div>
         <div class="field"><label class="lbl" for="iTeam">Teams in this meet are</label><select id="iTeam"><option value="C">Clubs</option><option value="S">Schools</option><option value="P">Provinces</option><option value="R">Regions</option><option value="N">Countries</option></select><span class="hint">Only club meets change a swimmer's club.</span><label class="chk" style="margin-top:6px"><input type="checkbox" id="iThaiOnly"> Import Thai swimmers only</label></div>
         <div class="field"><label class="lbl" for="iCourse">Pool, if the file has no COURSE</label><select id="iCourse"><option value="LCM">50 m (LCM)</option><option value="SCM">25 m (SCM)</option></select></div>
         <div class="field" style="justify-content:flex-end"><span class="hint">Leave these empty: when you choose the file, the meet name and dates are filled in from it (highlighted) for you to check. A SESSIONDATE or EVENTDATE column gives each swim its own day.</span></div>
@@ -859,6 +860,13 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div id="trExcluded" style="margin-top:12px"></div>
     </div>
 
+    <div class="panel" style="margin-bottom:18px" id="privPanel">
+      <div class="dup-hd"><h3 style="margin:0">Private data of inactive swimmers</h3></div>
+      <div class="hint" style="margin:6px 0 12px">For PDPA: swimmers with no meet for 5 years or more no longer need their citizen ID / passport number and full birth date kept. Removing them keeps every result, the name and the birth year. Swimmers with no meet for 2 years show an “Inactive · 2 yrs” label on their profile.</div>
+      <div id="pcBody"></div>
+      <div class="msg" id="pcMsg" role="status"></div>
+    </div>
+
     <div class="panel" style="margin-bottom:18px" id="clubPanel">
       <div class="dup-hd"><h3 style="margin:0">Club names <span class="mono" id="clubCount"></span></h3></div>
       <div class="hint" style="margin:6px 0 12px">When the same club appears under two spellings, keep one name. Every swimmer listed under the other spelling moves to it, and future uploads with the other spelling are filed under the kept name automatically.</div>
@@ -886,7 +894,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
           <div class="field"><label class="lbl" for="rStroke">Stroke</label><select id="rStroke"></select></div>
           <div class="field"><label class="lbl" for="rDist">Distance</label><select id="rDist"></select></div>
           <div class="field"><label class="lbl" for="rCourse">Pool</label><select id="rCourse"><option value="LCM">50 m (LCM)</option><option value="SCM">25 m (SCM)</option></select></div>
-          <div class="field"><label class="lbl" for="rDate">Date</label><input type="date" id="rDate"></div>
+          <div class="field"><label class="lbl" for="rDate">Date</label><input type="date" min="1950-01-01" max="2100-12-31" id="rDate"></div>
           <div class="field full"><label class="lbl" for="rMeet">Meet or session</label><input type="text" id="rMeet" placeholder="e.g. Club time trial"></div>
           <div class="field full"><label class="lbl" for="rTime">Time</label><input type="text" id="rTime" class="mono" placeholder="1:05.32 or 32.48"><span class="hint">Minutes:seconds.hundredths. Seconds alone also works.</span></div>
           <div class="full" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="primary" type="submit" id="rBtn">Save time</button><span class="msg" id="rMsg"></span></div>
@@ -1156,7 +1164,7 @@ function qShow(){
   const out=[];for(const s of state.swimmers){const hay=fold([s.nameEn,s.nameTh,s.club,s.clubCode].join(" "));if(!toks.every(t=>hay.includes(t)))continue;
     const nm=fold(s.nameEn)+" "+fold(s.nameTh);out.push({s,score:nm.startsWith(toks[0])||fold(s.nameTh).startsWith(toks[0])?0:toks.every(t=>nm.includes(t))?1:2})}
   qSugg=out.sort((a,b)=>a.score-b.score||a.s.name.localeCompare(b.s.name,"th")).slice(0,12);qIdx=0;
-  box.innerHTML=qSugg.length?qSugg.map((o,i)=>{const s=o.s;return`<button type="button" role="option" id="qs${i}" data-qs="${i}" aria-selected="${i===qIdx}"><span class="nm">${esc(s.name)}</span><span class="tm"><span class="hint">${resOf(s.id).length} swims</span></span><span class="sub">${esc([altName(s),s.club,s.birthYear?"born "+s.birthYear:""].filter(Boolean).join(" · "))}</span></button>`}).join("")
+  box.innerHTML=qSugg.length?qSugg.map((o,i)=>{const s=o.s;return`<button type="button" role="option" id="qs${i}" data-qs="${i}" aria-selected="${i===qIdx}"><span class="nm">${esc(s.name)}</span><span class="tm"><span class="hint">${resOf(s.id).length} swims</span></span><span class="sub">${esc([altName(s),s.club,s.birthYear?"born "+s.birthYear:"",(y=>y>=INACTIVE_YEARS?`inactive ${y} yrs`:"")(inactiveYears(s))].filter(Boolean).join(" · "))}</span></button>`}).join("")
     :`<div class="none">No swimmer matches “${esc(q)}”.</div>`;
   box.hidden=false;$("#q").setAttribute("aria-expanded","true");
 }
@@ -1214,6 +1222,10 @@ function vsEntry(r){if(!(r.entry>0&&valid(r)))return`<td class="num t"></td>`;co
 /* entered but did not start: left out of the swimmer page for visitors and out of portfolios; never counted */
 const isDns=r=>/^(DNS|WDR)/i.test(r.status||"");
 function entryStats(list){const e=list.filter(r=>r.entry>0&&valid(r));const beat=e.filter(r=>r.time<r.entry).length;return{n:e.length,beat}}
+/* inactive: no meet for 2 years or more (the label shows how many full years) */
+const INACTIVE_YEARS=2,PRIV_KEEP_YEARS=5;
+function inactiveYears(s){let last="";for(const r of resOf(s.id)){const d=r.meetEnd||r.date||"";if(d>last)last=d}if(!last)return 0;return Math.floor(dayDiff(last,today())/365.25)}
+const inactiveTag=s=>{const y=inactiveYears(s);return y>=INACTIVE_YEARS?`<span class="tag inactive" title="No meet for ${y} years">Inactive · ${y} yrs</span>`:""};
 function idCard(s){
   const all=resOf(s.id);const ok=all.filter(valid);
   const byDate=sortByDate(ok);const first=byDate[0],last=byDate[byDate.length-1];
@@ -1222,7 +1234,7 @@ function idCard(s){
   const es=entryStats(real);
   const g=s.gender==="F"?"Female":s.gender==="M"?"Male":"";
   const fact=(k,v,sub)=>v?`<div><dt>${k}</dt><dd>${v}${sub?`<small>${sub}</small>`:""}</dd></div>`:"";
-  return`<div class="idcard"><div class="idmain"><span class="lane">${esc(initials(s.name))}</span><div style="min-width:0"><div class="tags">${s.prefix?`<span class="tag">${esc(s.prefix)}</span>`:""}${g?`<span class="tag">${g}</span>`:""}${s.nation?`<span class="tag">${esc(s.nation)}</span>`:""}</div><h2>${esc(s.name)}</h2>${altName(s)?`<div class="th">${esc(altName(s))}</div>`:""}<div class="cardacts"><button class="ghost editbtn" type="button" data-portfolio="${esc(s.id)}">Portfolio PDF</button>${canEdit()?`<button class="ghost editbtn" data-edit="profile">✎ Edit swimmer</button>`:""}</div></div></div>
+  return`<div class="idcard"><div class="idmain"><span class="lane">${esc(initials(s.name))}</span><div style="min-width:0"><div class="tags">${s.prefix?`<span class="tag">${esc(s.prefix)}</span>`:""}${g?`<span class="tag">${g}</span>`:""}${s.nation?`<span class="tag">${esc(s.nation)}</span>`:""}${inactiveTag(s)}</div><h2>${esc(s.name)}</h2>${altName(s)?`<div class="th">${esc(altName(s))}</div>`:""}<div class="cardacts"><button class="ghost editbtn" type="button" data-portfolio="${esc(s.id)}">Portfolio PDF</button>${canEdit()?`<button class="ghost editbtn" data-edit="profile">✎ Edit swimmer</button>`:""}</div></div></div>
     <dl class="facts">
       ${fact("Born",s.birthYear?String(s.birthYear):"",s.birthYear?`age ${yr-s.birthYear} in ${yr}`:"")}
       ${state.isStaff&&priv.has(s.id)?fact("Citizen ID / passport",`<span class="mono">${esc(fmtCid(priv.get(s.id).cid))||"—"}</span>`,`${priv.get(s.id).dob?"born "+fmtDob(priv.get(s.id).dob)+" · ":""}only you can see this`):""}
@@ -1294,7 +1306,7 @@ function editHtml(s){
 }
 function editRowHtml(r,cols){
   return`<tr class="editrow"><td colspan="${cols}"><form class="rowedit" data-rform="${esc(r.id)}" autocomplete="off">
-    <div class="field"><label class="lbl" for="xr-date">Swim date</label><input type="date" id="xr-date" value="${esc(r.date)}"></div>
+    <div class="field"><label class="lbl" for="xr-date">Swim date</label><input type="date" min="1950-01-01" max="2100-12-31" id="xr-date" value="${esc(r.date)}"></div>
     <div class="field"><label class="lbl" for="xr-round">Round</label><input type="text" id="xr-round" value="${esc(r.round||"")}" placeholder="TIM, PRE, FIN"></div>
     <div class="field"><label class="lbl" for="xr-place">Place</label><input type="number" id="xr-place" min="0" value="${r.place>0?r.place:""}"></div>
     <div class="field"><label class="lbl" for="xr-entry">Entry time</label><input type="text" class="mono" id="xr-entry" value="${r.entry?fmt(r.entry):""}" placeholder="NT"></div>
@@ -1637,8 +1649,8 @@ $("#stdFile").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(
     <form id="fStd" class="clubmerge" autocomplete="off" style="margin-top:8px">
       <div class="field" style="flex:2 1 260px"><label class="lbl" for="stdName">Meet name</label><input type="text" id="stdName" value="${esc(P.names[0]||"")}" placeholder="e.g. Thailand National Age Group Championships 2027"></div>
       <div class="field" style="flex:0 1 120px"><label class="lbl" for="stdYear">Age counted in</label><input type="number" id="stdYear" min="2000" max="2100" value="${yr}"></div>
-      <div class="field" style="flex:1 1 160px"><label class="lbl" for="stdFrom">Swims from (optional)</label><input type="date" id="stdFrom"></div>
-      <div class="field" style="flex:1 1 160px"><label class="lbl" for="stdTo">Swims until (optional)</label><input type="date" id="stdTo"></div>
+      <div class="field" style="flex:1 1 160px"><label class="lbl" for="stdFrom">Swims from (optional)</label><input type="date" min="1950-01-01" max="2100-12-31" id="stdFrom"></div>
+      <div class="field" style="flex:1 1 160px"><label class="lbl" for="stdTo">Swims until (optional)</label><input type="date" min="1950-01-01" max="2100-12-31" id="stdTo"></div>
       <button class="primary" type="submit">Save</button><button class="ghost" type="button" id="stdCancel">Cancel</button></form>`};
 $("#stdPanel").addEventListener("click",async e=>{const m=$("#stdMsg");
   if(e.target.id==="stdCancel"){stdPending=null;$("#stdPreview").innerHTML="";return}
@@ -1749,7 +1761,7 @@ function renderRankings(){
   document.querySelectorAll("#shortcuts .shortcut").forEach(b=>b.setAttribute("aria-pressed",allMode&&b.dataset.sc===ui.kCourse));
   document.querySelectorAll("#kGender button").forEach(b=>b.setAttribute("aria-pressed",!allMode&&b.dataset.g===ui.kGender));
   document.querySelectorAll("#kCourse button").forEach(b=>b.setAttribute("aria-pressed",!allMode&&b.dataset.c===ui.kCourse));
-  $("#kFrom").value=ui.kFrom;$("#kTo").value=ui.kTo;
+  if(document.activeElement!==$("#kFrom"))$("#kFrom").value=ui.kFrom;if(document.activeElement!==$("#kTo"))$("#kTo").value=ui.kTo;
   $("#kPresets").innerHTML=presetList().map(([l,f,t])=>`<button data-f="${f}" data-t="${t}" aria-pressed="${ui.kFrom===f&&ui.kTo===t}">${l}</button>`).join("");
   const ages=[...new Set(state.swimmers.map(rankAge).filter(a=>a!=null&&a>0))].sort((a,b)=>a-b);
   if(ui.kAge.startsWith("a:")&&!ages.includes(+ui.kAge.slice(2)))ui.kAge="";
@@ -1894,6 +1906,7 @@ function renderManage(){
   renderConvert();
   renderClubs();
   renderTeamRemoval();
+  renderPrivClean();
   renderBaseTimes();
   renderStdAdmin();
   renderRecordsAdmin();
@@ -1995,6 +2008,28 @@ function renderTeamRemoval(){
   const ex=[...excludedTeams].sort();
   $("#trExcluded").innerHTML=ex.length?`<div class="lbl" style="margin-bottom:6px">Skipped in uploads</div><div class="chips">${ex.map(t=>`<span class="chipx">${esc(t)}<button type="button" data-unexcl="${esc(t)}" aria-label="Stop skipping ${esc(t)}" title="Stop skipping this team">×</button></span>`).join("")}</div>`:"";
 }
+/* PDPA clean-up: remove citizen IDs and full birth dates of swimmers with no meet for PRIV_KEEP_YEARS years */
+let pcConfirm=false;
+function pcList(){return state.demo?[]:state.swimmers.filter(s=>{const v=priv.get(s.id);return v&&(v.cid||v.dob)&&inactiveYears(s)>=PRIV_KEEP_YEARS})}
+function renderPrivClean(){
+  const pn=$("#privPanel");if(!pn)return;if(!state.isStaff){pn.hidden=true;return}pn.hidden=false;
+  const list=pcList().sort((a,b)=>inactiveYears(b)-inactiveYears(a));const n=list.length;
+  const inact=state.demo?0:state.swimmers.filter(s=>inactiveYears(s)>=INACTIVE_YEARS).length;
+  $("#pcBody").innerHTML=`<div class="hint" style="color:var(--fg)">${inact.toLocaleString()} swimmer${inact===1?"":"s"} inactive for ${INACTIVE_YEARS}+ years · <b>${n.toLocaleString()}</b> inactive for ${PRIV_KEEP_YEARS}+ years still ha${n===1?"s":"ve"} private data.</div>`
+    +(n?`<div class="hint" style="margin-top:6px">${list.slice(0,8).map(s=>`${esc(s.name)} (${inactiveYears(s)} yrs)`).join(", ")}${n>8?", …":""}</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px">${pcConfirm?`<span class="confirm">Remove the citizen ID and full birth date of ${n} swimmer${n===1?"":"s"}? Results stay. This can't be undone. <button type="button" class="yes" id="pcYes">Remove</button><button type="button" id="pcNo">Cancel</button></span>`
+        :`<button type="button" class="ghost" id="pcGo">Remove private data of ${n} swimmer${n===1?"":"s"}</button>`}</div>`:"");
+}
+$("#privPanel").addEventListener("click",async e=>{
+  if(e.target.id==="pcGo"){pcConfirm=true;renderPrivClean();return}
+  if(e.target.id==="pcNo"){pcConfirm=false;renderPrivClean();return}
+  if(e.target.id!=="pcYes")return;
+  const m=$("#pcMsg"),ids=pcList().map(s=>s.id);e.target.disabled=true;
+  const ok=await writePriv(new Map(ids.map(id=>[id,null])));
+  if(ok)ids.forEach(id=>priv.delete(id));
+  pcConfirm=false;msg(m,ok?`Removed the private data of ${ids.length} swimmer${ids.length===1?"":"s"}. Their results are unchanged.`:"Some private data couldn't be removed. Try again.",ok);
+  renderPrivClean();
+});
 /* several teams at once: tick them, then delete all their swimmers (and skip the teams in future uploads) */
 let trPick=new Set(),trBulkConfirm=false;
 function renderTrBulk(footOnly){
@@ -2443,7 +2478,7 @@ function showSugg(){
   const box=$("#cFindList"),q=$("#cFind").value;
   if(fold(q).replace(/\s/g,"").length<2){box.hidden=true;$("#cFind").setAttribute("aria-expanded","false");return}
   sugg=findSwimmers(q);suggIdx=0;
-  box.innerHTML=sugg.length?sugg.map((o,i)=>{const s=o.s,on=ui.picked&&ui.picked.has(s.id);return`<button type="button" role="option" id="sg${i}" data-sg="${i}" aria-selected="${i===suggIdx}"><span class="nm">${esc(s.name)}${on?" ✓":""}</span><span class="tm">${o.best!=null?fmt(o.best):'<span class="hint">no time</span>'}</span><span class="sub">${esc([altName(s),s.club,s.birthYear?"born "+s.birthYear:""].filter(Boolean).join(" · "))}</span></button>`}).join("")+`<div class="none" style="padding:8px 12px;font-size:12px">Times shown are bests in ${ui.cDist}m ${ui.cStroke}, ${poolName(ui.cCourse)} pool.</div>`
+  box.innerHTML=sugg.length?sugg.map((o,i)=>{const s=o.s,on=ui.picked&&ui.picked.has(s.id);return`<button type="button" role="option" id="sg${i}" data-sg="${i}" aria-selected="${i===suggIdx}"><span class="nm">${esc(s.name)}${on?" ✓":""}</span><span class="tm">${o.best!=null?fmt(o.best):'<span class="hint">no time</span>'}</span><span class="sub">${esc([altName(s),s.club,s.birthYear?"born "+s.birthYear:"",(y=>y>=INACTIVE_YEARS?`inactive ${y} yrs`:"")(inactiveYears(s))].filter(Boolean).join(" · "))}</span></button>`}).join("")+`<div class="none" style="padding:8px 12px;font-size:12px">Times shown are bests in ${ui.cDist}m ${ui.cStroke}, ${poolName(ui.cCourse)} pool.</div>`
     :`<div class="none">No swimmer matches “${esc(q)}”.</div>`;
   box.hidden=false;$("#cFind").setAttribute("aria-expanded","true");
 }
@@ -2466,8 +2501,12 @@ const rk=()=>{saveUi();renderRankings()};
 $("#shortcuts").onclick=e=>{const b=e.target.closest(".shortcut");if(b){ui.kMode="all";ui.kCourse=b.dataset.sc;rk()}};
 $("#kGender").onclick=e=>{const b=e.target.closest("button");if(b){ui.kGender=b.dataset.g;ui.kMode="event";rk()}};
 $("#kCourse").onclick=e=>{const b=e.target.closest("button");if(b){ui.kCourse=b.dataset.c;ui.kMode="event";rk()}};
-$("#kFrom").onchange=e=>{ui.kFrom=e.target.value;if(ui.kTo&&ui.kFrom>ui.kTo)ui.kTo=ui.kFrom;rk()};
-$("#kTo").onchange=e=>{ui.kTo=e.target.value;if(ui.kFrom&&ui.kTo&&ui.kTo<ui.kFrom)ui.kFrom=ui.kTo;rk()};
+/* typing a year fires "change" after every digit (year 2, 20, 202 …). Only a complete, sensible date is used, and the box
+   is never rewritten while it is being typed in — rewriting it restarted the year and gave years like 20666 */
+const goodDate=v=>!v||(/^\d{4}-\d\d-\d\d$/.test(v)&&+v.slice(0,4)>=1950&&+v.slice(0,4)<=2100);
+$("#kFrom").onchange=e=>{const v=e.target.value;if(!goodDate(v))return;ui.kFrom=v;if(ui.kTo&&ui.kFrom>ui.kTo)ui.kTo=ui.kFrom;rk()};
+$("#kTo").onchange=e=>{const v=e.target.value;if(!goodDate(v))return;ui.kTo=v;if(ui.kFrom&&ui.kTo&&ui.kTo<ui.kFrom)ui.kFrom=ui.kTo;rk()};
+["kFrom","kTo"].forEach(id=>$("#"+id).addEventListener("blur",e=>{if(!goodDate(e.target.value))e.target.value=ui[id]||""}));
 $("#kPresets").onclick=e=>{const b=e.target.closest("button");if(b){ui.kFrom=b.dataset.f;ui.kTo=b.dataset.t;rk()}};
 $("#kAge").onchange=e=>{const v=e.target.value;if(v==="custom"){ui.kAgeCustom=true;$("#kAgeCustom").hidden=false;$("#kAgeLo").value="";$("#kAgeHi").value="";$("#kAgeLo").focus();return}ui.kAgeCustom=false;ui.kAge=v;rk()};
 const applyCustomAge=()=>{let lo=parseInt($("#kAgeLo").value,10),hi=parseInt($("#kAgeHi").value,10);if(isNaN(lo)&&isNaN(hi)){ui.kAge="";rk();return}if(isNaN(lo))lo=0;if(isNaN(hi))hi=99;if(lo>hi)[lo,hi]=[hi,lo];ui.kAgeCustom=true;ui.kAge=`g:${lo}-${hi}`;rk()};
@@ -2595,6 +2634,15 @@ function lenexResultRows(xmlText){
 
 /* match swimmers the app already has: citizen ID first, then English name + birth date (+ gender).
    Used for files from other organisers (Hy-Tek, foreign Lenex) that carry no Thai ID. */
+/* a swimmer from a Hy-Tek meet without a citizen ID, who has the same English name, full birth date and gender */
+function noIdTwin(nameEn,birth,sex){
+  if(state.demo||!nameEn||!/^\d{4}-\d\d-\d\d$/.test(birth||""))return"";
+  const k=fold(nameEn).replace(/[^a-z]/g,"");if(k.length<4)return"";
+  const c=state.swimmers.filter(o=>{if(!o.nameEn)return false;const parts=o.nameEn.trim().split(/\s+/);const ks=[fold(o.nameEn).replace(/[^a-z]/g,""),fold(parts.slice(1).join("")+parts[0]).replace(/[^a-z]/g,"")];
+    if(!ks.includes(k))return false;const pv=priv.get(o.id)||{};
+    return pv.dob===birth&&(!sex||!o.gender||o.gender===sex)&&!/^\d{13}$/.test(String(pv.cid||""))});
+  return c.length===1?c[0].id:"";
+}
 function nameMatcher(){
   const byCid=new Map();priv.forEach((v,sid)=>{if(v&&v.cid)byCid.set(String(v.cid),sid)});
   const nk=n=>fold(n).replace(/[^a-z฀-๿]/g,"");
@@ -2620,7 +2668,10 @@ function cl2Rows(text){
   const md=v=>{const m=String(v||"").match(/^(\d\d)(\d\d)(\d{4})$/);return m?`${m[3]}-${m[1]}-${m[2]}`:""};
   const CRS={L:"LCM",S:"SCM",Y:"SCY","3":"LCM","1":"SCM","2":"SCY"};const STK={"1":"Freestyle","2":"Backstroke","3":"Breaststroke","4":"Butterfly","5":"Medley","6":"Freestyle relay","7":"Medley relay"};
   const STAT=t=>{const u=String(t||"").toUpperCase();return u==="DQ"?"DSQ":u==="NS"||u==="SCR"?"DNS":u==="DNF"?"DNF":""};
-  const fullId=(uss,d3)=>{if(/^\d{13}$/.test(d3||""))return d3;if(/^\d{12}$/.test(uss))return uss+thaiCheck(uss);return uss};
+  /* only a real Thai citizen ID identifies a swimmer. Team Manager makes its own IDs when a team leaves the field empty
+     (birth date + letters of the name, e.g. 062806PONXTRIT); those are ignored and never saved */
+  let madeUpIds=0;
+  const fullId=(uss,d3)=>{if(/^\d{13}$/.test(d3||"")&&thaiCheck(d3.slice(0,12))===d3[12])return d3;if(/^\d{12}$/.test(uss))return uss+thaiCheck(uss);if(uss)madeUpIds++;return""};
   const splitName=n=>{const[a,b]=String(n).split(",");return b?{first:b.trim(),last:a.trim()}:{first:String(n).trim(),last:""}};
   const head=["MEETNAME","MEETDATE","MEETENDDATE","SESSIONDATE","COURSE","EVENTNUMBER","STROKE","DISTANCE","RELAYCOUNT","ROUND","GENDER","CLUBNAME","CLUBCODE","CLUBNATION",
     "FIRSTNAMEEN","LASTNAMEEN","BIRTHDATE","NATION","LICENSE","XSID","PLACE","STATUS","SWIMTIME","ENTRYTIME",...Array.from({length:30},(_,i)=>"SPLIT"+(i+1)*50),
@@ -2665,7 +2716,7 @@ function cl2Rows(text){
         FIRSTNAMEEN1:lead.nm.first,LASTNAMEEN1:lead.nm.last,BIRTHDATE1:lead.birth,LICENSE1:lead.id,NATION1:club.CLUBNATION,GENDER1:lead.sex,XSID1:match(lead.nm,lead.birth,lead.sex,/^\d{13}$/.test(lead.id)?lead.id:"",isThaiTeam),...split(lead.G,leg)});
     }
   }
-  return{rows,meet,teams:[...new Set(real.map(x=>x.team.code))],unmatched:MM.unmatched,matchedId:MM.n.id,matchedName:MM.n.name,skippedCoaches:items.length-real.length};
+  return{rows,meet,teams:[...new Set(real.map(x=>x.team.code))],unmatched:MM.unmatched,matchedId:MM.n.id,matchedName:MM.n.name,madeUpIds,skippedCoaches:items.length-real.length};
 }
 let importNote="";
 let lastFile=null,autoFill=null,readGen=0;
@@ -2700,6 +2751,7 @@ async function readFile(file,quiet){
       const un=[...C.unmatched];
       importNote=`<div class="hint" style="color:var(--fg);margin-bottom:8px"><b>Hy-Tek file:</b> ${esc(C.meet.name)}${C.meet.start?" · "+esc(fperiod(C.meet.start,C.meet.end)):""}. Teams set to <b>${ttEn($("#iTeam").value)}</b>${$("#iThaiOnly").checked?", <b>Thai swimmers only</b>":""} (change above and choose the file again if needed).
         ${C.matchedId+C.matchedName?` Matched to swimmers already in the app: ${C.matchedId} by citizen ID, ${C.matchedName} by English name and birth date.`:""}
+        ${C.madeUpIds?` ${C.madeUpIds} ID${C.madeUpIds>1?"s":""} made up by Team Manager (not citizen IDs) ${C.madeUpIds>1?"were":"was"} ignored; those swimmers are matched by English name and birth date.`:""}
         ${un.length?`<br><span style="color:var(--bad)">${un.length} Thai swimmer${un.length>1?"s have":" has"} no ID and no match, so ${un.length>1?"they":"it"} will be added as new: ${esc(un.slice(0,15).map(([n,b])=>n+(b?" ("+b.slice(0,4)+")":"")).join(", "))}${un.length>15?", …":""}. Check Possible duplicates after uploading.</span>`:""}</div>`}
     const wb=(isLenex||isCl2)?{SheetNames:[]}:XLSX.read(await file.arrayBuffer(),{type:"array"});
     for(const name of wb.SheetNames){const r=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:""});
@@ -2723,7 +2775,7 @@ async function readFile(file,quiet){
     }
     const meetForm=norm($("#iMeet").value),dateForm=$("#iDate").value,endForm=$("#iEnd").value,defCourse=$("#iCourse").value,teamType=$("#iTeam").value||"C",thaiOnly=$("#iThaiOnly").checked;
     if(dateForm&&endForm&&endForm<dateForm){pv.innerHTML=`<div class="msg err">The end date is before the start date. Fix the meet period, then choose the file again.</div>`;return}
-    const salt=db?await getSalt():"local";
+    const salt=db?await getSalt():"local";const linkedIds=new Set();
     const aliases=db?await loadAliases():new Map();
     const recs=[],skipped=[],conflicts=[];const sw=new Map();const relayRows=[];let leadOffs=0;
     const meet=meetForm,start=dateForm;let end=dateForm?endForm:"";
@@ -2753,7 +2805,8 @@ async function readFile(file,quiet){
       const birthDate=parseDate(g.BIRTHDATE);const birthYear=birthDate?+birthDate.slice(0,4):null;
       const idn=normId(g.CITIZENID)||normId(g.PASSPORT||g.PASSPORTNO)||licId(g.LICENSE)||licId(g.REGISTRATIONID);
       const cid=idn?idn.id:"";
-      const sid=norm(g.XSID)||await sidOf(idn?idn.key:"n:"+(nameEn||nameTh).toLowerCase()+"|"+(birthDate||""));
+      let sid=norm(g.XSID)||await sidOf(idn?idn.key:"n:"+(nameEn||nameTh).toLowerCase()+"|"+(birthDate||""));
+      if(!norm(g.XSID)&&idn&&/^\d{13}$/.test(idn.id)&&!state.demo&&!swimmerById(sid)&&!sw.has(sid)){const tw=noIdTwin(nameEn,birthDate,mapGender(g.GENDER));if(tw){sid=tw;linkedIds.add(tw)}}
       [nameEn,nameTh].forEach(n=>{if(n)fileByName.set(nmKey(n,birthDate),{sid,cid})});
       const course=mapCourse(g.COURSE,defCourse);
       const time=parseTime(g.SWIMTIME);
@@ -2792,7 +2845,8 @@ async function readFile(file,quiet){
       const nameEn=fEn||(thai(full)?"":full),nameTh=thai(full)?full:"";
       const idn=normId(g.CITIZENID1)||licId(g.LICENSE1);
       let sid=null,cid=idn?idn.id:"";
-      if(norm(g.XSID1))sid=norm(g.XSID1);else if(idn)sid=await sidOf(idn.key);
+      if(norm(g.XSID1))sid=norm(g.XSID1);else if(idn){sid=await sidOf(idn.key);
+        if(/^\d{13}$/.test(idn.id)&&!state.demo&&!swimmerById(sid)&&!sw.has(sid)){const tw=noIdTwin(norm(norm(g.FIRSTNAMEEN1)+" "+norm(g.LASTNAMEEN1)),birthDate,mapGender(g.GENDER1||g.GENDER));if(tw){sid=tw;linkedIds.add(tw)}}}
       if(!sid){const hit=[nameEn,nameTh,full].map(x=>x&&fileByName.get(nmKey(x,birthDate))).find(Boolean);if(hit){sid=hit.sid;cid=cid||hit.cid}}
       if(!sid&&!state.demo){const want=[nameEn,nameTh,full].filter(Boolean).map(fold);const ex=state.swimmers.filter(o=>want.some(w=>w===fold(o.nameEn)||w===fold(o.nameTh))&&(!birthYear||!o.birthYear||+o.birthYear===birthYear));if(ex.length===1)sid=ex[0].id}
       if(!sid)sid=await sidOf("n:"+(nameEn||nameTh).toLowerCase()+"|"+(birthDate||""));
@@ -2834,7 +2888,8 @@ async function readFile(file,quiet){
     /* a meet already in the app around the same dates: probably the same meet with a differently typed name */
     let near=[];if(!isExisting&&!picked&&!state.demo){const st=[...firstOf.values()][0];const seen=new Set();
       near=state.results.filter(r=>{const k=mKey(r);if(seen.has(k)||meetKeys.has(k))return false;seen.add(k);return Math.abs(dayDiff(r.meetStart||r.date,st.meetStart||st.date))<=3}).slice(0,3)}
-    pv.innerHTML=importNote+autoNote+`<div class="hint" style="font-size:14px;color:var(--fg)"><b>${isExisting?"Already in the app":"New meet"}:</b> ${meetLine}${isExisting?` (${inMeet.length} results stored now)`:""}</div>
+    const linkNote=linkedIds.size?`<div class="hint" style="color:var(--fg);margin-bottom:8px"><b>${linkedIds.size} swimmer${linkedIds.size>1?"s":""} from earlier Hy-Tek meets</b> (no citizen ID then) ${linkedIds.size>1?"are":"is"} linked to the citizen ID in this file, matched by English name, birth date and gender: ${esc([...linkedIds].slice(0,10).map(id=>swimmerById(id)?.name||"").join(", "))}${linkedIds.size>10?", …":""}.</div>`:"";
+    pv.innerHTML=importNote+autoNote+linkNote+`<div class="hint" style="font-size:14px;color:var(--fg)"><b>${isExisting?"Already in the app":"New meet"}:</b> ${meetLine}${isExisting?` (${inMeet.length} results stored now)`:""}</div>
       ${near.length?`<div class="msg err" style="display:block;margin:6px 0">Already in the app around these dates: ${near.map(r=>`<b>${esc(r.meet)}</b> · ${meetPeriod(r)} <button class="lnk" type="button" data-usemeet="${esc(mKey(r))}">Upload to this meet instead</button>`).join("; ")}. If it's the same meet, use it so results aren't split into two meets.</div>`:""}
       <div class="hint">Teams: <b>${teamsIn.length} ${teamsIn.length===1?ttEn(teamType).toLowerCase():ttPl(teamType)}</b>${teamsIn.length?` (${esc(teamsIn.slice(0,6).join(", "))}${teamsIn.length>6?", …":""})`:""}. ${teamType==="C"?"Swimmers' clubs are updated from this meet.":`Swimmers' clubs are not changed; each swim is recorded as representing their ${ttEn(teamType).toLowerCase()}.`}</div>
       ${isExisting&&!replace?`<div class="hint">${picked?"Replace is off":"This meet is already in the app. To replace it, choose it under “Upload to”"}. Results are added and updated, nothing is removed.</div>`:""}
@@ -2970,7 +3025,7 @@ $("#iTeam").addEventListener("change",e=>{$("#iThaiOnly").checked=e.target.value
 function clearAutoMeet(){if(autoFill&&$("#iPick").value===""&&(autoFill.m==="\u0000"||$("#iMeet").value===autoFill.m)&&$("#iDate").value===autoFill.s&&$("#iEnd").value===autoFill.e){$("#iMeet").value="";$("#iDate").value="";$("#iEnd").value=""}autoFill=null;["iMeet","iDate","iEnd"].forEach(id=>$("#"+id).classList.remove("autofill"))}
 ["iMeet","iDate","iEnd"].forEach(id=>$("#"+id).addEventListener("change",()=>{$("#"+id).classList.remove("autofill");
   if(autoFill)autoFill={m:"\u0000"};   // edited by hand: keep what was typed for this file
-  if(lastFile&&$("#preview").textContent.trim()&&$("#iPick").value==="")readFile(lastFile,true)}));
+  if(lastFile&&$("#preview").textContent.trim()&&$("#iPick").value===""&&goodDate($("#"+id).value))readFile(lastFile,true)}));
 $("#iReplace").onchange=()=>{if(pending){$("#preview").innerHTML=`<div class="hint">Choose the file again to see the updated preview.</div>`;pending=null}};
 let confirmMeet=null,editMeetK=null;
 /* rename a meet or correct its period: every result is rewritten with the new details (and a new id, so re-uploading the file under the new name updates instead of duplicating) */
@@ -2998,8 +3053,8 @@ function renderMeets(){
   if(editMeetK&&$("#fMeetEdit")&&$("#fMeetEdit").contains(document.activeElement))return;   // don't wipe a meet being edited
   $("#meetTbl").innerHTML=list.length?`<thead><tr><th>Period</th><th>Meet</th><th>Pool</th><th>Teams</th><th class="num">Swimmers</th><th class="num">Results</th><th></th></tr></thead><tbody>`+list.map(o=>editMeetK===o.k?`<tr class="editrow"><td colspan="7"><form class="rowedit" id="fMeetEdit" data-mk="${esc(o.k)}" autocomplete="off">
       <div class="field" style="grid-column:span 2"><label class="lbl" for="meName">Meet name</label><input type="text" id="meName" value="${esc(o.meet)}"></div>
-      <div class="field"><label class="lbl" for="meStart">Start date</label><input type="date" id="meStart" value="${esc(o.date)}"></div>
-      <div class="field"><label class="lbl" for="meEnd">End date</label><input type="date" id="meEnd" value="${esc(o.end||"")}"></div>
+      <div class="field"><label class="lbl" for="meStart">Start date</label><input type="date" min="1950-01-01" max="2100-12-31" id="meStart" value="${esc(o.date)}"></div>
+      <div class="field"><label class="lbl" for="meEnd">End date</label><input type="date" min="1950-01-01" max="2100-12-31" id="meEnd" value="${esc(o.end||"")}"></div>
       <div class="field" style="justify-content:flex-end"><div style="display:flex;gap:6px"><button class="primary" type="submit">Save</button><button class="ghost" type="button" data-medit-cancel>Cancel</button></div></div>
       <span class="hint full" style="grid-column:1/-1">Changes the meet for all ${o.n} results of ${o.sw.size} swimmers. If you change the start date, every swim in the meet moves by the same number of days.</span>
     </form></td></tr>`:`<tr><td>${esc(o.period)}</td><td class="wrapok">${esc(o.meet||"(no name)")}</td><td>${[...o.courses].map(poolName).join(", ")}</td><td><select class="ttsel" data-mt="${esc(o.k)}" aria-label="Teams in ${esc(o.meet||"this meet")}">${TEAM_TYPES.map(([v,l])=>`<option value="${v}"${o.t===v?" selected":""}>${l==="Country"?"Countries":l+"s"}</option>`).join("")}</select></td><td class="num t">${o.sw.size}</td><td class="num t">${o.n}</td><td class="num">${confirmMeet===o.k?`<span class="confirm">Delete all ${o.n} results? <button class="yes" data-mdel="${esc(o.k)}">Delete</button><button class="no" data-mkeep>Keep</button></span>`:`<button class="lnk" data-medit="${esc(o.k)}">Edit</button> <button class="lnk" data-mup="${esc(o.k)}">Upload again</button> <button class="lnk" style="color:var(--bad)" data-mask="${esc(o.k)}">Delete</button>`}</td></tr>`).join("")+`</tbody>`:`<tbody><tr><td class="empty">No meets uploaded yet.</td></tr></tbody>`;
