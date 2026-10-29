@@ -97,6 +97,9 @@ td.num,th.num{text-align:right}
 td.wrapok{white-space:normal;min-width:160px}
 .chip{display:inline-block;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--gold);color:var(--accent-ink)}
 .chip.course{background:var(--surface-2);color:var(--muted)}
+.chip.pbc{background:var(--red);color:var(--red-ink)}
+.swimt .spl{display:block;margin:3px 0 0 auto;font:600 12px var(--body);letter-spacing:0}
+.laps.only{margin:0}
 /* pool colours: 50 m (LCM) blue, 25 m (SCM) amber, yards grey-brown, so the two pools are told apart at a glance */
 .chip.course.pool-lcm{background:color-mix(in srgb,var(--c7) 16%,transparent);color:var(--c7);font-weight:700}
 .chip.course.pool-scm{background:color-mix(in srgb,var(--c4) 20%,transparent);color:color-mix(in srgb,var(--c4) 80%,var(--fg));font-weight:700}
@@ -541,8 +544,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   /* swim history as cards: meet + date on the left, the swim time large on the right */
   .t-hist thead,.t-mr thead{display:none}
   .t-hist,.t-mr{border-collapse:separate}
-  .t-hist tbody tr:not(.splits):not(.editrow),.t-mr tbody tr:not(.editrow){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:2px;padding:10px 2px;border-bottom:1px solid var(--line)}
-  .t-hist tbody tr:not(.splits):not(.editrow) td,.t-mr tbody tr:not(.editrow) td{border:0;padding:0;background:none;white-space:normal;min-width:0}
+  .t-hist tbody tr:not(.splits):not(.editrow),.t-mr tbody tr:not(.editrow):not(.splits){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:2px;padding:10px 2px;border-bottom:1px solid var(--line)}
+  .t-hist tbody tr:not(.splits):not(.editrow) td,.t-mr tbody tr:not(.editrow):not(.splits) td{border:0;padding:0;background:none;white-space:normal;min-width:0}
   .t-hist td:nth-child(2){grid-column:1;grid-row:1;font-weight:600}
   .t-hist td:nth-child(1){grid-column:1;grid-row:2;color:var(--muted);font-size:12.5px}
   .t-hist td:nth-child(6){grid-column:2;grid-row:1/span 2;align-self:center;font-size:19px;text-align:right;padding:4px 8px!important;border-radius:8px;background:color-mix(in srgb,var(--navy) 8%,transparent)!important}
@@ -554,7 +557,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   .t-hist td:nth-child(9):empty{display:none}
   .t-hist td:nth-child(10){grid-column:2;grid-row:4;text-align:right}
   .t-hist td:nth-child(10):empty{display:none}
-  .t-hist .splits td{display:block;padding:8px 6px}
+  .t-hist .splits td,.t-mr .splits td{display:block;padding:8px 6px}
+  .swimt .spl{font-size:12px}
   .t-mr td:nth-child(1){grid-column:1;grid-row:1;font-weight:600}
   .t-mr td:nth-child(2){grid-column:1;grid-row:2;color:var(--muted);font-size:12.5px}
   .t-mr td:nth-child(4){grid-column:2;grid-row:1/span 2;align-self:center;font-size:19px;text-align:right;padding:4px 8px!important;border-radius:8px;background:color-mix(in srgb,var(--navy) 8%,transparent)!important}
@@ -1238,13 +1242,13 @@ function renderProfile(){
   const pbPts=points(sm.best,s.gender);
   h+=`<h3>${evName(st,d)} · ${c==="LCM"?"50 m pool":c==="SCM"?"25 m pool":c} · progress${pbPts?` · best ${pbPts} pts`:""}</h3>`;
   h+=`<div class="chart-box"><canvas id="profChart"></canvas></div>`;
-  h+=`<div class="legend-note">${sm.n} swims · ${sm.n>1?`improved ${sm.impr.toFixed(1)}% from ${fmt(sm.first.time)} to a best of ${fmt(sm.best.time)}`:`best ${fmt(sm.best.time)}`}. Each point is the fastest swim at a meet; gold points are new personal bests. ${shareBtn(sm.best).replace(">Share<",">Share best time<")}</div>`;
+  h+=`<div class="legend-note">${sm.n} swims · ${sm.n>1?`improved ${sm.impr.toFixed(1)}% from ${fmt(sm.first.time)} to a best of ${fmt(sm.best.time)}`:`best ${fmt(sm.best.time)}`}. Each point is the fastest swim at a meet; red points are new personal bests. ${shareBtn(sm.best).replace(">Share<",">Share best time<")}</div>`;
   {const a=standHtml(s,st,d,c),b=targetsHtml(s,st,d,c,sm.best.time);if(a||b)h+=`<div class="viz2">${a}${b}</div>`}
   let prev=null,run=Infinity;const meta2=new Map();
   sortByDate(all).forEach(r=>{if(!valid(r)){meta2.set(r.id,{delta:null,isPb:false});return}meta2.set(r.id,{delta:prev?r.time-prev.time:null,isPb:r.time<run});if(r.time<run)run=r.time;prev=r});
   const ed=canEdit();const rows=sortByDate(ed?all:all.filter(r=>!isDns(r))).reverse();
   h+=`<div class="tbl-wrap"><table class="t-hist"><thead><tr><th>Date</th><th>Meet</th><th>Round</th><th class="num">Place</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">vs previous</th><th></th><th></th></tr></thead><tbody>`+rows.map(r=>{if(ui.editRow===r.id)return editRowHtml(r,10);const m=meta2.get(r.id);const hasSp=r.splits&&r.splits.length>1;const open=ui.openSplit===r.id;
-    return`<tr><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"—")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${placeTxt(r)}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t ${m.delta==null?"":m.delta<0?"up":m.delta>0?"down":""}">${!valid(r)?"":m.delta==null?"first":(m.delta<0?"−":"+")+Math.abs(m.delta).toFixed(2)}</td><td>${m.isPb?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${valid(r)&&(m.isPb||recBadges(r))?" "+shareBtn(r):""}${hasSp?` <button class="lnk" data-split="${esc(r.id)}" aria-expanded="${open}">Splits</button>`:""}</td><td class="num">${ed?`<button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button><span data-del="${esc(r.id)}"><button class="x" title="Delete this time" aria-label="Delete this time">×</button></span>`:""}</td></tr>`+(open?`<tr class="splits"><td colspan="10">${splitHtml(r)}</td></tr>`:"")}).join("")+`</tbody></table></div>`;
+    return`<tr><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"—")}${r.meetEnd?`<br><span class="hint">${meetPeriod(r)}</span>`:""}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${placeTxt(r)}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}${hasSp?`<button class="lnk spl" data-split="${esc(r.id)}" aria-expanded="${open}">Splits ${open?"▴":"▾"}</button>`:""}</td>${vsEntry(r)}<td class="num t ${m.delta==null?"":m.delta<0?"up":m.delta>0?"down":""}">${!valid(r)?"":m.delta==null?"first":(m.delta<0?"−":"+")+Math.abs(m.delta).toFixed(2)}</td><td>${m.isPb?'<span class="chip pbc">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${valid(r)&&(m.isPb||recBadges(r))?" "+shareBtn(r):""}</td><td class="num">${ed?`<button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button><span data-del="${esc(r.id)}"><button class="x" title="Delete this time" aria-label="Delete this time">×</button></span>`:""}</td></tr>`+(open?`<tr class="splits"><td colspan="10">${splitHtml(r)}</td></tr>`:"")}).join("")+`</tbody></table></div>`;
   el.innerHTML=h;
   drawProf(sm.sorted);enhanceEdit();
 }
@@ -1451,9 +1455,12 @@ function meetsHtml(s){
     const rs=ed?rsAll:real;const e=entryStats(rs);const dnsLink="";
     const rows=rs.slice().sort((a,b)=>STROKES.indexOf(a.stroke)-STROKES.indexOf(b.stroke)||a.distance-b.distance||(a.date<b.date?-1:1));
     return`<div class="meetblk"><h4>${esc(m0.meet||"(no name)")}</h4><div class="hint">${meetPeriod(m0)} · ${[...new Set(rs.map(r=>poolName(r.course)))].join(", ")} pool · ${meetBy(m0)?`results by <b>${esc(meetBy(m0))}</b> · `:""}${real.length?`${real.length} swim${real.length>1?"s":""}`:"entered, did not swim"}${e.n?` · faster than entry in ${e.beat} of ${e.n}`:""}${dnsLink}</div>
-      <div class="tbl-wrap" style="margin-top:0"><table class="t-mr"><thead><tr><th>Event</th><th>Round</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">Place</th><th></th>${canEdit()?"<th></th>":""}</tr></thead><tbody>${rows.map(r=>ui.editRow===r.id?editRowHtml(r,canEdit()?8:7):`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[r.stroke]})"></span>${evH(r.stroke,r.distance)}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}</td>${vsEntry(r)}<td class="num t">${placeTxt(r)}</td><td>${pbIds.has(r.id)?'<span class="chip">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${valid(r)&&(pbIds.has(r.id)||recBadges(r))?" "+shareBtn(r):""}</td>${canEdit()?`<td class="num"><button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button></td>`:""}</tr>`).join("")}</tbody></table></div></div>`}).join("");
+      <div class="tbl-wrap" style="margin-top:0"><table class="t-mr"><thead><tr><th>Event</th><th>Round</th><th class="num">Entry</th><th class="num swimt">Swim time</th><th class="num">vs entry</th><th class="num">Place</th><th></th>${canEdit()?"<th></th>":""}</tr></thead><tbody>${rows.map(r=>ui.editRow===r.id?editRowHtml(r,canEdit()?8:7):`<tr><td><span class="dot" style="background:var(${STROKE_COLOR[r.stroke]})"></span>${evH(r.stroke,r.distance)}</td><td>${esc(r.round||"")}${r.relay?` <span class="chip course" title="${esc(r.relay+(r.relayTeam?" · "+r.relayTeam:""))}">Relay lead-off</span>`:""}</td><td class="num t">${r.entry?fmt(r.entry):'<span class="hint">NT</span>'}</td><td class="num t swimt">${valid(r)?fmt(r.time):`<span class="chip st">${esc(r.status||"No time")}</span>`}${r.splits&&r.splits.length>1?`<button class="lnk spl" data-split="${esc(r.id)}" aria-expanded="${ui.openSplit===r.id}">Splits ${ui.openSplit===r.id?"▴":"▾"}</button>`:""}</td>${vsEntry(r)}<td class="num t">${placeTxt(r)}</td><td>${pbIds.has(r.id)?'<span class="chip pbc">PB</span>':""}${recBadges(r)?" "+recBadges(r):""}${valid(r)&&(pbIds.has(r.id)||recBadges(r))?" "+shareBtn(r):""}</td>${canEdit()?`<td class="num"><button class="x" data-redit="${esc(r.id)}" title="Edit this result" aria-label="Edit this result">✎</button></td>`:""}</tr>`+(ui.openSplit===r.id&&r.splits&&r.splits.length>1?`<tr class="splits"><td colspan="${canEdit()?8:7}">${lapsHtml(r)}</td></tr>`:"")).join("")}</tbody></table></div></div>`}).join("");
   return h;
 }
+/* splits as a list: distance, cumulative time and (the time for that part) */
+function lapsHtml(r){const sp=r.splits||[];const step=r.distance/sp.length;let prev=0;
+  return`<div class="laps only">${r.reaction?`<span><b>Reaction</b>${r.reaction.toFixed(2)}</span>`:""}${sp.map((t,i)=>{const lap=t-prev;prev=t;return`<span><b>${Math.round(step*(i+1))}m</b>${fmt(t)} <span style="color:var(--muted)">(${fmt(lap)})</span></span>`}).join("")}</div>`}
 function splitHtml(r){
   const sp=r.splits||[];const step=r.distance/sp.length;let prev=0;
   return splitViz(r)+`<div class="laps">${r.reaction?`<span><b>Reaction</b>${r.reaction.toFixed(2)}</span>`:""}${sp.map((t,i)=>{const lap=t-prev;prev=t;return`<span><b>${Math.round(step*(i+1))}m</b>${fmt(t)} <span style="color:var(--muted)">(${lap.toFixed(2)})</span></span>`}).join("")}</div>`}
@@ -1824,7 +1831,7 @@ $("#stdGrid").addEventListener("submit",async e=>{if(e.target.id!=="fStdGrid")re
 const bestPerMeet=list=>{const m=new Map();list.forEach(r=>{const k=mKey(r);const b=m.get(k);if(!b||r.time<b.time)m.set(k,r)});return[...m.values()].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.time-b.time)};
 function drawProf(sorted){
   destroy("prof");const cv=$("#profChart");if(!cv||!window.Chart)return;
-  let run=Infinity;const acc=cssv("--accent"),gold=cssv("--gold"),surf=cssv("--surface");
+  let run=Infinity;const acc=cssv("--accent"),gold=cssv("--red"),surf=cssv("--surface");   // new PBs in red (gold looked like the 25 m pool label)
   const pts=bestPerMeet(sorted).map(r=>{const pb=r.time<run;if(pb)run=r.time;return{x:ts(r.date),y:r.time,r,pb}});
   const o=chartBase();
   o.plugins.tooltip.callbacks={title:i=>fdate(i[0].raw.r.date),label:i=>`${fmt(i.raw.y)}${i.raw.pb?"  PB":""}`,afterLabel:i=>i.raw.r.meet||""};
