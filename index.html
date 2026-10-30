@@ -100,6 +100,7 @@ td.wrapok{white-space:normal;min-width:160px}
 .chip.pbc{background:var(--red);color:var(--red-ink)}
 .swimt .spl{display:block;margin:3px 0 0 auto;font:600 12px var(--body);letter-spacing:0}
 .laps.only{margin:0}
+.laps .miss{opacity:.6}
 /* pool colours: 50 m (LCM) blue, 25 m (SCM) amber, yards grey-brown, so the two pools are told apart at a glance */
 .chip.course.pool-lcm{background:color-mix(in srgb,var(--c7) 16%,transparent);color:var(--c7);font-weight:700}
 .chip.course.pool-scm{background:color-mix(in srgb,var(--c4) 20%,transparent);color:color-mix(in srgb,var(--c4) 80%,var(--fg));font-weight:700}
@@ -1111,7 +1112,7 @@ const addDays=(a,n)=>new Date(ymdUTC(a)+n*864e5).toISOString().slice(0,10);
 const h100=v=>v>0?Math.round(v*100):0;
 function encRes(r){
   const start=r.meetStart||r.date;let prev=0;
-  const laps=(r.splits||[]).map(x=>{const v=Math.round(x*100);const d=v-prev;prev=v;return d});
+  const laps=(r.splits||[]).map(x=>{if(x==null)return 0;const v=Math.round(x*100);const d=v-prev;prev=v;return d});   // 0 = split not recorded
   const a=[meetIdOf(r),dayDiff(start,r.date),SCODE[r.stroke]||0,+r.distance||0,CCODE[r.course]||0,r.round||"",r.place||0,h100(r.time),h100(r.entry),h100(r.reaction),r.status||"",laps,r.eventNo||0,r.relay||"",r.relayTeam||"",r.edited?1:0,teamIdx(r)];
   const empty=v=>v===0||v===""||(Array.isArray(v)&&!v.length);while(a.length>5&&empty(a[a.length-1]))a.pop();
   return a;
@@ -1120,7 +1121,7 @@ function decRes(a){
   const m=meetsById.get(a[0])||{n:"",s:"",e:""};let acc=0;
   return{meet:m.n||"",meetStart:m.s||"",meetEnd:m.e||"",date:m.s?addDays(m.s,a[1]||0):"",stroke:SNAME[a[2]]||"",distance:a[3]||0,course:CNAME[a[4]]||"",
     round:a[5]||"",place:a[6]||null,time:a[7]?a[7]/100:null,entry:a[8]?a[8]/100:null,reaction:a[9]?a[9]/100:null,status:a[10]||"",
-    splits:(a[11]||[]).map(d=>{acc+=d;return acc/100}),eventNo:a[12]||null,relay:a[13]||"",relayTeam:a[14]||"",edited:!!a[15],
+    splits:(a[11]||[]).map(d=>{if(!d)return null;acc+=d;return acc/100}),eventNo:a[12]||null,relay:a[13]||"",relayTeam:a[14]||"",edited:!!a[15],
     team:a[16]&&m.tm&&m.tm[a[16]-1]?m.tm[a[16]-1][0]:"",teamCode:a[16]&&m.tm&&m.tm[a[16]-1]?m.tm[a[16]-1][1]||"":"",teamType:m.t||"C"};
 }
 const encMap=res=>{const o={};for(const k in res)o[shortRid(k)]=encRes(res[k]);return o};
@@ -1459,11 +1460,19 @@ function meetsHtml(s){
   return h;
 }
 /* splits as a list: distance, cumulative time and (the time for that part) */
-function lapsHtml(r){const sp=r.splits||[];const step=r.distance/sp.length;let prev=0;
-  return`<div class="laps only">${r.reaction?`<span><b>Reaction</b>${r.reaction.toFixed(2)}</span>`:""}${sp.map((t,i)=>{const lap=t-prev;prev=t;return`<span><b>${Math.round(step*(i+1))}m</b>${fmt(t)} <span style="color:var(--muted)">(${fmt(lap)})</span></span>`}).join("")}</div>`}
+/* splits are kept by position (every 50 m); a split the timing missed is null, so the others stay in the right place */
+function splitsAt(g,dist,time){const out=[];for(let d=50;d<=dist&&d<=1500;d+=50)out.push(parseTime(g["SPLIT"+d])||null);
+  if(out.length&&time&&!out[out.length-1])out[out.length-1]=time;
+  const known=out.filter(Boolean).length;return out.length===1?(known?out:[]):known>=2?out:[]}
+const spKnown=r=>(r.splits||[]).filter(x=>x!=null).length;
+/* one split row: cumulative time and the time since the previous recorded split (over 100 m or more when one is missing) */
+function lapItems(r,lapFmt){const sp=r.splits||[];const step=r.distance/sp.length;let prev=0,prevD=0;
+  return sp.map((t,i)=>{const d=Math.round(step*(i+1));if(t==null)return`<span class="miss"><b>${d}m</b>— <span style="color:var(--muted)">(not recorded)</span></span>`;
+    const lap=t-prev,over=d-prevD;prev=t;prevD=d;return`<span><b>${d}m</b>${fmt(t)} <span style="color:var(--muted)">(${lapFmt(lap)}${over>step+.1?` · ${over}m`:""})</span></span>`}).join("")}
+function lapsHtml(r){
+  return`<div class="laps only">${r.reaction?`<span><b>Reaction</b>${r.reaction.toFixed(2)}</span>`:""}${lapItems(r,fmt)}</div>`}
 function splitHtml(r){
-  const sp=r.splits||[];const step=r.distance/sp.length;let prev=0;
-  return splitViz(r)+`<div class="laps">${r.reaction?`<span><b>Reaction</b>${r.reaction.toFixed(2)}</span>`:""}${sp.map((t,i)=>{const lap=t-prev;prev=t;return`<span><b>${Math.round(step*(i+1))}m</b>${fmt(t)} <span style="color:var(--muted)">(${lap.toFixed(2)})</span></span>`}).join("")}</div>`}
+  return splitViz(r)+`<div class="laps">${r.reaction?`<span><b>Reaction</b>${r.reaction.toFixed(2)}</span>`:""}${lapItems(r,l=>l.toFixed(2))}</div>`}
 
 /* ================= PICTURES ================= */
 /* --- 1. share cards: a 1080×1080 picture of one swim (PB or record) drawn on a canvas --- */
@@ -1533,8 +1542,8 @@ const shareBtn=r=>`<button class="lnk" type="button" data-share="${esc(r.id)}" t
 /* --- 2. split chart: lap-by-lap difference against the swimmer's best (or previous best) race with the same laps --- */
 function lapsOf(r){let p=0;return(r.splits||[]).map(t=>{const l=t-p;p=t;return l})}
 function splitViz(r){
-  const laps=lapsOf(r);if(laps.length<2)return"";
-  const same=resOf(r.swimmerId).filter(x=>valid(x)&&x.id!==r.id&&x.stroke===r.stroke&&+x.distance===+r.distance&&x.course===r.course&&(x.splits||[]).length===laps.length);
+  const laps=lapsOf(r);if(laps.length<2||(r.splits||[]).includes(null))return"";
+  const same=resOf(r.swimmerId).filter(x=>valid(x)&&x.id!==r.id&&x.stroke===r.stroke&&+x.distance===+r.distance&&x.course===r.course&&(x.splits||[]).length===laps.length&&!x.splits.includes(null));
   if(!same.length)return"";
   const faster=same.filter(x=>x.time<r.time).sort((a,b)=>a.time-b.time);
   const cmp=faster[0]||same.filter(x=>x.date<=r.date).sort((a,b)=>a.time-b.time)[0]||same.sort((a,b)=>a.time-b.time)[0];
@@ -3115,11 +3124,10 @@ async function readFile(file,quiet){
       const course=mapCourse(g.COURSE,defCourse);
       const time=parseTime(g.SWIMTIME);
       const status=norm(g.STATUS).toUpperCase();
-      const splits=[];for(let d=50;d<=1500;d+=50){const v=parseTime(g["SPLIT"+d]);if(v&&d<=distance)splits.push(v)}
-      if(time&&splits.length&&splits[splits.length-1]<time&&splits.length===distance/50-1)splits.push(time);
+      const splits=splitsAt(g,distance,time);
       const round=norm(g.ROUND).toUpperCase();
       const rid="r"+(await sha(`${sid}|${M.m}|${M.st}|${stroke}|${distance}|${course}|${round}`)).slice(0,10);
-      const rec={team:canonClub(norm(g.CLUBNAME)),teamCode:norm(g.CLUBCODE),teamType,eventNo:parseInt(g.EVENTNUMBER,10)||null,stroke,distance,course,date,meet:M.m,meetStart:M.st,meetEnd:M.en,round,place:parseInt(g.PLACE,10)>0?parseInt(g.PLACE,10):null,status:time?(status&&status!=="OK"?status:(parseInt(g.PLACE,10)<0?"EXH":"")):(status&&status!=="OK"?status:"No time"),time:time||null,entry:parseTime(g.ENTRYTIME),reaction:parseFloat(String(g.REACTIONTIME).replace(",","."))||null,splits:splits.length===distance/50?splits:[]};
+      const rec={team:canonClub(norm(g.CLUBNAME)),teamCode:norm(g.CLUBCODE),teamType,eventNo:parseInt(g.EVENTNUMBER,10)||null,stroke,distance,course,date,meet:M.m,meetStart:M.st,meetEnd:M.en,round,place:parseInt(g.PLACE,10)>0?parseInt(g.PLACE,10):null,status:time?(status&&status!=="OK"?status:(parseInt(g.PLACE,10)<0?"EXH":"")):(status&&status!=="OK"?status:"No time"),time:time||null,entry:parseTime(g.ENTRYTIME),reaction:parseFloat(String(g.REACTIONTIME).replace(",","."))||null,splits};
       const nm=fold(nameEn||nameTh);
       if(sw.has(sid)){const e=sw.get(sid);if(e.relayOnly){e.profile={nameEn,nameTh,prefix:norm(g.NAMEPREFIX),birthYear,gender:mapGender(g.GENDER),club:canonClub(norm(g.CLUBNAME)),clubCode:norm(g.CLUBCODE),nation:norm(g.NATION)||norm(g.CLUBNATION),clubNation:norm(g.CLUBNATION)};e.relayOnly=false}
         else if(!e.names.has(nm)){e.names.add(nm);if(cid)conflicts.push(`Row ${line}: ID number also used for “${[...e.names][0]}” in this file, here it is “${nameEn||nameTh}”`)}}
@@ -3155,10 +3163,10 @@ async function readFile(file,quiet){
       if(!sid&&!state.demo){const want=[nameEn,nameTh,full].filter(Boolean).map(fold);const ex=state.swimmers.filter(o=>want.some(w=>w===fold(o.nameEn)||w===fold(o.nameTh))&&(!birthYear||!o.birthYear||+o.birthYear===birthYear));if(ex.length===1)sid=ex[0].id}
       if(!sid)sid=await sidOf("n:"+(nameEn||nameTh).toLowerCase()+"|"+(birthDate||""));
       const course=mapCourse(g.COURSE,defCourse),date=dayOf(g,M.st,M.en),round=norm(g.ROUND).toUpperCase();
-      const splits=[];for(let d=50;d<=leg;d+=50){const v=parseTime(g["SPLIT"+d]);if(v)splits.push(v)}
+      const splits=splitsAt(g,leg,time);
       const rid="r"+(await sha(`${sid}|${M.m}|${M.st}|${relayStroke}|${leg}|${course}|${round}|LEADOFF`)).slice(0,10);
       const rt=parseFloat(String(g.RT1||g.REACTIONTIME||"").replace(",","."));
-      const rec={team:canonClub(norm(g.CLUBNAME)),teamCode:norm(g.CLUBCODE),teamType,stroke:relayStroke==="IM"?"Backstroke":relayStroke,distance:leg,course,date,meet:M.m,meetStart:M.st,meetEnd:M.en,round,place:null,status:"",time,entry:null,reaction:rt>0&&rt<2?rt:null,splits:splits.length===leg/50?splits:[],relay:label,relayTeam:canonClub(norm(g.CLUBNAME))};
+      const rec={team:canonClub(norm(g.CLUBNAME)),teamCode:norm(g.CLUBCODE),teamType,stroke:relayStroke==="IM"?"Backstroke":relayStroke,distance:leg,course,date,meet:M.m,meetStart:M.st,meetEnd:M.en,round,place:null,status:"",time,entry:null,reaction:rt>0&&rt<2?rt:null,splits,relay:label,relayTeam:canonClub(norm(g.CLUBNAME))};
       addSw(sid,cid,birthDate,{nameEn,nameTh,prefix:"",birthYear,gender:mapGender(g.GENDER1||g.GENDER),club:canonClub(norm(g.CLUBNAME)),clubCode:norm(g.CLUBCODE),nation:norm(g.NATION1||g.CLUBNATION||g.NATION)},true);
       sw.get(sid).results[rid]=rec;recs.push({sid,rid,rec});leadOffs++;
     }
@@ -3203,7 +3211,7 @@ async function readFile(file,quiet){
           const df=[];if(Math.abs((r.time||0)-(rec.time||0))>.001||(r.status||"")!==(rec.status||""))df.push(`${tv(r)} → ${tv(rec)}`);
           if((r.place||null)!==(rec.place||null))df.push(`place ${r.place||"–"} → ${rec.place||"–"}`);
           if((r.team||"")!==(rec.team||""))df.push(`team ${r.team||"–"} → ${rec.team||"–"}`);
-          if((r.splits||[]).length!==(rec.splits||[]).length)df.push("splits");
+          if(JSON.stringify((r.splits||[]).map(x=>x==null?null:Math.round(x*100)))!==JSON.stringify((rec.splits||[]).map(x=>x==null?null:Math.round(x*100))))df.push("splits");
           if(df.length)lines.push(`${evL(rec)}: ${df.join(", ")}`)}
         if(replace)inMeet.filter(r=>r.swimmerId===sid&&!newRids.has(r.id)).forEach(r=>lines.push(`${evL(r)} ${tv(r)}: removed`));
         const latest=Object.values(d.results).reduce((a,r)=>r.date>a?r.date:a,"");
@@ -3256,7 +3264,7 @@ async function readFile(file,quiet){
           <label class="chk" style="margin:4px 0 0 4px"><input type="radio" name="pd_${esc(x.sid)}" value="__diff"> <span>Different person <span class="hint">(won't be flagged again)</span></span></label></div>`}).join("")}${maybeDup.length>80?`<div class="hint">First 80 shown; the rest are added as new.</div>`:""}</div>
         <div class="hint" style="margin-top:6px">If the problem is a wrong ID or name in Splash, it's better to fix it there and choose the file again.</div></div>`:""}
       ${renamed.length?`<details><summary>${renamed.length} swimmers have a different name in this file than in the app</summary><div class="hint">${renamed.slice(0,40).map(esc).join("<br>")}${renamed.length>40?"<br>…":""}</div><div class="hint">They are matched by citizen ID. The newer name is used unless you edited it by hand.</div></details>`:""}
-      <div class="tbl-wrap" style="margin-top:0"><table><thead><tr><th>Swimmer</th><th>Club</th><th>Event</th><th>Round</th><th class="num">Time</th><th class="num">Splits</th></tr></thead><tbody>${sample.map(({sid,rec})=>{const p=sw.get(sid).profile;return`<tr><td>${esc(mainName(p))}</td><td>${esc(p.club)}</td><td>${rec.distance}m ${esc(rec.stroke)} <span class="chip course pool-${String(rec.course).toLowerCase()}">${rec.course}</span>${rec.relay?` <span class="chip course">${esc(rec.relay)} lead-off</span>`:""}</td><td>${esc(rec.round)}</td><td class="num t">${rec.time?fmt(rec.time):esc(rec.status)}</td><td class="num t">${rec.splits.length||"—"}</td></tr>`}).join("")}</tbody></table></div>
+      <div class="tbl-wrap" style="margin-top:0"><table><thead><tr><th>Swimmer</th><th>Club</th><th>Event</th><th>Round</th><th class="num">Time</th><th class="num">Splits</th></tr></thead><tbody>${sample.map(({sid,rec})=>{const p=sw.get(sid).profile;return`<tr><td>${esc(mainName(p))}</td><td>${esc(p.club)}</td><td>${rec.distance}m ${esc(rec.stroke)} <span class="chip course pool-${String(rec.course).toLowerCase()}">${rec.course}</span>${rec.relay?` <span class="chip course">${esc(rec.relay)} lead-off</span>`:""}</td><td>${esc(rec.round)}</td><td class="num t">${rec.time?fmt(rec.time):esc(rec.status)}</td><td class="num t">${(spKnown(rec)?spKnown(rec)+(rec.splits.includes(null)?` of ${rec.splits.length}`:""):"—")}</td></tr>`}).join("")}</tbody></table></div>
       ${recs.length>sample.length?`<div class="hint">First ${sample.length} of ${recs.length} results shown.</div>`:""}
       ${skipped.length?`<details><summary>${skipped.length} rows skipped</summary><div class="hint">${skipped.slice(0,60).map(([l,why])=>`Row ${l}: ${esc(why)}`).join("<br>")}${skipped.length>60?"<br>…":""}</div></details>`:""}
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="primary" id="doImport" ${reup&&!changes.length?"disabled":""}>${reup?`Save changes for ${changes.length} swimmer${changes.length===1?"":"s"}`:`Upload ${recs.length} results`}</button><button class="ghost" id="cancelImport">Cancel</button><span class="msg" id="iMsg"></span></div>
