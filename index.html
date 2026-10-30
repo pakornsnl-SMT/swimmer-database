@@ -286,6 +286,7 @@ form .full{grid-column:1/-1}
 .rpt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;align-items:start}
 @media (max-width:400px){.rpt-grid{grid-template-columns:minmax(0,1fr)}}
 .rcard{display:flex;flex-direction:column;gap:12px}
+#view-manage>.panel{content-visibility:auto;contain-intrinsic-size:auto 500px}
 .tlist{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:4px 0}
 .trow{display:flex;align-items:center;gap:6px;padding:3px 10px;min-height:30px}.trow:hover{background:var(--surface-2)}
 .trow label{display:flex;align-items:center;gap:6px;flex:1;min-width:0;cursor:pointer}.trow .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1017,7 +1018,9 @@ function teamOptionsHtml(val){
 const teamText=v=>v?`${({C:"club",S:"school",P:"province",R:"region",N:"country"})[v[0]]} ${v.slice(2)}`:"";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=s=>{if(s==null||isNaN(s))return"—";const m=Math.floor(s/60),r=s-m*60;const rs=r.toFixed(2);return m?`${m}:${rs.padStart(5,"0")}`:rs;};
-const fdate=d=>d?new Date(d+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):"—";
+/* dates are formatted thousands of times per page (rankings, histories): one formatter, and each date only once */
+const _fdF=new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"short",year:"numeric"}),_fdC=new Map();
+const fdate=d=>{if(!d)return"—";let v=_fdC.get(d);if(v===undefined){v=_fdF.format(new Date(d+"T00:00:00"));if(_fdC.size>20000)_fdC.clear();_fdC.set(d,v)}return v};
 /* A meet is identified by its name + start date; every swim keeps the meet's period. */
 const mKey=r=>(r.meetStart||r.date)+"|"+r.meet;
 function fperiod(a,b){
@@ -1907,14 +1910,25 @@ function topList(pool,st,d){
   const best=new Map();pool.filter(r=>r.stroke===st&&+r.distance===+d).forEach(r=>{const b=best.get(r.swimmerId);if(!b||r.time<b.time||(r.time===b.time&&r.date<b.date))best.set(r.swimmerId,r)});
   return[...best.values()].sort((a,b)=>a.time-b.time||(a.date<b.date?-1:1));
 }
+/* long ranking lists: the first rows are drawn straight away, the rest only when scrolled near (less to lay out = faster tabs) */
+const rkMore=new Map();let rkMoreN=0,moreObs=null;
+function chunkRows(arr){const FIRST=25;if(arr.length<=FIRST+10)return arr.join("");const id="m"+(++rkMoreN);rkMore.set(id,arr.slice(FIRST));
+  return arr.slice(0,FIRST).join("")+`<tr class="rkmore" data-more="${id}"><td colspan="12" class="hint">${arr.length-FIRST} more…</td></tr>`}
+function watchMore(root){if(!root)return;const els=root.querySelectorAll("tr.rkmore:not([data-w])");if(!els.length)return;
+  if(!("IntersectionObserver" in window)){els.forEach(moreNow);return}
+  if(!moreObs)moreObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)moreNow(e.target)}),{rootMargin:"500px 0px"});
+  els.forEach(el=>{el.dataset.w="1";moreObs.observe(el)})}
+function moreNow(el){const rest=rkMore.get(el.dataset.more);if(!rest){el.remove();return}const next=rest.splice(0,60);el.insertAdjacentHTML("beforebegin",next.join(""));
+  if(!rest.length){rkMore.delete(el.dataset.more);if(moreObs)moreObs.unobserve(el);el.remove()}
+  else{el.firstElementChild.textContent=`${rest.length} more…`;if(moreObs){moreObs.unobserve(el);moreObs.observe(el)}}}
 function rankRows(list,compact){
   let rank=0,prevT=null;
-  return list.slice(0,ui.kTop).map((r,i)=>{if(r.time!==prevT){rank=i+1;prevT=r.time}const s=swimmerById(r.swimmerId);const p=points(r,s.gender);const a=rankAge(s);
+  return chunkRows(list.slice(0,ui.kTop).map((r,i)=>{if(r.time!==prevT){rank=i+1;prevT=r.time}const s=swimmerById(r.swimmerId);const p=points(r,s.gender);const a=rankAge(s);
     const medal=rank<=3?`<span class="medal m${rank}" aria-label="Rank ${rank}">${rank}</span>`:rank;
     const name=`<button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>${altName(s)&&!compact?`<br><span class="hint">${esc(altName(s))}</span>`:""}`;
     return compact
       ?`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r)+(meetBy(r)?" · results by "+meetBy(r):""))}"><td>${medal}</td><td>${name}${s.club?`<span class="rk-club" title="${esc(s.club)}">${esc(s.club)}</span>`:""}</td><td class="num t">${a??""}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td></tr>`
-      :`<tr class="rk${rank}"><td>${medal}</td><td>${name}</td><td class="num t">${a??""}</td><td class="num t">${s.birthYear||""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"")}${r.meetEnd||meetBy(r)?`<br><span class="hint">${r.meetEnd?meetPeriod(r):""}${r.meetEnd&&meetBy(r)?" · ":""}${meetBy(r)?"results by "+esc(meetBy(r)):""}</span>`:""}</td></tr>`}).join("");
+      :`<tr class="rk${rank}"><td>${medal}</td><td>${name}</td><td class="num t">${a??""}</td><td class="num t">${s.birthYear||""}</td><td>${esc(s.club||"")}</td><td class="num t"><b>${fmt(r.time)}</b></td><td class="num pts">${p??"—"}</td><td>${fdate(r.date)}</td><td class="wrapok">${esc(r.meet||"")}${r.meetEnd||meetBy(r)?`<br><span class="hint">${r.meetEnd?meetPeriod(r):""}${r.meetEnd&&meetBy(r)?" · ":""}${meetBy(r)?"results by "+esc(meetBy(r)):""}</span>`:""}</td></tr>`}));
 }
 function periodText(){
   if(!ui.kFrom&&!ui.kTo)return"all time";
@@ -1988,7 +2002,7 @@ function renderRankings(){
       secs.map((s,i)=>`<section class="evsec" id="ev-${s.st}-${s.d}"><h3><span class="dot" style="background:var(${STROKE_COLOR[s.st]})"></span>${s.d}m ${esc(s.st)}</h3><div class="gcols" data-lazy="${i}" style="min-height:${Math.min(ui.kTop,Math.max(s.L.F.length,s.L.M.length))*34+40}px"></div></section>`).join("")+
       (emptyEv.length?`<div class="hint" style="margin-top:20px">No times yet: ${emptyEv.join(", ")}.</div>`:"");
     /* speed: each event's tables are drawn only when they come near the screen (drawing all of them at once took seconds on phones) */
-    const draw=el=>{const s=secs[+el.dataset.lazy];if(!s||el.dataset.done)return;el.dataset.done="1";el.innerHTML=col("F",s.L.F)+col("M",s.L.M);el.style.minHeight=""};
+    const draw=el=>{const s=secs[+el.dataset.lazy];if(!s||el.dataset.done)return;el.dataset.done="1";el.innerHTML=col("F",s.L.F)+col("M",s.L.M);watchMore(el);el.style.minHeight=""};
     if(rkObs)rkObs.disconnect();
     const lazies=[...document.querySelectorAll("#rkBody [data-lazy]")];
     if("IntersectionObserver" in window){rkObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){draw(e.target);rkObs.unobserve(e.target)}}),{rootMargin:"1200px 0px"});if(lazies[0])draw(lazies[0]);lazies.forEach(el=>{if(!el.dataset.done)rkObs.observe(el)})}
@@ -2003,6 +2017,7 @@ function renderRankings(){
   $("#rkSub").textContent=`${poolName(ui.kCourse)} pool · ${filt} · ${all.length} swimmer${all.length===1?"":"s"} ranked, best time per swimmer${all.length>ui.kTop?`, top ${ui.kTop} shown`:""}`;
   if(!all.length){$("#rkBody").innerHTML=`<div class="empty">No ${gName.toLowerCase()} have a ${d}m ${st} time in a ${poolName(ui.kCourse)} pool for ${periodText()}${ageText} yet.</div>`;return}
   $("#rkBody").innerHTML=`<div class="tbl-wrap"><table class="rank t-rk9"><thead><tr><th>#</th><th>Swimmer</th><th class="num">Age</th><th class="num">Born</th><th>Club</th><th class="num">Time</th><th class="num">Points</th><th>Date</th><th>Meet</th></tr></thead><tbody>${rankRows(all,false)}</tbody></table></div>`;
+  watchMore($("#rkBody"));
 }
 
 /* ---------- COMPARE VIEW ---------- */
@@ -2624,6 +2639,17 @@ $("#convGo").onclick=async()=>{
 /* ---------- routing ---------- */
 const VIEWS=["swimmers","rankings","records","compare","insights","reports","manage"];
 function show(v){if(v==="manage"&&!state.isStaff)v="swimmers";ui.view=v;VIEWS.forEach(x=>{$("#view-"+x).hidden=x!==v;$("#tab-"+x).setAttribute("aria-selected",x===v)});render()}
+/* speed for the tabs: a page whose data and settings have not changed since it was last drawn is shown as it is (instantly);
+   otherwise the tab switches at once and the page is drawn right after, so the click never feels stuck */
+const CACHED_VIEWS=new Set(["rankings","records","compare","insights"]),viewDeps={};
+/* only the settings a page uses count: e.g. opening a swimmer does not make the rankings page out of date */
+const UI_OF={rankings:/^(k|rankAll)/,compare:/^(c[A-Z]|picked)/,records:/^rec/,insights:/^in[A-Z]/};
+const depsNow=v=>[state.raw,state.swimmers,meetsById,recDoc,stdDoc,btSaved,clubAlias,excludedTeams,nameLang,state.isStaff,state.demo,JSON.stringify(Object.keys(ui).filter(k=>UI_OF[v].test(k)).sort().map(k=>[k,ui[k]]))];
+const depsSame=v=>{const o=viewDeps[v],n=depsNow(v);return!!o&&o.length===n.length&&o.every((x,i)=>x===n[i])};
+function showTab(v){if(v==="manage"&&!state.isStaff)v="swimmers";if(v===ui.view){render();return}
+  ui.view=v;VIEWS.forEach(x=>{$("#view-"+x).hidden=x!==v;$("#tab-"+x).setAttribute("aria-selected",x===v)});
+  if(CACHED_VIEWS.has(v)&&depsSame(v))return;
+  requestAnimationFrame(()=>setTimeout(()=>{if(ui.view===v)render()},0))}
 function render(){
   $("#demoBanner").hidden=!state.demo;
   $("#tab-manage").hidden=!state.isStaff;
@@ -2635,10 +2661,11 @@ function render(){
   else if(ui.view==="reports")renderReports();
   else if(ui.view==="insights")renderInsights();
   else renderManage();
+  if(CACHED_VIEWS.has(ui.view))viewDeps[ui.view]=depsNow(ui.view);
 }
 
 /* ---------- events ---------- */
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.view));
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>showTab(b.dataset.view));
 function syncLang(){document.querySelectorAll("#langSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.l===nameLang))}
 $("#langSeg").onclick=e=>{const b=e.target.closest("button");if(!b||b.dataset.l===nameLang)return;nameLang=b.dataset.l;try{localStorage.setItem("smt-lang",nameLang)}catch(_){}
   state.swimmers.forEach(s=>s.name=mainName(s));syncLang();render()};
@@ -3323,6 +3350,13 @@ $("#preview").addEventListener("click",async e=>{
   msg(m,res.failed?`Saved ${res.done} swimmers. ${res.failed} couldn't be saved — upload the same file again to retry them.`:P.reup?`Done in ${res.took}. Changes saved for ${P.nChanges-skip.size} swimmer${P.nChanges-skip.size===1?"":"s"}${skip.size?`; ${skip.size} left as they were`:""}.`:`Done in ${res.took}. ${P.recs.length} result${P.recs.length===1?"":"s"} for ${P.sw.size} swimmer${P.sw.size===1?"":"s"} ${P.sw.size===1&&P.recs.length===1?"is":"are"} now in the app.${same.size?` ${same.size} matched to swimmers already in the app (no duplicates made).`:""}`,!res.failed);
   pending=null;btn.hidden=true;$("#cancelImport").textContent="Upload another file";delete $("#iBy").dataset.touched;$("#iByOther").hidden=true;$("#iByOther").value="";
   if(!res.failed&&$("#iPick").value===""){$("#iMeet").value="";$("#iDate").value="";$("#iEnd").value="";autoFill=null;lastFile=null;["iMeet","iDate","iEnd"].forEach(id=>$("#"+id).classList.remove("autofill"))}
+  /* finished: the file's details are cleared away; only a short "done" note stays, ready for the next file */
+  if(!res.failed){const txt=m.textContent,meetTxt=[...new Set(P.recs.map(r=>r.rec.meet))].join(", ");
+    if($("#iPick").value!==""){$("#iPick").value="";$("#iPick").dispatchEvent(new Event("change"))}
+    $("#preview").innerHTML=`<div class="panel" style="padding:12px 14px;margin:10px 0;border-left:4px solid var(--good)"><b style="color:var(--good)">✓ Uploaded</b> · ${esc(meetTxt)}
+      <div class="msg ok" id="iMsg" role="status" style="margin-top:4px">${esc(txt)}</div>
+      <div style="margin-top:8px"><button class="ghost" type="button" id="cancelImport">Upload another file</button></div></div>`;
+    $("#fileName").textContent="or drop it here";skipNow=new Set();tOpen=new Set();tBoxOpen=false;lastFile=null}
   setTimeout(()=>{dupPairs=dupScan();updateDupBadge();renderDupes();const n=dupPairs.filter(p=>p.level!=="low").length;const mm=$("#iMsg");if(n&&mm){mm.insertAdjacentHTML("beforeend",` <button class="lnk" type="button" id="goDupes">${n} possible duplicate${n>1?"s":""} to review</button>`)}},1500);
 });
 
