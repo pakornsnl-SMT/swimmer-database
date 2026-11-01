@@ -1938,9 +1938,8 @@ function topList(pool,st,d){
 /* long ranking lists: the first rows are drawn straight away, the rest only when scrolled near (less to lay out = faster tabs) */
 const rkMore=new Map();let rkMoreN=0,moreObs=null;
 function chunkRows(arr){const FIRST=25;if(arr.length<=FIRST+10)return arr.join("");const id="m"+(++rkMoreN);rkMore.set(id,arr.slice(FIRST));
-  return arr.slice(0,FIRST).join("")+`<tr class="rkmore" data-more="${id}"><td colspan="12" class="hint">${arr.length-FIRST} more…</td></tr>`}
+  return arr.slice(0,FIRST).join("")+`<tr class="rkmore" data-more="${id}"><td colspan="2" class="hint">${arr.length-FIRST} more…</td></tr>`}
 function watchMore(root){if(!root)return;const els=root.querySelectorAll("tr.rkmore:not([data-w])");if(!els.length)return;
-  els.forEach(el=>{const t=el.closest("table"),n=t&&t.tHead&&t.tHead.rows[0]?t.tHead.rows[0].cells.length:0;if(n)el.cells[0].colSpan=n});   // a too-wide colspan adds empty columns to a fixed-layout table
   if(!("IntersectionObserver" in window)){els.forEach(moreNow);return}
   if(!moreObs)moreObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)moreNow(e.target)}),{rootMargin:"500px 0px"});
   els.forEach(el=>{el.dataset.w="1";moreObs.observe(el)})}
