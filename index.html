@@ -839,6 +839,31 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div class="msg" id="pubMsg" role="status"></div>
     </div>
 
+    <div class="panel" style="margin-bottom:18px" id="tasaPanel">
+      <div class="dup-hd"><h3 style="margin:0">Results for TASA (Excel)</h3></div>
+      <div class="hint" style="margin:6px 0 12px">One row per swim, relay lead-offs included (a swimmer with 5 events and 1 relay gets 6 rows). Columns: IDCODE(LICENSE), FIRSTNAME, LASTNAME, FIRSTNAMEEN, LASTNAMEEN, DOB, PLACE, SWIMTIME, CLUBNAME, CLUBCODE, GENDER, ROUND, STROKE (FREE, BACK, BREAST, FLY, MEDLEY), DISTANCE. The file holds citizen IDs and birth dates, so send it only to TASA.</div>
+      <div class="rk-top">
+        <div class="field" style="flex:1 1 320px"><label class="lbl" for="taMeet">Meet</label><select id="taMeet"></select></div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px">
+        <label class="chk"><input type="checkbox" id="taEv" checked> Add extra columns at the end (EVENTNO, POOL, RELAY)</label>
+        <label class="chk"><input type="checkbox" id="taBad"> Include DNS, DSQ and DNF</label>
+      </div>
+      <div style="margin-top:12px"><button class="primary" type="button" id="taGo">Download Excel</button></div>
+      <div class="msg" id="taMsg" role="status"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:18px" id="certPanel">
+      <div class="dup-hd"><h3 style="margin:0">Certificates (Excel for Word mail merge)</h3></div>
+      <div class="hint" style="margin:6px 0 12px">Choose the meet's Splash results file. You get one row per swimmer in the Splash certificate layout (NAME, plus NAMETH and NAMEEN with the Thai and English names, BIRTHDATE, GENDER, CLUBNAME, then EVENTNO1, STYLE1, TIME1, PLACE1… for up to 40 events), with each swimmer's <b>relay events</b> added: the relay's final time and place, for every swimmer in the relay team. The file is only read on this computer; nothing is saved in the app.</div>
+      <div class="rk-top">
+        <div class="field"><label class="lbl" for="ceLang">Names</label><select id="ceLang"><option value="th">Thai (English if no Thai name)</option><option value="en">English</option></select></div>
+        <div class="field"><label class="lbl" for="ceBad">DNS, DSQ, DNF</label><select id="ceBad"><option value="">Leave out</option><option value="1">Include</option></select></div>
+      </div>
+      <label class="drop" for="ceFile" style="padding:14px;margin-top:10px"><b style="font-size:16px">Choose results file</b><span class="hint">Splash results: Lenex (.lxf / .lef) · the Excel file downloads straight away</span><input type="file" id="ceFile" accept=".lxf,.lef,.xml"></label>
+      <div class="msg" id="ceMsg" role="status"></div>
+    </div>
+
     <div class="panel" style="margin-bottom:18px" id="usePanel">
       <div class="dup-hd"><h3 style="margin:0">Data usage</h3><button class="ghost" type="button" id="useGo">Check now</button></div>
       <div id="useOut" class="hint" style="margin-top:8px">Shows how much of the database is used and how much data each visitor downloads.</div>
@@ -1915,6 +1940,7 @@ const rkMore=new Map();let rkMoreN=0,moreObs=null;
 function chunkRows(arr){const FIRST=25;if(arr.length<=FIRST+10)return arr.join("");const id="m"+(++rkMoreN);rkMore.set(id,arr.slice(FIRST));
   return arr.slice(0,FIRST).join("")+`<tr class="rkmore" data-more="${id}"><td colspan="12" class="hint">${arr.length-FIRST} more…</td></tr>`}
 function watchMore(root){if(!root)return;const els=root.querySelectorAll("tr.rkmore:not([data-w])");if(!els.length)return;
+  els.forEach(el=>{const t=el.closest("table"),n=t&&t.tHead&&t.tHead.rows[0]?t.tHead.rows[0].cells.length:0;if(n)el.cells[0].colSpan=n});   // a too-wide colspan adds empty columns to a fixed-layout table
   if(!("IntersectionObserver" in window)){els.forEach(moreNow);return}
   if(!moreObs)moreObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)moreNow(e.target)}),{rootMargin:"500px 0px"});
   els.forEach(el=>{el.dataset.w="1";moreObs.observe(el)})}
@@ -3481,7 +3507,8 @@ function renderMeets(){
   if($("#iBy")&&!$("#iBy").dataset.touched&&document.activeElement!==$("#iBy")){const pk=$("#iPick").value;const o=pk?meetIndex.get(pk):null;fillBy($("#iBy"),o?(meetsById.get(o.mid)||{}).by||"":"")}
   const cur=$("#iPick").value;
   $("#iPick").innerHTML=`<option value="">A new meet</option>`+list.map(o=>`<option value="${esc(o.k)}">${esc(o.meet||"(no name)")} · ${esc(o.period)} — ${o.n} results</option>`).join("");
-  const keep=list.some(o=>o.k===cur);$("#iPick").value=keep?cur:"";syncPick(!keep||cur===""?undefined:false);
+  const keep=list.some(o=>o.k===cur);$("#iPick").value=keep?cur:"";
+  {const ts=$("#taMeet"),tc=ts.value;ts.innerHTML=list.length?list.map(o=>`<option value="${esc(o.k)}">${esc(o.meet||"(no name)")} · ${esc(o.period)}</option>`).join(""):`<option value="">No meets yet</option>`;if(list.some(o=>o.k===tc))ts.value=tc}syncPick(!keep||cur===""?undefined:false);
   if(editMeetK&&$("#fMeetEdit")&&$("#fMeetEdit").contains(document.activeElement))return;   // don't wipe a meet being edited
   $("#meetTbl").innerHTML=list.length?`<thead><tr><th>Period</th><th>Meet</th><th>Pool</th><th>Teams</th><th>Results by</th><th class="num">Swimmers</th><th class="num">Results</th><th></th></tr></thead><tbody>`+list.map(o=>editMeetK===o.k?`<tr class="editrow"><td colspan="8"><form class="rowedit" id="fMeetEdit" data-mk="${esc(o.k)}" autocomplete="off">
       <div class="field" style="grid-column:span 2"><label class="lbl" for="meName">Meet name</label><input type="text" id="meName" value="${esc(o.meet)}"></div>
@@ -4070,6 +4097,86 @@ async function downloadRankingsXlsx(topN,m){
   try{await saveFile(rkFileName("xlsx"),blob);msg(m,`Saved ${rows.length} rows.`,true)}
   catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":"Couldn't save the file. Try again.",c==="declined")}
 }
+/* ---- Certificates: Splash's certificate export layout, built straight from the Lenex file, with relay events added for every relay swimmer ---- */
+function certRows(xmlText,lang,withBad){
+  const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))throw new Error("bad xml");
+  const meet=doc.querySelector("MEET");if(!meet)throw new Error("no meet");
+  const A=(el,k)=>el?el.getAttribute(k)||"":"";const course=A(meet,"course");
+  const ev=new Map(),place=new Map();
+  meet.querySelectorAll("SESSION").forEach(se=>se.querySelectorAll("EVENT").forEach(e=>{const ss=e.querySelector("SWIMSTYLE");
+    ev.set(A(e,"eventid"),{no:A(e,"number"),stroke:A(ss,"stroke"),d:A(ss,"distance"),legs:+A(ss,"relaycount")||1,course:A(se,"course")||course,date:A(se,"date")});
+    e.querySelectorAll("RANKING").forEach(r=>{if(!place.has(A(r,"resultid")))place.set(A(r,"resultid"),A(r,"place"))})}));
+  const STY={FREE:"Freestyle",BACK:"Backstroke",BREAST:"Breaststroke",FLY:"Butterfly",MEDLEY:"Medley",IMRELAY:"Medley"};
+  const style=e=>e.legs>1?`${e.legs}x${e.d}m ${STY[e.stroke]||e.stroke} Relay`:`${e.d}m ${STY[e.stroke]||e.stroke}`;
+  const isBad=res=>{const st=A(res,"status").toUpperCase();return!parseTime(A(res,"swimtime"))||/^(DNS|DSQ|DNF|WDR|SICK)$/.test(st)};
+  const tx=(res,e)=>{const t=parseTime(A(res,"swimtime")),en=parseTime(A(res,"entrytime")),st=A(res,"status").toUpperCase(),pl=place.get(A(res,"resultid"));const bad=isBad(res);
+    return{no:e.no,date:e.date,style:style(e),time:bad?(st||"DNS"):fmt(t),lcm:!bad&&e.course==="LCM"?fmt(t):"",place:!bad&&+pl>0?pl+".":"",point:!bad&&+A(res,"points")>0?A(res,"points"):"",
+      prog:!bad&&en&&t?Math.round(en*en/(t*t)*100)+"%":"-",entry:en?fmt(en):""}};
+  const people=new Map();   // athleteid -> {who, events}
+  const who=(a,club)=>{const th=(A(a,"firstname")+" "+A(a,"lastname")).trim(),en=(A(a,"firstname.en")+" "+A(a,"lastname.en")).trim();const thaiNm=/[\u0e00-\u0e7f]/.test(th);
+    const b=A(a,"birthdate");return{NAME:lang==="en"?(en||th):(thaiNm?th:(en||th)),NAMETH:thaiNm?th:"",NAMEEN:en||(thaiNm?"":th),BIRTHDATE:b?`${b.slice(8,10)}/${b.slice(5,7)}/${b.slice(0,4)}`:"",GENDER:A(a,"gender"),LONGCLUB:A(club,"name"),SHORTCLUB:A(club,"code"),CLUBNAME:A(club,"name")}};
+  const get=(a,club)=>{const id=A(a,"athleteid");if(!people.has(id))people.set(id,{who:who(a,club),ev:[]});return people.get(id)};
+  const allAth=new Map();doc.querySelectorAll("ATHLETE").forEach(a=>allAth.set(A(a,"athleteid"),{a,club:a.closest("CLUB")}));
+  let relays=0,relayRows=0;
+  for(const club of meet.querySelectorAll("CLUBS > CLUB")){
+    for(const a of club.querySelectorAll("ATHLETES > ATHLETE")){const p=get(a,club);
+      for(const res of a.querySelectorAll("RESULTS > RESULT")){const e=ev.get(A(res,"eventid"));if(!e||e.legs>1)continue;if(!withBad&&isBad(res))continue;p.ev.push(tx(res,e))}}
+    for(const rel of club.querySelectorAll("RELAYS > RELAY"))for(const res of rel.querySelectorAll("RESULTS > RESULT")){const e=ev.get(A(res,"eventid"));if(!e)continue;if(!withBad&&isBad(res))continue;relays++;
+      for(const pos of res.querySelectorAll("RELAYPOSITIONS > RELAYPOSITION")){const x=allAth.get(A(pos,"athleteid"));if(!x)continue;get(x.a,x.club).ev.push(tx(res,e));relayRows++}}
+  }
+  const list=[...people.values()].filter(p=>p.ev.length);
+  list.forEach(p=>p.ev.sort((x,y)=>(x.date||"").localeCompare(y.date||"")||(parseInt(x.no,10)||0)-(parseInt(y.no,10)||0)));
+  list.sort((x,y)=>x.who.CLUBNAME.localeCompare(y.who.CLUBNAME,"th")||x.who.NAME.localeCompare(y.who.NAME,"th"));
+  const MAXE=40,head=["NAME","NAMETH","NAMEEN","BIRTHDATE","GENDER","LONGCLUB","SHORTCLUB","CLUBNAME"];
+  for(let i=1;i<=MAXE;i++)head.push(...["EVENTNO","STYLE","TIME","TIME_LCM","PLACE","POINT","PROGRESSION","ENTRYTIME"].map(h=>h+i));
+  for(let i=1;i<=10;i++)head.push("MKTITLE"+i,"MKTOTAL"+i,"MKPLACE"+i);
+  const rows=list.map(p=>{const w=p.who,r=[w.NAME,w.NAMETH,w.NAMEEN,w.BIRTHDATE,w.GENDER,w.LONGCLUB,w.SHORTCLUB,w.CLUBNAME];
+    for(let i=0;i<MAXE;i++){const x=p.ev[i];r.push(...(x?[x.no,x.style,x.time,x.lcm,x.place,x.point,x.prog,x.entry]:["","","","","","","",""]))}
+    for(let i=0;i<30;i++)r.push("");return r});
+  return{head,rows,meetName:A(meet,"name"),relays,relayRows,swimmers:list.length,over:list.filter(p=>p.ev.length>MAXE).length};
+}
+$("#ceFile").onchange=async e=>{const f=e.target.files[0],m=$("#ceMsg");e.target.value="";if(!f)return;
+  if(!window.XLSX){msg(m,"The Excel tools didn't load. Reload the page and try again.",false);return}
+  msg(m,"Reading the file…",true);let R;
+  try{R=certRows(await readLenexText(f),$("#ceLang").value,!!$("#ceBad").value)}catch(err){msg(m,"This doesn't look like a Splash Lenex results file (.lxf or .lef).",false);return}
+  if(!R.rows.length){msg(m,"No results found in this file.",false);return}
+  const ws=XLSX.utils.aoa_to_sheet([R.head,...R.rows]);
+  for(let i=0;i<R.rows.length;i++)R.head.forEach((h,c)=>{if(/^(BIRTHDATE|TIME|TIME_LCM|ENTRYTIME|PLACE|PROGRESSION)\d*$/.test(h)){const x=ws[XLSX.utils.encode_cell({r:i+1,c})];if(x){x.t="s";x.v=String(x.v)}}});   // keep times and dates as text for the mail merge
+  ws["!cols"]=R.head.map(h=>({wch:/^NAME/.test(h)||/CLUB/.test(h)?26:/^STYLE/.test(h)?24:9}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Certificates");
+  const blob=new Blob([XLSX.write(wb,{type:"array",bookType:"xlsx"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  try{await saveFile(`Certificates_${fileSafe(R.meetName||f.name.replace(/\.\w+$/,""))}.xlsx`,blob);
+    msg(m,`Saved ${R.swimmers} swimmers, including ${R.relayRows} relay swims from ${R.relays} relay teams.`+(R.over?` ${R.over} swimmer${R.over===1?" has":"s have"} more than 40 events; only the first 40 fit.`:""),true)}
+  catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":"Couldn't save the file. Try again.",c==="declined")}
+};
+/* ---- Results of one meet for TASA: one row per swim, relay lead-offs included ---- */
+const TASA_ST={Freestyle:"FREE",Backstroke:"BACK",Breaststroke:"BREAST",Butterfly:"FLY",IM:"MEDLEY"};
+async function downloadTasaXlsx(k,withEv,withBad,m){
+  if(!window.XLSX){msg(m,"The Excel tools didn't load. Reload the page and try again.",false);return}
+  const o=meetIndex.get(k);if(!o){msg(m,"Choose a meet first.",false);return}
+  const bad=r=>!r.time||/^(DNS|DSQ|DNF|No time)$/i.test(r.status||"");
+  const list=state.results.filter(r=>mKey(r)===k&&(withBad||!bad(r)));
+  if(!list.length){msg(m,"This meet has no results to export.",false);return}
+  const split=n=>{n=(n||"").trim();const i=n.indexOf(" ");return i<0?[n,""]:[n.slice(0,i),n.slice(i+1).trim()]};
+  const evn=r=>r.eventNo||(r.relay?9999:9998);
+  list.sort((a,b)=>(a.date||"").localeCompare(b.date||"")||evn(a)-evn(b)||(a.relay||"").localeCompare(b.relay||"")||(a.distance-b.distance)||(a.stroke||"").localeCompare(b.stroke||"")||(a.round||"").localeCompare(b.round||"")||((a.place||999)-(b.place||999))||((a.time||1e9)-(b.time||1e9)));
+  const head=["IDCODE(LICENSE)","FIRSTNAME","LASTNAME","FIRSTNAMEEN","LASTNAMEEN","DOB","PLACE","SWIMTIME","CLUBNAME","CLUBCODE","GENDER","ROUND","STROKE","DISTANCE",...(withEv?["EVENTNO","POOL","RELAY"]:[])];
+  let noId=0,noDob=0;const ppl=new Set();
+  const rows=list.map(r=>{const s=swimmerById(r.swimmerId)||{},p=priv.get(r.swimmerId)||{};ppl.add(r.swimmerId);
+    if(!p.cid)noId++;if(!p.dob)noDob++;const[ft,lt]=split(s.nameTh),[fe,le]=split(s.nameEn);
+    return[p.cid||"",ft,lt,fe,le,p.dob?fmtDob(p.dob):"",r.relay||bad(r)?"":(r.place||""),bad(r)?(r.status&&r.status!=="No time"?r.status.toUpperCase():"DNS"):fmt(r.time),r.team||s.club||"",r.teamCode||s.clubCode||"",s.gender||"",r.round||"",TASA_ST[r.stroke]||(r.stroke||"").toUpperCase(),r.distance||"",
+      ...(withEv?[r.eventNo||"",r.course||"",r.relay?"Lead-off · "+r.relay:""]:[])]});
+  const ws=XLSX.utils.aoa_to_sheet([head,...rows]);
+  for(let i=1;i<=rows.length;i++)["A","F","H"].forEach(c=>{const x=ws[c+(i+1)];if(x){x.t="s";x.v=String(x.v)}});   // keep IDs, dates and times as text
+  ws["!cols"]=head.map(h=>({wch:/IDCODE/.test(h)?16:/NAME$|NAMEEN/.test(h)?18:h==="CLUBNAME"?28:h==="RELAY"?28:9}));ws["!autofilter"]={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:head.length-1}})};
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Results");
+  const blob=new Blob([XLSX.write(wb,{type:"array",bookType:"xlsx"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  const lead=list.filter(r=>r.relay).length;
+  try{await saveFile(`TASA_${fileSafe(o.meet||"meet")}_${o.date||today()}.xlsx`,blob);
+    msg(m,`Saved ${rows.length} rows for ${ppl.size} swimmers (${lead} relay lead-off${lead===1?"":"s"}).`+(noId||noDob?` ${noId?noId+" row"+(noId===1?" has":"s have")+" no ID number":""}${noId&&noDob?" and ":""}${noDob?noDob+" row"+(noDob===1?" has":"s have")+" no birth date":""} in the app, so ${noId&&noDob?"those cells are":"that cell is"} empty.`:""),true)}
+  catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":"Couldn't save the file. Try again.",c==="declined")}
+}
+$("#taGo").onclick=()=>downloadTasaXlsx($("#taMeet").value,$("#taEv").checked,$("#taBad").checked,$("#taMsg"));
 $("#rkXlsx").onclick=()=>downloadRankingsXlsx(ui.kTop,$("#rkXlsxMsg"));
 /* how many swimmers per list: remembered on this device */
 try{const n=+localStorage.getItem("smt-ktop");ui.kTop=[10,20,50,100].includes(n)?n:100}catch(e){ui.kTop=100}
