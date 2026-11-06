@@ -9,6 +9,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F6GZJE9VV5"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-F6GZJE9VV5');
+window.__track=function(v){try{gtag('event','page_view',{page_title:'SMT · '+v,page_location:location.origin+'/'+v})}catch(e){}};</script>
 <style>html{-webkit-text-size-adjust:100%}body{margin:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -292,7 +295,14 @@ form .full{grid-column:1/-1}
 .trow label{display:flex;align-items:center;gap:6px;flex:1;min-width:0;cursor:pointer}.trow .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trow .tc{white-space:nowrap;font-size:12px}
 .trow .tx{width:20px;height:20px;padding:0;border:1px solid var(--line);border-radius:3px;background:var(--surface);color:var(--fg);font:600 14px/1 system-ui;cursor:pointer;flex:none}
-.tsw{padding:2px 10px 6px 64px;font-size:13px;line-height:1.7;border-bottom:1px dashed var(--line)}
+.tsw{padding:2px 10px 6px 34px;font-size:13px;line-height:1.5;border-bottom:1px dashed var(--line)}
+.swrow{display:flex;gap:6px;align-items:flex-start;padding:3px 0;cursor:pointer}.swrow input{margin-top:2px;flex:none}
+.swtag{display:inline-block;font-size:11px;line-height:1.4;padding:0 6px;border-radius:9px;margin-left:2px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.swtag.ok{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent)}
+.swtag.warn{color:#b26b00;border-color:#e3b25c}
+.swtag.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent);white-space:normal}
+.swtag.new{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.trow .swtag{flex:none}
 @media (max-width:560px){.trow .tc{display:none}}
 .stdtbl th,.stdtbl td{padding:3px 6px;text-align:center}.stdtbl input{width:84px;text-align:right;padding:5px 6px}.stdtbl tbody th{font-weight:500;white-space:nowrap;text-align:left}
 .stdt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)}
@@ -832,6 +842,13 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div class="msg" id="dupMsg"></div>
     </div>
 
+    <div class="panel" style="margin-bottom:18px" id="idcPanel">
+      <div class="dup-hd"><h3 style="margin:0">ID check (all swimmers)</h3><button class="ghost" id="idcGo" type="button">Check now</button></div>
+      <div class="hint" style="margin:6px 0 0">Looks through everyone already in the app for signs that one ID number belongs to two people: two swimmer profiles with the same ID number, or one swimmer who swam for two different teams at the same meet. Each upload also shows its own ID check before you upload.</div>
+      <div id="idcOut" style="margin-top:10px"></div>
+      <div class="msg" id="idcMsg" role="status"></div>
+    </div>
+
     <div class="panel" style="margin-bottom:18px" id="pubPanel">
       <div class="dup-hd"><h3 style="margin:0">Public website &amp; backup</h3></div>
       <div class="hint" style="margin:6px 0 12px"><b>Publish public data</b> saves <code>public.json</code>: every swimmer, result, meet and record that visitors may see, with citizen IDs, full birth dates and staff settings left out. Upload it to the <code>data</code> folder of your GitHub repository and the public website updates within a minute. Do this after each meet.<br><b>Backup</b> saves everything, including private data, for safekeeping. Never upload a backup to GitHub.</div>
@@ -864,6 +881,28 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div class="msg" id="ceMsg" role="status"></div>
     </div>
 
+    <div class="panel" style="margin-bottom:18px" id="entPanel">
+      <div class="dup-hd"><h3 style="margin:0">Excel entries → Splash entry file (.lxf)</h3></div>
+      <div class="hint" style="margin:6px 0 12px">Turns a club's Excel entry form into an entry file that Splash Meet Manager imports directly. The full Thai name also goes into Splash's Domicile field. Each row is matched to the right event by gender, stroke, distance and <b>the swimmer's age</b> (for example 200 IM men: #103 for 12 &amp; over, #414 for 10 &amp; 11). Excel columns: CITIZENID, FIRSTNAME, LASTNAME, FIRSTNAMEEN, LASTNAMEEN, GENDER, BIRTHDATE, STROKE, DISTANCE, CLUBNAME, CLUBCODE, and optional ENTRYTIME, NUMBER (event number), NATION. Files are only read on this computer; nothing is saved in the app.</div>
+      <div class="lbl" style="margin-bottom:4px">1 · The meet's event file from Meet Manager</div>
+      <label class="drop" for="enEvFile" style="padding:12px"><b style="font-size:15px" id="enEvName">Choose event file</b><span class="hint">Meet Manager: Export → Lenex, events / invitation (.lxf / .lef)</span><input type="file" id="enEvFile" accept=".lxf,.lef,.xml"></label>
+      <div class="lbl" style="margin:12px 0 4px">2 · The Excel entry form</div>
+      <label class="chk" style="margin-bottom:8px"><input type="checkbox" id="enUseApp" checked> Empty entry times: use the swimmer's best time from this app (same pool, in the meet's qualifying period)</label>
+      <label class="drop" for="enXlsx" style="padding:12px"><b style="font-size:15px">Choose Excel file</b><span class="hint">.xlsx · one row per swimmer per event</span><input type="file" id="enXlsx" accept=".xlsx,.xls,.csv"></label>
+      <div class="msg" id="enMsg" role="status"></div>
+      <div id="enOut"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:18px" id="idcardPanel">
+      <div class="dup-hd"><h3 style="margin:0">Swimmer ID cards (Excel for Word mail merge)</h3></div>
+      <div class="hint" style="margin:6px 0 12px">Choose the meet's start list from Splash Meet Manager, exported as Lenex (.lxf) after the heats are seeded and the time schedule is calculated. You get one row per swimmer (ATHLETEID = the swimmer's ID in this meet, NAME, NAMETH, NAMEEN, BIRTHDATE, GENDER, CLUBNAME…), then for each individual event: EVENTNO1, EVENT1, ENTRYTIME1, HEAT1, LANE1, <b>HEATDATE1, HEATTIME1</b>, and so on for up to 20 events. The file is only read on this computer; nothing is saved in the app.</div>
+      <div class="rk-top">
+        <div class="field"><label class="lbl" for="icLang">Names</label><select id="icLang"><option value="th">Thai (English if no Thai name)</option><option value="en">English</option></select></div>
+      </div>
+      <label class="drop" for="icFile" style="padding:14px;margin-top:10px"><b style="font-size:16px">Choose start list file</b><span class="hint">Splash start list / entries: Lenex (.lxf / .lef) · the Excel file downloads straight away</span><input type="file" id="icFile" accept=".lxf,.lef,.xml"></label>
+      <div class="msg" id="icMsg" role="status"></div>
+    </div>
+
     <div class="panel" style="margin-bottom:18px" id="usePanel">
       <div class="dup-hd"><h3 style="margin:0">Data usage</h3><button class="ghost" type="button" id="useGo">Check now</button></div>
       <div id="useOut" class="hint" style="margin-top:8px">Shows how much of the database is used and how much data each visitor downloads.</div>
@@ -876,6 +915,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div id="recPreview"></div>
       <div class="msg" id="recMsg" role="status"></div>
       <div id="recCands"></div>
+      <div id="recHistAdm"></div>
     </div>
 
     <div class="panel" style="margin-bottom:18px" id="stdPanel">
@@ -1217,7 +1257,7 @@ let recent=[];try{recent=JSON.parse(localStorage.getItem("smt-recent")||"[]");
   if(localStorage.getItem("smt-recent-v")!=="2"){recent=[];localStorage.setItem("smt-recent","[]");localStorage.setItem("smt-recent-v","2")}}catch(e){}
 function rememberSwimmer(id){recent=[id,...recent.filter(x=>x!==id)].slice(0,8);try{localStorage.setItem("smt-recent",JSON.stringify(recent))}catch(e){}}
 function enhanceEdit(){const c=document.getElementById("eClub");if(c)suggestInput(c,()=>clubCatalog().map(x=>({t:x.name,sub:`${x.n} swimmer${x.n>1?"s":""}${x.codes&&x.codes.size?" · code "+[...x.codes.keys()].join(", "):""}`})))}
-function openSwimmer(id){ui.sel=id;ui.ev=null;ui.openSplit=null;rememberSwimmer(id);renderRoster();renderProfile()}
+function openSwimmer(id){try{window.__track&&window.__track("swimmer")}catch(e){}ui.sel=id;ui.ev=null;ui.openSplit=null;rememberSwimmer(id);renderRoster();renderProfile()}
 function renderRoster(){
   $("#swCount").textContent=state.swimmers.length?`· ${state.swimmers.length.toLocaleString()} swimmers`:"";
   const list=recent.filter(id=>swimmerById(id));
@@ -1608,8 +1648,9 @@ function recHistHtml(x){
         <text x="${Math.min(Math.max(X(h.date),l+20),W-r-20).toFixed(1)}" y="${(Y(h.t)-10).toFixed(1)}" font-size="13" text-anchor="middle" style="fill:var(--fg)">${fmt(h.t)}</text>`).join("")}</svg>`;
   }
   let prev=null;
-  const rows=L.map(h=>{const d=prev!=null?prev-h.t:null;prev=h.t;return`<tr><td class="num t"><b>${fmt(h.t)}</b></td><td class="num t up">${d!=null?"−"+d.toFixed(2):""}</td><td>${esc(h.name)}</td><td>${h.date?fdate(h.date):'<span class="hint">not recorded</span>'}</td><td class="wrapok">${esc(h.place||"")}</td></tr>`}).reverse().join("");
-  return`<div style="padding:4px 2px">${svg}<div class="tbl-wrap" style="margin-top:6px"><table class="rhtbl"><thead><tr><th class="num">Time</th><th class="num">Better by</th><th>Holder</th><th>Date</th><th>Place</th></tr></thead><tbody>${rows}</tbody></table></div>
+  const ed=canEdit()&&!state.public,bad=recBadSet(x);
+  const rows=L.map(h=>{const d=prev!=null?prev-h.t:null;prev=h.t;const cur=h===x;return`<tr><td class="num t"><b>${fmt(h.t)}</b></td><td class="num t up">${d!=null?"−"+d.toFixed(2):""}</td><td>${esc(h.name)}${bad.has(recHid(h))?` <span class="swtag bad" title="A record can't be slower than an earlier record">looks wrong</span>`:""}</td><td>${h.date?fdate(h.date):'<span class="hint">not recorded</span>'}</td><td class="wrapok">${esc(h.place||"")}</td>${ed?`<td>${cur?'<span class="hint">current</span>':`<button type="button" class="lnk" data-rhdel="${esc(recHid(h))}">Remove</button>`}</td>`:""}</tr>`}).reverse().join("");
+  return`<div style="padding:4px 2px">${svg}<div class="tbl-wrap" style="margin-top:6px"><table class="rhtbl"><thead><tr><th class="num">Time</th><th class="num">Better by</th><th>Holder</th><th>Date</th><th>Place</th>${ed?"<th></th>":""}</tr></thead><tbody>${rows}</tbody></table></div>
     ${L.some(h=>!h.date)?`<div class="hint">Records without a date are listed but can't be placed on the chart.</div>`:""}</div>`;
 }
 
@@ -2671,7 +2712,7 @@ const CACHED_VIEWS=new Set(["rankings","records","compare","insights"]),viewDeps
 const UI_OF={rankings:/^(k|rankAll)/,compare:/^(c[A-Z]|picked)/,records:/^rec/,insights:/^in[A-Z]/};
 const depsNow=v=>[state.raw,state.swimmers,meetsById,recDoc,stdDoc,btSaved,clubAlias,excludedTeams,nameLang,state.isStaff,state.demo,JSON.stringify(Object.keys(ui).filter(k=>UI_OF[v].test(k)).sort().map(k=>[k,ui[k]]))];
 const depsSame=v=>{const o=viewDeps[v],n=depsNow(v);return!!o&&o.length===n.length&&o.every((x,i)=>x===n[i])};
-function showTab(v){if(v==="manage"&&!state.isStaff)v="swimmers";if(v===ui.view){render();return}
+function showTab(v){try{window.__track&&window.__track(v)}catch(e){}if(v==="manage"&&!state.isStaff)v="swimmers";if(v===ui.view){render();return}
   ui.view=v;VIEWS.forEach(x=>{$("#view-"+x).hidden=x!==v;$("#tab-"+x).setAttribute("aria-selected",x===v)});
   if(CACHED_VIEWS.has(v)&&depsSame(v))return;
   requestAnimationFrame(()=>setTimeout(()=>{if(ui.view===v)render()},0))}
@@ -2863,7 +2904,7 @@ const drop=$("#drop");
 ["dragenter","dragover"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add("over")}));
 ["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove("over")}));
 /* a new file: meet details that came from the previous file (filled in, or corrected by hand) are cleared first */
-const newFile=f=>{skipNow=new Set();tOpen=new Set();tBoxOpen=false;if(autoFill&&$("#iPick").value===""){const a=autoFill;if(a.m==="\u0000"||($("#iMeet").value===a.m&&$("#iDate").value===a.s&&$("#iEnd").value===a.e)){$("#iMeet").value="";$("#iDate").value="";$("#iEnd").value=""}autoFill=null}readFile(f)};
+const newFile=f=>{skipNow=new Set();skipSw=new Set();swTags=new Map();useFileNames=false;tOpen=new Set();tBoxOpen=false;if(autoFill&&$("#iPick").value===""){const a=autoFill;if(a.m==="\u0000"||($("#iMeet").value===a.m&&$("#iDate").value===a.s&&$("#iEnd").value===a.e)){$("#iMeet").value="";$("#iDate").value="";$("#iEnd").value=""}autoFill=null}readFile(f)};
 drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)newFile(f)});
 $("#iFile").onchange=e=>{const f=e.target.files[0];if(f)newFile(f);e.target.value=""};
 
@@ -2882,8 +2923,9 @@ async function getSalt(){
 
 /* .lxf is a zip holding one .lef; read it with the browser's own decompressor (no extra library) */
 async function readLenexText(file){return readZipText(file,/\.(lef|xml)$/i,/\.lxf$/i)}
+const sdifText=buf=>{try{return new TextDecoder("utf-8",{fatal:true}).decode(buf)}catch(e){return new TextDecoder("windows-874").decode(buf)}};
 async function readZipText(file,want,zipName){
-  if(!(zipName||/\.zip$/i).test(file.name))return await file.text();
+  if(!(zipName||/\.zip$/i).test(file.name))return /\.(cl2|hy3|sd3)$/i.test(file.name)?sdifText(await file.arrayBuffer()):await file.text();
   const buf=await file.arrayBuffer(),dv=new DataView(buf);let e=-1;
   for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-66000);i--)if(dv.getUint32(i,true)===0x06054b50){e=i;break}
   if(e<0)throw new Error("not a zip");
@@ -2893,9 +2935,10 @@ async function readZipText(file,want,zipName){
     const name=new TextDecoder().decode(new Uint8Array(buf,p+46,nl));p+=46+nl+xl+cl;
     if(!want.test(name))continue;
     const start=off+30+dv.getUint16(off+26,true)+dv.getUint16(off+28,true);const raw=new Uint8Array(buf,start,size);
-    const enc=/\.(cl2|sd3|hy3)$/i.test(name)?"windows-1252":"utf-8";
-    if(method===0)return new TextDecoder(enc).decode(raw);
-    if(method===8){const ds=new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return new TextDecoder(enc).decode(await new Response(ds).arrayBuffer())}
+    const enc=/\.(cl2|sd3|hy3)$/i.test(name)?"sdif":"utf-8";
+    const dec=b=>enc==="sdif"?sdifText(b):new TextDecoder(enc).decode(b);
+    if(method===0)return dec(raw);
+    if(method===8){const ds=new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return dec(await new Response(ds).arrayBuffer())}
     throw new Error("unsupported zip")}
   throw new Error("no matching file inside");
 }
@@ -2983,7 +3026,8 @@ function cl2Rows(text){
      (birth date + letters of the name, e.g. 062806PONXTRIT); those are ignored and never saved */
   let madeUpIds=0;
   const fullId=(uss,d3)=>{if(/^\d{13}$/.test(d3||"")&&thaiCheck(d3.slice(0,12))===d3[12])return d3;if(/^\d{12}$/.test(uss))return uss+thaiCheck(uss);if(uss)madeUpIds++;return""};
-  const splitName=n=>{const[a,b]=String(n).split(",");return b?{first:b.trim(),last:a.trim()}:{first:String(n).trim(),last:""}};
+  const enClean=v=>{const o=String(v).replace(/\s+/g," ").trim(),c=o.replace(/[^\x20-\x7e\u00c0-\u017f]/g,"").replace(/\s+/g," ").trim();return c===o?c:c.replace(/(^|[\s-])([a-z])/g,(m,p,ch)=>p+ch.toUpperCase())};   // a stray Thai or broken character in an English name field
+  const splitName=n=>{const[a,b]=String(n).split(",");return b?{first:enClean(b),last:enClean(a)}:{first:enClean(n),last:""}};
   const head=["MEETNAME","MEETDATE","MEETENDDATE","SESSIONDATE","COURSE","EVENTNUMBER","STROKE","DISTANCE","RELAYCOUNT","ROUND","GENDER","CLUBNAME","CLUBCODE","CLUBNATION",
     "FIRSTNAMEEN","LASTNAMEEN","BIRTHDATE","NATION","LICENSE","XSID","PLACE","STATUS","SWIMTIME","ENTRYTIME",...Array.from({length:30},(_,i)=>"SPLIT"+(i+1)*50),
     "FIRSTNAMEEN1","LASTNAMEEN1","BIRTHDATE1","LICENSE1","NATION1","GENDER1","XSID1"];
@@ -3078,7 +3122,25 @@ function hy3Rows(text){
 }
 let importNote="";
 let lastFile=null,autoFill=null,readGen=0;
-let skipNow=new Set(),tOpen=new Set(),curTeams=new Map(),tBoxOpen=false;   // teams unticked in the preview: left out of this upload only
+let idReport=[],idRepName="";
+function idReportHtml(done){if(!idReport.length)return"";const ids=new Set(idReport.map(r=>r.cid)).size;
+  const rows=idReport.slice(0,60).map(r=>`<tr><td class="mono">${esc(r.cid)}</td><td><b>${esc([r.nameTh,r.nameEn].filter(Boolean).join(" · "))}</b>${r.birth?`<br><span class="hint">born ${esc(fmtDob(r.birth))}</span>`:""}${r.app?`<br><span class="hint">In the app: ${esc(r.app)}</span>`:""}</td><td>${esc(r.club||"")}</td><td class="hint">${esc(r.events.join(", "))}</td></tr>`).join("");
+  return`<details ${done?"":"open"} class="panel" style="padding:10px 12px;margin:10px 0;border-color:var(--bad)"><summary style="color:var(--bad);font-weight:600">ID check: ${ids} ID number${ids>1?"s":""} to check</summary>
+    <div class="hint" style="margin:6px 0">The same ID number is used for different names, so their results would go to one swimmer. This is usually a typing mistake in the entries. Fix the ID in Splash and choose the file again, or upload and correct the swimmer afterwards.</div>
+    <div style="max-height:360px;overflow:auto"><table class="rank"><thead><tr><th>ID number</th><th>Name in this file</th><th>Club</th><th>Events</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${idReport.length>60?`<div class="hint">First 60 of ${idReport.length} rows shown; the Excel file has them all.</div>`:""}
+    <div style="margin-top:8px"><button class="ghost" type="button" id="idRepXlsx">Download ID check (Excel)</button> <span class="msg" id="idRepMsg"></span></div></details>`}
+async function downloadIdReport(rows,file,m){
+  if(!window.XLSX){msg(m,"The Excel tools didn't load. Reload the page and try again.",false);return}
+  const head=["ID number","Problem","Name (Thai)","Name (English)","Birth date","Club","In the app","Events"];
+  const ws=XLSX.utils.aoa_to_sheet([head,...rows.map(r=>[r.cid,r.kind,r.nameTh||"",r.nameEn||"",r.birth?fmtDob(r.birth):"",r.club||"",r.app||"",r.events.join(", ")])]);
+  for(let i=1;i<=rows.length;i++){const x=ws["A"+(i+1)];if(x){x.t="s";x.v=String(x.v)}}
+  ws["!cols"]=[16,34,26,26,11,28,34,60].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"ID check");
+  const blob=new Blob([XLSX.write(wb,{type:"array",bookType:"xlsx"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  try{await saveFile(file,blob);msg(m,"Saved.",true)}catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":"Couldn't save the file. Try again.",c==="declined")}
+}
+let skipNow=new Set(),skipSw=new Set(),swTags=new Map(),tOpen=new Set(),curTeams=new Map(),tBoxOpen=false,useFileNames=false;   // teams unticked in the preview: left out of this upload only
 async function readFile(file,quiet){
   lastFile=file;const gen=++readGen;
   const pv=$("#preview");$("#fileName").textContent=file.name;pending=null;
@@ -3139,6 +3201,10 @@ async function readFile(file,quiet){
     const salt=db?await getSalt():"local";const linkedIds=new Set();
     const aliases=db?await loadAliases():new Map();
     const recs=[],skipped=[],conflicts=[];const sw=new Map();const relayRows=[];let leadOffs=0;
+    /* every name each ID number is used with in this file, with the events, for the ID check */
+    const idUse=new Map(),keySid=new Map();const useId=(cid,nameTh,nameEn,birth,club,ev)=>{if(!cid)return;const m=idUse.get(cid)||idUse.set(cid,new Map()).get(cid);const k=fold(nameEn||nameTh).replace(/\s+/g," ").trim();
+      const o=m.get(k)||m.set(k,{nameTh,nameEn,birth:birth||"",club,events:[]}).get(k);o.events.push(ev)};
+    const evLbl=(no,d,st,round,relay)=>`${no?"#"+no+" ":""}${d}m ${st==="IM"?"IM":st}${round&&!/^(TIM|F)$/.test(round)?" "+round:""}${relay?" (relay lead-off)":""}`;
     const meet=meetForm,start=dateForm;let end=dateForm?endForm:"";
     const meetOf=g=>{const m=meet||norm(g.MEETNAME||g.MEET),st=start||parseDate(g.MEETDATE||g.MEETSTARTDATE||g.STARTDATE);let en=end||parseDate(g.MEETENDDATE||g.MEETDATEEND||g.ENDDATE)||"";if(en&&st&&en<=st)en="";return{m,st,en}};
     const dayOf=(g,st,en)=>{let d=parseDate(g.SESSIONDATE||g.EVENTDATE||g.SWIMDATE||g.DATE);if(!d||d<st||(en&&d>en)||(!en&&d!==st))d=st;return d};
@@ -3154,12 +3220,15 @@ async function readFile(file,quiet){
       const relayCount=parseInt(g.RELAYCOUNT,10)||0;
       if(thaiOnly){const isRelayRow=(parseInt(g.RELAYCOUNT,10)||0)>1||norm(g.FIRSTNAME1||g.LASTNAME1);const nat=isRelayRow?(norm(g.NATION1)||norm(g.CLUBNATION)||norm(g.NATION)):(norm(g.NATION)||norm(g.CLUBNATION));
         if(!isThai({nation:nat})){skipped.push([line,`Not a Thai swimmer (${nat})`]);continue}}
-      {const tn=canonClub(norm(g.CLUBNAME));if(!excludedTeams.has(tn)){const ft=fileTeams.get(tn)||fileTeams.set(tn,{n:0,sw:new Map(),code:norm(g.CLUBCODE)}).get(tn);ft.n++;
-          const th=norm(norm(g.FIRSTNAME||g.FIRSTNAME1)+" "+norm(g.LASTNAME||g.LASTNAME1)),en=norm(norm(g.FIRSTNAMEEN||g.FIRSTNAMEEN1)+" "+norm(g.LASTNAMEEN||g.LASTNAMEEN1));
-          const k=fold(th+"|"+en);const w=ft.sw.get(k)||ft.sw.set(k,{th,en,by:String(parseDate(g.BIRTHDATE||g.BIRTHDATE1)||"").slice(0,4),n:0}).get(k);w.n++}
-        if(skipNow.has(tn)){skipped.push([line,`Team “${tn}” not selected for this upload`]);continue}}
+      let swKey="";
+      {const tn=canonClub(norm(g.CLUBNAME));const th=norm(norm(g.FIRSTNAME||g.FIRSTNAME1)+" "+norm(g.LASTNAME||g.LASTNAME1)),en=norm(norm(g.FIRSTNAMEEN||g.FIRSTNAMEEN1)+" "+norm(g.LASTNAMEEN||g.LASTNAMEEN1));
+        const k=fold(th+"|"+en);swKey=tn+"\u0001"+k;
+        if(!excludedTeams.has(tn)){const ft=fileTeams.get(tn)||fileTeams.set(tn,{n:0,sw:new Map(),code:norm(g.CLUBCODE)}).get(tn);ft.n++;
+          const w=ft.sw.get(k)||ft.sw.set(k,{th,en,by:String(parseDate(g.BIRTHDATE||g.BIRTHDATE1)||"").slice(0,4),n:0,key:swKey}).get(k);w.n++}
+        if(skipNow.has(tn)){skipped.push([line,`Team “${tn}” not selected for this upload`]);continue}
+        if(skipSw.has(swKey)){skipped.push([line,`${th||en} not selected for this upload`]);continue}}
       if(excludedTeams.has(canonClub(norm(g.CLUBNAME)))){skipped.push([line,`Team “${canonClub(norm(g.CLUBNAME))}” is set to be skipped`]);continue}
-      if(relayCount>1||/x/i.test(String(g.DISTANCE))||/relay|ผลัด/i.test(String(g.STROKE))||norm(g.FIRSTNAME1||g.LASTNAME1)){relayRows.push({g,line,relayCount});continue}
+      if(relayCount>1||/x/i.test(String(g.DISTANCE))||/relay|ผลัด/i.test(String(g.STROKE))||norm(g.FIRSTNAME1||g.LASTNAME1)){relayRows.push({g,line,relayCount,swKey});continue}
       const nameTh=norm(norm(g.FIRSTNAME)+" "+norm(g.LASTNAME)),nameEn=norm(norm(g.FIRSTNAMEEN)+" "+norm(g.LASTNAMEEN));
       if(!nameTh&&!nameEn){skipped.push([line,"No swimmer name"]);continue}
       const stroke=mapStroke(g.STROKE);
@@ -3180,6 +3249,7 @@ async function readFile(file,quiet){
       const round=norm(g.ROUND).toUpperCase();
       const rid="r"+(await sha(`${sid}|${M.m}|${M.st}|${stroke}|${distance}|${course}|${round}`)).slice(0,10);
       const rec={team:canonClub(norm(g.CLUBNAME)),teamCode:norm(g.CLUBCODE),teamType,eventNo:parseInt(g.EVENTNUMBER,10)||null,stroke,distance,course,date,meet:M.m,meetStart:M.st,meetEnd:M.en,round,place:parseInt(g.PLACE,10)>0?parseInt(g.PLACE,10):null,status:time?(status&&status!=="OK"?status:(parseInt(g.PLACE,10)<0?"EXH":"")):(status&&status!=="OK"?status:"No time"),time:time||null,entry:parseTime(g.ENTRYTIME),reaction:parseFloat(String(g.REACTIONTIME).replace(",","."))||null,splits};
+      useId(cid,nameTh,nameEn,birthDate,rec.team,evLbl(rec.eventNo,distance,stroke,round));keySid.set(swKey,sid);
       const nm=fold(nameEn||nameTh);
       if(sw.has(sid)){const e=sw.get(sid);if(e.relayOnly){e.profile={nameEn,nameTh,prefix:norm(g.NAMEPREFIX),birthYear,gender:mapGender(g.GENDER),club:canonClub(norm(g.CLUBNAME)),clubCode:norm(g.CLUBCODE),nation:norm(g.NATION)||norm(g.CLUBNATION),clubNation:norm(g.CLUBNATION)};e.relayOnly=false}
         else if(!e.names.has(nm)){e.names.add(nm);if(cid)conflicts.push(`Row ${line}: ID number also used for “${[...e.names][0]}” in this file, here it is “${nameEn||nameTh}”`)}}
@@ -3190,7 +3260,7 @@ async function readFile(file,quiet){
     /* Relays: the lead-off (first) swimmer's split counts as an official individual time.
        DISTANCE is the distance each swimmer swims (4×100 → 100). In a medley relay the lead-off swims backstroke. */
     const thai=t=>/[฀-๿]/.test(t);
-    for(const{g,line,relayCount}of relayRows){
+    for(const{g,line,relayCount,swKey}of relayRows){
       const rs=String(g.STROKE??"");const relayStroke=/medley|ผสม|^5$/i.test(rs)?"IM":mapStroke(rs.replace(/relay|ผลัด/ig,""));
       const dRaw=String(g.DISTANCE??"");const leg=parseInt(/x/i.test(dRaw)?dRaw.split(/x/i).pop():dRaw.replace(/[^\d]/g,""),10);
       const n=relayCount||parseInt(/x/i.test(dRaw)?dRaw.split(/x/i)[0]:"",10)||4;
@@ -3220,6 +3290,7 @@ async function readFile(file,quiet){
       const rt=parseFloat(String(g.RT1||g.REACTIONTIME||"").replace(",","."));
       const rec={team:canonClub(norm(g.CLUBNAME)),teamCode:norm(g.CLUBCODE),teamType,stroke:relayStroke==="IM"?"Backstroke":relayStroke,distance:leg,course,date,meet:M.m,meetStart:M.st,meetEnd:M.en,round,place:null,status:"",time,entry:null,reaction:rt>0&&rt<2?rt:null,splits,relay:label,relayTeam:canonClub(norm(g.CLUBNAME))};
       addSw(sid,cid,birthDate,{nameEn,nameTh,prefix:"",birthYear,gender:mapGender(g.GENDER1||g.GENDER),club:canonClub(norm(g.CLUBNAME)),clubCode:norm(g.CLUBCODE),nation:norm(g.NATION1||g.CLUBNATION||g.NATION)},true);
+      useId(cid,nameTh,nameEn,birthDate,rec.team,evLbl(parseInt(g.EVENTNUMBER,10),leg,rec.stroke,round,true));keySid.set(swKey,sid);
       sw.get(sid).results[rid]=rec;recs.push({sid,rid,rec});leadOffs++;
     }
     if(teamType!=="C")sw.forEach(d=>{delete d.profile.club;delete d.profile.clubCode;d.fillOnly=true});   // a province/school/country is not the swimmer's club
@@ -3246,7 +3317,31 @@ async function readFile(file,quiet){
           if((close(kTh,nameKeyOf(o.nameTh))||close(kEn,nameKeyOf(o.nameEn))))add(o,sameClub?"high":"med",sameClub?"Very similar name, same club and birth year":"Very similar name, same birth year")});
         if(c.size)maybeDup.push({sid,p,cid:id,cands:[...c.values()].sort((a,b)=>rank[b.level]-rank[a.level]).slice(0,3)})});
       maybeDup.sort((a,b)=>rank[b.cands[0].level]-rank[a.cands[0].level])}
-    const renamed=state.demo||teamType!=="C"?[]:[...sw.entries()].filter(([sid,d])=>{const o=swimmerById(sid);if(!o)return false;const a=fold(o.nameEn),b=fold(d.profile.nameEn),c=fold(o.nameTh),e=fold(d.profile.nameTh);return(a&&b&&a!==b)||(c&&e&&c!==e)}).map(([sid,d])=>`${swimmerById(sid).name} → ${d.profile.nameEn||d.profile.nameTh}`);
+    const nf=t=>fold(t).replace(/\s+/g," ").trim();
+    const renamed=state.demo||teamType!=="C"?[]:[...sw.entries()].flatMap(([sid,d])=>{const o=swimmerById(sid);if(!o||d.relayOnly)return[];const out=[];
+      if(nf(o.nameTh)&&nf(d.profile.nameTh)&&nf(o.nameTh)!==nf(d.profile.nameTh))out.push(`${o.nameTh} → ${norm(d.profile.nameTh)}`);
+      if(nf(o.nameEn)&&nf(d.profile.nameEn)&&nf(o.nameEn)!==nf(d.profile.nameEn))out.push(`${o.nameEn} → ${norm(d.profile.nameEn)}`);
+      return out.length?[out.join(" · ")]:[]});
+    /* ID check: one ID number used for different names in this file, or for a very different name than the swimmer in the app */
+    idReport=[];idRepName=(recs[0]&&recs[0].rec.meet)||"";
+    idUse.forEach((m,cid)=>{if(m.size<2)return;m.forEach(o=>idReport.push({cid,kind:"Same ID, different names in this file",nameTh:o.nameTh,nameEn:o.nameEn,birth:o.birth,club:o.club,events:o.events}))});
+    if(!state.demo){const far=(a,b)=>{a=nameKeyOf(a);b=nameKeyOf(b);if(!a||!b)return null;const mx=Math.max(2,Math.round(Math.max(a.length,b.length)*.3));return lev(a,b,mx)>mx};
+      sw.forEach((d,sid)=>{const o=swimmerById(sid),cid=d.priv&&d.priv.cid;if(!o||!cid||(idUse.get(cid)||new Map()).size>1)return;
+        const t=far(o.nameTh,d.profile.nameTh),e=far(o.nameEn,d.profile.nameEn);if(!(t||e)||t===false||e===false)return;
+        const evs=[...(idUse.get(cid)||new Map()).values()].flatMap(x=>x.events);
+        idReport.push({cid,kind:"Very different name than in the app",nameTh:d.profile.nameTh,nameEn:d.profile.nameEn,birth:d.priv.dob||"",club:d.profile.club||"",events:evs,app:[o.nameTh,o.nameEn].filter(Boolean).join(" · ")+(o.birthYear?` (born ${o.birthYear})`:"")})})}
+    /* a short note after each swimmer in "Choose teams": how the file's swimmer matches the app (kept for swimmers unticked later) */
+    {const dupBy=new Map(maybeDup.map(x=>[x.sid,x])),repBy=new Map();idReport.forEach(r=>repBy.set(r.cid+"|"+fold(r.nameEn||r.nameTh).replace(/\s+/g," ").trim(),r));
+      const nmOf=o=>[o.nameTh,o.nameEn].filter(Boolean)[0]||"";
+      keySid.forEach((sid,key)=>{const d=sw.get(sid);if(!d)return;const o=swimmerById(sid),cid=d.priv&&d.priv.cid;const tags=[];
+        const rr=cid&&repBy.get(cid+"|"+fold(d.profile.nameEn||d.profile.nameTh).replace(/\s+/g," ").trim());
+        if(rr&&rr.kind.startsWith("Same ID")){tags.push(["bad","Same ID as another name in this file"+(o?` · in the app it is ${nmOf(o)}`:"")]);swTags.set(key,tags);return}
+        if(o){const byId=cid&&(priv.get(sid)||{}).cid===cid;
+          if(rr&&rr.app)tags.push(["bad",`ID belongs to ${nmOf(o)} in the app`]);
+          else{const nf=t=>fold(t).replace(/\s+/g," ").trim();const diff=(nf(o.nameTh)&&nf(d.profile.nameTh)&&nf(o.nameTh)!==nf(d.profile.nameTh))||(nf(o.nameEn)&&nf(d.profile.nameEn)&&nf(o.nameEn)!==nf(d.profile.nameEn));
+            tags.push([diff?"warn":"ok",byId?(diff?`In the app, ID matches, name differs: ${nmOf(o)}`:"In the app · ID matches"):(diff?`In the app, matched by name: ${nmOf(o)}`:"In the app · matched by name and birth date")])}}
+        else{const x=dupBy.get(sid);if(x){const c=x.cands[0];tags.push(["bad",`New · similar to ${nmOf(c.o)}${c.o.birthYear?" ("+c.o.birthYear+")":""}: ${c.why}`])}else tags.push(["new",cid?"New swimmer":"New swimmer · no ID number"])}
+        swTags.set(key,tags)})}
     const newSw=[...sw.keys()].filter(id=>!existing.has(id)).length,dup=recs.filter(r=>known.has(r.rid)).length,timed=recs.filter(r=>r.rec.time).length;
     const meetKeys=new Set(recs.map(r=>mKey(r.rec)));
     const picked=$("#iPick").value!=="";
@@ -3286,10 +3381,10 @@ async function readFile(file,quiet){
       near=state.results.filter(r=>{const k=mKey(r);if(seen.has(k)||meetKeys.has(k))return false;seen.add(k);return Math.abs(dayDiff(r.meetStart||r.date,st.meetStart||st.date))<=3}).slice(0,3)}
     const linkNote=linkedIds.size?`<div class="hint" style="color:var(--fg);margin-bottom:8px"><b>${linkedIds.size} swimmer${linkedIds.size>1?"s":""} from earlier Hy-Tek meets</b> (no citizen ID then) ${linkedIds.size>1?"are":"is"} linked to the citizen ID in this file, matched by English name, birth date and gender: ${esc([...linkedIds].slice(0,10).map(id=>swimmerById(id)?.name||"").join(", "))}${linkedIds.size>10?", …":""}.</div>`:"";
     curTeams=fileTeams;const tList=[...fileTeams.entries()].sort((a,b)=>a[0].localeCompare(b[0],"th"));
-    const teamBox=tList.length>1||skipNow.size?`<details class="panel" style="padding:10px 12px;margin:8px 0;background:var(--surface-2)" id="tPickBox" ${skipNow.size||tBoxOpen?"open":""}><summary><b>Choose teams to upload</b> <span class="hint">· ${tList.length-[...skipNow].filter(t=>fileTeams.has(t)).length} of ${tList.length} ${ttPl(teamType)} selected</span></summary>
-        <div class="hint" style="margin:6px 0">Untick a team to leave it out of this upload only. To always skip a team, use Admin → Remove team.</div>
+    const teamBox=tList.length?`<details class="panel" style="padding:10px 12px;margin:8px 0;background:var(--surface-2)" id="tPickBox" ${skipNow.size||tBoxOpen?"open":""}><summary><b>Choose teams and swimmers to upload</b> <span class="hint">· ${tList.length-[...skipNow].filter(t=>fileTeams.has(t)).length} of ${tList.length} ${ttPl(teamType)} selected</span></summary>
+        <div class="hint" style="margin:6px 0">Untick a team or, after pressing +, a swimmer to leave them out of this upload only. The note after each swimmer shows how they match the app; red ones need checking. To always skip a team, use Admin → Remove team.</div>
         <div style="display:flex;gap:12px;margin-bottom:6px"><button type="button" class="lnk" data-tall="1">Select all</button><button type="button" class="lnk" data-tall="0">Select none</button></div>
-        <div class="tlist">${tList.map(([t,v])=>{const op=tOpen.has(t);const ppl=[...v.sw.values()].sort((x,y)=>(x.th||x.en).localeCompare(y.th||y.en,"th"));return`<div class="trow"><button type="button" class="tx" data-topen="${esc(t)}" aria-expanded="${op}" aria-label="${op?"Hide":"Show"} swimmers">${op?"−":"+"}</button><label><input type="checkbox" data-tpick="${esc(t)}" ${skipNow.has(t)?"":"checked"}> <span class="tn">${esc(t||"(no team)")}</span></label><span class="hint tc">${v.code&&v.code!==t?esc(v.code)+" · ":""}${v.sw.size} swimmer${v.sw.size===1?"":"s"} · ${v.n} result${v.n===1?"":"s"}</span></div>${op?`<div class="tsw">${ppl.map(x=>`<div>${esc(x.th||x.en)}${x.th&&x.en&&x.th!==x.en?` <span class="hint">${esc(x.en)}</span>`:""}${x.by?` <span class="hint">· ${x.by}</span>`:""} <span class="hint">· ${x.n} swim${x.n===1?"":"s"}</span></div>`).join("")}</div>`:""}`}).join("")}</div>
+        <div class="tlist">${tList.map(([t,v])=>{const op=tOpen.has(t);const chk=teamChecks(v);return`<div class="trow"><button type="button" class="tx" data-topen="${esc(t)}" aria-expanded="${op}" aria-label="${op?"Hide":"Show"} swimmers">${op?"−":"+"}</button><label><input type="checkbox" data-tpick="${esc(t)}" ${skipNow.has(t)?"":"checked"}> <span class="tn">${esc(t||"(no team)")}</span></label><span class="hint tc">${v.code&&v.code!==t?esc(v.code)+" · ":""}${v.sw.size} swimmer${v.sw.size===1?"":"s"}${chk.off?` (${chk.off} unticked)`:""} · ${v.n} result${v.n===1?"":"s"}</span>${chk.bad?`<span class="swtag bad" title="Swimmers to check">${chk.bad} to check</span>`:""}</div>${op?swListHtml(t):""}`}).join("")}</div>
         <span class="msg" id="tPickMsg"></span></details>`:"";
     pv.innerHTML=importNote+autoNote+linkNote+teamBox+`<div class="hint" style="font-size:14px;color:var(--fg)"><b>${isExisting?"Already in the app":"New meet"}:</b> ${meetLine}${isExisting?` (${inMeet.length} results stored now)`:""}</div>
       ${near.length?`<div class="msg err" style="display:block;margin:6px 0">Already in the app around these dates: ${near.map(r=>`<b>${esc(r.meet)}</b> · ${meetPeriod(r)} <button class="lnk" type="button" data-usemeet="${esc(mKey(r))}">Upload to this meet instead</button>`).join("; ")}. If it's the same meet, use it so results aren't split into two meets.</div>`:""}
@@ -3306,7 +3401,7 @@ async function readFile(file,quiet){
       ${toRemove?`<div class="stat"><span class="v down">${toRemove}</span><span class="lbl">Will be removed</span></div>`:""}</div>
       ${dup&&!reup?`<div class="hint">Results already in the app are updated, not added twice.</div>`:""}
       ${changeBox}
-      ${conflicts.length?`<details open><summary style="color:var(--bad)">${conflicts.length} rows share a citizen ID with a different name</summary><div class="hint">${conflicts.slice(0,40).map(esc).join("<br>")}</div><div class="hint">These rows will be stored as one swimmer. If an ID is wrong in the file, fix it in Splash and choose the file again.</div></details>`:""}
+      ${idReportHtml()}
       ${maybeDup.length?`<div class="panel pdbox" style="padding:10px 12px;margin:10px 0;border-color:var(--bad)"><b style="color:var(--bad)">${maybeDup.length} new swimmer${maybeDup.length>1?"s":""} may already be in the app</b>
         <div class="hint" style="margin:2px 0 8px">Check each one before uploading. <b>Same swimmer</b> adds the results to the swimmer already in the app (no duplicate is made, and future files are matched the same way). <b>Not sure</b> adds them as new; you can still merge later under “Possible duplicate swimmers”.</div>
         <div style="max-height:420px;overflow:auto">${maybeDup.slice(0,80).map(x=>{const nm=q=>[q.nameTh,q.nameEn].filter(Boolean).map(esc).join(" · ")||"Unnamed";const det=q=>[q.birthYear?"born "+q.birthYear:"",q.club?esc(q.club):""].filter(Boolean).join(", ");
@@ -3315,7 +3410,7 @@ async function readFile(file,quiet){
           <label class="chk" style="margin:4px 0 0 4px"><input type="radio" name="pd_${esc(x.sid)}" value="" checked> <span>Not sure, add as new</span></label>
           <label class="chk" style="margin:4px 0 0 4px"><input type="radio" name="pd_${esc(x.sid)}" value="__diff"> <span>Different person <span class="hint">(won't be flagged again)</span></span></label></div>`}).join("")}${maybeDup.length>80?`<div class="hint">First 80 shown; the rest are added as new.</div>`:""}</div>
         <div class="hint" style="margin-top:6px">If the problem is a wrong ID or name in Splash, it's better to fix it there and choose the file again.</div></div>`:""}
-      ${renamed.length?`<details><summary>${renamed.length} swimmers have a different name in this file than in the app</summary><div class="hint">${renamed.slice(0,40).map(esc).join("<br>")}${renamed.length>40?"<br>…":""}</div><div class="hint">They are matched by citizen ID. The newer name is used unless you edited it by hand.</div></details>`:""}
+      ${renamed.length?`<details><summary>${renamed.length} swimmer${renamed.length===1?" has":"s have"} a different name in this file than in the app</summary><div class="hint">${renamed.slice(0,40).map(esc).join("<br>")}${renamed.length>40?"<br>…":""}</div><div class="hint" style="margin-top:6px">They are matched by citizen ID, so their results are added to the right swimmer either way. The names already in the app are kept.</div><label class="chk" style="margin-top:6px"><input type="checkbox" id="iUseNames"${useFileNames?" checked":""}> Use the names from this file instead (for example after a legal name change)</label></details>`:""}
       <div class="tbl-wrap" style="margin-top:0"><table><thead><tr><th>Swimmer</th><th>Club</th><th>Event</th><th>Round</th><th class="num">Time</th><th class="num">Splits</th></tr></thead><tbody>${sample.map(({sid,rec})=>{const p=sw.get(sid).profile;return`<tr><td>${esc(mainName(p))}</td><td>${esc(p.club)}</td><td>${rec.distance}m ${esc(rec.stroke)} <span class="chip course pool-${String(rec.course).toLowerCase()}">${rec.course}</span>${rec.relay?` <span class="chip course">${esc(rec.relay)} lead-off</span>`:""}</td><td>${esc(rec.round)}</td><td class="num t">${rec.time?fmt(rec.time):esc(rec.status)}</td><td class="num t">${(spKnown(rec)?spKnown(rec)+(rec.splits.includes(null)?` of ${rec.splits.length}`:""):"—")}</td></tr>`}).join("")}</tbody></table></div>
       ${recs.length>sample.length?`<div class="hint">First ${sample.length} of ${recs.length} results shown.</div>`:""}
       ${skipped.length?`<details><summary>${skipped.length} rows skipped</summary><div class="hint">${skipped.slice(0,60).map(([l,why])=>`Row ${l}: ${esc(why)}`).join("<br>")}${skipped.length>60?"<br>…":""}</div></details>`:""}
@@ -3323,9 +3418,21 @@ async function readFile(file,quiet){
       <div class="bar" id="iBar" hidden><i></i></div>`;
   }catch(err){console.error(err);pv.innerHTML=`<div class="msg err">${err&&err.message==="no-user"?"Sign in to upload results.":err&&err.message==="no-salt"?"Staff access isn't set up yet. Ask the owner to open this app once, then try again.":"Couldn't read this file. Check that it is an Excel or CSV export from Splash."}</div>`}
 }
-$("#preview").addEventListener("change",e=>{if(e.target.dataset.wc==null||!pending||!pending.reup)return;const n=pending.nChanges-document.querySelectorAll("#preview [data-wc]:not(:checked)").length;const b=$("#doImport");if(b){b.textContent=`Save changes for ${n} swimmer${n===1?"":"s"}`;b.disabled=!n}});
+$("#preview").addEventListener("change",e=>{if(e.target.id==="iUseNames"){useFileNames=e.target.checked;return}if(e.target.dataset.wc==null||!pending||!pending.reup)return;const n=pending.nChanges-document.querySelectorAll("#preview [data-wc]:not(:checked)").length;const b=$("#doImport");if(b){b.textContent=`Save changes for ${n} swimmer${n===1?"":"s"}`;b.disabled=!n}});
 /* team picker in the preview: re-read the file without the unticked teams, so every count below stays exact */
 let tPickTimer=null;
+const teamChecks=v=>{let off=0,bad=0;v.sw.forEach(x=>{if(skipSw.has(x.key))off++;else if((swTags.get(x.key)||[]).some(g=>g[0]==="bad"))bad++});return{off,bad}};
+function swListHtml(t){const v=curTeams.get(t);if(!v)return"";const teamOff=skipNow.has(t);
+  const ppl=[...v.sw.values()].sort((x,y)=>(x.th||x.en).localeCompare(y.th||y.en,"th"));
+  return`<div class="tsw">${ppl.map(x=>{const tags=swTags.get(x.key)||[];return`<label class="swrow"><input type="checkbox" data-swpick="${esc(x.key)}" ${skipSw.has(x.key)?"":"checked"} ${teamOff?"disabled":""}><span>${esc(x.th||x.en)}${x.th&&x.en&&x.th!==x.en?` <span class="hint">${esc(x.en)}</span>`:""}${x.by?` <span class="hint">· ${x.by}</span>`:""} <span class="hint">· ${x.n} swim${x.n===1?"":"s"}</span>${tags.map(g=>` <span class="swtag ${g[0]}">${esc(g[1])}</span>`).join("")}</span></label>`}).join("")}</div>`}
+/* ticking swimmers: several ticks in a row are applied together, so the preview is only redrawn once */
+function swPickApply(el){el.checked?skipSw.delete(el.dataset.swpick):skipSw.add(el.dataset.swpick);
+  const m=$("#tPickMsg");if(m){m.className="msg";m.textContent="Updating…"}
+  clearTimeout(tPickTimer);tPickTimer=setTimeout(async()=>{const box=$("#tPickBox"),lst=box&&box.querySelector(".tlist");
+    const keep={top:lst?lst.scrollTop:0,y:window.scrollY,boxY:box?box.getBoundingClientRect().top:null};tBoxOpen=true;
+    await readFile(lastFile,true);
+    const nb=$("#tPickBox"),nl=nb&&nb.querySelector(".tlist");if(nl)nl.scrollTop=keep.top;
+    if(nb&&keep.boxY!=null)window.scrollBy(0,nb.getBoundingClientRect().top-keep.boxY);else window.scrollTo(0,keep.y)},700)}
 function tPickApply(){const boxes=[...document.querySelectorAll("#preview [data-tpick]")];if(!boxes.length||!lastFile)return;
   if(!boxes.some(b=>b.checked)){msg($("#tPickMsg"),"Tick the teams you want to upload.",false);return}
   skipNow=new Set(boxes.filter(b=>!b.checked).map(b=>b.dataset.tpick));$("#tPickMsg").className="msg";$("#tPickMsg").textContent="Updating…";
@@ -3335,15 +3442,16 @@ function tPickApply(){const boxes=[...document.querySelectorAll("#preview [data-
     await readFile(lastFile,true);
     const nb=$("#tPickBox"),nl=nb&&nb.querySelector(".tlist");if(nl)nl.scrollTop=keep.top;
     if(nb&&keep.boxY!=null)window.scrollBy(0,nb.getBoundingClientRect().top-keep.boxY);else window.scrollTo(0,keep.y)},350)}
-$("#preview").addEventListener("change",e=>{if(e.target.dataset.tpick!=null)tPickApply()});
+$("#preview").addEventListener("change",e=>{if(e.target.dataset.tpick!=null)tPickApply();else if(e.target.dataset.swpick!=null&&lastFile)swPickApply(e.target)});
 $("#preview").addEventListener("click",async e=>{
   const to=e.target.closest("[data-topen]");if(to){const t=to.dataset.topen;tOpen.has(t)?tOpen.delete(t):tOpen.add(t);const row=to.closest(".trow");const open=tOpen.has(t);to.textContent=open?"−":"+";to.setAttribute("aria-expanded",open);
-    if(open){const ppl=[...(curTeams.get(t)?.sw.values()||[])].sort((x,y)=>(x.th||x.en).localeCompare(y.th||y.en,"th"));row.insertAdjacentHTML("afterend",`<div class="tsw">${ppl.map(x=>`<div>${esc(x.th||x.en)}${x.th&&x.en&&x.th!==x.en?` <span class="hint">${esc(x.en)}</span>`:""}${x.by?` <span class="hint">· ${x.by}</span>`:""} <span class="hint">· ${x.n} swim${x.n===1?"":"s"}</span></div>`).join("")}</div>`)}
+    if(open)row.insertAdjacentHTML("afterend",swListHtml(t));
     else if(row.nextElementSibling&&row.nextElementSibling.classList.contains("tsw"))row.nextElementSibling.remove();return}
   const ta=e.target.closest("[data-tall]");if(ta){document.querySelectorAll("#preview [data-tpick]").forEach(b=>b.checked=ta.dataset.tall==="1");tPickApply();return}
   const um=e.target.closest("[data-usemeet]");if(um){const sel=$("#iPick");if([...sel.options].some(o=>o.value===um.dataset.usemeet)){sel.value=um.dataset.usemeet;sel.dispatchEvent(new Event("change"));if($("#iReplace"))$("#iReplace").checked=false;autoFill=null;["iMeet","iDate","iEnd"].forEach(id=>$("#"+id).classList.remove("autofill"));if(lastFile)readFile(lastFile)}return}
   if(e.target.id==="goDupes"){$("#dupPanel").scrollIntoView({behavior:"smooth",block:"start"});return}
-  if(e.target.id==="cancelImport"){pending=null;lastFile=null;$("#preview").innerHTML="";$("#fileName").textContent="or drop it here";clearAutoMeet();return}
+  if(e.target.id==="idRepXlsx"){downloadIdReport(idReport,`ID_check_${fileSafe(idRepName||"results")}_${today()}.xlsx`,$("#idRepMsg"));return}
+  if(e.target.id==="cancelImport"){idReport=[];pending=null;lastFile=null;$("#preview").innerHTML="";$("#fileName").textContent="or drop it here";clearAutoMeet();return}
   if(e.target.id!=="doImport"||!pending)return;
   const btn=e.target,m=$("#iMsg"),bar=$("#iBar");
   if(!db){msg(m,"Saving isn't available in this view.",false);return}
@@ -3380,8 +3488,8 @@ $("#preview").addEventListener("click",async e=>{
     if($("#iPick").value!==""){$("#iPick").value="";$("#iPick").dispatchEvent(new Event("change"))}
     $("#preview").innerHTML=`<div class="panel" style="padding:12px 14px;margin:10px 0;border-left:4px solid var(--good)"><b style="color:var(--good)">✓ Uploaded</b> · ${esc(meetTxt)}
       <div class="msg ok" id="iMsg" role="status" style="margin-top:4px">${esc(txt)}</div>
-      <div style="margin-top:8px"><button class="ghost" type="button" id="cancelImport">Upload another file</button></div></div>`;
-    $("#fileName").textContent="or drop it here";skipNow=new Set();tOpen=new Set();tBoxOpen=false;lastFile=null}
+      <div style="margin-top:8px"><button class="ghost" type="button" id="cancelImport">Upload another file</button></div></div>${idReportHtml(true)}`;
+    $("#fileName").textContent="or drop it here";skipNow=new Set();skipSw=new Set();swTags=new Map();tOpen=new Set();tBoxOpen=false;lastFile=null}
   setTimeout(()=>{dupPairs=dupScan();updateDupBadge();renderDupes();const n=dupPairs.filter(p=>p.level!=="low").length;const mm=$("#iMsg");if(n&&mm){mm.insertAdjacentHTML("beforeend",` <button class="lnk" type="button" id="goDupes">${n} possible duplicate${n>1?"s":""} to review</button>`)}},1500);
 });
 
@@ -3411,7 +3519,9 @@ function applyProfile(body,data){
   /* international / province / school meets: names are often written differently (e.g. "SRISUK Napat"), so only fill details that are missing */
   if(data.fillOnly&&(body.nameEn||body.nameTh)){const p=data.profile;(body.locked||[]).forEach(k=>delete p[k]);Object.keys(p).forEach(k=>{if(p[k]!==""&&p[k]!=null&&(body[k]==null||body[k]===""))body[k]=p[k]});return}
   const latest=Object.values(data.results).reduce((a,r)=>r.date>a?r.date:a,"");
-  if(!body.lastMeet||latest>=body.lastMeet){const p={...data.profile};(body.locked||[]).forEach(k=>delete p[k]);if(!p.birthYear&&body.birthYear)delete p.birthYear;Object.keys(p).forEach(k=>{if(p[k]===""&&body[k])delete p[k]});Object.assign(body,p,{lastMeet:latest})}
+  if(!body.lastMeet||latest>=body.lastMeet){const p={...data.profile};(body.locked||[]).forEach(k=>delete p[k]);
+    if(!useFileNames)["nameEn","nameTh"].forEach(k=>{if(body[k])delete p[k]});   /* a swimmer already in the app keeps the names there; the file only fills a missing one */
+    if(!p.birthYear&&body.birthYear)delete p.birthYear;Object.keys(p).forEach(k=>{if(p[k]===""&&body[k])delete p[k]});Object.assign(body,p,{lastMeet:latest})}
   /* an older meet: the newer details stay, but anything still empty (for example no club yet) is filled in */
   else{const p=data.profile;(body.locked||[]).forEach(k=>delete p[k]);Object.keys(p).forEach(k=>{if(p[k]!==""&&p[k]!=null&&(body[k]==null||body[k]===""))body[k]=p[k]})}
 }
@@ -4148,6 +4258,259 @@ $("#ceFile").onchange=async e=>{const f=e.target.files[0],m=$("#ceMsg");e.target
     msg(m,`Saved ${R.swimmers} swimmers, including ${R.relayRows} relay swims from ${R.relays} relay teams.`+(R.over?` ${R.over} swimmer${R.over===1?" has":"s have"} more than 40 events; only the first 40 fit.`:""),true)}
   catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":"Couldn't save the file. Try again.",c==="declined")}
 };
+/* ---- ID check over the whole app ---- */
+let idcRows=[];
+function idCheckAll(){
+  const rows=[];const evOf=r=>`${r.meet} · ${r.distance}m ${r.stroke}${r.relay?" (relay lead-off)":""}`;
+  const byCid=new Map();priv.forEach((v,sid)=>{if(v&&v.cid&&swimmerById(sid))(byCid.get(v.cid)||byCid.set(v.cid,[]).get(v.cid)).push(sid)});
+  byCid.forEach((sids,cid)=>{if(sids.length<2)return;sids.forEach(sid=>{const o=swimmerById(sid);rows.push({cid,kind:"Same ID on two swimmer profiles",nameTh:o.nameTh||"",nameEn:o.nameEn||"",birth:(priv.get(sid)||{}).dob||"",club:o.club||"",events:[...new Set(resOf(sid).map(r=>r.meet))].slice(0,8)})})});
+  state.swimmers.forEach(o=>{const byMeet=new Map();resOf(o.id).forEach(r=>{if(!r.team)return;const k=mKey(r);(byMeet.get(k)||byMeet.set(k,new Map()).get(k)).set(r.team,(byMeet.get(k).get(r.team)||[]).concat(r))});
+    byMeet.forEach(teams=>{if(teams.size<2)return;const cid=(priv.get(o.id)||{}).cid||"";
+      teams.forEach((rs,team)=>rows.push({cid,kind:"Swam for two teams at one meet",nameTh:o.nameTh||"",nameEn:o.nameEn||"",birth:(priv.get(o.id)||{}).dob||"",club:team,events:rs.map(evOf)}))})});
+  return rows;
+}
+$("#idcGo").onclick=()=>{const out=$("#idcOut");if(!state.isStaff||!priv.size&&!state.swimmers.length){msg($("#idcMsg"),"Nothing to check yet.",false);return}
+  idcRows=idCheckAll();$("#idcMsg").textContent="";
+  if(!idcRows.length){out.innerHTML=`<div class="msg ok">✓ No problems found: every ID number belongs to one swimmer, and nobody swam for two teams at one meet.</div>`;return}
+  const n=new Set(idcRows.map(r=>r.cid+"|"+r.nameEn+r.nameTh)).size;
+  out.innerHTML=`<div class="hint" style="margin-bottom:6px"><b style="color:var(--bad)">${idcRows.length} rows to check</b>. Open a swimmer to fix the ID, or merge or split the profiles.</div>
+    <div style="max-height:420px;overflow:auto"><table class="rank"><thead><tr><th>ID number</th><th>Problem</th><th>Swimmer</th><th>Team</th><th>Meets / events</th></tr></thead><tbody>${idcRows.slice(0,100).map(r=>`<tr><td class="mono">${esc(r.cid||"—")}</td><td class="hint">${esc(r.kind)}</td><td><b>${esc([r.nameTh,r.nameEn].filter(Boolean).join(" · "))}</b>${r.birth?`<br><span class="hint">born ${esc(fmtDob(r.birth))}</span>`:""}</td><td>${esc(r.club)}</td><td class="hint">${esc(r.events.join(", "))}</td></tr>`).join("")}</tbody></table></div>
+    ${idcRows.length>100?`<div class="hint">First 100 of ${idcRows.length} rows shown; the Excel file has them all.</div>`:""}
+    <div style="margin-top:8px"><button class="ghost" type="button" id="idcXlsx">Download (Excel)</button></div>`;
+  $("#idcXlsx").onclick=()=>downloadIdReport(idcRows,`ID_check_all_swimmers_${today()}.xlsx`,$("#idcMsg"))};
+/* ---- Swimmer ID cards: each swimmer's events with heat, lane and the heat's scheduled start time, from a Splash start list (Lenex) ---- */
+function idCardRows(xmlText,lang){
+  const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))throw new Error("bad xml");
+  const meet=doc.querySelector("MEET");if(!meet)throw new Error("no meet");
+  const A=(el,k)=>el?el.getAttribute(k)||"":"";
+  const hm=t=>{const m=String(t||"").match(/^(\d{1,2}):(\d\d)/);return m?m[1].padStart(2,"0")+":"+m[2]:""};
+  const STY={FREE:"Freestyle",BACK:"Backstroke",BREAST:"Breaststroke",FLY:"Butterfly",MEDLEY:"Medley"};
+  const ev=new Map(),heat=new Map();let heats=0,timed=0;
+  meet.querySelectorAll("SESSION").forEach(se=>{const date=A(se,"date");se.querySelectorAll("EVENT").forEach(e=>{const ss=e.querySelector("SWIMSTYLE");
+    const o={no:A(e,"number"),legs:+A(ss,"relaycount")||1,name:`${A(ss,"distance")}m ${STY[A(ss,"stroke")]||A(ss,"name")||A(ss,"stroke")}`,date,time:hm(A(e,"daytime"))||hm(A(se,"daytime"))};ev.set(A(e,"eventid"),o);
+    e.querySelectorAll("HEATS > HEAT").forEach(h=>{heats++;const t=hm(A(h,"daytime"));if(t)timed++;heat.set(A(h,"heatid"),{no:A(h,"number"),time:t})})})});
+  const dd=d=>d?`${d.slice(8,10)}/${d.slice(5,7)}/${d.slice(0,4)}`:"";
+  const people=[];let entries=0,noHeat=0;
+  for(const club of meet.querySelectorAll("CLUBS > CLUB"))for(const a of club.querySelectorAll("ATHLETES > ATHLETE")){
+    const th=(A(a,"firstname")+" "+A(a,"lastname")).trim(),en=(A(a,"firstname.en")+" "+A(a,"lastname.en")).trim(),thaiNm=/[\u0e00-\u0e7f]/.test(th);
+    const list=[];
+    a.querySelectorAll("ENTRIES > ENTRY").forEach(x=>{const e=ev.get(A(x,"eventid"));if(!e||e.legs>1)return;if(/^(RJC|SICK|WDR)$/i.test(A(x,"status")))return;
+      const h=heat.get(A(x,"heatid"));if(!h)noHeat++;entries++;const et=parseTime(A(x,"entrytime"));
+      list.push({no:e.no,name:e.name,entry:et?fmt(et):"NT",heat:h?h.no:"",lane:A(x,"lane"),date:e.date,time:h&&h.time?h.time:""})});
+    if(!list.length)continue;
+    list.sort((x,y)=>(x.date||"").localeCompare(y.date||"")||(x.time||"99").localeCompare(y.time||"99")||(parseInt(x.no,10)||0)-(parseInt(y.no,10)||0));
+    const b=A(a,"birthdate");
+    people.push({ATHLETEID:A(a,"athleteid"),NAME:lang==="en"?(en||th):(thaiNm?th:(en||th)),NAMETH:thaiNm?th:"",NAMEEN:en||(thaiNm?"":th),BIRTHDATE:dd(b),GENDER:A(a,"gender"),LONGCLUB:A(club,"name"),SHORTCLUB:A(club,"code"),CLUBNAME:A(club,"name"),ev:list})}
+  people.sort((x,y)=>x.CLUBNAME.localeCompare(y.CLUBNAME,"th")||x.NAME.localeCompare(y.NAME,"th"));
+  const MAXE=20,head=["ATHLETEID","NAME","NAMETH","NAMEEN","BIRTHDATE","GENDER","LONGCLUB","SHORTCLUB","CLUBNAME","EVENTS"];
+  for(let i=1;i<=MAXE;i++)head.push(...["EVENTNO","EVENT","ENTRYTIME","HEAT","LANE","HEATDATE","HEATTIME"].map(h=>h+i));
+  const rows=people.map(p=>{const r=[p.ATHLETEID,p.NAME,p.NAMETH,p.NAMEEN,p.BIRTHDATE,p.GENDER,p.LONGCLUB,p.SHORTCLUB,p.CLUBNAME,p.ev.length];
+    for(let i=0;i<MAXE;i++){const x=p.ev[i];r.push(...(x?[x.no,x.name,x.entry,x.heat,x.lane,dd(x.date),x.time]:["","","","","","",""]))}return r});
+  return{head,rows,meetName:A(meet,"name"),entries,heats,timed,noHeat,swimmers:people.length,over:people.filter(p=>p.ev.length>MAXE).length};
+}
+$("#icFile").onchange=async e=>{const f=e.target.files[0],m=$("#icMsg");e.target.value="";if(!f)return;
+  if(!window.XLSX){msg(m,"The Excel tools didn't load. Reload the page and try again.",false);return}
+  msg(m,"Reading the file…",true);let R;
+  try{R=idCardRows(await readLenexText(f),$("#icLang").value)}catch(err){msg(m,"This doesn't look like a Splash Lenex file (.lxf or .lef).",false);return}
+  if(!R.rows.length){msg(m,"No individual entries found in this file. Export the start list (entries) from Splash, not the results.",false);return}
+  if(!R.heats){msg(m,"This file has entries but no heats yet. In Splash, seed the heats and calculate the time schedule, then export the start list again.",false);return}
+  const ws=XLSX.utils.aoa_to_sheet([R.head,...R.rows]);
+  for(let i=0;i<R.rows.length;i++)R.head.forEach((h,c)=>{if(/^(BIRTHDATE|ENTRYTIME\d+|HEATDATE\d+|HEATTIME\d+)$/.test(h)){const x=ws[XLSX.utils.encode_cell({r:i+1,c})];if(x){x.t="s";x.v=String(x.v)}}});   // keep times and dates as text for the mail merge
+  ws["!cols"]=R.head.map(h=>({wch:/^NAME/.test(h)||/CLUB/.test(h)?26:/^EVENT\d/.test(h)?18:9}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"ID cards");
+  const blob=new Blob([XLSX.write(wb,{type:"array",bookType:"xlsx"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  try{await saveFile(`ID_cards_${fileSafe(R.meetName||f.name.replace(/\.\w+$/,""))}.xlsx`,blob);
+    const warn=[R.timed<R.heats?`${R.heats-R.timed} of ${R.heats} heats have no start time in the file, so their HEATTIME is empty (in Splash, calculate the time schedule before exporting).`:"",
+      R.noHeat?`${R.noHeat} entries are not in a heat yet.`:"",R.over?`${R.over} swimmer${R.over===1?" has":"s have"} more than 20 events; only the first 20 fit.`:""].filter(Boolean).join(" ");
+    msg(m,`Saved ${R.swimmers} swimmers with ${R.entries} individual entries.${warn?" "+warn:""}`,!warn)}
+  catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":"Couldn't save the file. Try again.",c==="declined")}
+};
+/* ---- Excel entry form -> Splash Lenex entry file, using the meet's own event file so every entry points at Meet Manager's event ---- */
+let enEv=null,enLast=null,enCodeFix={};
+let enNameFix={};
+try{enCodeFix=JSON.parse(localStorage.getItem("smt.enCodes")||"{}")||{};enNameFix=JSON.parse(localStorage.getItem("smt.enClubNames")||"{}")||{}}catch(e){enCodeFix={};enNameFix={}}
+/* club name -> code used most often in the app's results (after club merges) */
+let _ccSrc=null,_ccMap=null;
+function appClubCodes(){if(_ccSrc===state.results&&_ccMap)return _ccMap;const m=new Map();
+  state.results.forEach(r=>{if(!r.team||!r.teamCode)return;const k=canonClub(r.team);const c=m.get(k)||m.set(k,new Map()).get(k);c.set(r.teamCode,(c.get(r.teamCode)||0)+1)});
+  state.swimmers.forEach(o=>{if(o.club&&o.clubCode){const k=canonClub(o.club);const c=m.get(k)||m.set(k,new Map()).get(k);c.set(o.clubCode,(c.get(o.clubCode)||0)+1)}});
+  _ccMap=new Map([...m].map(([k,c])=>[k,[...c].sort((a,b)=>b[1]-a[1])[0][0]]));_ccSrc=state.results;return _ccMap}
+function similarClubs(name){const f=t=>fold(t).replace(/swim(ming)?|club|team|academy|school|sc\b|ชมรม|สโมสร|ว่ายน้ำ|\s|\W/g,"");const a=f(name);if(!a)return[];
+  return[...appClubCodes().keys()].map(k=>{const b=f(k);const d=!b?99:a.includes(b)||b.includes(a)?0:lev(a,b,Math.max(2,Math.round(Math.max(a.length,b.length)*.3)));return[k,d]}).filter(x=>x[1]<=Math.max(2,Math.round(a.length*.3))).sort((x,y)=>x[1]-y[1]).slice(0,3).map(x=>x[0])}
+function parseEventFile(xmlText){
+  const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))throw new Error("bad xml");
+  const meet=doc.querySelector("MEET");if(!meet)throw new Error("no meet");const A=(el,k)=>el?el.getAttribute(k)||"":"";
+  const ad=meet.querySelector("AGEDATE"),q=meet.querySelector("QUALIFY"),ses=meet.querySelector("SESSIONS");
+  const SN={FREE:"Freestyle",BACK:"Backstroke",BREAST:"Breaststroke",FLY:"Butterfly",MEDLEY:"IM"};
+  const events=[];meet.querySelectorAll("SESSION").forEach(se=>se.querySelectorAll("EVENT").forEach(e=>{const ss=e.querySelector("SWIMSTYLE");
+    const ags=[...e.querySelectorAll("AGEGROUP")];const mins=ags.map(a=>+A(a,"agemin")),maxs=ags.map(a=>+A(a,"agemax"));
+    events.push({id:A(e,"eventid"),no:A(e,"number"),g:A(e,"gender"),d:+A(ss,"distance"),st:SN[A(ss,"stroke")]||"",legs:+A(ss,"relaycount")||1,
+      min:!mins.length||mins.some(x=>x<0)?null:Math.min(...mins),max:!maxs.length||maxs.some(x=>x<0)?null:Math.max(...maxs),date:A(se,"date"),round:A(e,"round")})}));
+  const dates=events.map(e=>e.date).filter(Boolean).sort();
+  return{name:A(meet,"name"),city:A(meet,"city"),nation:A(meet,"nation"),course:A(meet,"course")||"LCM",ageDate:A(ad,"value")||dates[0]||"",ageType:A(ad,"type")||"YEAR",
+    qFrom:A(q,"from"),qUntil:A(q,"until"),sessions:ses?new XMLSerializer().serializeToString(ses):"",events,start:dates[0]||"",end:dates[dates.length-1]||""};
+}
+const enAgeLbl=e=>e.min==null&&e.max==null?"all ages":e.min==null?`${e.max} & under`:e.max==null?`${e.min} & over`:e.min===e.max?`${e.min}`:`${e.min}–${e.max}`;
+/* entry times as typed in forms: 1:05.23, 65.23, 1.05.23, or digits only like 101555 = 10:15.55 and 3105 = 31.05 */
+function parseEntryTime(v){if(v==null||v==="")return null;if(typeof v==="number"){if(v>0&&v<1)return Math.round(v*86400*100)/100;v=String(v)}
+  const s=String(v).trim();if(!s||/^(nt|-|0+)$/i.test(s))return null;
+  if(/^\d+$/.test(s)){if(s.length<3)return null;const h=+s.slice(-2),sec=+s.slice(-4,-2),min=+(s.slice(0,-4)||0);if(sec>59)return NaN;return Math.round((min*60+sec+h/100)*100)/100}
+  const p=s.replace(/,/g,".").match(/^(?:(\d+)[:.])?(\d{1,2})[.](\d{1,2})$/);if(p)return Math.round(((+p[1]||0)*60+ +p[2]+ +p[3].padEnd(2,"0")/100)*100)/100;
+  const t=parseTime(s);return t||NaN}
+const lxTime=t=>{if(!t)return"NT";const h=Math.floor(t/3600),m=Math.floor(t%3600/60),sec=t-h*3600-m*60;return`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${sec.toFixed(2).padStart(5,"0")}`};
+function buildEntries(rows,ev,opt){
+  const H=k=>{const keys=Object.keys(rows[0]||{});const f=keys.find(x=>x.replace(/[^a-z]/gi,"").toUpperCase()===k);return f};
+  const col={cid:H("CITIZENID")||H("LICENSE")||H("ID")||H("IDCODELICENSE"),fn:H("FIRSTNAME"),ln:H("LASTNAME"),fe:H("FIRSTNAMEEN"),le:H("LASTNAMEEN"),g:H("GENDER")||H("SEX"),b:H("BIRTHDATE")||H("DOB"),
+    st:H("STROKE")||H("STYLE"),d:H("DISTANCE"),et:H("ENTRYTIME")||H("TIME"),no:H("NUMBER")||H("EVENTNO")||H("EVENTNUMBER"),cl:H("CLUBNAME")||H("CLUB"),cc:H("CLUBCODE"),na:H("NATION")};
+  const need=[["CITIZENID or names",col.cid||col.fn||col.fe],["GENDER",col.g],["BIRTHDATE",col.b],["STROKE",col.st],["DISTANCE",col.d]].filter(x=>!x[1]).map(x=>x[0]);
+  if(need.length)return{error:`The Excel file needs these columns: ${need.join(", ")}.`};
+  const byCid=new Map();priv.forEach((v,sid)=>{if(v&&v.cid&&swimmerById(sid))byCid.set(String(v.cid),sid)});
+  const issues=[];
+  /* tidy what clubs actually send: "IM200" in STROKE with the time in DISTANCE, 2-digit years, ALL-CAPS names, and cells filled by dragging in Excel */
+  {const K=Object.keys(col).filter(k=>col[k]);const curYY=new Date().getFullYear()%100;
+    rows=rows.map((r,i)=>{const o={__line:i+2};K.forEach(k=>o[k]=String(r[col[k]]??"").replace(/\s+/g," ").trim());return o});
+    Object.keys(col).forEach(k=>col[k]=k);
+    const cap=t=>/[a-z]/.test(t)&&/[A-Z]/.test(t)?t:t.replace(/[A-Za-z][A-Za-z'’-]*/g,w=>w[0].toUpperCase()+w.slice(1).toLowerCase());
+    rows.forEach(o=>{
+      const m=String(o.st||"").match(/^([A-Za-z\u0e00-\u0e7f ]+?)\s*(\d{2,4})\s*m?$/i);
+      if(m){o.st=m[1];if(o.d&&!/^\d{2,4}$/.test(o.d)&&!o.et)o.et=o.d;o.d=m[2]}
+      if(o.fe)o.fe=cap(o.fe);if(o.le)o.le=cap(o.le);
+      const y2=String(o.b||"").match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2})$/);
+      if(y2){const yy=+y2[3];o.__b2=o.b;o.b=`${y2[1]}/${y2[2]}/${yy<=curYY?2000+yy:1900+yy}`}});
+    /* Excel auto-fill: the next row repeats the swimmer but the birth date or last name has counted up (27/1/12, 27/1/13… or Jun, Jul, Aug) */
+    const MON=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+    const nextName=(a,b)=>{a=a.toLowerCase();b=b.toLowerCase();const i=MON.indexOf(a.slice(0,3));if(i>=0&&b.slice(0,3)===MON[(i+1)%12])return true;const x=a.match(/^(.*?)(\d+)$/),y=b.match(/^(.*?)(\d+)$/);return!!(x&&y&&x[1]===y[1]&&+y[2]===+x[2]+1)};
+    const nextDate=(a,b)=>{const x=parseDate(a),y=parseDate(b);if(!x||!y)return false;const[ay,am,ad]=x.split("-").map(Number),[by,bm,bd]=y.split("-").map(Number);return(by===ay+1&&bm===am&&bd===ad)||(by===ay&&bm===am+1&&bd===ad)||(by===ay&&bm===am&&bd===ad+1)};
+    let chain=null;
+    rows.forEach((o,i)=>{const pr=rows[i-1];
+      const same=pr&&pr.cl===o.cl&&pr.g===o.g&&(pr.cid||"")===(o.cid||"")&&fold(pr.fe||pr.fn)===fold(o.fe||o.fn)&&fold(pr.fn)===fold(o.fn);
+      const bumpDate=same&&pr.b!==o.b&&fold(pr.le)===fold(o.le)&&fold(pr.ln)===fold(o.ln)&&nextDate(pr.__orig_b||pr.b,o.b);
+      const bumpName=same&&pr.b===o.b&&(o.le&&pr.le&&nextName(pr.__orig_le||pr.le,o.le)||o.ln&&pr.ln&&nextName(pr.__orig_ln||pr.ln,o.ln));
+      if(bumpDate||bumpName){if(!chain||chain.last!==i-1)chain={first:pr,from:pr.__line,last:i,what:bumpDate?"birth date":"last name",vals:[bumpDate?(pr.__b2||pr.b):(pr.le||pr.ln)]};
+        chain.last=i;chain.vals.push(bumpDate?(o.__b2||o.b):(o.le||o.ln));chain.to=o.__line;
+        o.__orig_b=o.b;o.__orig_le=o.le;o.__orig_ln=o.ln;o.b=chain.first.b;o.le=chain.first.le;o.ln=chain.first.ln;o.__auto=chain}
+      else if(chain&&chain.last===i-1){chain.done=true}});
+    const seen=new Set();rows.forEach(o=>{const c=o.__auto;if(!c||seen.has(c))return;seen.add(c);
+      issues.push([c.from,[c.first.fe,c.first.le].filter(Boolean).join(" ")||[c.first.fn,c.first.ln].join(" "),`Rows ${c.from}–${c.to}: the ${c.what} counts up (${c.vals.join(", ")}), which looks like Excel auto-fill from dragging a cell. All rows were read as ${c.what==="birth date"?(c.first.__b2||c.first.b):(c.first.le||c.first.ln)}. Please check with the club.`])});
+    rows.forEach(o=>{if(o.__b2&&!o.__auto)o.__note2=true})}
+  const ageAt=b=>{if(!b)return null;const y=+b.slice(0,4);if(ev.ageType==="DATE"&&ev.ageDate){const a=ev.ageDate;let n=+a.slice(0,4)-y;if(a.slice(5)<b.slice(5))n--;return n}return+String(ev.ageDate||ev.start).slice(0,4)-y};
+  const people=new Map();let n=0;
+  /* swimmers with no ID: find them in the app by English or Thai name and birth date */
+  const byName=new Map();state.swimmers.forEach(o=>{[o.nameEn,o.nameTh].forEach(nm=>{const k=nameKeyOf(nm||"");if(k)(byName.get(k)||byName.set(k,[]).get(k)).push(o)})});
+  const findByName=(names,birth)=>{for(const nm of names){const c=(byName.get(nameKeyOf(nm))||[]).filter(o=>{const d=(priv.get(o.id)||{}).dob;return d?d===birth:+o.birthYear===+String(birth).slice(0,4)});if(c.length===1)return c[0]}return null};
+  const cidName=new Map();
+  rows.forEach((r,i)=>{const line=r.__line||i+2,v=k=>col[k]?String(r[col[k]]??"").trim():"";
+    if(![v("cid"),v("fn"),v("fe"),v("st"),v("d")].some(Boolean))return;
+    const cid=(normId(v("cid"))||{}).id||"";const birth=parseDate(col.b?r[col.b]:"")||"";const g=mapGender(v("g"));
+    const nmKey=fold(v("fe")+v("le")||v("fn")+v("ln")).replace(/\s+/g,"");
+    /* one ID typed for two different swimmers: keep them apart and flag it */
+    let idClash="";if(cid){const was=cidName.get(cid);if(!was)cidName.set(cid,{k:nmKey,who:[v("fn"),v("ln")].filter(Boolean).join(" ")||[v("fe"),v("le")].join(" "),line});else if(was.k!==nmKey)idClash=was}
+    const key=cid&&!idClash?cid:(cid?cid+"|":"")+nmKey+"|"+birth;
+    let p=people.get(key);
+    if(!p){let sid=cid&&!idClash?byCid.get(cid):"";let o=sid?swimmerById(sid):null;let byNm=false;
+      if(!o&&!cid&&birth){o=findByName([v("fe")+" "+v("le"),v("fn")+" "+v("ln")].map(norm).filter(Boolean),birth);if(o){sid=o.id;byNm=true}}
+      const pv=sid?priv.get(sid)||{}:{};
+      const split=t=>{t=norm(t||"");const k=t.indexOf(" ");return k<0?[t,""]:[t.slice(0,k),t.slice(k+1)]};
+      const [ft,lt]=split(o&&o.nameTh),[fe,le]=split(o&&o.nameEn);
+      p={cid:cid||(byNm&&!idClash?pv.cid||"":""),sid:sid||"",inApp:!!o,byName:byNm,fn:norm(v("fn"))||ft,ln:norm(v("ln"))||lt,fe:norm(v("fe"))||fe,le:norm(v("le"))||le,g:g||(o&&o.gender)||"",birth:birth||pv.dob||"",
+        club:(n=>enNameFix[n]||n)(norm(v("cl")))||(o&&o.club)||"",clubTyped:norm(v("cl")),code:norm(v("cc")).toUpperCase(),nation:norm(v("na")).toUpperCase()||(o&&o.nation)||"THA",entries:[],lines:[]};
+      p.age=ageAt(p.birth);people.set(key,p);n++;
+      const who=[p.fn,p.ln].filter(Boolean).join(" ")||[p.fe,p.le].join(" ");
+      if(cid&&/^\d{13}$/.test(cid)&&thaiCheck(cid.slice(0,12))!==cid[12])issues.push([line,who,`Citizen ID ${cid} is not a valid Thai ID (check digit). Please check it.`]);
+      if(idClash)issues.push([line,who,`Uses the same ID number (${cid}) as ${idClash.who} on row ${idClash.line}. Entered as two swimmers; please get the right ID from the club.`]);
+      if(!cid&&byNm)issues.push([line,who,`No ID in the Excel; found in the app by name and birth date${p.cid?", so the ID from the app is used":""}.`]);
+      else if(!cid&&p.nation==="THA")issues.push([line,who,"No citizen ID"]);
+      if(r.__note2)issues.push([line,who,`Birth year written with 2 digits (${r.__b2}); read as ${p.birth?fdate(p.birth):"?"}.`]);
+      if(!p.g)issues.push([line,who,"Gender missing or not M/F"]);
+      if(!p.birth)issues.push([line,who,"Birth date missing or unreadable"]);
+      if(!norm(v("cl")))issues.push([line,who,p.club?`No CLUBNAME in the Excel; “${p.club}” from the app is used`:"No CLUBNAME; listed as Unattached"])}
+    const who=[p.fn,p.ln].filter(Boolean).join(" ")||[p.fe,p.le].join(" ");p.lines.push(line);
+    const st=mapStroke(v("st")),d=parseInt(v("d").replace(/[^\d]/g,""),10);
+    if(!st||st==="RELAY"||!d){issues.push([line,who,`Unknown stroke or distance “${v("st")} ${v("d")}”`]);return}
+    const ok=e=>e.legs===1&&e.st===st&&e.d===d&&(e.g===p.g||e.g==="X"||!e.g)&&(p.age==null||((e.min==null||p.age>=e.min)&&(e.max==null||p.age<=e.max)));
+    let e=null;const wantNo=v("no").replace(/[^\d]/g,"");
+    if(wantNo){e=ev.events.find(x=>x.no===wantNo)||null;
+      if(!e){issues.push([line,who,`Event #${wantNo} is not in the event file`]);return}
+      if(!ok(e)){const alt=ev.events.filter(ok);issues.push([line,who,`Event #${wantNo} (${e.d}m ${e.st}, ${enAgeLbl(e)}) doesn't fit this swimmer (${p.g||"?"}, age ${p.age??"?"})${alt.length?`; #${alt[0].no} used instead`:""}`]);e=alt[0]||null;if(!e)return}}
+    else{const c=ev.events.filter(ok);
+      if(!c.length){const any=ev.events.filter(x=>x.legs===1&&x.st===st&&x.d===d&&(x.g===p.g||x.g==="X"));
+        issues.push([line,who,any.length?`${d}m ${st}: no event for age ${p.age??"?"} (${any.map(x=>"#"+x.no+" "+enAgeLbl(x)).join(", ")})`:`${d}m ${st} ${p.g==="F"?"women":"men"} is not in this meet`]);return}
+      e=c[0];if(c.length>1)issues.push([line,who,`${d}m ${st} fits ${c.map(x=>"#"+x.no).join(" and ")}; #${e.no} used. Put the event number in the NUMBER column to choose.`])}
+    if(p.entries.some(x=>x.ev.id===e.id)){issues.push([line,who,`Entered twice in #${e.no} ${e.d}m ${e.st}; the second row is ignored`]);return}
+    let t=parseEntryTime(col.et?r[col.et]:""),src=t?"Excel":"";
+    if(Number.isNaN(t)){issues.push([line,who,`Entry time “${v("et")}” unreadable; ${opt.useApp?"the app's best time or ":""}NT used`]);t=null;src=""}
+    if(!t&&opt.useApp&&p.sid){const best=resOf(p.sid).filter(x=>valid(x)&&x.stroke===st&&+x.distance===d&&x.course===ev.course&&(!ev.qFrom||x.date>=ev.qFrom)&&(!ev.qUntil||x.date<=ev.qUntil)).sort((a,b)=>a.time-b.time)[0];
+      if(best){t=best.time;src="App · "+fdate(best.date)+" · "+(best.meet||"")}}
+    p.entries.push({ev:e,t,src})});
+  const list=[...people.values()].filter(p=>p.entries.length);
+  list.forEach(p=>p.entries.sort((a,b)=>(+a.ev.no)-(+b.ev.no)));
+  /* club codes: typed in the Excel, else what you set below, else the code the app knows for that club */
+  const cc=appClubCodes(),clubs=new Map();
+  list.forEach(p=>{const k=p.club||"Unattached";const c=clubs.get(k)||clubs.set(k,{name:k,typed:new Set(),asTyped:new Set(),n:0}).get(k);c.n++;if(p.code)c.typed.add(p.code);if(p.clubTyped&&p.clubTyped!==k)c.asTyped.add(p.clubTyped)});
+  clubs.forEach(c=>{const inApp=cc.has(canonClub(c.name)),appCode=inApp?cc.get(canonClub(c.name)):"";const fix=(enCodeFix[c.name]||"").toUpperCase();
+    c.inApp=inApp;c.appName=canonClub(c.name);c.appCode=appCode;
+    c.code=c.typed.size===1&&!fix?[...c.typed][0]:fix||appCode||"";c.src=c.typed.size===1&&!fix?"Excel":fix?"Set here":appCode?"App":"";
+    if(c.typed.size>1)c.mixed=[...c.typed];c.similar=inApp?[]:similarClubs(c.name);
+    if(c.typed.size===1&&appCode&&appCode!==[...c.typed][0]&&!fix)c.differs=appCode});
+  list.forEach(p=>{const c=clubs.get(p.club||"Unattached");p.code=c.code});
+  return{list,issues,people:n,clubs:[...clubs.values()].sort((a,b)=>a.name.localeCompare(b.name,"th"))};
+}
+function entriesXml(ev,list){
+  const X=t=>String(t??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const clubs=new Map();list.forEach(p=>{const k=(p.club||"Unattached")+"|"+p.code;(clubs.get(k)||clubs.set(k,{name:p.club||"Unattached",code:p.code,nation:p.nation,ppl:[]}).get(k)).ppl.push(p)});
+  let aid=0;
+  const cl=[...clubs.values()].map(c=>`<CLUB name="${X(c.name)}"${c.code?` code="${X(c.code)}"`:""} nation="${X(c.nation||"THA")}"><ATHLETES>${c.ppl.map(p=>{aid++;
+    const th=/[฀-๿]/.test(p.fn+p.ln);const fn=th?p.fn:(p.fe||p.fn),ln=th?p.ln:(p.le||p.ln);
+    return`<ATHLETE athleteid="${aid}" firstname="${X(fn)}" lastname="${X(ln)}"${p.fe?` firstname.en="${X(p.fe)}"`:""}${p.le?` lastname.en="${X(p.le)}"`:""} gender="${X(p.g)}" birthdate="${X(p.birth)}"${p.cid?` license="${X(p.cid)}"`:""} nation="${X(p.nation||"THA")}"${th?` domicile="${X(norm(p.fn+" "+p.ln))}"`:""}><ENTRIES>${p.entries.map(x=>`<ENTRY eventid="${X(x.ev.id)}" entrytime="${lxTime(x.t)}"${x.t?` entrycourse="${X(ev.course)}"`:""}/>`).join("")}</ENTRIES></ATHLETE>`}).join("")}</ATHLETES></CLUB>`).join("");
+  return`<?xml version="1.0" encoding="UTF-8"?>\n<LENEX version="3.0" created="${new Date().toISOString().slice(0,19)}"><CONSTRUCTOR name="Swim Meets Thailand" version="1"><CONTACT name="Swim Meets Thailand" internet="https://www.smdata.in.th"/></CONSTRUCTOR><MEETS><MEET name="${X(ev.name)}" city="${X(ev.city)}" nation="${X(ev.nation)}" course="${X(ev.course)}"><AGEDATE value="${X(ev.ageDate)}" type="${X(ev.ageType)}"/>${ev.sessions}<CLUBS>${cl}</CLUBS></MEET></MEETS></LENEX>`;
+}
+/* a .lxf is a zip holding one .lef; stored without compression, which Splash reads fine */
+function zipOne(name,text){const data=new TextEncoder().encode(text),nm=new TextEncoder().encode(name);
+  let c,crc=-1;const T=zipOne.T||(zipOne.T=Array.from({length:256},(_,n)=>{c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;return c>>>0}));
+  for(let i=0;i<data.length;i++)crc=T[(crc^data[i])&255]^(crc>>>8);crc=(crc^-1)>>>0;
+  const d=new Date(),dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xffff,dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xffff;
+  const lh=new DataView(new ArrayBuffer(30));[[0,0x04034b50,4],[4,20,2],[6,0x0800,2],[8,0,2],[10,dt,2],[12,dd,2],[14,crc,4],[18,data.length,4],[22,data.length,4],[26,nm.length,2],[28,0,2]].forEach(([o,v,s])=>s===4?lh.setUint32(o,v,true):lh.setUint16(o,v,true));
+  const ch=new DataView(new ArrayBuffer(46));[[0,0x02014b50,4],[4,20,2],[6,20,2],[8,0x0800,2],[10,0,2],[12,dt,2],[14,dd,2],[16,crc,4],[20,data.length,4],[24,data.length,4],[28,nm.length,2],[30,0,2],[32,0,2],[34,0,2],[36,0,2],[38,0,4],[42,0,4]].forEach(([o,v,s])=>s===4?ch.setUint32(o,v,true):ch.setUint16(o,v,true));
+  const off=30+nm.length+data.length,cdl=46+nm.length;
+  const end=new DataView(new ArrayBuffer(22));[[0,0x06054b50,4],[4,0,2],[6,0,2],[8,1,2],[10,1,2],[12,cdl,4],[16,off,4],[20,0,2]].forEach(([o,v,s])=>s===4?end.setUint32(o,v,true):end.setUint16(o,v,true));
+  return new Blob([lh,nm,data,ch,nm,end],{type:"application/zip"})}
+function renderEntries(){const R=enLast,out=$("#enOut");if(!R){out.innerHTML="";return}
+  const ents=R.list.reduce((a,p)=>a+p.entries.length,0),fromApp=R.list.reduce((a,p)=>a+p.entries.filter(x=>/^App/.test(x.src)).length,0),nt=R.list.reduce((a,p)=>a+p.entries.filter(x=>!x.t).length,0);
+  const noCode=R.clubs.filter(c=>!c.code).length;
+  const clubTbl=`<details ${noCode||R.clubs.some(c=>!c.inApp||c.differs||c.mixed)?"open":""} class="panel" style="padding:10px 12px;margin:10px 0"><summary style="font-weight:600">Teams in this file (${R.clubs.length})${noCode?` · <span style="color:var(--bad)">${noCode} without a code</span>`:""}</summary>
+    <div class="hint" style="margin:6px 0">Codes come from the Excel's CLUBCODE, otherwise from the code this club uses in the app. Type a code to set or change it; it's remembered on this computer for next time.</div>
+    <div class="tbl-wrap"><table class="rank"><thead><tr><th>Club in the Excel</th><th class="num">Swimmers</th><th>Code</th><th>Check</th></tr></thead><tbody>${R.clubs.map(c=>`<tr><td><b>${esc(c.name)}</b>${c.asTyped.size?`<br><span class="hint">Typed in the Excel as ${esc([...c.asTyped].join(", "))} · <button type="button" class="lnk enUnname" data-from="${esc([...c.asTyped].join("\u0001"))}">undo</button></span>`:""}${c.appName!==c.name&&c.inApp?`<br><span class="hint">In the app as ${esc(c.appName)}</span>`:""}</td><td class="num">${c.n}</td>
+      <td><input type="text" class="enCode" data-club="${esc(c.name)}" value="${esc(c.code)}" maxlength="12" style="width:110px;text-transform:uppercase" autocomplete="off"> <span class="hint">${esc(c.src)}</span></td>
+      <td class="hint">${!c.code?'<span class="swtag bad">No code</span> ':""}${c.mixed?`<span class="swtag warn">Different codes in the Excel: ${esc(c.mixed.join(", "))}</span> `:""}${c.differs?`<span class="swtag warn">The app uses ${esc(c.differs)}</span> `:""}${c.inApp?'<span class="swtag ok">In the app</span>':`<span class="swtag new">New to the app</span>${c.similar.length?` Similar in the app: ${c.similar.map(x=>`<b>${esc(x)}</b>${appClubCodes().get(x)?" ("+esc(appClubCodes().get(x))+")":""} <button type="button" class="lnk enRename" data-from="${esc(c.name)}" data-to="${esc(x)}">use this</button>`).join(", ")}`:""}`}</td></tr>`).join("")}</tbody></table></div></details>`;
+  out.innerHTML=clubTbl+`<div class="stats" style="margin-top:10px"><div class="stat"><span class="v">${R.list.length}</span><span class="lbl">Swimmers</span></div><div class="stat"><span class="v">${ents}</span><span class="lbl">Entries</span></div>
+      <div class="stat"><span class="v">${fromApp}</span><span class="lbl">Times from app</span></div><div class="stat"><span class="v">${nt}</span><span class="lbl">NT</span></div><div class="stat"><span class="v ${R.issues.length?"down":""}">${R.issues.length}</span><span class="lbl">To check</span></div></div>
+    ${R.issues.length?`<details open class="panel" style="padding:10px 12px;margin:10px 0;border-color:var(--bad)"><summary style="color:var(--bad);font-weight:600">${R.issues.length} row${R.issues.length>1?"s":""} to check</summary><div style="max-height:260px;overflow:auto;margin-top:6px">${R.issues.map(([l,w,t])=>`<div class="hint" style="padding:2px 0"><b>Row ${l}</b> · ${esc(w)}: ${esc(t)}</div>`).join("")}</div></details>`:""}
+    <div style="max-height:460px;overflow:auto;margin-top:8px"><table class="rank"><thead><tr><th>Swimmer</th><th>Event</th><th class="num">Entry time</th><th>From</th></tr></thead><tbody>${R.list.map(p=>p.entries.map((x,j)=>`<tr>${j?"<td></td>":`<td rowspan="1"><b>${esc([p.fn,p.ln].filter(Boolean).join(" ")||[p.fe,p.le].join(" "))}</b>${p.fe&&/[฀-๿]/.test(p.fn)?`<br><span class="hint">${esc(p.fe+" "+p.le)}</span>`:""}<br><span class="hint">${p.g==="F"?"F":"M"} · age ${p.age??"?"}${p.club?" · "+esc(p.club):""}${p.inApp?"":" · not in the app yet"}</span></td>`}<td>#${esc(x.ev.no)} ${x.ev.d}m ${esc(x.ev.st)} <span class="hint">${esc(enAgeLbl(x.ev))}</span></td><td class="num t"><b>${x.t?fmt(x.t):"NT"}</b></td><td class="hint">${esc(x.src||"")}</td></tr>`).join("")).join("")}</tbody></table></div>
+    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="primary" type="button" id="enGo">Download entry file</button><span class="hint">It downloads as a .zip: rename it to .lxf (or use the .lef inside), then in Meet Manager import it as Lenex entries.</span></div>`;
+  out.querySelectorAll(".enCode").forEach(inp=>inp.addEventListener("change",()=>{const v=norm(inp.value).toUpperCase();if(v)enCodeFix[inp.dataset.club]=v;else delete enCodeFix[inp.dataset.club];
+    try{localStorage.setItem("smt.enCodes",JSON.stringify(enCodeFix))}catch(e){}setTimeout(enRun,400)}));
+  const saveNames=()=>{try{localStorage.setItem("smt.enClubNames",JSON.stringify(enNameFix))}catch(e){}};
+  out.querySelectorAll(".enRename").forEach(b=>b.onclick=()=>{enNameFix[b.dataset.from]=b.dataset.to;saveNames();enRun()});
+  out.querySelectorAll(".enUnname").forEach(b=>b.onclick=()=>{b.dataset.from.split("\u0001").forEach(k=>delete enNameFix[k]);saveNames();enRun()});
+  $("#enGo").onclick=async()=>{const m=$("#enMsg");const R=enCompute()||enLast;if(!R||!R.list||!R.list.length){msg(m,"No entries to save.",false);return}const ents=R.list.reduce((a,p)=>a+p.entries.length,0);
+    const club=R.list[0].club||"club",xml=entriesXml(enEv,R.list);const base=`Entries_${fileSafe(club)}_${fileSafe(enEv.name)}`.slice(0,90);
+    /* claude.ai only lets a page save common file types, so the .lxf (a zip holding the .lef) is saved with a .zip ending */
+    try{await saveFile(base+(state.public?".lxf":".zip"),zipOne(base+".lef",xml));msg(m,`Saved ${ents} entries for ${R.list.length} swimmers${state.public?".":`, as ${base}.zip. Rename it to end in .lxf, or open it and use the .lef inside, then import it in Meet Manager.`}`,true)}
+    catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":`Couldn't save the file${c?" ("+c+")":""}. Try again.`,c==="declined")}}}
+let enRows=null;
+const enCompute=()=>enRows&&enEv?buildEntries(enRows,enEv,{useApp:$("#enUseApp").checked}):null;
+function enRun(){if(!enRows||!enEv)return;const R=enCompute();
+  if(R.error){msg($("#enMsg"),R.error,false);enLast=null;renderEntries();return}if($("#enMsg").classList.contains("err"))$("#enMsg").textContent="";enLast=R;renderEntries()}
+$("#enEvFile").onchange=async e=>{const f=e.target.files[0],m=$("#enMsg");e.target.value="";if(!f)return;
+  try{enEv=parseEventFile(await readLenexText(f))}catch(err){enEv=null;msg(m,"This doesn't look like a Meet Manager event file (.lxf or .lef).",false);return}
+  const ind=enEv.events.filter(x=>x.legs===1).length;$("#enEvName").textContent=`${enEv.name} · ${fperiod(enEv.start,enEv.end)} · ${ind} individual events`;
+  msg(m,`Event file loaded: ${enEv.events.length} events (${ind} individual), ${enEv.course==="LCM"?"50 m":"25 m"} pool, ages counted ${enEv.ageType==="YEAR"?"by year ("+enEv.ageDate.slice(0,4)+")":"on "+enEv.ageDate}.${enRows?"":" Now choose the Excel file."}`,true);enRun()};
+$("#enXlsx").onchange=async e=>{const f=e.target.files[0],m=$("#enMsg");e.target.value="";if(!f)return;
+  if(!window.XLSX){msg(m,"The Excel tools didn't load. Reload the page and try again.",false);return}
+  try{const wb=XLSX.read(await f.arrayBuffer(),{type:"array",raw:false});const ws=wb.Sheets[wb.SheetNames[0]];enRows=XLSX.utils.sheet_to_json(ws,{defval:"",raw:false})}catch(err){msg(m,"Couldn't read this Excel file.",false);return}
+  if(!enRows.length){msg(m,"The Excel file is empty.",false);return}
+  if(!enEv){msg(m,"Excel file read. Now choose the meet's event file (step 1).",true);return}enRun()};
+$("#enUseApp").onchange=enRun;
 /* ---- Results of one meet for TASA: one row per swim, relay lead-offs included ---- */
 const TASA_ST={Freestyle:"FREE",Backstroke:"BACK",Breaststroke:"BREAST",Butterfly:"FLY",IM:"MEDLEY"};
 async function downloadTasaXlsx(k,withEv,withBad,m){
@@ -4266,6 +4629,16 @@ const recCatText=x=>x.cat==="NR"?"National record":`Age group record ${agLabel(x
 const recShort=x=>x.cat==="NR"?"NR":"AGR";
 const recEvent=x=>x.relay?`${x.legs||4}×${x.d}m ${x.st==="IM"?"Medley":x.st} relay`:`${x.d}m ${x.st}`;
 function recList(c){return(recDoc[c]&&recDoc[c].list)||[]}
+/* record history clean-up: an entry is identified by its event, time and holder */
+const recHid=h=>recKey(h)+"|"+(+h.t).toFixed(2)+"|"+nmKeyR(h.name);
+/* former records that can't be right: slower than a record set on an earlier date for the same event */
+function recBadSet(x){const L=recHistory(x).filter(h=>h.date),out=new Set();L.forEach(h=>{if(L.some(o=>o!==h&&o.date<h.date&&o.t<h.t-.001))out.add(recHid(h))});return out}
+function recBadAll(){const out=[];["LCM","SCM"].forEach(c=>recList(c).forEach(x=>{const b=recBadSet(x);recHistory(x).forEach(h=>{if(h!==x&&b.has(recHid(h)))out.push({h,cur:x})})}));return out}
+async function recHistRemove(id,m){const next=JSON.parse(JSON.stringify(recDoc||{}));const n0=(next.hist||[]).length;next.hist=(next.hist||[]).filter(h=>recHid(h)!==id);
+  if(next.hist.length===n0)return;try{await saveRecDoc(next);if(m)msg(m,"Removed from the record history.",true);if(ui.view==="records")renderRecords();renderRecordsAdmin()}catch(err){if(m)msg(m,permErr(err),false)}}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-rhdel]");if(!b)return;e.stopPropagation();
+  if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="Sure? Remove";b.style.color="var(--bad)";setTimeout(()=>{if(b.isConnected){b.dataset.sure="";b.textContent="Remove";b.style.color=""}},4000);return}
+  b.disabled=true;recHistRemove(b.dataset.rhdel,$("#recMsg"))},true);
 function recGroups(c){return[...new Set(recList(c).filter(x=>x.cat==="AG").map(x=>x.ag))].sort((a,b)=>parseInt(a)-parseInt(b))}
 function agOf(age,c){for(const a of recGroups(c)){const[lo,hi]=a.split("-").map(Number);if(age>=lo&&age<=hi)return a}return""}
 /* which swimmer holds each record, which swim set it, and which records each swim set */
@@ -4350,6 +4723,11 @@ let recPending=null,recFormerPending=[];
 function renderRecordsAdmin(){
   const pn=$("#recPanel");if(!pn)return;if(!canEdit()){pn.hidden=true;return}pn.hidden=false;
   buildRecIdx();
+  {const bad=recBadAll(),since=new Date(Date.now()-30*864e5).toISOString();
+    const recent=(recDoc.hist||[]).filter(h=>/T/.test(h.replacedAt||"")&&h.replacedAt>=since).sort((a,b)=>b.replacedAt.localeCompare(a.replacedAt));
+    const row=(h,note)=>`<div class="clubpair"><div class="names"><b>${esc(recCatText(h))} · ${h.course==="LCM"?"50 m":"25 m"} · ${esc(recEvent(h))} ${h.g==="F"?"women":"men"}: ${fmt(h.t)}</b><span class="hint">${esc(h.name)}${h.date?" · "+fdate(h.date):""}${h.place?" · "+esc(h.place):""}${note?" — "+note:""}</span></div><div class="acts"><button type="button" class="lnk" data-rhdel="${esc(recHid(h))}">Remove</button></div></div>`;
+    $("#recHistAdm").innerHTML=(bad.length?`<div class="lbl" style="margin:16px 0 4px;color:var(--bad)">Record history entries that look wrong (${bad.length})</div><div class="hint" style="margin-bottom:6px">Each one is slower than a record set earlier for the same event, so it can't have been a record. Usually it came from a wrong records file.</div>`+bad.map(o=>row(o.h,`current record ${fmt(o.cur.t)}`)).join(""):"")
+      +(recent.length?`<details style="margin-top:14px"><summary class="lbl">Moved into the record history in the last 30 days (${recent.length})</summary><div class="hint" style="margin:6px 0">When a records file or “Set as new record” replaces a record, the old one is kept here. If a wrong file was uploaded, remove the wrong entries, then upload the right file.</div>${recent.map(h=>row(h,(d=>"moved "+fdate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"))(new Date(h.replacedAt)))).join("")}</details>`:"");}
   $("#recNow").textContent=["LCM","SCM"].map(c=>`${c==="LCM"?"50 m":"25 m"} pool: ${recList(c).length?recList(c).length+" records":"not loaded"}`).join(" · ");
   const cands=recCandidates();
   $("#recCands").innerHTML=cands.length?`<div class="lbl" style="margin:12px 0 6px">Possible new records (${cands.length})</div>`+cands.map(o=>`<div class="clubpair" data-rk="${esc(o.k)}" data-rid="${esc(o.r.id)}"><div class="names">
@@ -4542,5 +4920,6 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
 })();
 </script>
 
+<p style="text-align:center;font-size:11px;opacity:.75;margin:16px 12px 24px">This site uses Google Analytics (cookies) to count visits. · เว็บไซต์นี้ใช้ Google Analytics (คุกกี้) เพื่อนับจำนวนผู้เข้าชม</p>
 </body>
 </html>
