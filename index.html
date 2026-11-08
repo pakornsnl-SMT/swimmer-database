@@ -2007,8 +2007,10 @@ function presetList(){
   return[["All time","",""],[String(y),`${y}-01-01`,`${y}-12-31`],[String(y-1),`${y-1}-01-01`,`${y-1}-12-31`],["Last 12 months",iso(ago),t]];
 }
 /* Top by points: one entry per swimmer, the World Aquatics points of their best individual swim (relay lead-offs included) */
-function pointsLists(){const best=g=>{const m=new Map();rankPool(ui.kCourse,g).forEach(r=>{const p=points(r,g);if(p==null)return;const b=m.get(r.swimmerId);if(!b||p>b.p||(p===b.p&&r.date<b.r.date))m.set(r.swimmerId,{r,p})});return[...m.values()].sort((a,b)=>b.p-a.p||(a.r.date<b.r.date?-1:1))};return{F:best("F"),M:best("M")}}
-const rkFileName=ext=>`Rankings_${ui.kMode==="all"?"Top_"+ui.kCourse:ui.kMode==="points"?"Top_points_"+ui.kCourse:ui.kEvent.replace("|","_")+"_"+ui.kGender}_${today()}.${ext}`;
+function pointsLists(){const best=g=>{const m=new Map();rankPool(ui.kCourse,g).forEach(r=>{const p=points(r,g);if(p==null)return;const b=m.get(r.swimmerId);if(!b||p>b.p||(p===b.p&&r.date<b.r.date))m.set(r.swimmerId,{r,p})});return[...m.values()].map(o=>({...o,g})).sort((a,b)=>b.p-a.p||(a.r.date<b.r.date?-1:1))};const F=best("F"),M=best("M");return{F,M,A:[...F,...M].sort((a,b)=>b.p-a.p||(a.r.date<b.r.date?-1:1))}}
+const ptsGroups=()=>ui.kPtsG==="all"?["A"]:["F","M"];
+const ptsGLabel=g=>g==="A"?"Women & men combined":g==="F"?"Women":"Men";
+const rkFileName=ext=>`Rankings_${ui.kMode==="all"?"Top_"+ui.kCourse:ui.kMode==="points"?"Top_points_"+ui.kCourse+(ui.kPtsG==="all"?"_combined":""):ui.kEvent.replace("|","_")+"_"+ui.kGender}_${today()}.${ext}`;
 function eventsForCourse(c){return STROKES.map(st=>[st,distsFor(st).filter(d=>BT[c][`${st}|${d}`]||state.results.some(r=>r.stroke===st&&+r.distance===d&&r.course===c))])}
 let rkObs=null,rkDrawAll=()=>{};
 function renderRankings(){
@@ -2044,15 +2046,15 @@ function renderRankings(){
 
   if(ptsMode){
     /* one score per swimmer: the World Aquatics points of their best individual swim (relay lead-offs are official times, so they count) */
-    const L=pointsLists();
-    $("#rkTitle").textContent=`Top ${ui.kTop} by points`;
+    const L=pointsLists(),comb=ui.kPtsG==="all";
+    $("#rkTitle").textContent=`Top ${ui.kTop} by points${comb?" · women & men combined":""}`;
     $("#rkSub").textContent=`${poolName(ui.kCourse)} pool · ${filt} · each swimmer's best swim in any individual event, scored in World Aquatics points (base times set in Admin)`;
     const rows=list=>{let rank=0,prev=null;return list.slice(0,ui.kTop).map((o,i)=>{if(o.p!==prev){rank=i+1;prev=o.p}const s=swimmerById(o.r.swimmerId),r=o.r,a=rankAge(s);
       const medal=rank<=3?`<span class="medal m${rank}" aria-label="Rank ${rank}">${rank}</span>`:rank;
-      return`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r))}"><td>${medal}</td><td><button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>${s.club?`<span class="rk-club" title="${esc(s.club)}">${esc(s.club)}</span>`:""}</td><td class="num t">${a??""}</td><td class="num t">${fmt(r.time)}<br><span class="hint" style="white-space:nowrap">${r.distance} ${ABBR[r.stroke]||r.stroke}${r.relay?" · lead-off":""}</span></td><td class="num pts"><b>${o.p}</b></td></tr>`}).join("")};
-    const col=g=>{const list=L[g];return`<div class="gcol"><span class="lbl">${g==="F"?"Women":"Men"} · ${list.length?`${Math.min(ui.kTop,list.length)} of ${list.length}`:"no times"}</span>${list.length?`<div class="rkbox"><table class="rank"><thead><tr><th>#</th><th>Swimmer · club</th><th class="num">Age</th><th class="num">Best swim</th><th class="num">Pts</th></tr></thead><tbody>${rows(list)}</tbody></table></div>`:""}</div>`};
-    $("#rkBody").innerHTML=`<div class="seg" id="kPtsPool" style="margin:10px 0 4px"><button data-c="LCM" aria-pressed="${ui.kCourse==="LCM"}">50 m pool</button><button data-c="SCM" aria-pressed="${ui.kCourse==="SCM"}">25 m pool</button></div>`
-      +(L.F.length||L.M.length?`<div class="gcols">${col("F")}${col("M")}</div><p class="hint" style="margin-top:10px">Points compare every event with world-class times, so they are fairest within an age group. Some events, such as 50 m sprints, tend to score a little higher.</p>`
+      return`<tr class="rk${rank}" title="${esc((r.meet||"")+" · "+meetPeriod(r))}"><td>${medal}</td><td><button class="namebtn" data-open="${esc(s.id)}">${nameH(s.name)}</button>${s.club?`<span class="rk-club" title="${esc(s.club)}">${esc(s.club)}</span>`:""}</td><td class="num t">${a??""}${comb?`<br><span class="hint">${o.g==="F"?"W":"M"}</span>`:""}</td><td class="num t">${fmt(r.time)}<br><span class="hint" style="white-space:nowrap">${r.distance} ${ABBR[r.stroke]||r.stroke}${r.relay?" · lead-off":""}</span></td><td class="num pts"><b>${o.p}</b></td></tr>`}).join("")};
+    const col=g=>{const list=L[g];return`<div class="gcol"${g==="A"?' style="grid-column:1/-1"':""}><span class="lbl">${ptsGLabel(g)} · ${list.length?`${Math.min(ui.kTop,list.length)} of ${list.length}`:"no times"}</span>${list.length?`<div class="rkbox"><table class="rank"><thead><tr><th>#</th><th>Swimmer · club</th><th class="num">Age${comb?" · W/M":""}</th><th class="num">Best swim</th><th class="num">Pts</th></tr></thead><tbody>${rows(list)}</tbody></table></div>`:""}</div>`};
+    $("#rkBody").innerHTML=`<div class="seg" id="kPtsPool" style="margin:10px 0 4px"><button data-c="LCM" aria-pressed="${ui.kCourse==="LCM"}">50 m pool</button><button data-c="SCM" aria-pressed="${ui.kCourse==="SCM"}">25 m pool</button></div> <div class="seg" id="kPtsG" style="margin:10px 0 4px"><button data-pg="split" aria-pressed="${!comb}">Women · Men</button><button data-pg="all" aria-pressed="${comb}">Combined</button></div>`
+      +(L.F.length||L.M.length?`<div class="gcols">${ptsGroups().map(col).join("")}</div><p class="hint" style="margin-top:10px">Points compare every event with world-class times, so they are fairest within an age group. Some events, such as 50 m sprints, tend to score a little higher.</p>`
         :`<div class="empty">No ${poolName(ui.kCourse)} pool times with points for this period${ageText} yet.</div>`);
     return;
   }
@@ -2850,7 +2852,7 @@ $("#cChips").onclick=e=>{
   const b=e.target.closest("[data-unpick]");if(b){ui.picked.delete(b.dataset.unpick);renderCompare()}};
 const rk=()=>{saveUi();renderRankings()};
 $("#shortcuts").onclick=e=>{const b=e.target.closest(".shortcut");if(b){if(b.dataset.sc==="PTS")ui.kMode="points";else{ui.kMode="all";ui.kCourse=b.dataset.sc}rk()}};
-$("#rkBody").addEventListener("click",e=>{const b=e.target.closest("#kPtsPool [data-c]");if(b){ui.kCourse=b.dataset.c;rk()}});
+$("#rkBody").addEventListener("click",e=>{const b=e.target.closest("#kPtsPool [data-c]");if(b){ui.kCourse=b.dataset.c;rk()}const pg=e.target.closest("#kPtsG [data-pg]");if(pg){ui.kPtsG=pg.dataset.pg;rk()}});
 $("#kGender").onclick=e=>{const b=e.target.closest("button");if(b){ui.kGender=b.dataset.g;ui.kMode="event";rk()}};
 $("#kCourse").onclick=e=>{const b=e.target.closest("button");if(b){ui.kCourse=b.dataset.c;ui.kMode="event";rk()}};
 /* typing a year fires "change" after every digit (year 2, 20, 202 …). Only a complete, sensible date is used, and the box
@@ -3972,8 +3974,8 @@ async function buildRankingsReport(topN,layout,names){
         return[rank,nmHtml,s.birthYear||"",rankAge(s)??"",esc(fitPx(s.club||"",colPx.club)),ev+(r.relay?" <span class=\"en\">(R)</span>":""),fmt(r.time),`<b>${o.p}</b>`,shortDate(r.date),esc(fitPx(r.meet||"",colPx.meet))]}
       return[rank,`${esc(N.main)}${N.sub?`<br><span class="en">${esc(N.sub)}</span>`:""}`,s.birthYear||"",rankAge(s)??"",esc(s.club||""),`${evTh(r.stroke,r.distance)}<br><span class="en">${evEn(r.stroke,r.distance)}${r.relay?" (relay lead-off)":""}</span>`,fmt(r.time),`<b>${o.p}</b>`,rDate(r.date),esc(r.meet||"")]})};
     const L=pointsLists();
-    ["F","M"].forEach(g=>{const l=L[g];if(!l.length)return;
-      B.push({t:"table",caption:`${g==="F"?"หญิง":"ชาย"} · ${g==="F"?"Women":"Men"} <span class="en">(${l.length} ranked${l.length>topN?`, top ${topN} shown`:""})</span>`,cols:pc,rows:prow(l),dense});sig.push(g+":"+l.slice(0,topN).map(o=>o.r.swimmerId+o.p).join(","))});
+    ptsGroups().forEach(g=>{const l=L[g];if(!l.length)return;
+      B.push({t:"table",caption:`${g==="A"?"หญิงและชายรวมกัน":g==="F"?"หญิง":"ชาย"} · ${ptsGLabel(g)} <span class="en">(${l.length} ranked${l.length>topN?`, top ${topN} shown`:""})</span>`,cols:pc,rows:prow(l),dense});sig.push(g+":"+l.slice(0,topN).map(o=>o.r.swimmerId+o.p).join(","))});
     doc.titleTh="รายงานอันดับนักกีฬาว่ายน้ำตามคะแนน";doc.titleEn=`Swimming Rankings by Points — Top ${topN} ${ui.kCourse}`;
     doc.foot="อันดับจากคะแนน World Aquatics ของผลงานที่ดีที่สุดของนักกีฬาแต่ละคน · Ranked by the World Aquatics points of each swimmer's best swim";
     if(!B.length)B.push({t:"html",html:`<p>ไม่พบผลการแข่งขันตามเงื่อนไข · No results match these criteria.</p>`});
@@ -4189,8 +4191,8 @@ async function downloadRankingsXlsx(topN,m){
   const rows=[];
   const add=(st,d,g,list)=>{let rank=0,prev=null;list.slice(0,topN).forEach((r,i)=>{if(r.time!==prev){rank=i+1;prev=r.time}const s=swimmerById(r.swimmerId);
     rows.push([ui.kCourse,`${d}m ${st}`,st,+d,g==="F"?"Women":"Men",rank,s.nameTh||"",s.nameEn||"",s.birthYear||"",rankAge(s)??"",s.club||"",s.nation||"",fmt(r.time),r.time,points(r,s.gender)??"",r.date,r.meet||"",r.relay?"Yes":""])})};
-  if(ui.kMode==="points"){const L=pointsLists();["F","M"].forEach(g=>{let rank=0,prev=null;L[g].slice(0,topN).forEach((o,i)=>{if(o.p!==prev){rank=i+1;prev=o.p}const r=o.r,s=swimmerById(r.swimmerId);
-    rows.push([ui.kCourse,`${r.distance}m ${r.stroke}`,r.stroke,+r.distance,g==="F"?"Women":"Men",rank,s.nameTh||"",s.nameEn||"",s.birthYear||"",rankAge(s)??"",s.club||"",s.nation||"",fmt(r.time),r.time,o.p,r.date,r.meet||"",r.relay?"Yes":""])})})}
+  if(ui.kMode==="points"){const L=pointsLists();ptsGroups().forEach(g=>{let rank=0,prev=null;L[g].slice(0,topN).forEach((o,i)=>{if(o.p!==prev){rank=i+1;prev=o.p}const r=o.r,s=swimmerById(r.swimmerId);
+    rows.push([ui.kCourse,`${r.distance}m ${r.stroke}`,r.stroke,+r.distance,o.g==="F"?"Women":"Men",rank,s.nameTh||"",s.nameEn||"",s.birthYear||"",rankAge(s)??"",s.club||"",s.nation||"",fmt(r.time),r.time,o.p,r.date,r.meet||"",r.relay?"Yes":""])})})}
   else if(ui.kMode==="all"){const pools={F:rankPool(ui.kCourse,"F"),M:rankPool(ui.kCourse,"M")};eventsForCourse(ui.kCourse).forEach(([st,ds])=>ds.forEach(d=>["F","M"].forEach(g=>{const l=topList(pools[g],st,d);if(l.length)add(st,d,g,l)})))}
   else{const[st,d]=ui.kEvent.split("|");add(st,d,ui.kGender,topList(rankPool(ui.kCourse,ui.kGender),st,d))}
   if(!rows.length){msg(m,"There's nothing to export for these filters.",false);return}
@@ -4335,8 +4337,8 @@ function appClubCodes(){if(_ccSrc===state.results&&_ccMap)return _ccMap;const m=
   state.results.forEach(r=>{if(!r.team||!r.teamCode)return;const k=canonClub(r.team);const c=m.get(k)||m.set(k,new Map()).get(k);c.set(r.teamCode,(c.get(r.teamCode)||0)+1)});
   state.swimmers.forEach(o=>{if(o.club&&o.clubCode){const k=canonClub(o.club);const c=m.get(k)||m.set(k,new Map()).get(k);c.set(o.clubCode,(c.get(o.clubCode)||0)+1)}});
   _ccMap=new Map([...m].map(([k,c])=>[k,[...c].sort((a,b)=>b[1]-a[1])[0][0]]));_ccSrc=state.results;return _ccMap}
-function similarClubs(name){const f=t=>fold(t).replace(/swim(ming)?|club|team|academy|school|sc\b|ชมรม|สโมสร|ว่ายน้ำ|\s|\W/g,"");const a=f(name);if(!a)return[];
-  return[...appClubCodes().keys()].map(k=>{const b=f(k);const d=!b?99:a.includes(b)||b.includes(a)?0:lev(a,b,Math.max(2,Math.round(Math.max(a.length,b.length)*.3)));return[k,d]}).filter(x=>x[1]<=Math.max(2,Math.round(a.length*.3))).sort((x,y)=>x[1]-y[1]).slice(0,3).map(x=>x[0])}
+function similarClubs(name){const f=t=>fold(t).replace(/swim(ming)?|club|team|academy|school|sc\b|ชมรม|สโมสร|ว่ายน้ำ|\s|\W/g,"");const a=f(name);if(!a||a.length<3)return[];
+  return[...appClubCodes().keys()].map(k=>{const b=f(k);const d=!b||b.length<3?99:a.includes(b)||b.includes(a)?0:lev(a,b,Math.max(2,Math.round(Math.max(a.length,b.length)*.3)));return[k,d]}).filter(x=>x[1]<=Math.max(2,Math.round(a.length*.3))).sort((x,y)=>x[1]-y[1]).slice(0,3).map(x=>x[0])}
 function parseEventFile(xmlText){
   const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))throw new Error("bad xml");
   const meet=doc.querySelector("MEET");if(!meet)throw new Error("no meet");const A=(el,k)=>el?el.getAttribute(k)||"":"";
@@ -4344,7 +4346,7 @@ function parseEventFile(xmlText){
   const SN={FREE:"Freestyle",BACK:"Backstroke",BREAST:"Breaststroke",FLY:"Butterfly",MEDLEY:"IM"};
   const events=[];meet.querySelectorAll("SESSION").forEach(se=>se.querySelectorAll("EVENT").forEach(e=>{const ss=e.querySelector("SWIMSTYLE");
     const ags=[...e.querySelectorAll("AGEGROUP")];const mins=ags.map(a=>+A(a,"agemin")),maxs=ags.map(a=>+A(a,"agemax"));
-    events.push({id:A(e,"eventid"),no:A(e,"number"),g:A(e,"gender"),d:+A(ss,"distance"),st:SN[A(ss,"stroke")]||"",legs:+A(ss,"relaycount")||1,
+    events.push({id:A(e,"eventid"),no:A(e,"number"),g:A(e,"gender"),d:+A(ss,"distance"),st:SN[A(ss,"stroke")]||"",tech:(A(ss,"technique")||"").toUpperCase(),legs:+A(ss,"relaycount")||1,
       min:!mins.length||mins.some(x=>x<0)?null:Math.min(...mins),max:!maxs.length||maxs.some(x=>x<0)?null:Math.max(...maxs),date:A(se,"date"),round:A(e,"round")})}));
   const dates=events.map(e=>e.date).filter(Boolean).sort();
   return{name:A(meet,"name"),city:A(meet,"city"),nation:A(meet,"nation"),course:A(meet,"course")||"LCM",ageDate:A(ad,"value")||dates[0]||"",ageType:A(ad,"type")||"YEAR",
@@ -4425,21 +4427,25 @@ function buildEntries(rows,ev,opt){
       if(!p.birth)issues.push([line,who,"Birth date missing or unreadable"]);
       if(!norm(v("cl")))issues.push([line,who,p.club?`No CLUBNAME in the Excel; “${p.club}” from the app is used`:"No CLUBNAME; listed as Unattached"])}
     const who=[p.fn,p.ln].filter(Boolean).join(" ")||[p.fe,p.le].join(" ");p.lines.push(line);
-    const st=mapStroke(v("st")),d=parseInt(v("d").replace(/[^\d]/g,""),10);
+    /* "KICKFR", "Free kick", "เตะเท้า" … : the technique goes to the meet's kick (or pull) event, never to the normal one */
+    const stRaw=v("st"),tech=/kick|เตะ/i.test(stRaw)?"KICK":/pull|ดึง/i.test(stRaw)?"PULL":"";
+    const stRest=stRaw.replace(/kick|pull|เตะ(เท้า|ขา)?|ดึง(แขน)?/gi,"").replace(/[\s_\-]+/g," ").trim();
+    const SHORT={FR:"Freestyle",FS:"Freestyle",F:"Freestyle",BK:"Backstroke",BA:"Backstroke",BR:"Breaststroke",BS:"Breaststroke",FL:"Butterfly",BF:"Butterfly",IM:"IM",MED:"IM"};
+    const st=mapStroke(stRest)||SHORT[stRest.toUpperCase()]||(tech&&!stRest?"Freestyle":null),d=parseInt(v("d").replace(/[^\d]/g,""),10);
     if(!st||st==="RELAY"||!d){issues.push([line,who,`Unknown stroke or distance “${v("st")} ${v("d")}”`]);return}
-    const ok=e=>e.legs===1&&e.st===st&&e.d===d&&(e.g===p.g||e.g==="X"||!e.g)&&(p.age==null||((e.min==null||p.age>=e.min)&&(e.max==null||p.age<=e.max)));
+    const ok=e=>e.legs===1&&e.st===st&&e.d===d&&(e.tech||"")===tech&&(e.g===p.g||e.g==="X"||!e.g)&&(p.age==null||((e.min==null||p.age>=e.min)&&(e.max==null||p.age<=e.max)));
     let e=null;const wantNo=v("no").replace(/[^\d]/g,"");
     if(wantNo){e=ev.events.find(x=>x.no===wantNo)||null;
       if(!e){issues.push([line,who,`Event #${wantNo} is not in the event file`]);return}
       if(!ok(e)){const alt=ev.events.filter(ok);issues.push([line,who,`Event #${wantNo} (${e.d}m ${e.st}, ${enAgeLbl(e)}) doesn't fit this swimmer (${p.g||"?"}, age ${p.age??"?"})${alt.length?`; #${alt[0].no} used instead`:""}`]);e=alt[0]||null;if(!e)return}}
     else{const c=ev.events.filter(ok);
-      if(!c.length){const any=ev.events.filter(x=>x.legs===1&&x.st===st&&x.d===d&&(x.g===p.g||x.g==="X"));
-        issues.push([line,who,any.length?`${d}m ${st}: no event for age ${p.age??"?"} (${any.map(x=>"#"+x.no+" "+enAgeLbl(x)).join(", ")})`:`${d}m ${st} ${p.g==="F"?"women":"men"} is not in this meet`]);return}
+      if(!c.length){const any=ev.events.filter(x=>x.legs===1&&x.st===st&&x.d===d&&(x.tech||"")===tech&&(x.g===p.g||x.g==="X"));
+        const stL=`${st}${tech?" "+tech.toLowerCase():""}`;issues.push([line,who,any.length?`${d}m ${stL}: no event for age ${p.age??"?"} (${any.map(x=>"#"+x.no+" "+enAgeLbl(x)).join(", ")})`:`${d}m ${stL} ${p.g==="F"?"women":"men"} is not in this meet`]);return}
       e=c[0];if(c.length>1)issues.push([line,who,`${d}m ${st} fits ${c.map(x=>"#"+x.no).join(" and ")}; #${e.no} used. Put the event number in the NUMBER column to choose.`])}
     if(p.entries.some(x=>x.ev.id===e.id)){issues.push([line,who,`Entered twice in #${e.no} ${e.d}m ${e.st}; the second row is ignored`]);return}
     let t=parseEntryTime(col.et?r[col.et]:""),src=t?"Excel":"";
     if(Number.isNaN(t)){issues.push([line,who,`Entry time “${v("et")}” unreadable; ${opt.useApp?"the app's best time or ":""}NT used`]);t=null;src=""}
-    if(!t&&opt.useApp&&p.sid){const best=resOf(p.sid).filter(x=>valid(x)&&x.stroke===st&&+x.distance===d&&x.course===ev.course&&(!ev.qFrom||x.date>=ev.qFrom)&&(!ev.qUntil||x.date<=ev.qUntil)).sort((a,b)=>a.time-b.time)[0];
+    if(!t&&opt.useApp&&p.sid&&!e.tech){   /* a kick or pull event never takes a normal swim's time */const best=resOf(p.sid).filter(x=>valid(x)&&x.stroke===st&&+x.distance===d&&x.course===ev.course&&(!ev.qFrom||x.date>=ev.qFrom)&&(!ev.qUntil||x.date<=ev.qUntil)).sort((a,b)=>a.time-b.time)[0];
       if(best){t=best.time;src="App · "+fdate(best.date)+" · "+(best.meet||"")}}
     p.entries.push({ev:e,t,src})});
   const list=[...people.values()].filter(p=>p.entries.length);
@@ -4485,13 +4491,14 @@ function renderEntries(){const R=enLast,out=$("#enOut");if(!R){out.innerHTML="";
   out.innerHTML=clubTbl+`<div class="stats" style="margin-top:10px"><div class="stat"><span class="v">${R.list.length}</span><span class="lbl">Swimmers</span></div><div class="stat"><span class="v">${ents}</span><span class="lbl">Entries</span></div>
       <div class="stat"><span class="v">${fromApp}</span><span class="lbl">Times from app</span></div><div class="stat"><span class="v">${nt}</span><span class="lbl">NT</span></div><div class="stat"><span class="v ${R.issues.length?"down":""}">${R.issues.length}</span><span class="lbl">To check</span></div></div>
     ${R.issues.length?`<details open class="panel" style="padding:10px 12px;margin:10px 0;border-color:var(--bad)"><summary style="color:var(--bad);font-weight:600">${R.issues.length} row${R.issues.length>1?"s":""} to check</summary><div style="max-height:260px;overflow:auto;margin-top:6px">${R.issues.map(([l,w,t])=>`<div class="hint" style="padding:2px 0"><b>Row ${l}</b> · ${esc(w)}: ${esc(t)}</div>`).join("")}</div></details>`:""}
-    <div style="max-height:460px;overflow:auto;margin-top:8px"><table class="rank"><thead><tr><th>Swimmer</th><th>Event</th><th class="num">Entry time</th><th>From</th></tr></thead><tbody>${R.list.map(p=>p.entries.map((x,j)=>`<tr>${j?"<td></td>":`<td rowspan="1"><b>${esc([p.fn,p.ln].filter(Boolean).join(" ")||[p.fe,p.le].join(" "))}</b>${p.fe&&/[฀-๿]/.test(p.fn)?`<br><span class="hint">${esc(p.fe+" "+p.le)}</span>`:""}<br><span class="hint">${p.g==="F"?"F":"M"} · age ${p.age??"?"}${p.club?" · "+esc(p.club):""}${p.inApp?"":" · not in the app yet"}</span></td>`}<td>#${esc(x.ev.no)} ${x.ev.d}m ${esc(x.ev.st)} <span class="hint">${esc(enAgeLbl(x.ev))}</span></td><td class="num t"><b>${x.t?fmt(x.t):"NT"}</b></td><td class="hint">${esc(x.src||"")}</td></tr>`).join("")).join("")}</tbody></table></div>
-    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="primary" type="button" id="enGo">Download entry file</button><span class="hint">It downloads as a .zip: rename it to .lxf (or use the .lef inside), then in Meet Manager import it as Lenex entries.</span></div>`;
+    <div style="max-height:460px;overflow:auto;margin-top:8px"><table class="rank"><thead><tr><th>Swimmer</th><th>Event</th><th class="num">Entry time</th><th>From</th></tr></thead><tbody>${R.list.map(p=>p.entries.map((x,j)=>`<tr>${j?"<td></td>":`<td rowspan="1"><b>${esc([p.fn,p.ln].filter(Boolean).join(" ")||[p.fe,p.le].join(" "))}</b>${p.fe&&/[฀-๿]/.test(p.fn)?`<br><span class="hint">${esc(p.fe+" "+p.le)}</span>`:""}<br><span class="hint">${p.g==="F"?"F":"M"} · age ${p.age??"?"}${p.club?" · "+esc(p.club):""}${p.inApp?"":" · not in the app yet"}</span></td>`}<td>#${esc(x.ev.no)} ${x.ev.d}m ${esc(x.ev.st)}${x.ev.tech?" "+esc(x.ev.tech.charAt(0)+x.ev.tech.slice(1).toLowerCase()):""} <span class="hint">${esc(enAgeLbl(x.ev))}</span></td><td class="num t"><b>${x.t?fmt(x.t):"NT"}</b></td><td class="hint">${esc(x.src||"")}</td></tr>`).join("")).join("")}</tbody></table></div>
+    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="primary" type="button" id="enGo">Download entry file</button><button class="ghost" type="button" id="enCancel">Cancel</button><span class="hint">It downloads as a .zip: rename it to .lxf (or use the .lef inside), then in Meet Manager import it as Lenex entries.</span></div>`;
   out.querySelectorAll(".enCode").forEach(inp=>inp.addEventListener("change",()=>{const v=norm(inp.value).toUpperCase();if(v)enCodeFix[inp.dataset.club]=v;else delete enCodeFix[inp.dataset.club];
     try{localStorage.setItem("smt.enCodes",JSON.stringify(enCodeFix))}catch(e){}setTimeout(enRun,400)}));
   const saveNames=()=>{try{localStorage.setItem("smt.enClubNames",JSON.stringify(enNameFix))}catch(e){}};
   out.querySelectorAll(".enRename").forEach(b=>b.onclick=()=>{enNameFix[b.dataset.from]=b.dataset.to;saveNames();enRun()});
   out.querySelectorAll(".enUnname").forEach(b=>b.onclick=()=>{b.dataset.from.split("\u0001").forEach(k=>delete enNameFix[k]);saveNames();enRun()});
+  $("#enCancel").onclick=()=>{enRows=null;enLast=null;renderEntries();msg($("#enMsg"),enEv?`Cleared. The event file (${enEv.name}) is still loaded; choose the next Excel file.`:"Cleared.",true)};
   $("#enGo").onclick=async()=>{const m=$("#enMsg");const R=enCompute()||enLast;if(!R||!R.list||!R.list.length){msg(m,"No entries to save.",false);return}const ents=R.list.reduce((a,p)=>a+p.entries.length,0);
     const club=R.list[0].club||"club",xml=entriesXml(enEv,R.list);const base=`Entries_${fileSafe(club)}_${fileSafe(enEv.name)}`.slice(0,90);
     /* claude.ai only lets a page save common file types, so the .lxf (a zip holding the .lef) is saved with a .zip ending */
@@ -4834,19 +4841,25 @@ function publicSnapshot(){
   const rec=JSON.parse(JSON.stringify(recDoc||{}));delete rec.dismissed;
   return{format:1,published:new Date().toISOString(),swimmers,meets,records:rec,basetimes:btSaved||null,standards:{lists:(stdDoc.lists||[]).map(({id,name,ageYear,from,to,times,meetCourse})=>({id,name,ageYear,from,to,times,meetCourse:meetCourse||""}))},org:{nameTh:org.nameTh||"",nameEn:org.nameEn||"",signer:org.signer||"",titleTh:org.titleTh||"",titleEn:org.titleEn||""}};
 }
+let pubWarnOk=false;
 $("#pubGo").onclick=async()=>{const m=$("#pubMsg");if(!canEdit())return;
+  /* never publish while the swimmer list is still arriving: a part-loaded list would drop swimmers from the website */
+  if(!state.swFull){msg(m,`Swimmers are still loading (${state.raw.length.toLocaleString()} so far). Wait until loading finishes, then press Publish public data again.`);return}
+  let prevN=0;try{prevN=+localStorage.getItem("smt.pubN")||0}catch(e){}
+  if(prevN&&state.raw.length<prevN*0.97&&!pubWarnOk){pubWarnOk=true;msg(m,`⚠️ Only ${state.raw.length.toLocaleString()} swimmers now, but the last public data had ${prevN.toLocaleString()}. If you didn't delete or merge that many, reload the app and wait for it to finish loading. Press Publish public data again to save anyway.`);return}
+  pubWarnOk=false;
   try{const snap=publicSnapshot();const txt=JSON.stringify(snap);
-    await saveFile("public.json",new Blob([txt],{type:"application/json"}));
+    await saveFile("public.json",new Blob([txt],{type:"application/json"}));try{localStorage.setItem("smt.pubN",String(snap.swimmers.length))}catch(e){}
     const mb=txt.length/1048576;
     msg(m,`Saved public.json (${mb.toFixed(1)} MB, ${snap.swimmers.length.toLocaleString()} swimmers). Now upload it to the data folder of your GitHub repository.${mb>=12?" ⚠️ This file is getting large, which makes the website slower to open on phones. Ask Claude to split public data into smaller files.":""}`,true)}
   catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":"Couldn't create the file. Try again.",c==="declined")}};
 $("#bakGo").onclick=async()=>{const m=$("#pubMsg");if(!canEdit())return;m.className="msg";m.textContent="Collecting everything…";
-  try{const grab=async c=>(await db.collection(c).get()).docs.map(d=>({id:d.id,...d.data()}));
+  try{const grab=async c=>{const sn=await db.collection(c).get();if(sn.metadata&&sn.metadata.fromCache)throw{code:"partial"};return sn.docs.map(d=>({id:d.id,...d.data()}))};
     const[sw,mt,al,se,st]=await Promise.all(["swimmers","meets","aliases","settings","staff"].map(grab));
     const txt=JSON.stringify({format:1,backup:new Date().toISOString(),swimmers:sw,meets:mt,aliases:al,settings:se,staff:st});
     await saveFile(`Backup_SwimMeetsThailand_${today()}.json`,new Blob([txt],{type:"application/json"}));
     msg(m,`Backup saved (${(txt.length/1048576).toFixed(1)} MB). It includes citizen IDs and birth dates: keep it somewhere private and never upload it to GitHub.`,true)}
-  catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":permErr(err),c==="declined")}};
+  catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="partial"?"The server sent only part of the data, so no backup was saved. Wait a minute and try again.":permErr(err),c==="declined")}};
 
 /* ---- Data usage (staff) ---- */
 $("#useGo").onclick=async()=>{const out=$("#useOut"),btn=$("#useGo");if(!canEdit()){out.textContent="Only staff can check data usage.";return}
@@ -4910,7 +4923,7 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
     let lastSnap=null;
     flushSwimmers=()=>{if(lastSnap){rawSw=lastSnap.docs.map(d=>({id:d.id,...d.data()}));applySwimmers(rawSw)}};
     db.collection("swimmers").onSnapshot(s=>{
-      lastSnap=s;if(bulkN>0){bulkPending=true;return}
+      state.swFull=!(s.metadata&&s.metadata.fromCache);lastSnap=s;if(bulkN>0){bulkPending=true;return}
       rawSw=s.docs.map(d=>({id:d.id,...d.data()}));
       if(!meetsReady&&rawSw.some(d=>d.rs&&Object.keys(d.rs).length))return;
       applySwimmers(rawSw);
