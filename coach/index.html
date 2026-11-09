@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v2.4 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v2.5 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -174,6 +174,19 @@ th{font-size:14px!important;font-weight:700!important;letter-spacing:.05em}
 body.printing td,body.printing .swrep td{font-size:12px!important}body.printing th{font-size:11px!important;color:#14213d!important}
 body.printing .swsum{font-size:12px!important;color:#111}body.printing .en,body.printing .hint{color:#3f4a5e!important}}
 .newtag,.pbtag{white-space:nowrap}.swrep td:first-child{white-space:nowrap}
+/* relay teams: vertical cards, one leg per line, drag to swap */
+.rteam{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;background:var(--surface)}
+.rth{margin:0 0 6px!important;gap:8px;align-items:center}.rtt{display:inline-flex;align-items:center;gap:6px;margin-left:auto}
+.rleg{display:grid;grid-template-columns:22px 22px 58px minmax(0,1fr) 96px;align-items:center;gap:8px;padding:5px 4px;border-top:1px solid var(--line);border-radius:6px}
+.rleg select{width:100%;min-width:0}.rleg .ln{font:700 15px var(--display);color:var(--teal);text-align:center}.rleg .ls{font-size:13px;color:var(--muted)}.rleg .lt{text-align:right;font-family:var(--mono);font-size:13px}
+.lh{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;font-size:18px;color:var(--muted);text-align:center;line-height:1}
+.rleg.rsrc{opacity:.35}.rleg.rover{background:var(--teal-soft);outline:2px dashed var(--teal)}
+.rghost{position:fixed;z-index:80;pointer-events:none;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.18);border:1px solid var(--teal)}
+@media (max-width:760px){.rleg{grid-template-columns:20px 16px 42px minmax(0,1fr) 58px;gap:5px}.rleg .ls{font-size:11px}.rleg .lt .en{display:none}.rth{flex-wrap:wrap}}
+.lsel{position:relative;display:flex;align-items:center;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:6px 26px 6px 10px;min-height:34px}
+.lsel .lname{font-weight:600;line-height:1.25;min-width:0}.lsel .lcar{position:absolute;right:9px;color:var(--muted);pointer-events:none}
+.lsel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.rleg.empty .lsel{border-style:dashed}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -181,7 +194,7 @@ body.printing .swsum{font-size:12px!important;color:#111}body.printing .en,body.
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.4</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.5</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -935,9 +948,12 @@ function evCard(m,S,G,cap){const n=cap?"③":"②",lim=m.lim||{},named=D.sw.filt
   else if(ui.emv==="rel"){h+=rels.length?rels.map(e=>{const teams=S.rel[e.no]||[],pool=named.filter(y=>gOk(e,y)),max=lim.relay||8,LS=legStrokes(e);
       return `<div style="border-top:1px solid var(--line);padding:10px 0"><div class="row" style="justify-content:space-between;margin:0"><b>#${esc(e.no)} · ${gName(e.g)} ${evName(e)} <span class="en">· Day ${e.day} · ${e.ags.map(agLbl).join(", ")}${lim.relay?" · up to "+lim.relay+" teams":""}</span></b>${open?`<span>${teams.length?`<button class="chip" data-emrfill="${esc(e.no)}" style="cursor:pointer">Refill fastest</button> `:""}${teams.length<max?`<button class="chip teal" data-emradd="${esc(e.no)}" style="cursor:pointer">+ Add team (fastest)</button>`:""}</span>`:""}</div>
        ${teams.map((t,i)=>{const sum=t.legs.every(Boolean)?t.legs.reduce((a,id,l)=>{const p=bestT(swById(id),C,LS[l],e.d);return a===null||!p?null:a+p},0):null,g=e.ags.find(q=>q.id===t.ag),mix=e.g==="X"&&t.legs.every(Boolean)&&t.legs.filter(id=>swById(id).g==="M").length!==2;
-        return `<div class="row" style="margin:6px 0 0;align-items:flex-start"><span class="teamtag t${i%4}">Team ${"ABCDEFGH"[i]}</span><select data-emrag="${esc(e.no)}|${i}"${dis} aria-label="Age group">${e.ags.map(q=>`<option value="${esc(q.id)}"${q.id===t.ag?" selected":""}>${agLbl(q)}</option>`).join("")}</select>
-         ${[0,1,2,3].map(l=>`<select data-emrleg="${esc(e.no)}|${i}|${l}"${dis} aria-label="Leg ${l+1}" style="max-width:190px"><option value="">${l+1}. ${e.st===5?RLEGS[l]:"Leg "+(l+1)}…</option>${pool.filter(y=>!g||relFits(m,y,g)).map(y=>{const p=bestT(y,C,LS[l],e.d);return `<option value="${esc(y.id)}"${t.legs[l]===y.id?" selected":""}>${l+1}. ${esc(y.th)} · ${y.g==="M"?"B":"G"}${ageOf(m,y)}${p?" · "+fmt(p):""}</option>`}).join("")}</select>`).join("")}
-         <span><input class="tin" data-emrt="${esc(e.no)}|${i}" inputmode="decimal" value="${t.t?fmt(t.t):""}" placeholder="${sum?fmt(sum):"NT"}"${dis} aria-label="Team entry time"><div class="tnote">${t.t?"typed":sum?"sum of SMT bests":""}</div></span>${open?`<button class="sick" data-emrdel="${esc(e.no)}|${i}">Remove</button>`:""}</div>${mix?`<p class="hint" style="margin:2px 0 0;color:var(--red)">Mixed relay: needs 2 boys and 2 girls.</p>`:""}`}).join("")||`<p class="hint" style="margin:4px 0 0">No team yet. Tap “+ Add team” to fill the fastest team from your named swimmers.</p>`}</div>`}).join("")+`<p class="hint">“+ Add team” picks the fastest swimmers left for that age group (best order for medley legs; 2 boys + 2 girls for mixed). Change any leg with the drop-down. Only named swimmers can swim relays; swimming up an age group is allowed. Empty time = sum of SMT bests.</p>`:`<p class="hint">This meet has no relays.</p>`}
+        return `<div class="rteam"><div class="row rth"><span class="teamtag t${i%4}">Team ${"ABCDEFGH"[i]}</span><select data-emrag="${esc(e.no)}|${i}"${dis} aria-label="Age group">${e.ags.map(q=>`<option value="${esc(q.id)}"${q.id===t.ag?" selected":""}>${agLbl(q)}</option>`).join("")}</select>
+          <span class="rtt"><input class="tin" data-emrt="${esc(e.no)}|${i}" inputmode="decimal" value="${t.t?fmt(t.t):""}" placeholder="${sum?fmt(sum):"NT"}"${dis} aria-label="Team entry time"><span class="hint">${t.t?"typed":sum?"sum of bests":""}</span></span>${open?`<button class="sick" data-emrdel="${esc(e.no)}|${i}">Remove</button>`:""}</div>
+         ${[0,1,2,3].map(l=>{const y=t.legs[l]?swById(t.legs[l]):null,p=y?bestT(y,C,LS[l],e.d):0;return `<div class="rleg${y?"":" empty"}" data-rleg="${esc(e.no)}|${i}|${l}">${open?`<span class="lh" title="Hold and drag to swap" aria-hidden="true">⠿</span>`:""}<span class="ln">${l+1}</span><span class="ls">${e.st===5?RLEGS[l]:"Leg "+(l+1)}</span>
+           <span class="lsel"><span class="lname">${y?nmH(y.th):'<span class="hint">Choose swimmer…</span>'}</span><span class="lcar">▾</span><select data-emrleg="${esc(e.no)}|${i}|${l}"${dis} aria-label="Leg ${l+1}"><option value="">Choose swimmer…</option>${pool.filter(q=>!g||relFits(m,q,g)||q.id===t.legs[l]).map(q=>{const pp=bestT(q,C,LS[l],e.d);return `<option value="${esc(q.id)}"${t.legs[l]===q.id?" selected":""}>${esc(q.th)} · ${q.g==="M"?"B":"G"}${ageOf(m,q)}${pp?" · "+fmt(pp):""}</option>`}).join("")}</select></span>
+           <span class="lt">${y?`<span class="en">${y.g==="M"?"B":"G"}${ageOf(m,y)}</span> ${p?fmt(p):"NT"}`:""}</span></div>`}).join("")}
+         ${mix?`<p class="hint" style="margin:4px 0 0;color:var(--red)">Mixed relay: needs 2 boys and 2 girls.</p>`:""}</div>`}).join("")||`<p class="hint" style="margin:4px 0 0">No team yet. Tap “+ Add team” to fill the fastest team from your named swimmers.</p>`}</div>`}).join("")+`<p class="hint">“+ Add team” picks the fastest swimmers left for that age group (best order for medley legs; 2 boys + 2 girls for mixed). To swap, hold ⠿ and drag a swimmer onto another leg (also between Team A and B), or change a leg with the drop-down. Only named swimmers can swim relays; swimming up an age group is allowed. Empty time = sum of SMT bests.</p>`:`<p class="hint">This meet has no relays.</p>`}
   else{const rows=named.map(y=>({y,c:entCnt(m,S,y.id),r:Object.values(S.rel).flat().filter(t=>t.legs.includes(y.id)).length}));const none=rows.filter(o=>!o.c.tot&&!o.r);
     const nT=Object.values(S.rel).reduce((a,l)=>a+l.length,0),bad=Object.values(S.rel).flat().filter(t=>t.legs.filter(Boolean).length<4).length;
     h+=`<div class="kpis"><div class="kpi"><b>${rows.reduce((a,o)=>a+o.c.tot,0)}</b><span>individual entries</span></div><div class="kpi"><b>${nT}</b><span>relay teams</span></div><div class="kpi"><b>${named.length-none.length} <small style="font:400 15px var(--body);color:var(--muted)">of ${named.length}</small></b><span>named swimmers entered</span></div></div>
@@ -987,6 +1003,24 @@ function bestTeam(m,e,g,used){const C=m.course==="SCM"?2:1,LS=legStrokes(e),pool
 function refill(m,S,ev){const used=new Set();for(const tm of S.rel[ev.no]||[]){const g=ev.ags.find(q=>q.id===tm.ag)||{min:0,max:0},legs=bestTeam(m,ev,g,used);if(legs)tm.legs=legs;tm.legs.filter(Boolean).forEach(id=>used.add(id))}}
 
 window.addEventListener("beforeunload",e=>{if(Object.values(MS).some(S=>S&&(S.saving||S.esaving))){e.preventDefault();e.returnValue=""}});
+
+/* hold and drag a relay leg onto another leg to swap (mouse and touch) */
+(()=>{const view=document.getElementById("view");let drag=null;
+  const legAt=(x,y)=>{const el=document.elementFromPoint(x,y);return el&&el.closest(".rleg")};
+  view.addEventListener("pointerdown",e=>{const h=e.target.closest(".lh");if(!h||ui.tab!=="entries")return;const row=h.closest(".rleg");e.preventDefault();
+    const r=row.getBoundingClientRect(),gh=row.cloneNode(true);gh.className="rleg rghost";gh.style.width=r.width+"px";gh.style.left=r.left+"px";gh.style.top=r.top+"px";gh.querySelectorAll("select").forEach(x=>x.remove());document.body.appendChild(gh);
+    row.classList.add("rsrc");drag={src:row.dataset.rleg,row,gh,dy:e.clientY-r.top,over:null};try{h.setPointerCapture(e.pointerId)}catch(_){}});
+  window.addEventListener("pointermove",e=>{if(!drag)return;e.preventDefault();drag.gh.style.top=(e.clientY-drag.dy)+"px";const t=legAt(e.clientX,e.clientY);
+    if(drag.over&&drag.over!==t)drag.over.classList.remove("rover");if(t&&t!==drag.row&&t.dataset.rleg.split("|")[0]===drag.src.split("|")[0]){t.classList.add("rover");drag.over=t}else drag.over=null;
+    if(e.clientY<60)scrollBy(0,-12);else if(e.clientY>innerHeight-60)scrollBy(0,12)},{passive:false});
+  const end=e=>{if(!drag)return;const d=drag;drag=null;d.gh.remove();d.row.classList.remove("rsrc");if(d.over)d.over.classList.remove("rover");if(!d.over)return;
+    const[m,S]=curM(),[no,i1,l1]=d.src.split("|"),[,i2,l2]=d.over.dataset.rleg.split("|"),A=S.rel[no][+i1],B=S.rel[no][+i2];
+    const ev=m.events.find(v=>v.no===no),gA=ev.ags.find(q=>q.id===A.ag),gB=ev.ags.find(q=>q.id===B.ag),xA=B.legs[+l2],xB=A.legs[+l1];
+    const bad=[[xA,gA],[xB,gB]].find(([id,g])=>id&&g&&!relFits(m,swById(id),g));
+    if(bad){CTX.toast(`${swById(bad[0]).th} is too old for ${agLbl(bad[1])}.`,true);return}
+    if(A!==B&&[xA&&A.legs.some((q,k)=>q===xA&&k!==+l1),xB&&B.legs.some((q,k)=>q===xB&&k!==+l2)].some(Boolean)){CTX.toast("That swimmer is already in this team.",true);return}
+    A.legs[+l1]=xA||"";B.legs[+l2]=xB||"";saveEnt(m,S);render()};
+  window.addEventListener("pointerup",end);window.addEventListener("pointercancel",()=>{if(drag){drag.gh.remove();drag.row.classList.remove("rsrc");if(drag.over)drag.over.classList.remove("rover");drag=null}});})();
 
 return CTX;
 };
