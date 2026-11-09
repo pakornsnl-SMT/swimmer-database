@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v2.3 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v2.4 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -147,7 +147,7 @@ body.printing *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
  main.panel,#view.panel{padding:12px 10px}
- table{font-size:14px}th{font-size:11px;letter-spacing:.04em}th,td{padding-left:6px!important;padding-right:6px!important}
+ table{font-size:14px}th{font-size:12.5px;letter-spacing:.04em}th,td{padding-left:6px!important;padding-right:6px!important}
  .seg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch;scrollbar-width:none}.seg::-webkit-scrollbar{display:none}.seg button{white-space:nowrap;flex:none;padding:6px 11px}
  .tin{width:80px;font-size:13px;padding:5px 6px}.tnote{white-space:normal;height:auto;min-height:0}
  td .en{font-size:12px}.chip{font-size:12px}
@@ -165,6 +165,15 @@ tr.gstart2 td{border-top:2px solid var(--line)}
 @media print{tr.grph td,tr.gr0 td,tr.gr1 td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 .slow{color:#b7791f}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .slow{color:#e0a84a}}:root[data-theme="dark"] .slow{color:#e0a84a}
+
+/* bigger, clearer column headings */
+th{font-size:14px!important;font-weight:700!important;letter-spacing:.05em}
+@media (max-width:760px){th{font-size:12.5px!important}}
+/* sharp, easy-to-read PDF */
+@media print{body.printing{color:#111;font-size:13px;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;--muted:#3f4a5e;--ink:#111}
+body.printing td,body.printing .swrep td{font-size:12px!important}body.printing th{font-size:11px!important;color:#14213d!important}
+body.printing .swsum{font-size:12px!important;color:#111}body.printing .en,body.printing .hint{color:#3f4a5e!important}}
+.newtag,.pbtag{white-space:nowrap}.swrep td:first-child{white-space:nowrap}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -172,7 +181,7 @@ tr.gstart2 td{border-top:2px solid var(--line)}
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.3</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.4</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -756,7 +765,7 @@ render();
 /* ---------- Reports: Download PDF (browser print → Save as PDF) ---------- */
 document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="rpPdf")return;const old=document.title,m=(ui.rm&&D.meets[ui.rm])||{};
   document.title=(CLUB.short+" - "+(m.n||"meet report")).replace(/[\\/:*?"<>|]+/g," ");document.body.classList.add("printing");
-  const done=()=>{document.body.classList.remove("printing");document.title=old;window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);setTimeout(()=>window.print(),50)});
+  const done=()=>{document.body.classList.remove("printing");document.title=old;window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
 
 /* ---------- Reports: one box per swimmer with an automatic summary (English / Thai) ---------- */
 const SNF=["","Freestyle","Backstroke","Breaststroke","Butterfly","IM"];
@@ -977,6 +986,8 @@ function bestTeam(m,e,g,used){const C=m.course==="SCM"?2:1,LS=legStrokes(e),pool
 
 function refill(m,S,ev){const used=new Set();for(const tm of S.rel[ev.no]||[]){const g=ev.ags.find(q=>q.id===tm.ag)||{min:0,max:0},legs=bestTeam(m,ev,g,used);if(legs)tm.legs=legs;tm.legs.filter(Boolean).forEach(id=>used.add(id))}}
 
+window.addEventListener("beforeunload",e=>{if(Object.values(MS).some(S=>S&&(S.saving||S.esaving))){e.preventDefault();e.returnValue=""}});
+
 return CTX;
 };
 
@@ -1111,7 +1122,9 @@ function rankIndex(){if(RIDX)return RIDX;RIDX=new Map();const M=PUB.meets;
   for(const s of PUB.swimmers){if(!s.birthYear)continue;for(const k in s.rs){const a=s.rs[k];if(!(a[7]>0)||a[10])continue;const m=M[a[0]];if(!m||!m.s)continue;
     const dt=new Date(Date.parse(m.s+"T00:00:00Z")+(+a[1]||0)*864e5).toISOString().slice(0,10),key=s.gender+"|"+s.birthYear+"|"+a[2]+"-"+a[3]+"|"+a[4];
     (RIDX.get(key)||RIDX.set(key,[]).get(key)).push([a[7],dt,s.id])}}return RIDX}
-function rankAt(sid,st,d,course,until){const me=PUB.byId.get(sid);if(!me||!me.birthYear)return null;const L=rankIndex().get(me.gender+"|"+me.birthYear+"|"+st+"-"+d+"|"+course)||[],from=until.slice(0,4)+"-01-01",best=new Map();
+const RCACHE=new Map();
+function rankAt(sid,st,d,course,until){const ck=sid+"|"+st+"|"+d+"|"+course+"|"+until;if(RCACHE.has(ck))return RCACHE.get(ck);const v=rankAt0(sid,st,d,course,until);RCACHE.set(ck,v);return v}
+function rankAt0(sid,st,d,course,until){const me=PUB.byId.get(sid);if(!me||!me.birthYear)return null;const L=rankIndex().get(me.gender+"|"+me.birthYear+"|"+st+"-"+d+"|"+course)||[],from=until.slice(0,4)+"-01-01",best=new Map();
   for(const [t,dt,id] of L)if(dt>=from&&dt<=until&&(!best.has(id)||t<best.get(id)))best.set(id,t);
   if(!best.has(sid))return null;const times=[...best.values()].sort((a,b)=>a-b),mine=best.get(sid);return{rank:times.indexOf(mine)+1,total:times.length,times,mine}}
 async function coachPage(clubId){
@@ -1140,6 +1153,7 @@ async function coachPage(clubId){
   $("#pkgChips").innerHTML=`${CLUB.pkg?`<span class="chip teal">${escH(CLUB.pkg)} · up to ${CLUB.limit} swimmers</span>`:""}${CLUB.expires?`<span class="chip ${CTX.expired?"":"gold"}" style="${CTX.expired?"color:var(--red);border-color:var(--red)":""}">${CTX.expired?"Expired":"Valid to"} ${escH(new Date(CLUB.expires+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}))}</span>`:""}`;
   $("#userBar").innerHTML=`<span class="hint">${escH(USER.email||"")}</span>${PROFILE.role==="admin"?` <a class="chip" href="?${MOCK?"mock=1&":""}${QS.get("data")?"data="+encodeURIComponent(QS.get("data"))+"&":""}">Admin</a>`:""} <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
   show("#scrApp");APP=window.startCoachApp(D,CTX,CLUB);
+  (window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>{try{rankIndex()}catch(e){}});
 }
 
 /* ---------- admin page (SMT staff) ---------- */
