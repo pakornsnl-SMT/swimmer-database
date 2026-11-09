@@ -298,6 +298,7 @@ function tNote(v,pb){if(!pb)return "typed · no SMT time yet";const d=pb-v;retur
 function entCount(i){const per=MEET.days.map(dy=>dy.ev.filter(e=>ui.ent[entKey(i,e[0])]).length);return{per,tot:per.reduce((a,b)=>a+b,0)}}
 function limChip(n,max,label){return `<span class="chip" style="${n>=max?'border-color:var(--gold);color:var(--gold)':''}">${label} ${n}/${max}</span>`}
 function entriesView(){
+  if(!CTX.entryMeet)return `<h2>Meet entries</h2><div class="lock" style="border-style:solid;border-color:var(--line)"><b style="color:var(--ink);font-family:var(--display)">No meet is open for entries yet.</b><br>When SMT opens entries for a meet, it appears here with its events, limits and deadline. Your swimmers' best times fill in automatically.</div>`;
   const days=Math.ceil((new Date(MEET.dl)-new Date(new Date().toDateString()))/864e5);
   const all=Object.values(ui.ent).filter(Boolean).length,swN=new Set(Object.keys(ui.ent).filter(k=>ui.ent[k]).map(k=>k.split("|")[0])).size;
   ui.em=ui.em||"sw";ui.et=ui.et||{};
@@ -386,8 +387,8 @@ function qualView(){
   return h;
 }
 function goalsView(){
-  ui.gm=ui.gm||"q";const top=`<div class="row" style="margin-bottom:14px">${segBtns("gm",[["q","April Championship 2027"],["top","Thailand top 3 / 8 / 16"]])}</div>`;
-  if(ui.gm==="q")return top+qualView();
+  ui.gm=ui.gm||"top";const top=`<div class="row" style="margin-bottom:14px">${segBtns("gm",[["q","April Championship 2027"],["top","Thailand top 3 / 8 / 16"]])}</div>`;
+  if(ui.gm==="q")return top+(CTX.qual?qualView():`<div class="lock" style="border-style:solid;border-color:var(--line)"><b style="color:var(--ink);font-family:var(--display)">Qualifying times not published yet.</b><br>When the official qualifying times are out, SMT adds them here and you will see who has qualified and who is close.</div>`);
   return top+goalsTop();
 }
 function goalsTop(){
