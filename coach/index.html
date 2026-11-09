@@ -128,7 +128,7 @@ a.chip{text-decoration:none;color:inherit;display:inline-block}code{font-family:
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, coach accounts and transfer requests</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -752,12 +752,14 @@ async function initDB(){
     allTransfers:()=>list(c("transferRequests")),
     requestTransfer:t=>F.addDoc(c("transferRequests"),{...t,status:"open",createdAt:F.serverTimestamp()}),
     decideTransfer:(t,ok)=>F.runTransaction(db,async tx=>{const r=d("transferRequests",t.id);if(ok)tx.set(d("rosters",t.swimmerId),{clubId:t.toClub,clubName:t.toClubName||t.toClub,since:F.serverTimestamp()});tx.update(r,{status:ok?"approved":"declined",decidedAt:F.serverTimestamp()})}),
-    listMeets:()=>list(c("meets"))
+    listMeets:()=>list(c("meets")),
+    saveMeet:(id,v)=>F.setDoc(d("meets",id),v),
+    delMeet:id=>F.deleteDoc(d("meets",id))
   };
 }
 function mockDB(){ /* test copy kept in this browser only (for checking screens without touching the real database) */
   const K="smt.mockdb",load=()=>{try{return JSON.parse(localStorage.getItem(K))||null}catch(e){return null}};
-  let S=load()||{users:{admin1:{role:"admin",email:"admin@test"},coach1:{role:"coach",clubId:"jfin",email:"coach@test"}},clubs:{jfin:{name:"J-Fin Swimming Club",short:"J-Fin",pkg:"Package XL",limit:30,expires:"2026-12-31",resultsName:"J-Fin Swimming Club"}},rosters:{},data:{},transfers:{}};
+  let S=load()||{users:{admin1:{role:"admin",email:"admin@test"},coach1:{role:"coach",clubId:"jfin",email:"coach@test"}},clubs:{jfin:{name:"J-Fin Swimming Club",short:"J-Fin",pkg:"Package XL",limit:30,expires:"2026-12-31",resultsName:"J-Fin Swimming Club"}},rosters:{},data:{},transfers:{},meets:{}};
   const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};save();let cb=null,cur=(()=>{try{return JSON.parse(sessionStorage.getItem('smt.mockuser'))}catch(e){return null}})();const keep=()=>{try{sessionStorage.setItem('smt.mockuser',JSON.stringify(cur))}catch(e){}};const wait=v=>new Promise(r=>setTimeout(()=>r(v),60));
   return{onAuth:f=>{cb=f;setTimeout(()=>f(cur),0)},signIn:async e=>{const uid=e.startsWith("admin")?"admin1":e.startsWith("coach")?"coach1":null;if(!uid)throw{code:"auth/invalid-credential"};cur={uid,email:e};keep();cb&&cb(cur);return cur},signOut:async()=>{cur=null;keep();cb&&cb(null)},reset:async()=>wait(),
     getUser:async uid=>wait(S.users[uid]||null),getClub:async id=>wait(S.clubs[id]?{id,...S.clubs[id]}:null),listClubs:async()=>wait(Object.entries(S.clubs).map(([id,v])=>({id,...v}))),saveClub:async(id,v)=>{S.clubs[id]={...(S.clubs[id]||{}),...v};save()},
@@ -767,7 +769,7 @@ function mockDB(){ /* test copy kept in this browser only (for checking screens 
     release:async sid=>{delete S.rosters[sid];save()},bulkAdd:async(ids,club)=>{let n=0,skip=0;ids.forEach(i=>{if(S.rosters[i])skip++;else{S.rosters[i]={clubId:club.id,clubName:club.name,since:Date.now()};n++}});save();return{n,skip}},
     getData:async(cl,k)=>wait((S.data[cl]||{})[k]||null),setData:async(cl,k,v)=>{(S.data[cl]=S.data[cl]||{})[k]=v;save()},
     myTransfers:async cl=>Object.entries(S.transfers).filter(([,t])=>t.toClub===cl).map(([id,t])=>({id,...t})),allTransfers:async()=>Object.entries(S.transfers).map(([id,t])=>({id,...t})),
-    requestTransfer:async t=>{S.transfers["t"+Date.now()]={...t,status:"open"};save()},decideTransfer:async(t,ok)=>{if(ok)S.rosters[t.swimmerId]={clubId:t.toClub,clubName:t.toClubName};S.transfers[t.id].status=ok?"approved":"declined";save()},listMeets:async()=>[]};
+    requestTransfer:async t=>{S.transfers["t"+Date.now()]={...t,status:"open"};save()},decideTransfer:async(t,ok)=>{if(ok)S.rosters[t.swimmerId]={clubId:t.toClub,clubName:t.toClubName};S.transfers[t.id].status=ok?"approved":"declined";save()},listMeets:async()=>Object.entries(S.meets||{}).map(([id,m])=>({id,...m})),saveMeet:async(id,v)=>{(S.meets=S.meets||{})[id]=v;save()},delMeet:async id=>{delete S.meets[id];save()}};
 }
 
 /* ---------- public data from www.smdata.in.th (same file the public site uses) ---------- */
@@ -826,7 +828,7 @@ async function coachPage(clubId){
   const year=new Date().getFullYear(),today=new Date().toISOString().slice(0,10);
   let ids=ro.map(r=>r.id);const D=buildData(pub,ids,year);
   const CLUB={id:club.id,name:club.name||club.id,short:club.short||club.name||club.id,pkg:club.pkg||"",limit:+club.limit||0,expires:club.expires||""};
-  const CTX={year,saved:{calendar:cal,settings:set},myTransfers:tr,meets:meets.map(m=>({n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a),
+  const CTX={year,saved:{calendar:cal,settings:set},myTransfers:tr,meets:meets.map(m=>({n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a).filter(m=>m.b>=new Date().toISOString().slice(0,10)).sort((x,y)=>x.a.localeCompare(y.a)),
     expired:!!(CLUB.expires&&CLUB.expires<today),toast,
     addSwimmer:async id=>{if(CLUB.limit&&ids.length>=CLUB.limit)return{full:true};const r=await DB.addToRoster(id,CLUB);if(r.ok){ids=ids.concat(id);APP.reload(buildData(pub,ids,year))}return r},
     releaseSwimmer:async id=>{await DB.release(id);ids=ids.filter(x=>x!==id);APP.reload(buildData(pub,ids,year))},
@@ -847,10 +849,10 @@ async function adminPage(){
   const qs=extra=>"?"+[MOCK?"mock=1":"",QS.get("data")?"data="+encodeURIComponent(QS.get("data")):"",extra].filter(Boolean).join("&");
   async function draw(){const el=$("#adminView");el.innerHTML=`<p class="hint">Loading…</p>`;
     try{
-    const [clubs,users,trs]=await Promise.all([DB.listClubs(),DB.listUsers(),DB.allTransfers().catch(()=>[])]);
+    const [clubs,users,trs,mts]=await Promise.all([DB.listClubs(),DB.listUsers(),DB.allTransfers().catch(()=>[]),DB.listMeets().catch(()=>[])]);mts.sort((a,b)=>String(a.start).localeCompare(String(b.start)));
     const counts=await Promise.all(clubs.map(c=>DB.rosterCount(c.id).catch(()=>"?")));
     const open=trs.filter(t=>t.status==="open");
-    let h=`<div class="row" style="margin-bottom:14px"><div class="seg">${[["clubs","Clubs"],["coaches","Coach accounts"],["transfers",`Transfer requests${open.length?" ("+open.length+")":""}`]].map(([v,l])=>`<button data-at="${v}" aria-pressed="${A.tab===v}">${l}</button>`).join("")}</div></div>`;
+    let h=`<div class="row" style="margin-bottom:14px"><div class="seg">${[["clubs","Clubs"],["meets","Upcoming meets"],["coaches","Coach accounts"],["transfers",`Transfer requests${open.length?" ("+open.length+")":""}`]].map(([v,l])=>`<button data-at="${v}" aria-pressed="${A.tab===v}">${l}</button>`).join("")}</div></div>`;
     if(A.tab==="clubs"){const e=A.edit?clubs.find(c=>c.id===A.edit)||{}:{};
       h+=`<div class="tw"><table><thead><tr><th>Club</th><th>Package</th><th class="num">Swimmers</th><th>Valid to</th><th></th></tr></thead><tbody>${clubs.map((c,i)=>`<tr><td><b>${escH(c.name)}</b><div class="en">${escH(c.id)}${c.short?" · "+escH(c.short):""}</div></td><td>${escH(c.pkg||"")}</td><td class="num">${counts[i]} / ${c.limit||"?"}</td><td class="en">${escH(c.expires||"")}</td>
         <td class="num" style="white-space:nowrap"><a class="chip teal" href="${qs("club="+encodeURIComponent(c.id))}">Open coach view</a> <button class="chip" data-aedit="${escH(c.id)}" style="cursor:pointer">Edit</button> <button class="chip" data-afill="${escH(c.id)}" style="cursor:pointer">Fill team from results</button></td></tr>`).join("")||`<tr><td class="hint" colspan="5">No clubs yet. Add the first one below.</td></tr>`}</tbody></table></div>
@@ -858,9 +860,17 @@ async function adminPage(){
          <div class="row" style="margin:0"><label class="hint">Club name<br><input id="cfName" required value="${escH(e.name||"")}" style="width:260px"></label><label class="hint">Short name<br><input id="cfShort" value="${escH(e.short||"")}" placeholder="J-Fin" style="width:120px"></label><label class="hint">Club code (ID)<br><input id="cfId" required value="${escH(e.id||"")}" ${A.edit?"readonly":""} placeholder="jfin" style="width:110px" pattern="[a-z0-9-]+" title="lowercase letters, numbers and -"></label></div>
          <div class="row" style="margin:0"><label class="hint">Package<br><select id="cfPkg">${[["Package S",5],["Package M",10],["Package L",20],["Package XL",30],["Package XXL",50]].map(([p,l])=>`<option data-l="${l}"${(e.pkg||"Package XL")===p?" selected":""}>${p}</option>`).join("")}</select></label><label class="hint">Swimmer limit<br><input id="cfLimit" type="number" min="1" value="${escH(e.limit||30)}" style="width:80px"></label><label class="hint">Valid to<br><input id="cfExp" type="date" value="${escH(e.expires||(new Date().getFullYear()+"-12-31"))}"></label><label class="hint">Club name in results (for "Fill team")<br><input id="cfRes" value="${escH(e.resultsName||e.name||"")}" style="width:240px"></label></div>
          <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">${A.edit?"Save changes":"Add club"}</button>${A.edit?`<button type="button" class="chip" data-acancel="1" style="cursor:pointer">Cancel</button>`:""}</div></form>`}
+    if(A.tab==="meets"){const e=A.medit?mts.find(m=>m.id===A.medit)||{}:{},today=new Date().toISOString().slice(0,10),PR={A:"A · main target",B:"B · important",C:"C · training meet"};
+      h+=`<p class="hint" style="margin-top:0">Meets listed here appear in every coach's <b>Calendar → Add a meet</b> list. Past meets drop off the coach list by themselves.</p>
+      <div class="tw"><table><thead><tr><th>Meet</th><th>Dates</th><th>Pool</th><th>Entry deadline</th><th>Priority</th><th></th></tr></thead><tbody>${mts.map(m=>`<tr${(m.end||m.start)<today?' style="opacity:.5"':''}><td><b>${escH(m.name)}</b>${m.city?`<div class="en">${escH(m.city)}</div>`:""}</td><td class="en" style="white-space:nowrap">${escH(m.start)}${m.end&&m.end!==m.start?" → "+escH(m.end):""}</td><td>${m.course==="SCM"?"25 m":"50 m"}</td><td class="en">${escH(m.deadline||"–")}</td><td><span class="pill ${m.priority==="A"?"pill-gold":m.priority==="C"?"":"pill-blue"}">${escH(m.priority||"B")}</span></td>
+        <td class="num" style="white-space:nowrap"><button class="chip" data-medit="${escH(m.id)}" style="cursor:pointer">Edit</button> <button class="sick" data-mdel="${escH(m.id)}">Remove</button></td></tr>`).join("")||`<tr><td class="hint" colspan="6">No upcoming meets yet. Add the first one below.</td></tr>`}</tbody></table></div>
+        <form id="meetForm" class="addm" style="margin-top:14px"><b style="font-family:var(--display);font-size:17px">${A.medit?"Edit meet":"Add a meet"}</b>
+         <div class="row" style="margin:0"><label class="hint">Meet name<br><input id="mfName" required value="${escH(e.name||"")}" style="width:320px"></label><label class="hint">City / venue<br><input id="mfCity" value="${escH(e.city||"")}" style="width:180px"></label></div>
+         <div class="row" style="margin:0"><label class="hint">First day<br><input id="mfStart" type="date" required value="${escH(e.start||"")}"></label><label class="hint">Number of days<br><input id="mfDays" type="number" min="1" max="14" value="${e.start&&e.end?Math.round((Date.parse(e.end)-Date.parse(e.start))/864e5)+1:1}" style="width:70px"></label><label class="hint">Last day<br><input id="mfEnd" type="date" value="${escH(e.end||"")}"></label><label class="hint">Pool<br><select id="mfCourse"><option value="LCM">50 m (LCM)</option><option value="SCM"${e.course==="SCM"?" selected":""}>25 m (SCM)</option></select></label><label class="hint">Entry deadline<br><input id="mfDl" type="date" value="${escH(e.deadline||"")}"></label><label class="hint">Priority<br><select id="mfPr">${["A","B","C"].map(p=>`<option value="${p}"${(e.priority||"B")===p?" selected":""}>${PR[p]}</option>`).join("")}</select></label></div>
+         <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">${A.medit?"Save changes":"Add meet"}</button>${A.medit?`<button type="button" class="chip" data-mcancel="1" style="cursor:pointer">Cancel</button>`:""}</div></form>`}
     if(A.tab==="coaches"){h+=`<div class="tw"><table><thead><tr><th>Email</th><th>Role</th><th>Club</th><th>Login code (UID)</th><th></th></tr></thead><tbody>${users.map(u=>`<tr><td>${escH(u.email||"")}</td><td>${u.role==="admin"?'<span class="pill pill-gold">Admin</span>':'<span class="pill pill-blue">Coach</span>'}</td><td>${escH((clubs.find(c=>c.id===u.clubId)||{}).name||u.clubId||"")}</td><td class="en" style="font-family:var(--mono);font-size:12px">${escH(u.id)}</td><td class="num">${u.id===USER.uid?'<span class="hint">you</span>':`<button class="sick" data-adel="${escH(u.id)}">Remove access</button>`}</td></tr>`).join("")}</tbody></table></div>
         <form id="userForm" class="addm" style="margin-top:14px"><b style="font-family:var(--display);font-size:17px">Link a coach login to a club</b>
-         <ol class="hint" style="margin:0;padding-left:18px"><li>In Firebase → Authentication → Users → <b>Add user</b>, create the coach's email and password.</li><li>Copy their <b>User UID</b> and paste it here, choose the club, and save.</li><li>Send the coach the address coach.smdata.in.th, their email and password.</li></ol>
+         <ol class="hint" style="margin:0;padding-left:18px"><li>In Firebase → Authentication → Users → <b>Add user</b>, create the coach's email and password.</li><li>Copy their <b>User UID</b> and paste it here, choose the club, and save.</li><li>Send the coach the address www.smdata.in.th/coach/, their email and password.</li></ol>
          <div class="row" style="margin:0"><label class="hint">User UID<br><input id="ufUid" required style="width:280px;font-family:var(--mono)"></label><label class="hint">Email<br><input id="ufEmail" type="email" style="width:220px"></label><label class="hint">Role<br><select id="ufRole"><option value="coach">Coach</option><option value="admin">Admin (SMT staff)</option></select></label><label class="hint">Club<br><select id="ufClub">${clubs.map(c=>`<option value="${escH(c.id)}">${escH(c.name)}</option>`).join("")}</select></label></div>
          <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">Save</button></div></form>`}
     if(A.tab==="transfers"){h+=`<div class="tw"><table><thead><tr><th>Swimmer</th><th>From</th><th>To</th><th>Reason</th><th></th></tr></thead><tbody>${trs.sort((a,b)=>(a.status==="open"?0:1)-(b.status==="open"?0:1)).map(t=>`<tr><td><b>${escH(t.swimmerName||t.swimmerId)}</b></td><td>${escH(t.fromClubName||t.fromClub||"")}</td><td>${escH(t.toClubName||t.toClub)}</td><td class="en">${escH(t.reason||"")}${t.note?" · "+escH(t.note):""}</td>
@@ -870,7 +880,9 @@ async function adminPage(){
   $("#adminUser").innerHTML=`<span class="hint">${escH(USER.email||"")}</span> <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
   const el=$("#adminView");
   el.onclick=async e=>{const t=e.target.closest("button");if(!t)return;
-    if(t.dataset.at){A.tab=t.dataset.at;A.edit=null;draw()}
+    if(t.dataset.at){A.tab=t.dataset.at;A.edit=null;A.medit=null;draw()}
+    else if(t.dataset.medit){A.medit=t.dataset.medit;draw()}else if(t.dataset.mcancel){A.medit=null;draw()}
+    else if(t.dataset.mdel){if(t.dataset.sure){try{await DB.delMeet(t.dataset.mdel);toast("Meet removed.");if(A.medit===t.dataset.mdel)A.medit=null;draw()}catch(err){toast(friendly(err),true)}}else{t.dataset.sure="1";t.textContent="Tap again to remove"}}
     else if(t.dataset.aedit){A.edit=t.dataset.aedit;draw()}else if(t.dataset.acancel){A.edit=null;draw()}
     else if(t.dataset.adel){if(t.dataset.sure){await DB.delUser(t.dataset.adel);toast("Access removed.");draw()}else{t.dataset.sure="1";t.textContent="Tap again to confirm"}}
     else if(t.dataset.aok||t.dataset.ano){const tr=A.trs.find(x=>x.id===(t.dataset.aok||t.dataset.ano));t.disabled=true;try{await DB.decideTransfer(tr,!!t.dataset.aok);toast(t.dataset.aok?"Approved. The swimmer moved to "+(tr.toClubName||tr.toClub)+".":"Declined.");draw()}catch(err){toast(friendly(err),true);t.disabled=false}}
@@ -879,10 +891,17 @@ async function adminPage(){
         const have=await DB.rosterCount(c.id),room=Math.max(0,(+c.limit||0)-have),pick=ids.slice(0,room);
         if(!ids.length){toast(`No swimmers with the results club name "${c.resultsName||c.name}" since ${y}. Check the name in Edit.`,true);t.disabled=false;t.textContent="Fill team from results";return}
         t.textContent=`Adding ${pick.length}…`;const r=await DB.bulkAdd(pick,{id:c.id,name:c.name});toast(`Added ${r.n} swimmers${r.skip?`, ${r.skip} already in another club`:""}${ids.length>pick.length?`, ${ids.length-pick.length} not added (package limit)`:""}.`);draw()}catch(err){toast(friendly(err),true);t.disabled=false;t.textContent="Fill team from results"}}};
-  el.onchange=e=>{if(e.target.id==="cfPkg"){const o=e.target.selectedOptions[0];$("#cfLimit").value=o.dataset.l}};
+  const addDays=(d,n)=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
+  el.onchange=e=>{const id=e.target.id;if(id==="cfPkg"){const o=e.target.selectedOptions[0];$("#cfLimit").value=o.dataset.l}
+    if((id==="mfStart"||id==="mfDays")&&$("#mfStart").value){$("#mfEnd").value=addDays($("#mfStart").value,Math.max(1,+$("#mfDays").value||1)-1)}
+    if(id==="mfEnd"&&$("#mfStart").value&&$("#mfEnd").value){$("#mfDays").value=Math.max(1,Math.round((Date.parse($("#mfEnd").value)-Date.parse($("#mfStart").value))/864e5)+1)}};
   el.onsubmit=async e=>{e.preventDefault();const f=e.target;
     if(f.id==="clubForm"){const id=$("#cfId").value.trim().toLowerCase();if(!/^[a-z0-9-]+$/.test(id)){toast("Club code: lowercase letters, numbers and - only.",true);return}
       try{await DB.saveClub(id,{name:$("#cfName").value.trim(),short:$("#cfShort").value.trim()||$("#cfName").value.trim(),pkg:$("#cfPkg").value,limit:+$("#cfLimit").value||0,expires:$("#cfExp").value,resultsName:$("#cfRes").value.trim()});toast("Club saved.");A.edit=null;draw()}catch(err){toast(friendly(err),true)}}
+    if(f.id==="meetForm"){const a=$("#mfStart").value,b=$("#mfEnd").value||a;if(b<a){toast("The last day is before the first day.",true);return}
+      const v={name:$("#mfName").value.trim(),city:$("#mfCity").value.trim(),start:a,end:b,course:$("#mfCourse").value,deadline:$("#mfDl").value,priority:$("#mfPr").value};
+      const sl=v.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40),id=A.medit||(a+"-"+(sl||Date.now().toString(36)));
+      try{await DB.saveMeet(id,v);toast(A.medit?"Meet saved.":"Meet added. Coaches will see it in their Calendar.");A.medit=null;draw()}catch(err){toast(friendly(err),true)}}
     if(f.id==="userForm"){const uid=$("#ufUid").value.trim();if(uid.length<20){toast("That doesn't look like a full User UID. Copy it from Firebase → Authentication → Users.",true);return}
       const role=$("#ufRole").value,v={role,email:$("#ufEmail").value.trim()};if(role==="coach")v.clubId=$("#ufClub").value;
       try{await DB.setUser(uid,v);toast("Saved. The coach can log in now.");draw()}catch(err){toast(friendly(err),true)}}};
