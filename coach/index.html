@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v2.7 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v2.8 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -206,7 +206,7 @@ body.printing .swsum{font-size:12px!important;color:#111}body.printing .en,body.
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.7</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.8</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -822,7 +822,7 @@ const RT={en:{title:"Swimmer reports",swims:"swims",pbs:"PBs",ev:"Event",pl:"Pla
     tgt:(d,n,e)=>`<b>เป้าหมายต่อไป:</b> อีก ${d} วินาที จะติด ${n} อันดับแรกของประเทศ ใน ${e}`,top3:e=>`<b>เป้าหมายต่อไป:</b> อยู่ใน 3 อันดับแรกของประเทศแล้ว ใน ${e} รักษาอันดับไว้`}};
 const rEv=(L,e)=>L==="th"?`${e.ds} ${ST[e.st]}`:`${e.ds} ${SNF[e.st]}`;
 const dayBefore=d=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()-1);return x.toISOString().slice(0,10)};
-function swSummary(L,T,s,list,mt){const out=[],comp=list.filter(x=>!x.first),pbs=list.filter(x=>x.pb),firsts=list.filter(x=>x.first),slow=comp.filter(x=>x.r.t>x.prev);
+function swRepSummary(L,T,s,list,mt){const out=[],comp=list.filter(x=>!x.first),pbs=list.filter(x=>x.pb),firsts=list.filter(x=>x.first),slow=comp.filter(x=>x.r.t>x.prev);
   const rate=comp.length?pbs.length/comp.length:0,vi=rate>=.75?0:rate>=.5?1:rate>=.25?2:3;
   out.push(`<b>${T.v[vi]}:</b> ${T.head(pbs.length,comp.length,firsts.length)}`);
   if(pbs.length){const b=pbs.reduce((a,x)=>x.drop/x.prev>a.drop/a.prev?x:a);out.push(T.imp(rEv(L,b.e),(b.drop/100).toFixed(2),(b.drop/b.prev*100).toFixed(1),fmt(b.prev),fmt(b.r.t)))}
@@ -850,7 +850,7 @@ function swReport(rows,mt){const L=ui.rl||"en",T=RT[L],by=new Map();rows.forEach
      <div class="tw"><table><thead><tr><th>${T.ev}</th><th class="num">${T.pl}</th><th class="num">${T.time}</th><th class="num">${T.prev}</th><th class="num">${T.ch}</th><th class="num hide-sm">${T.pts}</th><th class="hide-sm">${T.sp}</th></tr></thead><tbody>${l.map((x,li)=>{const lp=x.r.sp||[],sok=lp.length>1&&Math.abs(lp.reduce((a,b)=>a+b,0)-x.r.t)<=5,gi=[...new Set(l.map(y=>y.e.st))].indexOf(x.e.st),ns=li>0&&l[li-1].e.st!==x.e.st;
        return `<tr class="gr${gi%3}${ns?" gstart2":""}"><td><b>${rEv(L,x.e)}</b>${x.r.relay?` <span class="en">(${T.lead})</span>`:""}</td><td class="num">${medal(x.r.p)}</td><td class="num t"><b>${fmt(x.r.t)}</b>${x.pb?' <span class="pbtag">PB</span>':""}</td><td class="num t" style="color:var(--muted)">${x.first?"–":fmt(x.prev)}</td>
        <td class="num">${x.first?`<span class="newtag">${T.first}</span>`:x.pb?`<span class="up">−${(x.drop/100).toFixed(2)}</span>`:x.r.t>x.prev?`<span class="slow">+${((x.r.t-x.prev)/100).toFixed(2)}</span>`:"="}</td><td class="num hide-sm">${pts(s,x.e.k,x.r.t)||""}</td><td class="hide-sm en">${sok?lp.map(fmt).join(" · "):""}</td></tr>`}).join("")}</tbody></table></div>
-     <div class="swsum">${swSummary(L,T,s,l,mt).map(t=>`<p>${t}</p>`).join("")}</div></div>`}).join("")}`}
+     <div class="swsum">${swRepSummary(L,T,s,l,mt).map(t=>`<p>${t}</p>`).join("")}</div></div>`}).join("")}`}
 
 /* ---------- SMT meet entries: 1 Numbers → 2 Names → 3 Events ---------- */
 const todayL=()=>new Date().toLocaleDateString("en-CA");
