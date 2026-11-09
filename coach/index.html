@@ -892,7 +892,7 @@ async function coachPage(clubId){
   if(!clubId){show("#scrLogin");$("#loginMsg").textContent="Your account isn't linked to a club yet. Please contact SMT.";return}
   setLoad("Loading your club…");
   const club=await DB.getClub(clubId);if(!club){show("#scrLogin");$("#loginMsg").textContent="Club not found. Please contact SMT.";return}
-  const [ro,pub,cal,set,tr,meets]=await Promise.all([DB.roster(clubId),loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(()=>[])]);
+  const [ro,pub,cal,set,tr,meets]=await Promise.all([DB.roster(clubId),loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]})]);
   setLoad("Working out rankings…");await new Promise(r=>setTimeout(r,0));
   const year=new Date().getFullYear(),today=new Date().toISOString().slice(0,10);
   let ids=ro.map(r=>r.id);const D=buildData(pub,ids,year);
