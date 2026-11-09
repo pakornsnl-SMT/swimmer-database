@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v2.2 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v2.3 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -156,6 +156,15 @@ body.printing *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 }
 .nmsh{display:none}
 @media (max-width:760px){.nmfull{display:none}.nmsh{display:inline;white-space:nowrap}}
+/* colour sections: groups of rows (by day / by stroke) */
+tr.grph td{font:700 13px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:7px 10px!important;border-top:2px solid var(--teal);background:var(--teal-soft);color:var(--teal)}
+tr.grph.gr1 td{border-top-color:var(--red);background:var(--red-soft);color:var(--red)}
+tr.grph .grn{float:right;font:500 12px var(--body);letter-spacing:0;text-transform:none;opacity:.85}
+tr.gr0:not(.grph) td:first-child{box-shadow:inset 4px 0 var(--teal)}tr.gr1:not(.grph) td:first-child{box-shadow:inset 4px 0 var(--red)}
+tr.gstart2 td{border-top:2px solid var(--line)}
+@media print{tr.grph td,tr.gr0 td,tr.gr1 td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.slow{color:#b7791f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .slow{color:#e0a84a}}:root[data-theme="dark"] .slow{color:#e0a84a}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -163,7 +172,7 @@ body.printing *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.2</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.3</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -804,9 +813,9 @@ function swReport(rows,mt){const L=ui.rl||"en",T=RT[L],by=new Map();rows.forEach
   ${swl.map(({s,l})=>{const md=[1,2,3].map(p=>l.filter(x=>x.r.p===p&&!x.r.relay).length),pbn=l.filter(x=>x.pb).length;
     return `<div class="swrep"><div class="row" style="justify-content:space-between;margin:0 0 6px;border-bottom:1px solid var(--line);padding-bottom:6px"><div><b style="font:700 17px var(--display)">${esc(s.th)}</b> <span class="en">· ${esc(s.en)} · ${s.g==="M"?(L==="th"?"ชาย":"Boy"):(L==="th"?"หญิง":"Girl")}, ${s.age}</span></div>
      <div class="row" style="margin:0;gap:6px"><span class="chip">${l.length} ${T.swims}</span><span class="chip"><b>${pbn}</b> ${T.pbs}</span>${md.some(Boolean)?`<span class="chip">${[1,2,3].map((p,i)=>md[i]?`${medal(p)}×${md[i]}`:"").filter(Boolean).join(" ")}</span>`:""}</div></div>
-     <div class="tw"><table><thead><tr><th>${T.ev}</th><th class="num">${T.pl}</th><th class="num">${T.time}</th><th class="num">${T.prev}</th><th class="num">${T.ch}</th><th class="num hide-sm">${T.pts}</th><th class="hide-sm">${T.sp}</th></tr></thead><tbody>${l.map(x=>{const lp=x.r.sp||[],sok=lp.length>1&&Math.abs(lp.reduce((a,b)=>a+b,0)-x.r.t)<=5;
-       return `<tr><td><b>${rEv(L,x.e)}</b>${x.r.relay?` <span class="en">(${T.lead})</span>`:""}</td><td class="num">${medal(x.r.p)}</td><td class="num t"><b>${fmt(x.r.t)}</b>${x.pb?' <span class="pbtag">PB</span>':""}</td><td class="num t" style="color:var(--muted)">${x.first?"–":fmt(x.prev)}</td>
-       <td class="num">${x.first?`<span class="newtag">${T.first}</span>`:x.pb?`<span class="up">−${(x.drop/100).toFixed(2)}</span>`:x.r.t>x.prev?`<span style="color:var(--gold)">+${((x.r.t-x.prev)/100).toFixed(2)}</span>`:"="}</td><td class="num hide-sm">${pts(s,x.e.k,x.r.t)||""}</td><td class="hide-sm en">${sok?lp.map(fmt).join(" · "):""}</td></tr>`}).join("")}</tbody></table></div>
+     <div class="tw"><table><thead><tr><th>${T.ev}</th><th class="num">${T.pl}</th><th class="num">${T.time}</th><th class="num">${T.prev}</th><th class="num">${T.ch}</th><th class="num hide-sm">${T.pts}</th><th class="hide-sm">${T.sp}</th></tr></thead><tbody>${l.map((x,li)=>{const lp=x.r.sp||[],sok=lp.length>1&&Math.abs(lp.reduce((a,b)=>a+b,0)-x.r.t)<=5,gi=[...new Set(l.map(y=>y.e.st))].indexOf(x.e.st),ns=li>0&&l[li-1].e.st!==x.e.st;
+       return `<tr class="gr${gi%2}${ns?" gstart2":""}"><td><b>${rEv(L,x.e)}</b>${x.r.relay?` <span class="en">(${T.lead})</span>`:""}</td><td class="num">${medal(x.r.p)}</td><td class="num t"><b>${fmt(x.r.t)}</b>${x.pb?' <span class="pbtag">PB</span>':""}</td><td class="num t" style="color:var(--muted)">${x.first?"–":fmt(x.prev)}</td>
+       <td class="num">${x.first?`<span class="newtag">${T.first}</span>`:x.pb?`<span class="up">−${(x.drop/100).toFixed(2)}</span>`:x.r.t>x.prev?`<span class="slow">+${((x.r.t-x.prev)/100).toFixed(2)}</span>`:"="}</td><td class="num hide-sm">${pts(s,x.e.k,x.r.t)||""}</td><td class="hide-sm en">${sok?lp.map(fmt).join(" · "):""}</td></tr>`}).join("")}</tbody></table></div>
      <div class="swsum">${swSummary(L,T,s,l,mt).map(t=>`<p>${t}</p>`).join("")}</div></div>`}).join("")}`}
 
 /* ---------- SMT meet entries: 1 Numbers → 2 Names → 3 Events ---------- */
@@ -902,8 +911,8 @@ function evCard(m,S,G,cap){const n=cap?"③":"②",lim=m.lim||{},named=D.sw.filt
     const allOn=list.length&&list.every(o=>mine[o.e.no]);
     h+=`<div class="row"><select id="emSw" aria-label="Swimmer">${named.map(y=>{const k=entCnt(m,S,y.id).tot;return `<option value="${esc(y.id)}"${y.id===x.id?" selected":""}>${esc(y.th)} · ${ageOf(m,y)}${k?` (${k})`:""}</option>`}).join("")}</select>${dayChips(c)}</div>
      <div class="row"><span class="hint">Order</span>${segBtns("emo",[["st","By stroke"],["day","By day"]])}</div>`;
-    h+=list.length?`<div class="tw"><table><thead><tr><th><input type="checkbox" class="chk" data-emall="${esc(x.id)}"${allOn?" checked":""}${open?"":" disabled"} aria-label="Tick all"></th><th>Event <span class="en" style="text-transform:none;letter-spacing:0">← tick to swim all</span></th><th class="num hide-sm">#</th><th class="hide-sm">Day</th><th class="num">Entry time</th></tr></thead><tbody>${list.map(({e,g})=>{const on=!!mine[e.no],full=!on&&isFull(c,e);
-      return `<tr${full?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emev="${esc(x.id)}|${esc(e.no)}"${on?" checked":""}${full||!open?" disabled":""} aria-label="Enter event ${esc(e.no)}"></td><td>${evLbl(e)} <span class="en">· ${agLbl(g)}${e.g==="X"?" · mixed":""}</span>${full?' <span class="en">· limit reached</span>':""}<div class="ph en">#${esc(e.no)} · Day ${e.day} · ${dayDate(m,e.day)}</div></td><td class="num en hide-sm">${esc(e.no)}</td><td class="en hide-sm">Day ${e.day} · ${dayDate(m,e.day)}</td><td class="num">${tIn(x,e,mine[e.no],full)}</td></tr>`}).join("")}</tbody></table></div><p class="hint">Empty box = SMT best (shown in grey). Type a time and the event is ticked for you: 3560 = 35.60 · 23555 = 2:35.55.</p>`:`<p class="hint">No individual event fits this swimmer's age and gender.</p>`}
+    h+=list.length?`<div class="tw"><table><thead><tr><th><input type="checkbox" class="chk" data-emall="${esc(x.id)}"${allOn?" checked":""}${open?"":" disabled"} aria-label="Tick all"></th><th>Event <span class="en" style="text-transform:none;letter-spacing:0">← tick to swim all</span></th><th class="num hide-sm">#</th><th class="hide-sm">Day</th><th class="num">Entry time</th></tr></thead><tbody>${list.map(({e,g},li)=>{const on=!!mine[e.no],full=!on&&isFull(c,e),gk=ui.emo==="day"?e.day:e.st,gi=ui.emo==="day"?days.indexOf(e.day):[1,2,3,4,5].indexOf(e.st),newG=li===0||gk!==(ui.emo==="day"?list[li-1].e.day:list[li-1].e.st);
+      return `${newG?`<tr class="grph gr${gi%2}"><td colspan="5">${ui.emo==="day"?`Day ${e.day} · ${dayDate(m,e.day)}`:`${SN[e.st]} <span style="font-weight:400">${ST[e.st]}</span>`}<span class="grn">${(n=>n?n+" ticked":"")(list.filter(o=>(ui.emo==="day"?o.e.day:o.e.st)===gk&&mine[o.e.no]).length)}</span></td></tr>`:""}<tr class="gr${gi%2}"${full?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emev="${esc(x.id)}|${esc(e.no)}"${on?" checked":""}${full||!open?" disabled":""} aria-label="Enter event ${esc(e.no)}"></td><td>${evLbl(e)} <span class="en">· ${agLbl(g)}${e.g==="X"?" · mixed":""}</span>${full?' <span class="en">· limit reached</span>':""}<div class="ph en">#${esc(e.no)} · Day ${e.day} · ${dayDate(m,e.day)}</div></td><td class="num en hide-sm">${esc(e.no)}</td><td class="en hide-sm">Day ${e.day} · ${dayDate(m,e.day)}</td><td class="num">${tIn(x,e,mine[e.no],full)}</td></tr>`}).join("")}</tbody></table></div><p class="hint">Empty box = SMT best (shown in grey). Type a time and the event is ticked for you: 3560 = 35.60 · 23555 = 2:35.55.</p>`:`<p class="hint">No individual event fits this swimmer's age and gender.</p>`}
   else if(ui.emv==="ev"){const evs=ind.slice().sort(byStroke);if(!ui.emev||!ind.find(e=>e.no===ui.emev))ui.emev=evs[0]&&evs[0].no;const e=ind.find(v=>v.no===ui.emev);
     h+=`<div class="row"><select id="emEv" aria-label="Event">${evs.map(v=>{const k=named.filter(y=>(S.ent[y.id]||{})[v.no]).length;return `<option value="${esc(v.no)}"${v.no===e.no?" selected":""}>${gName(v.g)} ${evName(v)} · #${esc(v.no)} · Day ${v.day}${k?` (${k})`:""}</option>`}).join("")}</select></div>`;
     const rows=named.filter(y=>gOk(e,y)&&agFor(m,y,e)).map(y=>({y,pb:bestT(y,C,e.st,e.d)})).sort((a,b)=>(a.pb||1e9)-(b.pb||1e9));
