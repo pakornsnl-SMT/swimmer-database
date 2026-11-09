@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v1.9 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v2.0 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -136,6 +136,13 @@ body.printing *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 @media print{body.printing .swrep{break-inside:avoid;page-break-inside:avoid}body.printing #swrepHd .row{display:none!important}body.printing .hide-sm{display:table-cell!important}}
 @media print{body.printing .swrep{padding:8px 10px;margin:8px 0}body.printing .swrep td,body.printing .swrep th{padding:3px 6px;font-size:11px}body.printing .swsum{font-size:11px;padding:6px 10px}body.printing .swrep .chip{font-size:11px;padding:1px 8px}}
 @media print{body.printing #swrepHd{break-before:page;page-break-before:always}}
+/* SMT Coach colour scheme: blue (main) and red (accent) */
+:root{--bg:#f4f6fb;--surface:#ffffff;--ink:#14213d;--muted:#5a6886;--line:#d9e0ee;--teal:#1d4fb8;--teal-soft:#e3eafa;--blue:#3b7be0;--blue-soft:#e6efff;--red:#b3182d;--red-soft:#fde6e9;--gold:#dc3545;--gold-soft:#fdecee;--sel:#e3ebff;--selbar:#1d4fb8;--good:#1f8a4c;--bad:#c42a3c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d1322;--surface:#141d31;--ink:#e6ecf8;--muted:#93a3c2;--line:#26345a;--teal:#7aa2f5;--teal-soft:#18284a;--blue:#8fb6ff;--blue-soft:#1a2a4d;--red:#ff6b78;--red-soft:#3d1a20;--gold:#ff8a94;--gold-soft:#3a1c22;--sel:#1a2a4d;--selbar:#7aa2f5}}
+:root[data-theme="dark"]{--bg:#0d1322;--surface:#141d31;--ink:#e6ecf8;--muted:#93a3c2;--line:#26345a;--teal:#7aa2f5;--teal-soft:#18284a;--blue:#8fb6ff;--blue-soft:#1a2a4d;--red:#ff6b78;--red-soft:#3d1a20;--gold:#ff8a94;--gold-soft:#3a1c22;--sel:#1a2a4d;--selbar:#7aa2f5}
+.stripe{background:linear-gradient(90deg,var(--teal) 0 50%,var(--surface) 50% 51%,var(--red) 51%)!important}
+.medal.m1{background:#c99a1a!important}.rk-gold{color:#b8860b!important}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rk-gold{color:#e0b84a!important}}:root[data-theme="dark"] .rk-gold{color:#e0b84a!important}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -143,7 +150,7 @@ body.printing *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v1.9</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v2.0</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
