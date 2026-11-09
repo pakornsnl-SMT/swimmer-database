@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- SMT COACH APP v1.3 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -128,7 +129,7 @@ a.chip{text-decoration:none;color:inherit;display:inline-block}code{font-family:
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v1.3</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -843,6 +844,54 @@ async function coachPage(clubId){
 }
 
 /* ---------- admin page (SMT staff) ---------- */
+/* ---------- meet event files: Hytek (.zip with .ev3/.hyv) and Lenex (.lxf/.lef) ---------- */
+const evText=buf=>{try{return new TextDecoder("utf-8",{fatal:true}).decode(buf)}catch(e){return new TextDecoder("windows-874").decode(buf)}};
+async function unzipAll(buf){const dv=new DataView(buf),out={};let e=-1;
+  for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-66000);i--)if(dv.getUint32(i,true)===0x06054b50){e=i;break}
+  if(e<0)throw new Error("This file is not a zip.");
+  let p=dv.getUint32(e+16,true);const n=dv.getUint16(e+10,true);
+  for(let k=0;k<n;k++){if(dv.getUint32(p,true)!==0x02014b50)break;
+    const method=dv.getUint16(p+10,true),size=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+    const name=new TextDecoder().decode(new Uint8Array(buf,p+46,nl));p+=46+nl+xl+cl;
+    const start=off+30+dv.getUint16(off+26,true)+dv.getUint16(off+28,true),raw=new Uint8Array(buf,start,size);
+    if(method===0)out[name]=raw.slice().buffer;
+    else if(method===8)out[name]=await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()}
+  return out}
+const usDate=s=>{const m=String(s||"").match(/^(\d\d)\/(\d\d)\/(\d{4})$/);return m?`${m[3]}-${m[1]}-${m[2]}`:""};
+const plusDays=(d,n)=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
+function groupEvents(rows){ /* rows: {no,id,day,g,d,st,r,min,max,time} -> one event per number with its age groups */
+  const by=new Map();for(const r of rows){const k=r.no;if(!by.has(k))by.set(k,{no:r.no,day:r.day,g:r.g,d:r.d,st:r.st,r:r.r,time:r.time||"",ags:[]});by.get(k).ags.push({id:r.id,min:r.min,max:r.max})}
+  return[...by.values()].sort((a,b)=>a.day-b.day||(parseInt(a.no)-parseInt(b.no))||String(a.no).localeCompare(String(b.no)))}
+function parseEV3(t){const L=t.replace(/\*>/g,"\n").split(/\r?\n/).map(s=>s.trim()).filter(Boolean),h=L[0].split(";");
+  const STK={A:1,B:2,C:3,D:4,E:5},GEN={G:"F",W:"F",F:"F",B:"M",M:"M",X:"X"};
+  const rows=L.slice(1).map(l=>l.split(";")).filter(f=>/^\d+$/.test(f[0])&&STK[f[9]]).map(f=>({no:f[0],id:f[1],g:GEN[f[5]]||"X",r:f[4]==="R"?4:1,min:+f[6]||0,max:+f[7]>=99?0:+f[7]||0,d:f[4]==="R"?+f[8]/4:+f[8],st:STK[f[9]],day:Math.max(1,+f[23]||1),time:f[24]||""}));
+  const start=usDate(h[2]);return{name:h[0],venue:h[1]||"",city:h[26]||"",start,end:usDate(h[3])||start,ageDate:usDate(h[4]),course:/^S/i.test(h[5])?"SCM":"LCM",deadline:usDate(h[23]),events:groupEvents(rows),src:"Hytek",daysKnown:true}}
+function parseHYV(t){const L=t.split(/\r?\n/).map(s=>s.trim()).filter(Boolean),h=L[0].split(";");const GEN={F:"F",W:"F",G:"F",M:"M",B:"M",X:"X"};
+  const rows=L.slice(1).map(l=>l.split(";")).filter(f=>/^\d+/.test(f[0])&&+f[7]>=1&&+f[7]<=5).map(f=>({no:f[0].match(/^\d+/)[0],id:f[0],g:GEN[f[2]]||"X",r:f[3]==="R"?4:1,min:+f[4]||0,max:+f[5]>=99?0:+f[5]||0,d:f[3]==="R"?+f[6]/4:+f[6],st:+f[7],day:1}));
+  const start=usDate(h[1]);return{name:h[0],venue:h[5]||"",city:"",start,end:usDate(h[2])||start,ageDate:usDate(h[3]),course:/^S/i.test(h[4])?"SCM":"LCM",deadline:"",events:groupEvents(rows),src:"Hytek",daysKnown:false}}
+function parseLEF(t){const doc=new DOMParser().parseFromString(t,"application/xml");if(doc.querySelector("parsererror"))throw new Error("The Lenex file could not be read.");
+  const M=doc.querySelector("MEET");if(!M)throw new Error("No meet found in the Lenex file.");
+  const STK={FREE:1,BACK:2,BREAST:3,FLY:4,MEDLEY:5},ses=[...M.querySelectorAll("SESSION")],dates=[...new Set(ses.map(s=>s.getAttribute("date")).filter(Boolean))].sort();
+  const rows=[];for(const s of ses){const day=Math.max(1,dates.indexOf(s.getAttribute("date"))+1);
+    for(const e of s.querySelectorAll("EVENT")){const pe=e.getAttribute("preveventid");if(pe&&pe!=="-1")continue;const ss=e.querySelector("SWIMSTYLE");if(!ss)continue;const st=STK[ss.getAttribute("stroke")];if(!st)continue;
+      const base={no:e.getAttribute("number")||e.getAttribute("eventid"),g:{M:"M",F:"F",X:"X"}[e.getAttribute("gender")]||"X",r:+ss.getAttribute("relaycount")>1?4:1,d:+ss.getAttribute("distance"),st,day,time:s.getAttribute("daytime")||""};
+      const ags=[...e.querySelectorAll("AGEGROUP")];if(!ags.length)rows.push({...base,id:e.getAttribute("eventid"),min:0,max:0});
+      else ags.forEach(a=>rows.push({...base,id:e.getAttribute("eventid")+"/"+(a.getAttribute("agegroupid")||""),min:Math.max(0,+a.getAttribute("agemin")||0),max:+a.getAttribute("agemax")>=99?0:Math.max(0,+a.getAttribute("agemax")||0)}))}}
+  const start=M.getAttribute("startdate")||dates[0]||"",AD=M.querySelector("AGEDATE");
+  return{name:M.getAttribute("name")||"",venue:"",city:M.getAttribute("city")||"",start,end:M.getAttribute("stopdate")||dates[dates.length-1]||start,ageDate:AD?AD.getAttribute("value")||"":"",course:/^SCM/i.test(M.getAttribute("course")||"")?"SCM":"LCM",deadline:(M.getAttribute("deadline")||"").slice(0,10),
+    maxInd:+M.getAttribute("maxentriesathlete")||0,maxRel:+M.getAttribute("maxentriesrelay")||0,events:groupEvents(rows),src:"Lenex",daysKnown:dates.length>0}}
+async function readEventFile(file){const nm=file.name.toLowerCase(),buf=await file.arrayBuffer();let files={};
+  if(/\.(zip|lxf)$/.test(nm))files=await unzipAll(buf);else files[file.name]=buf;
+  const pick=re=>Object.keys(files).find(k=>re.test(k));let r,k;
+  if(k=pick(/\.ev3$/i))r=parseEV3(evText(files[k]));
+  else if(k=pick(/\.(lef|xml)$/i))r=parseLEF(new TextDecoder().decode(files[k]));
+  else if(k=pick(/\.hyv$/i))r=parseHYV(evText(files[k]));
+  else throw new Error("No meet events found. Use the Hytek \"Meet Events\" .zip (or its .ev3 / .hyv) or a Lenex .lxf / .lef file.");
+  if(!r.events.length)throw new Error("The file has no events I can read.");
+  r.file=file.name;return r}
+const G_TXT={M:"Boys",F:"Girls",X:"Mixed"},ST_TXT=["","Free","Back","Breast","Fly","IM"];
+const agTxt=ags=>ags.map(a=>a.min&&a.max&&a.min===a.max?a.min:!a.min&&!a.max?"Open":!a.max?a.min+"+":!a.min?a.max+"&U":a.min+"-"+a.max).join(", ");
+const evTxt=e=>`${G_TXT[e.g]} ${e.r>1?"4×":""}${e.d} ${e.r>1&&e.st===5?"Medley":ST_TXT[e.st]}${e.r>1?" Relay":""}`;
 async function adminPage(){
   setLoad("Loading admin…");show("#scrAdmin");
   const A={tab:"clubs",edit:null};
@@ -860,14 +909,20 @@ async function adminPage(){
          <div class="row" style="margin:0"><label class="hint">Club name<br><input id="cfName" required value="${escH(e.name||"")}" style="width:260px"></label><label class="hint">Short name<br><input id="cfShort" value="${escH(e.short||"")}" placeholder="J-Fin" style="width:120px"></label><label class="hint">Club code (ID)<br><input id="cfId" required value="${escH(e.id||"")}" ${A.edit?"readonly":""} placeholder="jfin" style="width:110px" pattern="[a-z0-9-]+" title="lowercase letters, numbers and -"></label></div>
          <div class="row" style="margin:0"><label class="hint">Package<br><select id="cfPkg">${[["Package S",5],["Package M",10],["Package L",20],["Package XL",30],["Package XXL",50]].map(([p,l])=>`<option data-l="${l}"${(e.pkg||"Package XL")===p?" selected":""}>${p}</option>`).join("")}</select></label><label class="hint">Swimmer limit<br><input id="cfLimit" type="number" min="1" value="${escH(e.limit||30)}" style="width:80px"></label><label class="hint">Valid to<br><input id="cfExp" type="date" value="${escH(e.expires||(new Date().getFullYear()+"-12-31"))}"></label><label class="hint">Club name in results (for "Fill team")<br><input id="cfRes" value="${escH(e.resultsName||e.name||"")}" style="width:240px"></label></div>
          <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">${A.edit?"Save changes":"Add club"}</button>${A.edit?`<button type="button" class="chip" data-acancel="1" style="cursor:pointer">Cancel</button>`:""}</div></form>`}
-    if(A.tab==="meets"){const e=A.medit?mts.find(m=>m.id===A.medit)||{}:{},today=new Date().toISOString().slice(0,10),PR={A:"A · main target",B:"B · important",C:"C · training meet"};
-      h+=`<p class="hint" style="margin-top:0">Meets listed here appear in every coach's <b>Calendar → Add a meet</b> list. Past meets drop off the coach list by themselves.</p>
-      <div class="tw"><table><thead><tr><th>Meet</th><th>Dates</th><th>Pool</th><th>Entry deadline</th><th>Priority</th><th></th></tr></thead><tbody>${mts.map(m=>`<tr${(m.end||m.start)<today?' style="opacity:.5"':''}><td><b>${escH(m.name)}</b>${m.city?`<div class="en">${escH(m.city)}</div>`:""}</td><td class="en" style="white-space:nowrap">${escH(m.start)}${m.end&&m.end!==m.start?" → "+escH(m.end):""}</td><td>${m.course==="SCM"?"25 m":"50 m"}</td><td class="en">${escH(m.deadline||"–")}</td><td><span class="pill ${m.priority==="A"?"pill-gold":m.priority==="C"?"":"pill-blue"}">${escH(m.priority||"B")}</span></td>
-        <td class="num" style="white-space:nowrap"><button class="chip" data-medit="${escH(m.id)}" style="cursor:pointer">Edit</button> <button class="sick" data-mdel="${escH(m.id)}">Remove</button></td></tr>`).join("")||`<tr><td class="hint" colspan="6">No upcoming meets yet. Add the first one below.</td></tr>`}</tbody></table></div>
+    if(A.tab==="meets"){const e=A.mform||{},today=new Date().toISOString().slice(0,10),evs=e.events||[];
+      const nDays=e.start&&e.end?Math.round((Date.parse(e.end)-Date.parse(e.start))/864e5)+1:1;
+      h+=`<p class="hint" style="margin-top:0">Load the meet's event file. Coaches then see the meet in <b>Calendar → Add a meet</b> and choose their own priority. The events are kept for online entries.</p>
+      <div class="tw"><table><thead><tr><th>Meet</th><th>Dates</th><th>Pool</th><th class="num">Events</th><th>Entry deadline</th><th></th></tr></thead><tbody>${mts.map(m=>`<tr${(m.end||m.start)<today?' style="opacity:.5"':''}><td><b>${escH(m.name)}</b>${m.city?`<div class="en">${escH(m.city)}</div>`:""}</td><td class="en" style="white-space:nowrap">${escH(m.start)}${m.end&&m.end!==m.start?" → "+escH(m.end):""}</td><td>${m.course==="SCM"?"25 m":"50 m"}</td><td class="num">${(m.events||[]).length||'<span class="hint">–</span>'}</td><td class="en">${escH(m.deadline||"–")}</td>
+        <td class="num" style="white-space:nowrap"><button class="chip" data-medit="${escH(m.id)}" style="cursor:pointer">Edit</button> <button class="sick" data-mdel="${escH(m.id)}">Remove</button></td></tr>`).join("")||`<tr><td class="hint" colspan="6">No upcoming meets yet. Load the first event file below.</td></tr>`}</tbody></table></div>
         <form id="meetForm" class="addm" style="margin-top:14px"><b style="font-family:var(--display);font-size:17px">${A.medit?"Edit meet":"Add a meet"}</b>
-         <div class="row" style="margin:0"><label class="hint">Meet name<br><input id="mfName" required value="${escH(e.name||"")}" style="width:320px"></label><label class="hint">City / venue<br><input id="mfCity" value="${escH(e.city||"")}" style="width:180px"></label></div>
-         <div class="row" style="margin:0"><label class="hint">First day<br><input id="mfStart" type="date" required value="${escH(e.start||"")}"></label><label class="hint">Number of days<br><input id="mfDays" type="number" min="1" max="14" value="${e.start&&e.end?Math.round((Date.parse(e.end)-Date.parse(e.start))/864e5)+1:1}" style="width:70px"></label><label class="hint">Last day<br><input id="mfEnd" type="date" value="${escH(e.end||"")}"></label><label class="hint">Pool<br><select id="mfCourse"><option value="LCM">50 m (LCM)</option><option value="SCM"${e.course==="SCM"?" selected":""}>25 m (SCM)</option></select></label><label class="hint">Entry deadline<br><input id="mfDl" type="date" value="${escH(e.deadline||"")}"></label><label class="hint">Priority<br><select id="mfPr">${["A","B","C"].map(p=>`<option value="${p}"${(e.priority||"B")===p?" selected":""}>${PR[p]}</option>`).join("")}</select></label></div>
-         <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">${A.medit?"Save changes":"Add meet"}</button>${A.medit?`<button type="button" class="chip" data-mcancel="1" style="cursor:pointer">Cancel</button>`:""}</div></form>`}
+         <label class="hint">Event file: Hytek "Meet Events" .zip (or .ev3 / .hyv), or Lenex .lxf / .lef<br><input type="file" id="mfFile" accept=".zip,.ev3,.hyv,.lxf,.lef,.xml"></label>
+         ${e.file?`<p class="hint" style="margin:0">Read from <b>${escH(e.file)}</b> (${escH(e.src||"")}). Check the details below, then save.</p>`:""}
+         <div class="row" style="margin:0"><label class="hint">Meet name<br><input id="mfName" required value="${escH(e.name||"")}" style="width:320px"></label><label class="hint">City / venue<br><input id="mfCity" value="${escH(e.city||e.venue||"")}" style="width:200px"></label></div>
+         <div class="row" style="margin:0"><label class="hint">First day<br><input id="mfStart" type="date" required value="${escH(e.start||"")}"></label><label class="hint">Number of days<br><input id="mfDays" type="number" min="1" max="14" value="${nDays}" style="width:70px"></label><label class="hint">Last day<br><input id="mfEnd" type="date" value="${escH(e.end||"")}"></label><label class="hint">Pool<br><select id="mfCourse"><option value="LCM">50 m (LCM)</option><option value="SCM"${e.course==="SCM"?" selected":""}>25 m (SCM)</option></select></label><label class="hint">Entry deadline<br><input id="mfDl" type="date" value="${escH(e.deadline||"")}"></label><label class="hint">Age on<br><input id="mfAge" type="date" value="${escH(e.ageDate||"")}"></label></div>
+         <div class="row" style="margin:0"><label class="hint">Individual events per swimmer<br>whole meet <input id="mfLm" type="number" min="0" value="${escH(e.lim&&e.lim.meet||e.maxInd||"")}" placeholder="no limit" style="width:80px"></label><label class="hint"><br>per day <input id="mfLd" type="number" min="0" value="${escH(e.lim&&e.lim.day||"")}" placeholder="no limit" style="width:80px"></label><label class="hint">Relay teams per club, each relay<br><input id="mfLr" type="number" min="0" value="${escH(e.lim&&e.lim.relay||e.maxRel||"")}" placeholder="no limit" style="width:80px"></label></div>
+         ${evs.length?`<details class="hint"${A.mopen?" open":""}><summary style="cursor:pointer"><b>${evs.length} events</b> · ${(n=>n+" relay"+(n===1?"":"s"))(evs.filter(x=>x.r>1).length)} · ${[...new Set(evs.map(x=>x.day))].length} day${[...new Set(evs.map(x=>x.day))].length>1?"s":""}${e.daysKnown===false?' · <span style="color:var(--gold)">this file has no days, so all events are on Day 1</span>':""} · tap to check</summary>
+           ${[...new Set(evs.map(x=>x.day))].map(d=>`<h4 style="margin:10px 0 4px">Day ${d}${e.start?" · "+plusDays(e.start,d-1):""}</h4><div class="tw"><table><tbody>${evs.filter(x=>x.day===d).map(x=>`<tr><td class="num" style="width:50px">#${escH(x.no)}</td><td>${evTxt(x)}</td><td class="en">${escH(agTxt(x.ags))}</td></tr>`).join("")}</tbody></table></div>`).join("")}</details>`:""}
+         <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">${A.medit?"Save changes":"Add meet"}</button>${A.medit||e.file?`<button type="button" class="chip" data-mcancel="1" style="cursor:pointer">Cancel</button>`:""}</div></form>`}
     if(A.tab==="coaches"){h+=`<div class="tw"><table><thead><tr><th>Email</th><th>Role</th><th>Club</th><th>Login code (UID)</th><th></th></tr></thead><tbody>${users.map(u=>`<tr><td>${escH(u.email||"")}</td><td>${u.role==="admin"?'<span class="pill pill-gold">Admin</span>':'<span class="pill pill-blue">Coach</span>'}</td><td>${escH((clubs.find(c=>c.id===u.clubId)||{}).name||u.clubId||"")}</td><td class="en" style="font-family:var(--mono);font-size:12px">${escH(u.id)}</td><td class="num">${u.id===USER.uid?'<span class="hint">you</span>':`<button class="sick" data-adel="${escH(u.id)}">Remove access</button>`}</td></tr>`).join("")}</tbody></table></div>
         <form id="userForm" class="addm" style="margin-top:14px"><b style="font-family:var(--display);font-size:17px">Link a coach login to a club</b>
          <ol class="hint" style="margin:0;padding-left:18px"><li>In Firebase → Authentication → Users → <b>Add user</b>, create the coach's email and password.</li><li>Copy their <b>User UID</b> and paste it here, choose the club, and save.</li><li>Send the coach the address www.smdata.in.th/coach/, their email and password.</li></ol>
@@ -875,14 +930,14 @@ async function adminPage(){
          <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">Save</button></div></form>`}
     if(A.tab==="transfers"){h+=`<div class="tw"><table><thead><tr><th>Swimmer</th><th>From</th><th>To</th><th>Reason</th><th></th></tr></thead><tbody>${trs.sort((a,b)=>(a.status==="open"?0:1)-(b.status==="open"?0:1)).map(t=>`<tr><td><b>${escH(t.swimmerName||t.swimmerId)}</b></td><td>${escH(t.fromClubName||t.fromClub||"")}</td><td>${escH(t.toClubName||t.toClub)}</td><td class="en">${escH(t.reason||"")}${t.note?" · "+escH(t.note):""}</td>
         <td class="num" style="white-space:nowrap">${t.status==="open"?`<button class="chip teal" data-aok="${escH(t.id)}" style="cursor:pointer">Approve (move swimmer)</button> <button class="chip" data-ano="${escH(t.id)}" style="cursor:pointer">Decline</button>`:`<span class="pill ${t.status==="approved"?"pill-green":"pill-blue"}">${escH(t.status)}</span>`}</td></tr>`).join("")||`<tr><td class="hint" colspan="5">No transfer requests.</td></tr>`}</tbody></table></div>`}
-    el.innerHTML=h;A.clubs=clubs;A.trs=trs}
+    el.innerHTML=h;A.clubs=clubs;A.trs=trs;A.mts=mts}
     catch(err){el.innerHTML=`<div class="lock" style="color:var(--red)">${escH(friendly(err))}</div>`}}
   $("#adminUser").innerHTML=`<span class="hint">${escH(USER.email||"")}</span> <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
   const el=$("#adminView");
   el.onclick=async e=>{const t=e.target.closest("button");if(!t)return;
-    if(t.dataset.at){A.tab=t.dataset.at;A.edit=null;A.medit=null;draw()}
-    else if(t.dataset.medit){A.medit=t.dataset.medit;draw()}else if(t.dataset.mcancel){A.medit=null;draw()}
-    else if(t.dataset.mdel){if(t.dataset.sure){try{await DB.delMeet(t.dataset.mdel);toast("Meet removed.");if(A.medit===t.dataset.mdel)A.medit=null;draw()}catch(err){toast(friendly(err),true)}}else{t.dataset.sure="1";t.textContent="Tap again to remove"}}
+    if(t.dataset.at){A.tab=t.dataset.at;A.edit=null;A.medit=null;A.mform=null;draw()}
+    else if(t.dataset.medit){A.medit=t.dataset.medit;const m=(A.mts||[]).find(x=>x.id===A.medit);A.mform=m?JSON.parse(JSON.stringify(m)):null;draw()}else if(t.dataset.mcancel){A.medit=null;A.mform=null;draw()}
+    else if(t.dataset.mdel){if(t.dataset.sure){try{await DB.delMeet(t.dataset.mdel);toast("Meet removed.");if(A.medit===t.dataset.mdel){A.medit=null;A.mform=null}draw()}catch(err){toast(friendly(err),true)}}else{t.dataset.sure="1";t.textContent="Tap again to remove"}}
     else if(t.dataset.aedit){A.edit=t.dataset.aedit;draw()}else if(t.dataset.acancel){A.edit=null;draw()}
     else if(t.dataset.adel){if(t.dataset.sure){await DB.delUser(t.dataset.adel);toast("Access removed.");draw()}else{t.dataset.sure="1";t.textContent="Tap again to confirm"}}
     else if(t.dataset.aok||t.dataset.ano){const tr=A.trs.find(x=>x.id===(t.dataset.aok||t.dataset.ano));t.disabled=true;try{await DB.decideTransfer(tr,!!t.dataset.aok);toast(t.dataset.aok?"Approved. The swimmer moved to "+(tr.toClubName||tr.toClub)+".":"Declined.");draw()}catch(err){toast(friendly(err),true);t.disabled=false}}
@@ -892,16 +947,18 @@ async function adminPage(){
         if(!ids.length){toast(`No swimmers with the results club name "${c.resultsName||c.name}" since ${y}. Check the name in Edit.`,true);t.disabled=false;t.textContent="Fill team from results";return}
         t.textContent=`Adding ${pick.length}…`;const r=await DB.bulkAdd(pick,{id:c.id,name:c.name});toast(`Added ${r.n} swimmers${r.skip?`, ${r.skip} already in another club`:""}${ids.length>pick.length?`, ${ids.length-pick.length} not added (package limit)`:""}.`);draw()}catch(err){toast(friendly(err),true);t.disabled=false;t.textContent="Fill team from results"}}};
   const addDays=(d,n)=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
-  el.onchange=e=>{const id=e.target.id;if(id==="cfPkg"){const o=e.target.selectedOptions[0];$("#cfLimit").value=o.dataset.l}
+  el.onchange=async e=>{const id=e.target.id;
+    if(id==="mfFile"&&e.target.files[0]){try{const r=await readEventFile(e.target.files[0]);const keep=A.mform||{};A.mform={...r,lim:{meet:r.maxInd||(keep.lim||{}).meet||0,day:(keep.lim||{}).day||0,relay:r.maxRel||(keep.lim||{}).relay||0}};A.mopen=false;toast(`Read ${r.events.length} events from ${r.file}.`);draw()}catch(err){toast(err.message||String(err),true);e.target.value=""}return}if(id==="cfPkg"){const o=e.target.selectedOptions[0];$("#cfLimit").value=o.dataset.l}
     if((id==="mfStart"||id==="mfDays")&&$("#mfStart").value){$("#mfEnd").value=addDays($("#mfStart").value,Math.max(1,+$("#mfDays").value||1)-1)}
     if(id==="mfEnd"&&$("#mfStart").value&&$("#mfEnd").value){$("#mfDays").value=Math.max(1,Math.round((Date.parse($("#mfEnd").value)-Date.parse($("#mfStart").value))/864e5)+1)}};
   el.onsubmit=async e=>{e.preventDefault();const f=e.target;
     if(f.id==="clubForm"){const id=$("#cfId").value.trim().toLowerCase();if(!/^[a-z0-9-]+$/.test(id)){toast("Club code: lowercase letters, numbers and - only.",true);return}
       try{await DB.saveClub(id,{name:$("#cfName").value.trim(),short:$("#cfShort").value.trim()||$("#cfName").value.trim(),pkg:$("#cfPkg").value,limit:+$("#cfLimit").value||0,expires:$("#cfExp").value,resultsName:$("#cfRes").value.trim()});toast("Club saved.");A.edit=null;draw()}catch(err){toast(friendly(err),true)}}
     if(f.id==="meetForm"){const a=$("#mfStart").value,b=$("#mfEnd").value||a;if(b<a){toast("The last day is before the first day.",true);return}
-      const v={name:$("#mfName").value.trim(),city:$("#mfCity").value.trim(),start:a,end:b,course:$("#mfCourse").value,deadline:$("#mfDl").value,priority:$("#mfPr").value};
+      const mf=A.mform||{},v={name:$("#mfName").value.trim(),city:$("#mfCity").value.trim(),start:a,end:b,course:$("#mfCourse").value,deadline:$("#mfDl").value,ageDate:$("#mfAge").value,
+        lim:{meet:+$("#mfLm").value||0,day:+$("#mfLd").value||0,relay:+$("#mfLr").value||0},events:mf.events||[],file:mf.file||"",src:mf.src||""};
       const sl=v.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40),id=A.medit||(a+"-"+(sl||Date.now().toString(36)));
-      try{await DB.saveMeet(id,v);toast(A.medit?"Meet saved.":"Meet added. Coaches will see it in their Calendar.");A.medit=null;draw()}catch(err){toast(friendly(err),true)}}
+      try{await DB.saveMeet(id,v);toast(A.medit?"Meet saved.":"Meet added. Coaches will see it in their Calendar.");A.medit=null;A.mform=null;draw()}catch(err){toast(friendly(err),true)}}
     if(f.id==="userForm"){const uid=$("#ufUid").value.trim();if(uid.length<20){toast("That doesn't look like a full User UID. Copy it from Firebase → Authentication → Users.",true);return}
       const role=$("#ufRole").value,v={role,email:$("#ufEmail").value.trim()};if(role==="coach")v.clubId=$("#ufClub").value;
       try{await DB.setUser(uid,v);toast("Saved. The coach can log in now.");draw()}catch(err){toast(friendly(err),true)}}};
