@@ -149,7 +149,7 @@ a.chip{text-decoration:none;color:inherit;display:inline-block}code{font-family:
   </nav>
   <main id="view" class="panel"></main>
 </div>
-<div id="picbox" hidden role="dialog" aria-label="New PB picture"><div class="picin"><img alt="New personal best picture"><p class="hint" style="color:#cfe">Long-press (phone) or right-click (computer) the picture to save it. In the real app there is a Save button.</p><button type="button" class="chip teal" id="picClose" style="cursor:pointer;font:600 14px var(--display);padding:8px 18px">Close</button></div></div>
+<div id="picbox" hidden role="dialog" aria-label="New PB picture"><div class="picin"><img alt="New personal best picture"><p class="hint" style="color:#cfe">Long-press (phone) or right-click (computer) the picture to save it.</p><button type="button" class="chip teal" id="picClose" style="cursor:pointer;font:600 14px var(--display);padding:8px 18px">Close</button></div></div>
 <div id="toast" class="toast" hidden role="status"></div>
 <script>
 window.startCoachApp=function(D,CTX,CLUB){
@@ -405,8 +405,7 @@ function goalsTop(){
   <div class="tw"><table><thead><tr><th>Swimmer</th><th>Event</th><th class="num">${YEAR} best</th><th class="num">Top ${N} time</th><th class="num">Gap</th><th class="num hide-sm">Thailand rank</th></tr></thead><tbody>
   ${show.length?show.map(x=>`<tr class="click" data-sw="${x.s.i}" data-k="${x.e.k}"><td><span class="nm">${esc(x.s.th)}</span> <span class="en">· ${x.s.age}</span></td><td>${evShort(x.e.k)}</td><td class="num t">${fmt(x.best)}</td><td class="num t">${fmt(x.target)}</td>
    <td class="num">${x.inn?`<span class="pill pill-green">In ✓</span>`:`<span class="pill ${x.gap<=50?"pill-gold":"pill-blue"}">${(x.gap/100).toFixed(2)} s to go</span>`}</td><td class="num hide-sm">${rkPill(x.nt[0],x.nt[1])}</td></tr>`).join(""):`<tr><td colspan="6" class="hint">Nobody in this group yet.</td></tr>`}
-  </tbody></table></div>
-  <p class="hint">In the real app, official standards (for example national age-group championship times) set in Admin appear here as extra targets.</p>`;
+  </tbody></table></div>`;
 }
 
 /* ---------- Reports: club meet report + New PB picture ---------- */
@@ -423,7 +422,7 @@ function reportsView(){
   ui.pbList=pbs;
   return `<h2>Club meet report</h2><p class="hint" style="margin-top:0">A ready-made summary after every meet, to share with parents.</p>
   <div class="row"><select id="rmSel" aria-label="Meet">${jm.map(x=>`<option value="${x.id}"${x.id===ui.rm?" selected":""}>${shortDate(x.s)} · ${esc(x.n)}</option>`).join("")}</select>
-   <button class="chip teal" id="copyLine" style="cursor:pointer;font:600 13px var(--display);padding:6px 14px">Copy text for LINE</button><button class="chip" disabled title="In the real app" style="font:600 13px var(--display);padding:6px 14px;opacity:.6;cursor:not-allowed;background:var(--surface);color:var(--ink)">Download PDF</button><span class="hint" id="copyMsg"></span></div>
+   <button class="chip teal" id="copyLine" style="cursor:pointer;font:600 13px var(--display);padding:6px 14px">Copy text for LINE</button><span class="hint" id="copyMsg"></span></div>
   <div class="kpis"><div class="kpi"><b>${nSw}</b><span>swimmers · ${rows.length} races</span></div><div class="kpi"><b>${pbs.length} <span style="font-size:16px;color:var(--muted)">of ${rows.length} races</span></b><span>personal bests (${pct}%)</span></div><div class="kpi"><b>${med[0]} · ${med[1]} · ${med[2]}</b><span>1st · 2nd · 3rd places</span></div><div class="kpi"><b>${firsts}</b><span>first-time swims</span></div></div>
   <div class="row" style="justify-content:space-between;margin:14px 0 6px"><h3 style="margin:0">Personal bests at this meet</h3><div class="row" style="margin:0"><span class="hint">Sort</span>${segBtns("ro",[["drop","Biggest drop"],["sw","By swimmer"],["ev","By event"]])}</div></div>${pbs.length?`<div class="tw"><table><thead><tr><th>Swimmer</th><th>Event</th><th class="num">Previous best</th><th class="num">New time</th><th class="num">Drop</th><th class="num hide-sm">Place</th><th></th></tr></thead><tbody>
    ${pbs.map((x,i)=>`<tr class="${grp[i]}"><td><span class="nm">${esc(x.s.th)}</span> <span class="en">· ${x.s.age}</span></td><td>${evShort(x.e.k)}</td><td class="num t" style="color:var(--muted)">${fmt(x.prev)}</td><td class="num t"><b>${fmt(x.r.t)}</b></td><td class="num"><span class="up">−${(x.drop/100).toFixed(2)} s</span></td><td class="num hide-sm">${medal(x.r.p)}</td>
@@ -617,7 +616,7 @@ function calendarView(){calInit();
      <div class="row" style="margin:0"><label class="hint">Length <input id="apL" type="number" min="1" max="60" value="${n}" style="width:64px"></label><select id="apU" aria-label="Unit"><option value="w"${u==="w"?" selected":""}>weeks</option><option value="d"${u==="d"?" selected":""}>days</option></select>
      <label class="hint">To <input id="apB" type="date" required value="${addDays(from,(u==="w"?n*7:n)-1)}"></label><button class="chip teal" style="cursor:pointer;padding:6px 14px">Add phase</button></div>
      <div class="hint">Starts the day after the last phase (${last?shortDate(last):"–"}). Change the length or the end date; the other one follows.</div></form>`})()}</div></div>
-  <p class="hint">In the real app, upcoming meets come from SMT's meet list (with entry deadlines), and the coach's plan is saved for the club. Parents could see the meet dates but not the training plan.</p>`;
+  <p class="hint">The meet list comes from SMT, with entry deadlines. Your plan is saved for your club and only your club's coaches see it.</p>`;
 }
 
 /* ---------- Team management: one club per swimmer ---------- */
