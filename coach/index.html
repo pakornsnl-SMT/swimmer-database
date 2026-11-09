@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.2 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.3 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -206,7 +206,7 @@ body.printing .swsum{font-size:12px!important;color:#111}body.printing .en,body.
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.2</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.3</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1418,7 +1418,7 @@ async function adminPage(){
         <td class="num" style="white-space:nowrap"><button class="chip teal" data-mview="${escH(m.id)}" style="cursor:pointer">Entries</button> <button class="chip" data-medit="${escH(m.id)}" style="cursor:pointer">Edit</button> <button class="sick" data-mdel="${escH(m.id)}">Remove</button></td></tr>`).join("")||`<tr><td class="hint" colspan="7">No upcoming meets yet. Load the first event file below.</td></tr>`}</tbody></table></div>
         <form id="meetForm" class="addm" style="margin-top:14px"><b style="font-family:var(--display);font-size:17px">${A.medit?"Edit meet":"Add a meet"}</b>
          <label class="hint">Event file: Hytek "Meet Events" .zip (or .ev3 / .hyv), or Lenex .lxf / .lef<br><input type="file" id="mfFile" accept=".zip,.ev3,.hyv,.lxf,.lef,.xml"></label>
-         ${e.events&&e.events.length&&e.src!=="Lenex"?`<label class="hint" style="border-left:4px solid var(--green);padding-left:8px">Splash event file (.lxf) for team entry files${e.lx?` <b style="color:var(--green)">✓ loaded${e.lxFile?" ("+escH(e.lxFile)+")":""}</b>`:" · not loaded yet"}<br><input type="file" id="mfLx" accept=".lxf,.lef,.xml,.zip"></label>`:""}
+         ${e.events&&e.events.length&&(e.src!=="Lenex"||!e.lx||A.medit)?`<label class="hint" style="border-left:4px solid var(--green);padding-left:8px">Splash event file (.lxf) for team entry files${e.lx?` <b style="color:var(--green)">✓ loaded${e.lxFile?" ("+escH(e.lxFile)+")":""}</b>`:" · not loaded yet"}<br><input type="file" id="mfLx" accept=".lxf,.lef,.xml,.zip"></label>`:""}
          ${e.file?`<p class="hint" style="margin:0">Read from <b>${escH(e.file)}</b> (${escH(e.src||"")}). Check the details below, then save.</p>`:""}
          <div class="row" style="margin:0"><label class="hint">Meet name<br><input id="mfName" required value="${escH(e.name||"")}" style="width:320px"></label><label class="hint">City / venue<br><input id="mfCity" value="${escH(e.city||e.venue||"")}" style="width:200px"></label></div>
          <div class="row" style="margin:0"><label class="hint">First day<br><input id="mfStart" type="date" required value="${escH(e.start||"")}"></label><label class="hint">Number of days<br><input id="mfDays" type="number" min="1" max="14" value="${nDays}" style="width:70px"></label><label class="hint">Last day<br><input id="mfEnd" type="date" value="${escH(e.end||"")}"></label><label class="hint">Pool<br><select id="mfCourse"><option value="LCM">50 m (LCM)</option><option value="SCM"${e.course==="SCM"?" selected":""}>25 m (SCM)</option></select></label><label class="hint">Events deadline<br><input id="mfDl" type="date" value="${escH(e.deadline||"")}"></label><label class="hint">Age calculated by<br><select id="mfAgeMode"><option value="year">Year of birth only</option><option value="date"${(e.ageMode||(e.ageDate&&!/-12-31$/.test(e.ageDate)?"date":"year"))==="date"?" selected":""}>Age on a set date</option></select></label><label class="hint">Set date<br><input id="mfAge" type="date" value="${escH(e.ageDate||"")}"></label></div>
