@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.5 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.6 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -175,6 +175,15 @@ tr.click:hover td.pbc{background:color-mix(in srgb,var(--teal) 18%,transparent)}
 /* round: heat / final / swim-off */
 .rdt{display:inline-block;font:600 10.5px var(--body);letter-spacing:.03em;text-transform:uppercase;padding:1px 6px;border-radius:999px;margin-right:6px;background:var(--bg);color:var(--muted);border:1px solid var(--line);vertical-align:1px;white-space:nowrap}
 .rdt.fin{background:var(--green-soft);color:var(--green);border-color:transparent}
+/* v3.6 tab bar: no vertical scrollbar, a bit taller */
+#tabs{overflow-y:hidden;padding-top:6px;border-bottom:0;box-shadow:inset 0 -3px var(--line);align-items:flex-end}
+#tabs button{margin-bottom:0;padding:12px 16px 11px}
+/* v3.6 club name stands out */
+#scrApp header h1{font-size:38px;line-height:1.05;letter-spacing:.03em;color:var(--teal);padding-bottom:8px;position:relative}
+#scrApp header h1::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--red) 0 33%,var(--surface) 33% 38%,var(--green) 38% 66%,var(--surface) 66% 71%,var(--teal) 71%)}
+#scrApp header .sub{margin-top:6px;font-size:14.5px}
+@media (max-width:760px){#scrApp header h1{font-size:28px}#tabs button{padding:10px 12px 9px}}
+@media print{#scrApp header h1::after{display:none}}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -250,7 +259,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.5</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.6</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
