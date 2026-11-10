@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.6 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.7 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -259,7 +259,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.6</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.7</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -375,18 +375,18 @@ function eventView(){
 
 const pbOf=(s,st,ds)=>{const e=s.evs.find(x=>x.st===st&&x.ds===ds);return e?e.pb.t:null};
 const RLEG={medley:[2,3,4,1],free:[1,1,1,1]};
-function relayPool(){const X=ui.rg==="X",C=ui.ra==="c",lo=C?+ui.raLo||0:0,lim=C?+ui.raHi||99:ui.ra==="open"?99:+ui.ra;return sw.filter(s=>(X||s.g===ui.rg)&&s.age>=lo&&s.age<=lim&&!ui.rout.has(s.i))}
+function relayPool(){const X=ui.rg==="X",C=ui.ra==="c",lo=C?+ui.raLo||0:0,lim=C?+ui.raHi||99:ui.ra==="open"||ui.ra==="t"?99:+ui.ra;return sw.filter(s=>(X||s.g===ui.rg)&&s.age>=lo&&s.age<=lim&&!ui.rout.has(s.i))}
 function relayTeams(){
-  const X=ui.rg==="X",order=RLEG[ui.rt],max=ui.rn==="max"?12:+ui.rn;let pool=relayPool();const teams=[];
+  const X=ui.rg==="X",order=RLEG[ui.rt],max=ui.rn==="max"?12:+ui.rn,TOT=ui.ra==="t",tLo=TOT?+ui.rtMin||0:0,tHi=TOT?+ui.rtMax||0:0;let pool=relayPool();const teams=[];
   for(let n=0;n<max;n++){
     const ids=new Set(pool.map(s=>s.i)),fu=new Set();
     const fixed=order.map((st,l)=>{const i=ui.rfix[n+"-"+l];if(i==null||!ids.has(i)||fu.has(i))return null;const t=pbOf(sw[i],st,50);if(!t)return null;fu.add(i);return{s:sw[i],t,leg:SN[st],fixed:true}});
-    const cand=order.map(st=>{const r=g=>pool.filter(s=>!fu.has(s.i)&&(!g||s.g===g)).map(s=>({s,t:pbOf(s,st,50),leg:SN[st]})).filter(x=>x.t).sort((a,b)=>a.t-b.t);return X?[...r("M").slice(0,6),...r("F").slice(0,6)].sort((a,b)=>a.t-b.t):r().slice(0,ui.rt==="free"?8:6)});
+    const cand=order.map(st=>{const r=g=>pool.filter(s=>!fu.has(s.i)&&(!g||s.g===g)).map(s=>({s,t:pbOf(s,st,50),leg:SN[st]})).filter(x=>x.t).sort((a,b)=>a.t-b.t);return X?[...r("M").slice(0,TOT?10:6),...r("F").slice(0,TOT?10:6)].sort((a,b)=>a.t-b.t):r().slice(0,TOT?14:ui.rt==="free"?8:6)});
     let best=null;
     const go=(l,used,acc,sum)=>{
-      if(l===4){if(!best||sum<best.tot)best={legs:acc.slice(),tot:sum};return}
+      if(l===4){if(TOT){const sa=acc.reduce((a,x)=>a+x.s.age,0);if((tLo&&sa<tLo)||(tHi&&sa>tHi))return}if(!best||sum<best.tot)best={legs:acc.slice(),tot:sum};return}
       if(fixed[l]){acc.push(fixed[l]);go(l+1,used,acc,sum+fixed[l].t);acc.pop();return}
-      for(const c of cand[l]){if(used.has(c.s.i))continue;if(best&&sum+c.t>=best.tot)continue;
+      for(const c of cand[l]){if(used.has(c.s.i))continue;if(best&&sum+c.t>=best.tot)continue;if(TOT&&tHi&&acc.reduce((a,x)=>a+x.s.age,0)+fixed.filter((f,j)=>f&&j>l).reduce((a,f)=>a+f.s.age,0)+c.s.age>tHi)continue;
         if(X&&acc.concat(fixed.filter((f,j)=>f&&j>l)).filter(a=>a.s.g===c.s.g).length>=2)continue;
         used.add(c.s.i);acc.push(c);go(l+1,used,acc,sum+c.t);acc.pop();used.delete(c.s.i)}};
     go(0,new Set(fu),[],0);
@@ -399,7 +399,8 @@ function relayView(){
   const pool=relayPool(),out=[...ui.rout].map(i=>sw[i]);
   let h=`<h2>Relay builder</h2><p class="hint" style="margin-top:0">Picks the fastest team from personal bests, then the next team from who is left. Medley order: back, breast, fly, free. Mixed = 2 boys + 2 girls.</p>
   <div class="row">${segBtns("rt",[["medley","4×50 Medley"],["free","4×50 Free"]])}${segBtns("rg",[["M","Boys"],["F","Girls"],["X","Mixed"]])}
-  <select id="raSel" aria-label="Age limit"><option value="open">Open (any age)</option>${ages.map(a=>`<option value="${a}"${ui.ra==a?" selected":""}>Age ${a} and under</option>`).join("")}<option value="c"${ui.ra==="c"?" selected":""}>Custom ages…</option></select>
+  <select id="raSel" aria-label="Age limit"><option value="open">Open (any age)</option>${ages.map(a=>`<option value="${a}"${ui.ra==a?" selected":""}>Age ${a} and under</option>`).join("")}<option value="c"${ui.ra==="c"?" selected":""}>Custom ages…</option><option value="t"${ui.ra==="t"?" selected":""}>Total age (4 swimmers added up)…</option></select>
+  ${ui.ra==="t"?`<span class="row" style="margin:0;gap:6px"><span class="hint">Total age</span><input id="rtMin" type="number" min="0" max="400" inputmode="numeric" placeholder="from" value="${ui.rtMin||""}" style="width:72px" aria-label="Total age from"><span class="hint">to</span><input id="rtMax" type="number" min="0" max="400" inputmode="numeric" placeholder="up to" value="${ui.rtMax||""}" style="width:72px" aria-label="Total age up to"></span>`:""}
   ${ui.ra==="c"?`<span class="row" style="margin:0;gap:6px"><span class="hint">Ages</span><select id="raLo" aria-label="Youngest age">${ages.map(a=>`<option${+ui.raLo===a?" selected":""}>${a}</option>`).join("")}</select><span class="hint">to</span><select id="raHi" aria-label="Oldest age">${ages.map(a=>`<option${+ui.raHi===a?" selected":""}>${a}</option>`).join("")}</select></span>`:""}</div>
   <div class="row"><span class="hint">Teams</span>${segBtns("rn",[["1","A"],["2","A–B"],["3","A–C"],["4","A–D"],["max","As many as possible"]])}</div>`;
   h+=`<div class="row" style="align-items:flex-start"><span class="hint" style="padding-top:3px">Not swimming today</span>${out.length?out.map(s=>`<button class="chip" data-unsick="${s.i}" style="cursor:pointer;background:var(--surface);color:var(--bad);border-color:var(--bad)" aria-label="Put ${esc(s.en)} back">${esc(s.th)} ↺</button>`).join(""):`<span class="hint" style="padding-top:3px">Nobody. Tap <b>Away</b> next to a swimmer (sick, family trip, anything) to take them out and rebuild the teams.</span>`}
@@ -412,7 +413,7 @@ function relayView(){
       const opts=pool.filter(s=>!earlier.has(s.i)&&!mine.has(s.i)&&(!X||s.g===l.s.g)).map(s=>({s,t:pbOf(s,st,50)})).filter(x=>x.t).sort((a,b)=>a.t-b.t);
       return `<span class="en">${li+1}. ${l.leg}</span><select class="rsel" id="rs${n}_${li}" data-rsel="${n}-${li}" aria-label="Team ${"ABCD"[n]||n+1} leg ${li+1}">${opts.map(o=>`<option value="${o.s.i}"${o.s.i===l.s.i?" selected":""}>${esc(o.s.th)} · ${X?(o.s.g==="M"?"B ":"G "):""}${o.s.age} · ${fmt(o.t)}</option>`).join("")}</select>
        <span class="t">${fmt(l.t)}${l.fixed?' <span class="badge">set</span>':''}</span><button class="sick" data-sick="${l.s.i}" aria-label="${esc(l.s.en)} is away">Away</button>`}).join("")}</div>
-    <p class="hint" style="margin-bottom:0">Sum of ages ${t.legs.reduce((a,l)=>a+l.s.age,0)} · estimate from 50 m PBs</p></div>`}).join("")}</div>`;
+    <p class="hint" style="margin-bottom:0">Sum of ages <b>${t.legs.reduce((a,l)=>a+l.s.age,0)}</b>${ui.ra==="t"&&(ui.rtMin||ui.rtMax)?` (limit ${ui.rtMin&&ui.rtMax?ui.rtMin+"–"+ui.rtMax:ui.rtMax?ui.rtMax+" & under":ui.rtMin+" & over"})`:""} · estimate from 50 m PBs</p></div>`}).join("")}</div>`;
   if(want&&teams.length<want)h+=`<p class="hint">Only ${teams.length} team${teams.length>1?"s":""} possible with the swimmers available.</p>`;
   h+=`<div class="row" style="margin-top:12px"><button class="chip teal" id="goent" style="cursor:pointer;font:600 14px var(--display);padding:8px 16px">Use for meet entries →</button><span class="hint">Planning only here. The real relay entries are made in Meet entries → Relays.</span></div>`;
   h+=`<p class="hint">Change a swimmer with the drop-down; the teams below rebuild around your choice. Choosing someone from a later team moves them up.</p>`;
@@ -890,7 +891,7 @@ view.addEventListener('change',e=>{const t=e.target;
   if(t.dataset.all){const cnt=()=>Object.values(ui.ent).filter(Boolean).length;if(t.checked){const n0=cnt();tickAll(t.dataset.all,true);if(t.dataset.mixed&&cnt()===n0)tickAll(t.dataset.all,false)}else tickAll(t.dataset.all,false);render();return}
   if(t.dataset.et){const v=parseT(t.value),n=document.getElementById("n"+t.id.slice(1));if(v===null){t.classList.add("bad");n.className="tnote bad";n.textContent="Try 3560 or 23555";return}
     t.classList.remove("bad");n.className="tnote";if(v){ui.et[t.dataset.et]=v;t.value=fmt(v);n.textContent=tNote(v,+t.dataset.pb)}else{delete ui.et[t.dataset.et];n.textContent=""}return}
-  if(t.id==="apC"){ui.apC=t.value;const[n,u]=PH_LEN[t.value],A=document.getElementById('apA');document.getElementById('apL').value=n;document.getElementById('apU').value=u;if(A.value)document.getElementById('apB').value=addDays(A.value,(u==="w"?n*7:n)-1);return}else if(t.id==="amS"){ui.amSel=t.value}else if(t.dataset.cmp!=null){const i=+t.dataset.cmp;let s=ui.cmp.sel.filter(x=>x!==i);if(t.checked){s.push(i);if(s.length>2)s=s.slice(-2)}ui.cmp.sel=s}else if(t.id==="agEdges"){const v=[...new Set(t.value.split(/[^0-9]+/).map(Number).filter(n=>n>0&&n<40))].sort((a,b)=>a-b);if(v.length)ui.agEdges=v}else if(t.id==="rmSel")ui.rm=t.value;else if(t.id==="evSel")ui.ev=t.value;else if(t.id==="eaSel")ui.ea=t.value;else if(t.id==="raSel"){ui.ra=t.value;ui.rfix={};if(t.value==="c"){const A=[...new Set(sw.map(s=>s.age))].sort((a,b)=>a-b);if(ui.raLo==null)ui.raLo=A[0];if(ui.raHi==null)ui.raHi=A[A.length-1]}}else if(t.id==="raLo"||t.id==="raHi"){ui[t.id]=+t.value;if(+ui.raLo>+ui.raHi){if(t.id==="raLo")ui.raHi=ui.raLo;else ui.raLo=ui.raHi}ui.rfix={}}else if(t.dataset.rsel){const[n,l]=t.dataset.rsel.split("-").map(Number);for(const k in ui.rfix)if(+k.split("-")[0]>n)delete ui.rfix[k];ui.rfix[t.dataset.rsel]=+t.value;}else if(t.id==="entSw")ui.sel=+t.value;else if(t.dataset.ent)ui.ent[t.dataset.ent]=t.checked;else return;render()});
+  if(t.id==="apC"){ui.apC=t.value;const[n,u]=PH_LEN[t.value],A=document.getElementById('apA');document.getElementById('apL').value=n;document.getElementById('apU').value=u;if(A.value)document.getElementById('apB').value=addDays(A.value,(u==="w"?n*7:n)-1);return}else if(t.id==="amS"){ui.amSel=t.value}else if(t.dataset.cmp!=null){const i=+t.dataset.cmp;let s=ui.cmp.sel.filter(x=>x!==i);if(t.checked){s.push(i);if(s.length>2)s=s.slice(-2)}ui.cmp.sel=s}else if(t.id==="agEdges"){const v=[...new Set(t.value.split(/[^0-9]+/).map(Number).filter(n=>n>0&&n<40))].sort((a,b)=>a-b);if(v.length)ui.agEdges=v}else if(t.id==="rmSel")ui.rm=t.value;else if(t.id==="evSel")ui.ev=t.value;else if(t.id==="eaSel")ui.ea=t.value;else if(t.id==="raSel"){ui.ra=t.value;ui.rfix={};if(t.value==="t"&&!ui.rtMax)ui.rtMax=61;if(t.value==="c"){const A=[...new Set(sw.map(s=>s.age))].sort((a,b)=>a-b);if(ui.raLo==null)ui.raLo=A[0];if(ui.raHi==null)ui.raHi=A[A.length-1]}}else if(t.id==="rtMin"||t.id==="rtMax"){ui[t.id]=Math.max(0,+t.value||0)||"";ui.rfix={}}else if(t.id==="raLo"||t.id==="raHi"){ui[t.id]=+t.value;if(+ui.raLo>+ui.raHi){if(t.id==="raLo")ui.raHi=ui.raLo;else ui.raLo=ui.raHi}ui.rfix={}}else if(t.dataset.rsel){const[n,l]=t.dataset.rsel.split("-").map(Number);for(const k in ui.rfix)if(+k.split("-")[0]>n)delete ui.rfix[k];ui.rfix[t.dataset.rsel]=+t.value;}else if(t.id==="entSw")ui.sel=+t.value;else if(t.dataset.ent)ui.ent[t.dataset.ent]=t.checked;else return;render()});
 document.getElementById('picbox').addEventListener('click',e=>{if(e.target.id==='picClose'||e.target.id==='picbox')e.currentTarget.hidden=true});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('picbox').hidden=true});
 render();
@@ -1031,7 +1032,7 @@ const ageFits=(a,g)=>(!g.min||a>=g.min)&&(!g.max||a<=g.max);
 function agFor(m,x,e){const a=ageOf(m,x),late=!ageSet(m,x);
   return e.ags.find(g=>ageFits(a,g))||(late?e.ags.find(g=>ageFits(a-1,g)):null)}
 const gOk=(e,x)=>e.g==="X"||e.g===x.g;
-const agLbl=g=>!g?"":g.min&&g.max&&g.min===g.max?g.min+" yrs":!g.min&&!g.max?"Open":!g.max?g.min+" & over":!g.min?g.max+" & under":g.min+"–"+g.max;
+const agLbl=g=>!g?"":g.t?"Total age "+(g.min&&g.max?g.min+"–"+g.max:g.max?g.max+" & under":g.min?g.min+" & over":"open"):g.min&&g.max&&g.min===g.max?g.min+" yrs":!g.min&&!g.max?"Open":!g.max?g.min+" & over":!g.min?g.max+" & under":g.min+"–"+g.max;
 const evName=e=>`${e.r>1?"4×":""}${e.d} ${e.r>1&&e.st===5?"Medley":SN[e.st]}${e.r>1?" Relay":""}`;
 const gName=g=>({M:"Boys",F:"Girls",X:"Mixed"})[g];
 function bestT(x,c,st,d){let b=0;for(const r of x.rs||[])if(r[4]===c&&r[2]===st&&r[3]===d&&r[5]>0&&(!b||r[5]<b))b=r[5];return b}
@@ -1075,7 +1076,7 @@ function evCard(m,S,G,cap){const n=cap?"③":"②",lim=m.lim||{},named=D.sw.filt
          ${[0,1,2,3].map(l=>{const y=t.legs[l]?swById(t.legs[l]):null,p=y?bestT(y,C,LS[l],e.d):0;return `<div class="rleg${y?"":" empty"}" data-rleg="${esc(e.no)}|${i}|${l}">${open?`<span class="lh" title="Hold and drag to swap" aria-hidden="true">⠿</span>`:""}<span class="ln">${l+1}</span><span class="ls">${e.st===5?RLEGS[l]:"Leg "+(l+1)}</span>
            <span class="lsel"><span class="lname">${y?nmH(y.th):'<span class="hint">Choose swimmer…</span>'}</span><span class="lcar">▾</span><select data-emrleg="${esc(e.no)}|${i}|${l}"${dis} aria-label="Leg ${l+1}"><option value="">Choose swimmer…</option>${pool.filter(q=>!g||relFits(m,q,g)||q.id===t.legs[l]).map(q=>{const pp=bestT(q,C,LS[l],e.d);return `<option value="${esc(q.id)}"${t.legs[l]===q.id?" selected":""}>${esc(q.th)} · ${q.g==="M"?"B":"G"}${ageOf(m,q)}${pp?" · "+fmt(pp):""}</option>`}).join("")}</select></span>
            <span class="lt">${y?`<span class="en">${y.g==="M"?"B":"G"}${ageOf(m,y)}</span> ${p?fmt(p):"NT"}`:""}</span></div>`}).join("")}
-         ${mix?`<p class="hint" style="margin:4px 0 0;color:var(--red)">Mixed relay: needs 2 boys and 2 girls.</p>`:""}</div>`}).join("")||`<p class="hint" style="margin:4px 0 0">No team yet. Tap “+ Add team” to fill the fastest team from your named swimmers.</p>`}</div>`}).join("")+`<p class="hint">“+ Add team” picks the fastest swimmers left for that age group (best order for medley legs; 2 boys + 2 girls for mixed). To swap, hold ⠿ and drag a swimmer onto another leg (also between Team A and B), or change a leg with the drop-down. Only named swimmers can swim relays; swimming up an age group is allowed. Empty time = sum of SMT bests.</p>`:`<p class="hint">This meet has no relays.</p>`}
+         ${mix?`<p class="hint" style="margin:4px 0 0;color:var(--red)">Mixed relay: needs 2 boys and 2 girls.</p>`:""}${g&&g.t?(()=>{const n=t.legs.filter(Boolean).length,s=relSum(m,t.legs),ok=totOk(m,t.legs,g);return `<p class="hint" style="margin:4px 0 0${n===4&&!ok?";color:var(--red);font-weight:600":""}">Total age <b>${s}</b>${n<4?" so far":""}${n===4?ok?" ✓":" ✗ too "+(g.max&&s>g.max?"old":"young")+", change a swimmer":""} · limit ${agLbl(g).replace("Total age ","")}</p>`})():""}</div>`}).join("")||`<p class="hint" style="margin:4px 0 0">No team yet. Tap “+ Add team” to fill the fastest team from your named swimmers.</p>`}</div>`}).join("")+`<p class="hint">“+ Add team” picks the fastest swimmers left for that age group (best order for medley legs; 2 boys + 2 girls for mixed). To swap, hold ⠿ and drag a swimmer onto another leg (also between Team A and B), or change a leg with the drop-down. Only named swimmers can swim relays; swimming up an age group is allowed. Empty time = sum of SMT bests.</p>`:`<p class="hint">This meet has no relays.</p>`}
   else{const rows=named.map(y=>({y,c:entCnt(m,S,y.id),r:Object.values(S.rel).flat().filter(t=>t.legs.includes(y.id)).length}));const none=rows.filter(o=>!o.c.tot&&!o.r);
     const nT=Object.values(S.rel).reduce((a,l)=>a+l.length,0),bad=Object.values(S.rel).flat().filter(t=>t.legs.filter(Boolean).length<4).length;
     h+=`<div class="kpis"><div class="kpi"><b>${rows.reduce((a,o)=>a+o.c.tot,0)}</b><span>individual entries</span></div><div class="kpi"><b>${nT}</b><span>relay teams</span></div><div class="kpi"><b>${named.length-none.length} <small style="font:400 15px var(--body);color:var(--muted)">of ${named.length}</small></b><span>named swimmers entered</span></div></div>
@@ -1121,11 +1122,14 @@ document.getElementById("view").addEventListener("click",e=>{const sm=e.target.c
 
 const dayDate=(m,d)=>{const x=new Date(m.start+"T00:00:00");x.setDate(x.getDate()+d-1);return x.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})};
 const legStrokes=e=>e.st===5?[2,3,4,1]:[e.st,e.st,e.st,e.st];
-function relFits(m,y,g){const a=ageOf(m,y);return !g.max||a<=g.max||(!ageSet(m,y)&&a-1<=g.max)}
+/* total-age relays: the 4 ages added up must be inside the group's range */
+const relSum=(m,ids)=>ids.filter(Boolean).reduce((a,id)=>a+ageOf(m,swById(id)),0);
+const totOk=(m,ids,g)=>{if(!g||!g.t||ids.filter(Boolean).length<4)return true;const s=relSum(m,ids);return(!g.min||s>=g.min)&&(!g.max||s<=g.max)};
+function relFits(m,y,g){if(g&&g.t)return true;const a=ageOf(m,y);return !g.max||a<=g.max||(!ageSet(m,y)&&a-1<=g.max)}
 function bestTeam(m,e,g,used){const C=m.course==="SCM"?2:1,LS=legStrokes(e),pool=D.sw.filter(y=>MS[m.id].names.has(y.id)&&!used.has(y.id)&&gOk(e,y)&&relFits(m,y,g));
-  const cand=LS.map(st=>pool.map(y=>({y,t:bestT(y,C,st,e.d)})).filter(o=>o.t).sort((a,b)=>a.t-b.t).slice(0,8));let best=null;
-  const go=(l,pick,sum)=>{if(best&&sum>=best.sum)return;if(l===4){if(e.g==="X"&&pick.filter(o=>o.y.g==="M").length!==2)return;best={legs:pick.map(o=>o.y.id),sum};return}
-    for(const o of cand[l]){if(pick.some(p=>p.y===o.y))continue;if(e.g==="X"){const b=pick.filter(p=>p.y.g==="M").length+(o.y.g==="M"?1:0),gg=pick.length+1-b;if(b>2||gg>2)continue}go(l+1,pick.concat(o),sum+o.t)}};
+  const TOT=g&&g.t,cand=LS.map(st=>pool.map(y=>({y,t:bestT(y,C,st,e.d),a:ageOf(m,y)})).filter(o=>o.t).sort((a,b)=>a.t-b.t).slice(0,TOT?16:8));let best=null;
+  const go=(l,pick,sum)=>{if(best&&sum>=best.sum)return;if(l===4){if(e.g==="X"&&pick.filter(o=>o.y.g==="M").length!==2)return;if(TOT){const s=pick.reduce((a,o)=>a+o.a,0);if((g.min&&s<g.min)||(g.max&&s>g.max))return}best={legs:pick.map(o=>o.y.id),sum};return}
+    for(const o of cand[l]){if(pick.some(p=>p.y===o.y))continue;if(TOT&&g.max&&pick.reduce((a,p)=>a+p.a,0)+o.a>g.max)continue;if(e.g==="X"){const b=pick.filter(p=>p.y.g==="M").length+(o.y.g==="M"?1:0),gg=pick.length+1-b;if(b>2||gg>2)continue}go(l+1,pick.concat(o),sum+o.t)}};
   go(0,[],0);return best?best.legs:null}
 
 function refill(m,S,ev){const used=new Set();for(const tm of S.rel[ev.no]||[]){const g=ev.ags.find(q=>q.id===tm.ag)||{min:0,max:0},legs=bestTeam(m,ev,g,used);if(legs)tm.legs=legs;tm.legs.filter(Boolean).forEach(id=>used.add(id))}}
@@ -1146,6 +1150,7 @@ window.addEventListener("beforeunload",e=>{if(Object.values(MS).some(S=>S&&(S.sa
     const ev=m.events.find(v=>v.no===no),gA=ev.ags.find(q=>q.id===A.ag),gB=ev.ags.find(q=>q.id===B.ag),xA=B.legs[+l2],xB=A.legs[+l1];
     const bad=[[xA,gA],[xB,gB]].find(([id,g])=>id&&g&&!relFits(m,swById(id),g));
     if(bad){CTX.toast(`${swById(bad[0]).th} is too old for ${agLbl(bad[1])}.`,true);return}
+    if(A!==B){const nA=A.legs.slice(),nB=B.legs.slice();nA[+l1]=xA||"";nB[+l2]=xB||"";const tb=[[nA,gA],[nB,gB]].find(([L,g])=>!totOk(m,L,g));if(tb){CTX.toast(`That swap makes a total age of ${relSum(m,tb[0])}, outside ${agLbl(tb[1])}.`,true);return}}
     if(A!==B&&[xA&&A.legs.some((q,k)=>q===xA&&k!==+l1),xB&&B.legs.some((q,k)=>q===xB&&k!==+l2)].some(Boolean)){CTX.toast("That swimmer is already in this team.",true);return}
     A.legs[+l1]=xA||"";B.legs[+l2]=xB||"";saveEnt(m,S);render()};
   window.addEventListener("pointerup",end);window.addEventListener("pointercancel",()=>{if(drag){drag.gh.remove();drag.row.classList.remove("rsrc");if(drag.over)drag.over.classList.remove("rover");drag=null}});})();
@@ -1307,7 +1312,7 @@ function teamLxf(m,T){const L=m.lx;if(!L||!L.sessions)return{err:"SMT hasn't loa
     const en=Object.entries((T.ent||{})[n.id]||{}).map(([no,v])=>{const e=evById(no);return e&&eid(e)?`<ENTRY eventid="${X(eid(e))}" entrytime="${lxT(v&&v[0])}"${v&&v[0]?` entrycourse="${X(L.course)}"`:""}/>`:""}).join("");
     return`<ATHLETE athleteid="${aid}" firstname="${X(f)}" lastname="${X(l)}" firstname.en="${X(fe)}" lastname.en="${X(le)}" gender="${n.g}" birthdate="${X(dob)}"${P.cid?` license="${X(P.cid)}"`:""} nation="THA" domicile="${X((f+" "+l).trim())}"><ENTRIES>${en}</ENTRIES></ATHLETE>`}).join("");
   let rn=0;const rel=Object.entries(T.rel||{}).flatMap(([no,Ls])=>{const e=evById(no);if(!e||!eid(e))return[];return Ls.map(t=>{rn++;const g=(e.ags||[]).find(q=>q.id===t.ag)||{};
-    return`<RELAY number="${rn}" gender="${e.g}" agemin="${g.min||-1}" agemax="${g.max||-1}" agetotalmin="-1" agetotalmax="-1"><ENTRIES><ENTRY eventid="${X(eid(e))}" entrytime="${lxT(t.t)}"${t.t?` entrycourse="${X(L.course)}"`:""}>${t.legs.some(Boolean)?`<RELAYPOSITIONS>${t.legs.map((id,k)=>id&&aidOf[id]?`<RELAYPOSITION athleteid="${aidOf[id]}" number="${k+1}"/>`:"").join("")}</RELAYPOSITIONS>`:""}</ENTRY></ENTRIES></RELAY>`})}).join("");
+    return`<RELAY number="${rn}" gender="${e.g}" agemin="${g.t?-1:g.min||-1}" agemax="${g.t?-1:g.max||-1}" agetotalmin="${g.t?g.min||-1:-1}" agetotalmax="${g.t?g.max||-1:-1}"><ENTRIES><ENTRY eventid="${X(eid(e))}" entrytime="${lxT(t.t)}"${t.t?` entrycourse="${X(L.course)}"`:""}>${t.legs.some(Boolean)?`<RELAYPOSITIONS>${t.legs.map((id,k)=>id&&aidOf[id]?`<RELAYPOSITION athleteid="${aidOf[id]}" number="${k+1}"/>`:"").join("")}</RELAYPOSITIONS>`:""}</ENTRY></ENTRIES></RELAY>`})}).join("");
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<LENEX version="3.0" created="${new Date().toISOString().slice(0,19)}"><CONSTRUCTOR name="Swim Meets Thailand" version="1"><CONTACT name="Swim Meets Thailand" internet="https://www.smdata.in.th"/></CONSTRUCTOR><MEETS><MEET name="${X(L.name)}" city="${X(L.city)}" nation="${X(L.nation)}" course="${X(L.course)}">${L.ageDate?`<AGEDATE value="${X(L.ageDate)}" type="${X(L.ageType)}"/>`:""}${L.sessions}<CLUBS><CLUB name="${X(T.clubName)}" nation="THA"><ATHLETES>${ath}</ATHLETES>${rel?`<RELAYS>${rel}</RELAYS>`:""}</CLUB></CLUBS></MEET></MEETS></LENEX>`;
   const fn=(T.clubShort+"_"+(m.name||"meet")).replace(/[^\w฀-๿-]+/g,"_").slice(0,80);return{blob:zipOne(fn+".lef",xml),name:fn+".lxf",athletes:ppl.length,warn}}
 /* one team's Hytek Meet Manager entry file (.hy3 in a .zip), layout matched to Team Manager's export:
@@ -1403,14 +1408,14 @@ async function unzipAll(buf){const dv=new DataView(buf),out={};let e=-1;
 const usDate=s=>{const m=String(s||"").match(/^(\d\d)\/(\d\d)\/(\d{4})$/);return m?`${m[3]}-${m[1]}-${m[2]}`:""};
 const plusDays=(d,n)=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
 function groupEvents(rows){ /* rows: {no,id,day,g,d,st,r,min,max,time} -> one event per number with its age groups */
-  const by=new Map();for(const r of rows){const k=r.no;if(!by.has(k))by.set(k,{no:r.no,day:r.day,g:r.g,d:r.d,st:r.st,r:r.r,time:r.time||"",ags:[]});by.get(k).ags.push({id:r.id,min:r.min,max:r.max})}
+  const by=new Map();for(const r of rows){const k=r.no;if(!by.has(k))by.set(k,{no:r.no,day:r.day,g:r.g,d:r.d,st:r.st,r:r.r,time:r.time||"",ags:[]});by.get(k).ags.push(r.t?{id:r.id,min:r.min,max:r.max,t:1}:{id:r.id,min:r.min,max:r.max})}
   return[...by.values()].sort((a,b)=>a.day-b.day||(parseInt(a.no)-parseInt(b.no))||String(a.no).localeCompare(String(b.no)))}
 function parseEV3(t){const L=t.replace(/\*>/g,"\n").split(/\r?\n/).map(s=>s.trim()).filter(Boolean),h=L[0].split(";");
   const STK={A:1,B:2,C:3,D:4,E:5},GEN={G:"F",W:"F",F:"F",B:"M",M:"M",X:"X"};
-  const rows=L.slice(1).map(l=>l.split(";")).filter(f=>/^\d+$/.test(f[0])&&STK[f[9]]).map(f=>({no:f[0],id:f[1],g:GEN[f[5]]||"X",r:f[4]==="R"?4:1,min:+f[6]||0,max:+f[7]>=99?0:+f[7]||0,d:f[4]==="R"?+f[8]/4:+f[8],st:STK[f[9]],day:Math.max(1,+f[23]||1),time:f[24]||""}));
+  const rows=L.slice(1).map(l=>l.split(";")).filter(f=>/^\d+$/.test(f[0])&&STK[f[9]]).map(f=>({no:f[0],id:f[1],g:GEN[f[5]]||"X",r:f[4]==="R"?4:1,min:+f[6]||0,max:+f[7]===99||+f[7]>=109?0:+f[7]||0,t:f[4]==="R"&&(+f[6]>=36||(+f[7]>=36&&+f[7]!==99&&+f[7]<109))?1:0,d:f[4]==="R"?+f[8]/4:+f[8],st:STK[f[9]],day:Math.max(1,+f[23]||1),time:f[24]||""}));
   const start=usDate(h[2]);return{name:h[0],venue:h[1]||"",city:h[26]||"",start,end:usDate(h[3])||start,ageDate:usDate(h[4]),course:/^S/i.test(h[5])?"SCM":"LCM",deadline:usDate(h[23]),events:groupEvents(rows),src:"Hytek",daysKnown:true}}
 function parseHYV(t){const L=t.split(/\r?\n/).map(s=>s.trim()).filter(Boolean),h=L[0].split(";");const GEN={F:"F",W:"F",G:"F",M:"M",B:"M",X:"X"};
-  const rows=L.slice(1).map(l=>l.split(";")).filter(f=>/^\d+/.test(f[0])&&+f[7]>=1&&+f[7]<=5).map(f=>({no:f[0].match(/^\d+/)[0],id:f[0],g:GEN[f[2]]||"X",r:f[3]==="R"?4:1,min:+f[4]||0,max:+f[5]>=99?0:+f[5]||0,d:f[3]==="R"?+f[6]/4:+f[6],st:+f[7],day:1}));
+  const rows=L.slice(1).map(l=>l.split(";")).filter(f=>/^\d+/.test(f[0])&&+f[7]>=1&&+f[7]<=5).map(f=>({no:f[0].match(/^\d+/)[0],id:f[0],g:GEN[f[2]]||"X",r:f[3]==="R"?4:1,min:+f[4]||0,max:+f[5]===99||+f[5]>=109?0:+f[5]||0,t:f[3]==="R"&&(+f[4]>=36||(+f[5]>=36&&+f[5]!==99&&+f[5]<109))?1:0,d:f[3]==="R"?+f[6]/4:+f[6],st:+f[7],day:1}));
   const start=usDate(h[1]);return{name:h[0],venue:h[5]||"",city:"",start,end:usDate(h[2])||start,ageDate:usDate(h[3]),course:/^S/i.test(h[4])?"SCM":"LCM",deadline:"",events:groupEvents(rows),src:"Hytek",daysKnown:false}}
 function parseLEF(t){const doc=new DOMParser().parseFromString(t,"application/xml");if(doc.querySelector("parsererror"))throw new Error("The Lenex file could not be read.");
   const M=doc.querySelector("MEET");if(!M)throw new Error("No meet found in the Lenex file.");
@@ -1419,7 +1424,7 @@ function parseLEF(t){const doc=new DOMParser().parseFromString(t,"application/xm
     for(const e of s.querySelectorAll("EVENT")){const pe=e.getAttribute("preveventid");if(pe&&pe!=="-1")continue;const ss=e.querySelector("SWIMSTYLE");if(!ss)continue;const st=STK[ss.getAttribute("stroke")];if(!st)continue;
       const base={no:e.getAttribute("number")||e.getAttribute("eventid"),g:{M:"M",F:"F",X:"X"}[e.getAttribute("gender")]||"X",r:+ss.getAttribute("relaycount")>1?4:1,d:+ss.getAttribute("distance"),st,day,time:s.getAttribute("daytime")||""};
       const ags=[...e.querySelectorAll("AGEGROUP")];if(!ags.length)rows.push({...base,id:e.getAttribute("eventid"),min:0,max:0});
-      else ags.forEach(a=>rows.push({...base,id:e.getAttribute("eventid")+"/"+(a.getAttribute("agegroupid")||""),min:Math.max(0,+a.getAttribute("agemin")||0),max:+a.getAttribute("agemax")>=99?0:Math.max(0,+a.getAttribute("agemax")||0)}))}}
+      else ags.forEach(a=>rows.push({...base,id:e.getAttribute("eventid")+"/"+(a.getAttribute("agegroupid")||""),min:Math.max(0,+a.getAttribute("agemin")||0),max:/^TOTAL$/i.test(a.getAttribute("calculate")||"")?Math.max(0,+a.getAttribute("agemax")||0):+a.getAttribute("agemax")>=99?0:Math.max(0,+a.getAttribute("agemax")||0),t:/^TOTAL$/i.test(a.getAttribute("calculate")||"")?1:0}))}}
   const start=M.getAttribute("startdate")||dates[0]||"",AD=M.querySelector("AGEDATE");
   return{name:M.getAttribute("name")||"",venue:"",city:M.getAttribute("city")||"",start,end:M.getAttribute("stopdate")||dates[dates.length-1]||start,ageDate:AD?AD.getAttribute("value")||"":"",ageMode:AD&&/^DATE$/i.test(AD.getAttribute("type")||"")?"date":"year",course:/^SCM/i.test(M.getAttribute("course")||"")?"SCM":"LCM",deadline:(M.getAttribute("deadline")||"").slice(0,10),
     maxInd:+M.getAttribute("maxentriesathlete")||0,maxRel:+M.getAttribute("maxentriesrelay")||0,events:groupEvents(rows),src:"Lenex",daysKnown:dates.length>0,lx:{name:M.getAttribute("name")||"",city:M.getAttribute("city")||"",nation:M.getAttribute("nation")||"THA",course:M.getAttribute("course")||"LCM",ageType:AD?AD.getAttribute("type")||"YEAR":"YEAR",ageDate:AD?AD.getAttribute("value")||"":"",sessions:new XMLSerializer().serializeToString(M.querySelector("SESSIONS"))}}}
@@ -1433,11 +1438,14 @@ async function readEventFile(file){const nm=file.name.toLowerCase(),buf=await fi
   if(!r.events.length)throw new Error("The file has no events I can read.");
   r.file=file.name;return r}
 const G_TXT={M:"Boys",F:"Girls",X:"Mixed"},ST_TXT=["","Free","Back","Breast","Fly","IM"];
-const agTxt=ags=>ags.map(a=>a.min&&a.max&&a.min===a.max?a.min:!a.min&&!a.max?"Open":!a.max?a.min+"+":!a.min?a.max+"&U":a.min+"-"+a.max).join(", ");
+const agTxt=ags=>ags.map(a=>(a.t?"total ":"")+(a.min&&a.max&&a.min===a.max?a.min:!a.min&&!a.max?"Open":!a.max?a.min+"+":!a.min?a.max+"&U":a.min+"-"+a.max)).join(", ");
 const evTxt=e=>`${G_TXT[e.g]} ${e.r>1?"4×":""}${e.d} ${e.r>1&&e.st===5?"Medley":ST_TXT[e.st]}${e.r>1?" Relay":""}`;
 async function adminPage(){
   setLoad("Loading admin…");show("#scrAdmin");
   const A={tab:"clubs",edit:null};
+  /* keep what was typed in the meet form when the form redraws */
+  const mfKeep=()=>{const mf=A.mform;if(!mf||!$("#mfName"))return;const g=id=>{const x=$("#"+id);return x?x.value:undefined};
+    Object.assign(mf,{name:g("mfName"),city:g("mfCity"),start:g("mfStart"),end:g("mfEnd"),course:g("mfCourse"),deadline:g("mfDl"),ageDate:g("mfAge"),ageMode:g("mfAgeMode"),cap:+g("mfCap")||0,alloc:g("mfAlloc"),numDl:g("mfNumDl"),namesDl:g("mfNamesDl"),lim:{meet:+g("mfLm")||0,day:+g("mfLd")||0,relay:+g("mfLr")||0}})};
   const qs=extra=>"?"+[MOCK?"mock=1":"",QS.get("data")?"data="+encodeURIComponent(QS.get("data")):"",extra].filter(Boolean).join("&");
   async function draw(){const el=$("#adminView");el.innerHTML=`<p class="hint">Loading…</p>`;
     try{
@@ -1482,7 +1490,7 @@ async function adminPage(){
          <div class="row" style="margin:0"><label class="hint">Swimmer limit (whole meet)<br><input id="mfCap" type="number" min="0" value="${escH(e.cap||"")}" placeholder="no limit" style="width:100px"></label><label class="hint">Places given by<br><select id="mfAlloc"><option value="approve">SMT approves each club</option><option value="auto"${e.alloc==="auto"?" selected":""}>Automatic, first come first served</option></select></label><label class="hint">Numbers deadline<br><input id="mfNumDl" type="date" value="${escH(e.numDl||"")}"></label><label class="hint">Names deadline<br><input id="mfNamesDl" type="date" value="${escH(e.namesDl||"")}"></label></div>
          <div class="row" style="margin:0"><label class="hint">Individual events per swimmer<br>whole meet <input id="mfLm" type="number" min="0" value="${escH(e.lim&&e.lim.meet||e.maxInd||"")}" placeholder="no limit" style="width:80px"></label><label class="hint"><br>per day <input id="mfLd" type="number" min="0" value="${escH(e.lim&&e.lim.day||"")}" placeholder="no limit" style="width:80px"></label><label class="hint">Relay teams per club, each relay<br><input id="mfLr" type="number" min="0" value="${escH(e.lim&&e.lim.relay||e.maxRel||"")}" placeholder="no limit" style="width:80px"></label></div>
          ${evs.length?`<details class="hint"${A.mopen?" open":""}><summary style="cursor:pointer"><b>${evs.length} events</b> · ${(n=>n+" relay"+(n===1?"":"s"))(evs.filter(x=>x.r>1).length)} · ${[...new Set(evs.map(x=>x.day))].length} day${[...new Set(evs.map(x=>x.day))].length>1?"s":""}${e.daysKnown===false?' · <span style="color:var(--gold)">this file has no days, so all events are on Day 1</span>':""} · tap to check</summary>
-           ${[...new Set(evs.map(x=>x.day))].map(d=>`<h4 style="margin:10px 0 4px">Day ${d}${e.start?" · "+plusDays(e.start,d-1):""}</h4><div class="tw"><table><tbody>${evs.filter(x=>x.day===d).map(x=>`<tr><td class="num" style="width:50px">#${escH(x.no)}</td><td>${evTxt(x)}</td><td class="en">${escH(agTxt(x.ags))}</td></tr>`).join("")}</tbody></table></div>`).join("")}</details>`:""}
+           ${[...new Set(evs.map(x=>x.day))].map(d=>`<h4 style="margin:10px 0 4px">Day ${d}${e.start?" · "+plusDays(e.start,d-1):""}</h4><div class="tw"><table><tbody>${evs.filter(x=>x.day===d).map(x=>`<tr><td class="num" style="width:50px">#${escH(x.no)}</td><td>${evTxt(x)}</td><td class="en">${x.r>1?x.ags.map((a,i)=>`<button type="button" class="chip" data-agtot="${escH(x.no)}|${i}" title="Tap to switch" style="cursor:pointer;margin:1px 4px 1px 0${a.t?";border-color:var(--green);color:var(--green)":""}">${escH(agTxt([{...a,t:0}]))} · ${a.t?"total of 4 ages":"each swimmer"}</button>`).join(""):escH(agTxt(x.ags))}</td></tr>`).join("")}</tbody></table></div>`).join("")}</details>`:""}
          <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">${A.medit?"Save changes":"Add meet"}</button>${A.medit||e.file?`<button type="button" class="chip" data-mcancel="1" style="cursor:pointer">Cancel</button>`:""}</div></form>`}
     if(A.tab==="corr"){const FL={nameTh:"Thai name",nameEn:"English name",dob:"Birth date",gender:"Boy / girl",cid:"Citizen ID"};const op=cors.filter(x=>x.status==="open").sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)),ac=cors.filter(x=>x.status==="accepted"&&!x.exported),done=cors.filter(x=>x.status!=="open"&&!(x.status==="accepted"&&!x.exported)).sort((a,b)=>(b.decidedAt||0)-(a.decidedAt||0)).slice(0,30);
       const row=x=>`<tr><td><b>${escH(x.swimmerName||x.swimmerId)}</b><div class="en">${escH(x.clubName||x.clubId)}</div></td><td>${FL[x.field]||escH(x.field)}</td><td class="en">${escH(x.old||"–")}</td><td><b>${escH(x.value)}</b>${x.note?`<div class="en">${escH(x.note)}</div>`:""}</td>`;
@@ -1525,7 +1533,7 @@ async function adminPage(){
         await DB.recount(m.id);draw()}catch(err){toast(friendly(err),true);t.disabled=false}}
     else if(t.dataset.mexport){const m=A.mts.find(x=>x.id===A.mview),cl=(A.mcl||[]).filter(x=>!x.paper);const clubs=new Map((A.clubs||[]).map(c=>[c.id,c]));
       const ST=["","Freestyle","Backstroke","Breaststroke","Butterfly","IM"],sp=t=>{t=String(t||"").trim();const k=t.indexOf(" ");return k<0?[t,""]:[t.slice(0,k),t.slice(k+1)]},ft=cs=>{if(!cs)return"";const mi=Math.floor(cs/6000),se=((cs%6000)/100).toFixed(2);return mi?mi+":"+se.padStart(5,"0"):se};
-      const H=["SMTID","CITIZENID","BIRTHDATE","FIRSTNAME","LASTNAME","FIRSTNAMEEN","LASTNAMEEN","GENDER","BIRTHYEAR","AGE","CLUBNAME","NUMBER","STROKE","DISTANCE","ENTRYTIME","RELAYTEAM","RELAYGENDER","AGEMIN","AGEMAX","LEG1","LEG2","LEG3","LEG4"],rows=[];
+      const H=["SMTID","CITIZENID","BIRTHDATE","FIRSTNAME","LASTNAME","FIRSTNAMEEN","LASTNAMEEN","GENDER","BIRTHYEAR","AGE","CLUBNAME","NUMBER","STROKE","DISTANCE","ENTRYTIME","RELAYTEAM","RELAYGENDER","AGEMIN","AGEMAX","LEG1","LEG2","LEG3","LEG4","AGETOTAL"],rows=[];
       for(const c of cl){const club=clubs.get(c.id)||{},cname=club.resultsName||club.name||c.clubName,nm=new Map((c.names||[]).map(n=>[n.id,n])),PP=((await DB.getData(c.id,"people").catch(()=>null))||{}).m||{};
         for(const [sid,o] of Object.entries(c.ent||{})){const n=nm.get(sid);if(!n)continue;const[f,l]=sp(n.th),[fe,le]=sp(n.en);
           for(const [no,v] of Object.entries(o)){const e=(m.events||[]).find(x=>x.no===no);if(!e)continue;const pp=PP[sid]||{};rows.push([sid,pp.cid||"",pp.dob||"",pp.isNew?pp.thF||f:f,pp.isNew?pp.thL||l:l,pp.isNew?pp.enF||fe:fe,pp.isNew?pp.enL||le:le,n.g,n.by||"",n.age||"",cname,no,ST[e.st],e.d,ft(v&&v[0]),"","","","","","","",""])}}
@@ -1533,7 +1541,8 @@ async function adminPage(){
         for(const sid of legIds){if(Object.keys((c.ent||{})[sid]||{}).length)continue;const n=nm.get(sid);if(!n)continue;const[f,l]=sp(n.th),[fe,le]=sp(n.en),pp=PP[sid]||{};
           rows.push([sid,pp.cid||"",pp.dob||"",pp.isNew?pp.thF||f:f,pp.isNew?pp.thL||l:l,pp.isNew?pp.enF||fe:fe,pp.isNew?pp.enL||le:le,n.g,n.by||"",n.age||"",cname,"","","","","","","","","","","",""])}
         for(const [no,L] of Object.entries(c.rel||{})){const e=(m.events||[]).find(x=>x.no===no);if(!e)continue;L.forEach((tm,i)=>{const g=(e.ags||[]).find(q=>q.id===tm.ag)||{};
-          rows.push(["","","","","","","","","","",cname,no,e.st===5?"IM":ST[e.st],e.d,ft(tm.t),"ABCDEFGH"[i],e.g,g.min||"",g.max||"",...[0,1,2,3].map(k=>tm.legs[k]||"")])})}}
+          rows.push(["","","","","","","","","","",cname,no,e.st===5?"IM":ST[e.st],e.d,ft(tm.t),"ABCDEFGH"[i],e.g,g.min||"",g.max||"",...[0,1,2,3].map(k=>tm.legs[k]||""),g.t?1:""])})}}
+      rows.forEach(r=>{while(r.length<H.length)r.push("")});
       if(!rows.length){toast("No entries yet.",true);return}
       const q=v=>{v=String(v??"");return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v},csv="\ufeff"+[H,...rows].map(r=>r.map(q).join(",")).join("\r\n");
       const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download=("Entries_"+m.name).replace(/[^\w\u0E00-\u0E7F-]+/g,"_").slice(0,80)+".csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
@@ -1546,6 +1555,7 @@ async function adminPage(){
       const u=URL.createObjectURL(r.blob),a=document.createElement("a");a.href=u;a.download=r.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},2000);toast(`Downloaded ${r.name}.${r.warn.length?` No birth date for ${r.warn.length} swimmer(s).`:""}`,!!r.warn.length)}
     else if(t.dataset.mpdel){if(t.dataset.sure){await DB.delMeetClub(A.mview,t.dataset.mpdel);await DB.recount(A.mview);toast("Removed.");draw()}else{t.dataset.sure="1";t.textContent="Tap again"}}
     else if(t.dataset.medit){A.medit=t.dataset.medit;const m=(A.mts||[]).find(x=>x.id===A.medit);A.mform=m?JSON.parse(JSON.stringify(m)):null;draw()}else if(t.dataset.mcancel){A.medit=null;A.mform=null;draw()}
+    else if(t.dataset.agtot){mfKeep();const[no,i]=t.dataset.agtot.split("|"),ev=(A.mform.events||[]).find(v=>String(v.no)===no),g=ev&&ev.ags[+i];if(g){if(g.t)delete g.t;else g.t=1;A.mopen=true;draw()}}
     else if(t.dataset.mdel){if(t.dataset.sure){try{await DB.delMeet(t.dataset.mdel);toast("Meet removed.");if(A.medit===t.dataset.mdel){A.medit=null;A.mform=null}draw()}catch(err){toast(friendly(err),true)}}else{t.dataset.sure="1";t.textContent="Tap again to remove"}}
     else if(t.dataset.aedit){A.edit=t.dataset.aedit;draw()}else if(t.dataset.acancel){A.edit=null;draw()}
     else if(t.dataset.adel){if(t.dataset.sure){await DB.delUser(t.dataset.adel);toast("Access removed.");draw()}else{t.dataset.sure="1";t.textContent="Tap again to confirm"}}
@@ -1562,10 +1572,10 @@ async function adminPage(){
           for(const r of L){const v=J.m[r.id];if(!v||(!v.dob&&!v.cid))continue;const o=m[r.id]||{};if(o.src==="coach"&&o.dob&&!v.dob)continue;m[r.id]={...o,dob:v.dob||o.dob||"",cid:v.cid||o.cid||"",src:"smt",at:J.made||""};ch++}
           if(ch){await DB.setData(c.id,"people",{m});n+=ch;k++}}
         toast(`Saved birth dates and IDs for ${n} swimmers in ${k} club${k===1?"":"s"}. You can delete the file now.`)}catch(err){toast(err.message||friendly(err),true)}return}
-    if(id==="mfLx"&&e.target.files[0]){const f=e.target.files[0];e.target.value="";try{const r=await readEventFile(f);if(r.src!=="Lenex"||!r.lx)throw new Error("Choose the Splash (Lenex) event file.");
+    if(id==="mfLx"&&e.target.files[0]){mfKeep();const f=e.target.files[0];e.target.value="";try{const r=await readEventFile(f);if(r.src!=="Lenex"||!r.lx)throw new Error("Choose the Splash (Lenex) event file.");
         const mf=A.mform,used=new Set();let ok=0;const L=r.events;
         for(const ev of mf.events){const same=x=>x.g===ev.g&&x.st===ev.st&&x.d===ev.d&&x.r===ev.r;let c=L.find(x=>!used.has(x)&&String(x.no)===String(ev.no)&&same(x))||L.find(x=>!used.has(x)&&same(x)&&x.day===ev.day)||L.find(x=>!used.has(x)&&same(x));
-          if(c){used.add(c);ev.lxid=String((c.ags[0]||{}).id||c.no).split("/")[0];ok++}else delete ev.lxid}
+          if(c){used.add(c);ev.lxid=String((c.ags[0]||{}).id||c.no).split("/")[0];ok++;if(ev.r>1&&c.ags.length===ev.ags.length)c.ags.forEach((q,k)=>{if(q.t){ev.ags[k].t=1;if(q.max)ev.ags[k].max=q.max}})}else delete ev.lxid}
         mf.lx=r.lx;mf.lxFile=f.name;toast(`Splash event file matched ${ok} of ${mf.events.length} events.${ok<mf.events.length?" Check the meet; unmatched events can't go in team files.":""} Tap Save changes.`,ok<mf.events.length);draw()}catch(err){toast(err.message||String(err),true)}return}
     if(id==="mfFile"&&e.target.files[0]){try{const r=await readEventFile(e.target.files[0]);const keep=A.mform||{};A.mform={...r,lim:{meet:r.maxInd||(keep.lim||{}).meet||0,day:(keep.lim||{}).day||0,relay:r.maxRel||(keep.lim||{}).relay||0}};A.mopen=false;toast(`Read ${r.events.length} events from ${r.file}.`);draw()}catch(err){toast(err.message||String(err),true);e.target.value=""}return}if(id==="cfPkg"){const o=e.target.selectedOptions[0];$("#cfLimit").value=o.dataset.l}
     if((id==="mfStart"||id==="mfDays")&&$("#mfStart").value){$("#mfEnd").value=addDays($("#mfStart").value,Math.max(1,+$("#mfDays").value||1)-1)}
