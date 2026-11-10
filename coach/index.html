@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.9 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.10 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -141,6 +141,39 @@ body.printing *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 body.printing td.hide-sm,body.printing th.hide-sm{display:table-cell!important}body.printing span.hide-sm{display:inline!important}body.printing div.hide-sm{display:block!important}
 body.printing td .nm,body.printing td .nm+.en{white-space:nowrap;max-width:none!important;display:inline}}
 @media print{body.printing #view td{padding-top:4px!important;padding-bottom:4px!important}body.printing #view .row .hint{display:none}}
+/* v3.10 Summary of times */
+.sthead{display:flex;justify-content:space-between;gap:12px;margin:6px 0 4px;font:600 15px var(--display);letter-spacing:.02em}
+.stblk{margin:14px 0 18px;break-inside:avoid}
+.sthd{font-size:16px;padding:6px 0 4px;border-bottom:3px solid var(--teal)}
+.sthd b{font:700 19px var(--display);color:var(--teal);letter-spacing:.02em}
+table.sttab{border-collapse:collapse;width:100%;font-size:12.5px}
+table.sttab th,table.sttab td{border:1px solid var(--line);padding:3px 6px!important;white-space:nowrap}
+table.sttab th{font:600 11.5px var(--display);text-transform:none;letter-spacing:.02em;background:var(--bg)}
+table.sttab td.stm{white-space:normal;min-width:180px}
+table.sttab td.num{font-family:var(--mono);text-align:right}
+.stpb{font-weight:700;color:var(--teal);background:var(--teal-soft)}
+@media print{body.printing.land .sthead{font-size:13px}body.printing.land .sthd b{font-size:15px}
+body.printing.land table.sttab{font-size:9.5px}body.printing.land table.sttab th{font-size:9px}
+body.printing.land table.sttab th,body.printing.land table.sttab td{padding:1.5px 4px!important}
+body.printing.land table.sttab td.stm{min-width:0;max-width:52mm}
+body.printing.land .tw{overflow:visible!important}body.printing.land #view h2{display:none}
+body.printing.land .stblk{margin:6px 0 10px}}
+table.sttab td.stm,table.sttab th.stm{white-space:nowrap!important;min-width:0}
+table.sttab td,table.sttab th{line-height:1.3}
+@media print{body.printing.land table.sttab td.stm{max-width:none}body.printing.land #view table.sttab td{padding-top:1.5px!important;padding-bottom:1.5px!important}}
+table.sttab th.stc{text-align:center;line-height:1.1}
+@media print{body.printing.land table.sttab{font-size:8.6px;width:100%;table-layout:auto}body.printing.land table.sttab th{font-size:8.4px;letter-spacing:0}
+body.printing.land table.sttab td.num{padding:1.5px 3px!important;letter-spacing:-.01em}body.printing.land .stblk{break-inside:avoid}
+body.printing.land main,body.printing.land #view,body.printing.land .panel{max-width:none!important;width:auto!important;min-width:0!important}}
+table.sttab{table-layout:auto}@media print{table.sttab td.stm{overflow:hidden;text-overflow:ellipsis}}
+@media print{body.printing.land table.sttab{font-size:9.4px;table-layout:fixed}body.printing.land table.sttab th{font-size:9px}}
+@media (max-width:760px){table.sttab{table-layout:auto}}
+@media print{body.printing.land table.sttab{font-size:8.8px}body.printing.land table.sttab td.num{padding:1.5px 2px!important;letter-spacing:-.02em;overflow:hidden}}
+table.sttab td.num.t{font:500 12.5px var(--mono)}table.sttab td.num.t.stpb{font-weight:700}
+@media print{body.printing.land table.sttab td.num.t{font:500 8.6px var(--mono)!important;letter-spacing:-.02em}body.printing.land table.sttab td.num.t.stpb{font-weight:700!important}body.printing.land table.sttab td{font-size:8.8px}}
+@media print{body.printing.land table.sttab td.num.t{font-size:9.6px!important;letter-spacing:-.03em}body.printing.land table.sttab td,body.printing.land table.sttab td.en{font-size:9.2px!important}}
+@media screen{table.sttab col{width:auto!important}table.sttab td.stm{white-space:normal!important;min-width:150px}table.sttab td.num.t{font-size:12px;padding:3px 4px!important}}
+@media screen{table.sttab th,table.sttab td{padding:3px 4px!important}table.sttab th{font-size:11.5px}table.sttab td.en{font-size:12px}table.sttab td.stm{min-width:130px;font-size:12.5px}}
 /* SMT Coach colour scheme: blue (main) and red (accent) */
 :root{--bg:#f4f6fb;--surface:#ffffff;--ink:#14213d;--muted:#5a6886;--line:#d9e0ee;--teal:#1d4fb8;--teal-soft:#e3eafa;--blue:#3b7be0;--blue-soft:#e6efff;--red:#b3182d;--red-soft:#fde6e9;--gold:#dc3545;--gold-soft:#fdecee;--sel:#e3ebff;--selbar:#1d4fb8;--good:#1f8a4c;--bad:#c42a3c}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d1322;--surface:#141d31;--ink:#e6ecf8;--muted:#93a3c2;--line:#26345a;--teal:#7aa2f5;--teal-soft:#18284a;--blue:#8fb6ff;--blue-soft:#1a2a4d;--red:#ff6b78;--red-soft:#3d1a20;--gold:#ff8a94;--gold-soft:#3a1c22;--sel:#1a2a4d;--selbar:#7aa2f5}}
@@ -262,7 +295,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.9</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.10</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -548,7 +581,7 @@ function goalsTop(){
 }
 
 /* ---------- Reports: club meet report + New PB picture ---------- */
-function reportsView(){
+function meetReportView(){
   const jm=[...new Set(ALL.map(x=>x.r.m))].map(id=>({id,n:meetName(id),s:(D.meets[id]||{}).s||""})).sort((a,b)=>b.s.localeCompare(a.s));
   if(!jm.length)return `<h2>Club meet report</h2><div class="lock">No ${POOL()} meets for ${CLUB.short} yet. Switch pool at the top.</div>`;
   if(!ui.rm||!jm.find(m=>m.id===ui.rm))ui.rm=jm[0].id;
@@ -963,6 +996,50 @@ function swReport(rows,mt){const L=ui.rl||"en",T=RT[L],by=new Map();rows.forEach
        return `<tr class="gr${gi%3}${ns?" gstart2":""}"><td><b>${rEv(L,x.e)}</b>${x.r.relay?` <span class="en">(${T.lead})</span>`:""}</td><td class="num">${rdTag(x.r,L)}${medal(x.r.p)}</td><td class="num t"><b>${fmt(x.r.t)}</b>${x.pb?' <span class="pbtag">PB</span>':""}</td><td class="num t" style="color:var(--muted)">${x.first?"–":fmt(x.prev)}</td>
        <td class="num">${x.first?`<span class="newtag">${T.first}</span>`:x.pb?`<span class="up">−${(x.drop/100).toFixed(2)}</span>`:x.r.t>x.prev?`<span class="slow">+${((x.r.t-x.prev)/100).toFixed(2)}</span>`:"="}</td><td class="num hide-sm">${pts(s,x.e.k,x.r.t)||""}</td><td class="hide-sm en">${sok?lp.map(fmt).join(" · "):""}</td></tr>`}).join("")}</tbody></table></div>
      <div class="swsum">${swRepSummary(L,T,s,l,mt).map(t=>`<p>${t}</p>`).join("")}</div></div>`}).join("")}`}
+
+/* ---------- Reports: Summary of times (like Splash Team Manager) ----------
+   One block per swimmer: a row per meet (name, date, pool), a column per event, the best time that swimmer swam
+   at that meet. Each swimmer's best time per event and pool is highlighted. Lead-off times count. */
+const ST_EV=[[1,50],[1,100],[1,200],[1,400],[1,800],[1,1500],[4,50],[4,100],[4,200],[2,50],[2,100],[2,200],[3,50],[3,100],[3,200],[5,100],[5,200],[5,400]];
+const ST_AB={1:"Fr",2:"Bk",3:"Br",4:"Bu",5:"IM"};
+function stDefaults(){if(ui.stFrom)return;const y=new Date().getFullYear();ui.stFrom=(y-1)+"-01-01";ui.stTo=new Date().toISOString().slice(0,10);ui.stPool=ui.stPool||"both";ui.stWho=ui.stWho||"all";ui.stSort=ui.stSort||"name"}
+function stData(){stDefaults();const from=ui.stFrom||"0000",to=ui.stTo||"9999";
+  let list=D.sw.filter(s=>s.rs&&s.rs.length);
+  if(ui.stWho==="M"||ui.stWho==="F")list=list.filter(s=>s.g===ui.stWho);else if(ui.stWho!=="all")list=list.filter(s=>s===D.sw[+ui.stWho]);
+  const out=[];
+  for(const s of list){const rows=new Map(),best={};
+    for(const r of s.rs){const c=r[4];if(ui.stPool==="50"&&c!==1||ui.stPool==="25"&&c!==2)continue;
+      const m=D.meets[r[0]]||{},day=r[1]||m.s||"";if(!(r[5]>0)||day<from||day>to)continue;
+      const key=r[0]+"|"+c;const row=rows.get(key)||rows.set(key,{m:r[0],name:m.n||"",date:m.s||day,c,t:{}}).get(key);
+      const k=r[2]+"-"+r[3];if(row.t[k]==null||r[5]<row.t[k])row.t[k]=r[5];const bk=c+"|"+k;if(best[bk]==null||r[5]<best[bk])best[bk]=r[5]}
+    if(rows.size)out.push({s,rows:[...rows.values()].sort((a,b)=>a.date.localeCompare(b.date)),best})}
+  out.sort(ui.stSort==="age"?(a,b)=>(b.s.by||0)-(a.s.by||0)||String(a.s.th).localeCompare(String(b.s.th),"th"):(a,b)=>String(a.s.th).localeCompare(String(b.s.th),"th"));
+  return out}
+function summaryTimesView(){stDefaults();const data=stData(),used=new Set();data.forEach(d=>d.rows.forEach(r=>Object.keys(r.t).forEach(k=>used.add(k))));
+  const cols=ST_EV.filter(([a,b])=>used.has(a+"-"+b));const yr=new Date().getFullYear();
+  const fd=v=>{const[y,m,d]=String(v||"").split("-");return d?`${d}/${m}/${y}`:v||""};
+  const opts=[["all","All swimmers"],["M","Boys"],["F","Girls"]].map(([v,l])=>`<option value="${v}"${ui.stWho===v?" selected":""}>${l}</option>`).join("")+
+    D.sw.map((s,i)=>[s,i]).filter(([s])=>s.rs&&s.rs.length).sort((a,b)=>String(a[0].th).localeCompare(String(b[0].th),"th")).map(([s,i])=>`<option value="${i}"${ui.stWho===String(i)?" selected":""}>${esc(s.th)}</option>`).join("");
+  const head=`<tr><th class="stm">Meet</th><th>Date</th><th>Pool</th>${cols.map(([a,b])=>`<th class="num stc">${b}<br>${ST_AB[a]}</th>`).join("")}</tr>`;
+  const cw=cols.length?Math.min(7,70/cols.length):0,mw=Math.max(16,100-cw*cols.length-10.4),cg=`<colgroup><col style="width:${mw.toFixed(2)}%"><col style="width:7%"><col style="width:3.4%">${cols.map(()=>`<col style="width:${cw.toFixed(3)}%">`).join("")}</colgroup>`;
+  const blocks=data.map(d=>`<div class="stblk"><div class="sthd"><b>${esc(d.s.th)}</b> <span class="en">${esc(d.s.en||"")}</span> <span class="hint">· ${d.s.g==="F"?"Girl":"Boy"}${d.s.by?" · born "+d.s.by+" · age "+(yr-d.s.by):""}</span></div>
+    <div class="tw"><table class="sttab">${cg}<thead>${head}</thead><tbody>${d.rows.map(r=>`<tr><td class="stm" title="${esc(r.name)}">${esc(r.name)}</td><td class="en">${fd(r.date)}</td><td class="en">${r.c===2?"25m":"50m"}</td>${cols.map(([a,b])=>{const k=a+"-"+b,t=r.t[k];return t==null?"<td></td>":`<td class="num t${d.best[r.c+"|"+k]===t?" stpb":""}">${fmt(t)}</td>`}).join("")}</tr>`).join("")}</tbody></table></div></div>`).join("");
+  return `<div class="row noprint" style="gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <label class="hint">From<br><input type="date" id="stFrom" value="${esc(ui.stFrom)}"></label>
+      <label class="hint">To<br><input type="date" id="stTo" value="${esc(ui.stTo)}"></label>
+      <label class="hint">Pool<br><select id="stPool"><option value="both"${ui.stPool==="both"?" selected":""}>50 m and 25 m</option><option value="50"${ui.stPool==="50"?" selected":""}>50 m only</option><option value="25"${ui.stPool==="25"?" selected":""}>25 m only</option></select></label>
+      <label class="hint">Swimmers<br><select id="stWho">${opts}</select></label>
+      <label class="hint">Order<br><select id="stSort"><option value="name"${ui.stSort==="name"?" selected":""}>By name</option><option value="age"${ui.stSort==="age"?" selected":""}>Youngest first</option></select></label>
+      <button class="chip" id="stPdf" type="button" style="margin-left:auto;cursor:pointer;font:600 13px var(--display);padding:6px 14px">Download PDF</button></div>
+    <div class="sthead"><div><b>${esc(CLUB.name)}</b><br>Summary of times</div><div style="text-align:right">${fd(ui.stFrom)} – ${fd(ui.stTo)}<br><span class="hint">${data.length} swimmer${data.length===1?"":"s"} · <span class="stpb" style="padding:0 5px">best time</span> = personal best in that pool</span></div></div>
+    ${data.length?blocks:`<div class="lock">No swims in this period. Change the dates above.</div>`}`}
+document.getElementById("view").addEventListener("change",e=>{const id=e.target.id;if(!/^st(From|To|Pool|Who|Sort)$/.test(id))return;ui[id]=e.target.value;render()});
+document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="stPdf")return;const old=document.title;
+  document.title=(CLUB.short+" - Summary of times").replace(/[\\/:*?"<>|]+/g," ");document.body.classList.add("printing","land");
+  const pg=document.createElement("style");pg.id="stPage";pg.textContent="@page{size:A4 landscape;margin:9mm}";document.head.appendChild(pg);
+  const done=()=>{document.body.classList.remove("printing","land");document.title=old;pg.remove();window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
+function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint" style="margin-bottom:12px">${segBtns("rpk",[["meet","Club meet report"],["st","Summary of times"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():meetReportView())}
 
 /* ---------- SMT meet entries: 1 Numbers → 2 Names → 3 Events ---------- */
 const todayL=()=>new Date().toLocaleDateString("en-CA");
