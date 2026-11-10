@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.7 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.8 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -184,6 +184,9 @@ tr.click:hover td.pbc{background:color-mix(in srgb,var(--teal) 18%,transparent)}
 #scrApp header .sub{margin-top:6px;font-size:14.5px}
 @media (max-width:760px){#scrApp header h1{font-size:28px}#tabs button{padding:10px 12px 9px}}
 @media print{#scrApp header h1::after{display:none}}
+/* v3.8 calendar: thicker phase bar on each day */
+.cd{box-shadow:inset 0 8px 0 var(--ph,transparent)!important;padding-top:11px!important}
+.cd .cph{color:var(--ph,var(--muted));font-weight:600}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -259,7 +262,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.7</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.8</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -712,9 +715,9 @@ function swimsBlock(s,e){
 
 /* ---------- Calendar & season plan ---------- */
 const SMT_LIST=CTX.meets; /* SMT's Upcoming meets list, set up by staff */
-const PH_LEN={base:[6,"w"],build:[4,"w"],taper:[2,"w"],race:[5,"d"],rest:[2,"w"]};
+const PH_LEN={base:[6,"w"],build:[4,"w"],specific:[4,"w"],taper:[2,"w"],race:[5,"d"],rest:[2,"w"]};
 const addDays=(d,n)=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
-const PH_COL={base:"var(--teal)",build:"var(--blue)",taper:"var(--gold)",race:"var(--red)",rest:"var(--silver)"};
+const PH_COL={base:"#e0559a",specific:"var(--green)",build:"var(--blue)",taper:"var(--gold)",race:"var(--red)",rest:"var(--silver)"};
 function calInit(){if(ui.phases)return;
   const sv=CTX.saved.calendar||{};ui.phases=Array.isArray(sv.phases)?sv.phases:[];
   const real=Object.entries(D.meets).filter(([id,m])=>m.s>=String(YEAR-1)).map(([id,m])=>({n:m.n,a:m.s,b:m.e||m.s,pr:/age group championship/i.test(m.n)&&!/region|SCM/i.test(m.n)?"A":/region|SCM/i.test(m.n)?"B":"C",real:true}));
@@ -741,7 +744,7 @@ function calendarView(){calInit();
   <div class="kpis"><div class="kpi"><b>${next?dn+" days":"–"}</b><span>${next?"to "+esc(next.n):"no meet planned"}</span></div><div class="kpi"><b>${ph?esc(ph.n):"–"}</b><span>training phase today</span></div><div class="kpi"><b>${up.filter(m=>m.pr==="A").length}</b><span>A meets ahead</span></div><div class="kpi"><b>${ui.cmeets.filter(m=>m.real&&m.a.startsWith(String(y))).length}</b><span>meets raced in ${y}</span></div></div>
   <div class="row" style="justify-content:space-between"><h3 style="margin:0">Season ${y}</h3><div class="row" style="margin:0"><button class="chip" data-cy="-1" style="cursor:pointer">‹ ${y-1}</button><button class="chip" data-cy="1" style="cursor:pointer">${y+1} ›</button></div></div>
   ${strip}
-  <div class="row legend">${Object.entries({Base:"base",Build:"build",Taper:"taper",Championship:"race",Rest:"rest"}).map(([n,c])=>`<span><i style="background:${PH_COL[c]}"></i>${n}</span>`).join("")}<span><b class="ymeet prA" style="position:static">A</b> main meet</span><span><b class="ymeet prB" style="position:static">B</b> important</span><span><b class="ymeet prC" style="position:static">C</b> practice meet</span></div>
+  <div class="row legend">${Object.entries({Base:"base",Build:"build",Specific:"specific",Taper:"taper",Championship:"race",Rest:"rest"}).map(([n,c])=>`<span><i style="background:${PH_COL[c]}"></i>${n}</span>`).join("")}<span><b class="ymeet prA" style="position:static">A</b> main meet</span><span><b class="ymeet prB" style="position:static">B</b> important</span><span><b class="ymeet prC" style="position:static">C</b> practice meet</span></div>
   <div class="row" style="justify-content:space-between;margin-top:16px"><h3 style="margin:0">${mName}</h3><div class="row" style="margin:0"><button class="chip" data-cmv="-1" style="cursor:pointer">‹ Prev</button><button class="chip" data-cmv="0" style="cursor:pointer">Today</button><button class="chip" data-cmv="1" style="cursor:pointer">Next ›</button></div></div>
   <div class="tw">${grid}</div>
   <div class="grid2" style="margin-top:18px"><div style="min-width:0"><h3 style="margin-top:0">Meets</h3><div class="tw"><table><tbody>${ui.cmeets.slice().sort((a,b)=>a.a.localeCompare(b.a)).filter(m=>m.a.startsWith(String(y))).map(m=>`<tr${m.b<today?' style="opacity:.6"':""}><td style="white-space:nowrap" class="en">${shortDate(m.a)}${m.b!==m.a?"–"+shortDate(m.b):""}</td><td><b class="ymeet pr${m.pr}" style="position:static">${m.pr}</b> ${esc(m.n)}${m.ex?' <span class="badge">example</span>':""}</td><td class="num" style="white-space:nowrap">${m.b<today?'<span class="hint">raced</span>':(k=>ui.mAsk===k?`<span class="hint">Remove?</span> <button class="sick" data-mdel="${k}">Yes</button> <button class="sick" data-mno="1" style="color:var(--muted)">No</button>`:`<button class="sick" data-mask="${k}" style="color:var(--muted)">Remove</button>`)(ui.cmeets.indexOf(m))}</td></tr>`).join("")}</tbody></table></div>
@@ -751,7 +754,7 @@ function calendarView(){calInit();
      <div class="row" style="margin:0"><span class="hint">Priority</span><select id="amP" aria-label="Priority">${["A","B","C"].map(p=>`<option value="${p}"${(pick?pick.pr:"C")===p?" selected":""}>${p} ${{A:"main",B:"important",C:"practice"}[p]}</option>`).join("")}</select><button class="chip teal" style="cursor:pointer;padding:6px 14px">Add to calendar</button></div></form>`})()}</div>
    <div style="min-width:0"><h3 style="margin-top:0">Training phases</h3><div class="tw"><table><tbody>${ui.phases.map((p,i)=>({p,i})).filter(({p})=>p.b>=`${y}-01-01`&&p.a<=`${y}-12-31`).map(({p,i})=>`<tr><td><span class="phdot" style="background:${PH_COL[p.c]}"></span>${esc(p.n)}</td><td class="en" style="white-space:nowrap">${shortDate(p.a)} – ${shortDate(p.b)}</td><td class="en">${(n=>n<7?n+" days":Math.round(n/7)+" wk")(Math.round((new Date(p.b)-new Date(p.a))/864e5)+1)}</td><td><button class="sick" data-delph="${i}" style="color:var(--muted)">Remove</button></td></tr>`).join("")}</tbody></table></div>
      ${(()=>{const last=ui.phases.map(p=>p.b).sort().pop(),from=last?addDays(last,1):iso(new Date()),c=ui.apC||"base",[n,u]=PH_LEN[c];
-    return `<form class="addm" id="addPh"><label class="hint" for="apC">Add a phase</label><div class="row" style="margin:0"><select id="apC" aria-label="Phase">${[["base","Base"],["build","Build"],["taper","Taper"],["race","Championship"],["rest","Rest"]].map(([v,l])=>`<option value="${v}"${v===c?" selected":""}>${l}</option>`).join("")}</select>
+    return `<form class="addm" id="addPh"><label class="hint" for="apC">Add a phase</label><div class="row" style="margin:0"><select id="apC" aria-label="Phase">${[["base","Base"],["build","Build"],["specific","Specific"],["taper","Taper"],["race","Championship"],["rest","Rest"]].map(([v,l])=>`<option value="${v}"${v===c?" selected":""}>${l}</option>`).join("")}</select>
      <label class="hint">From <input id="apA" type="date" required value="${from}"></label></div>
      <div class="row" style="margin:0"><label class="hint">Length <input id="apL" type="number" min="1" max="60" value="${n}" style="width:64px"></label><select id="apU" aria-label="Unit"><option value="w"${u==="w"?" selected":""}>weeks</option><option value="d"${u==="d"?" selected":""}>days</option></select>
      <label class="hint">To <input id="apB" type="date" required value="${addDays(from,(u==="w"?n*7:n)-1)}"></label><button class="chip teal" style="cursor:pointer;padding:6px 14px">Add phase</button></div>
@@ -883,7 +886,7 @@ view.addEventListener('submit',e=>{e.preventDefault();const f=e.target;
     if(s==='custom'){const a=f.querySelector('#amA').value,b=f.querySelector('#amB').value||a;m={n:f.querySelector('#amN').value.trim(),a,b:b<a?a:b,pr}}else{const p=SMT_LIST[+s];m={n:p.n,a:p.a,b:p.b,pr,ex:p.ex}}
     ui.cmeets.push(m);ui.amSel=null;const d=new Date(m.a);ui.cy=d.getFullYear();ui.cm=d.getMonth();render()}
   if(f.id==='tfm'){const id=f.dataset.id,tk=ui.taken[id]||{};mngDo(id,"Sending…",async()=>{await CTX.requestTransfer(id,f.querySelector('#trR').value,f.querySelector('#trN').value.trim(),tk);ui.tform=null;CTX.toast("Request sent to SMT.")})}
-  if(f.id==='addPh'){const a=f.querySelector('#apA').value,b=f.querySelector('#apB').value;if(b<a)return;const c=f.querySelector('#apC').value;ui.phases.push({n:{base:'Base',build:'Build',taper:'Taper',race:'Championship',rest:'Rest'}[c],c,a,b});render()}});
+  if(f.id==='addPh'){const a=f.querySelector('#apA').value,b=f.querySelector('#apB').value;if(b<a)return;const c=f.querySelector('#apC').value;ui.phases.push({n:{base:'Base',build:'Build',specific:'Specific',taper:'Taper',race:'Championship',rest:'Rest'}[c],c,a,b});render()}});
 view.addEventListener('input',e=>{const t=e.target;if(["apA","apL","apU","apB"].includes(t.id)){const A=document.getElementById('apA'),L=document.getElementById('apL'),U=document.getElementById('apU'),B=document.getElementById('apB');if(!A.value)return;
     if(t.id==="apB"&&B.value){const d=Math.round((new Date(B.value)-new Date(A.value))/864e5)+1;if(d>0){if(U.value==="w"&&d%7===0)L.value=d/7;else{U.value="d";L.value=d}}}
     else{const n=Math.max(1,+L.value||1);B.value=addDays(A.value,(U.value==="w"?n*7:n)-1)}return}if(e.target.id==="mq"){ui.mq=e.target.value;const p=e.target.selectionStart;clearTimeout(ui.mqT);ui.mqT=setTimeout(()=>{render();const q=document.getElementById('mq');if(q){q.focus();q.setSelectionRange(p,p)}},250);return}if(e.target.id==="q"){ui.q=e.target.value;const p=e.target.selectionStart;render();const q=document.getElementById('q');q.focus();q.setSelectionRange(p,p)}});
