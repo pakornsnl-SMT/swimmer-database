@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.4 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.5 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -223,6 +223,26 @@ body.printing .swsum{font-size:12px!important;color:#111}body.printing .en,body.
 .row{max-width:100%;min-width:0}.row>.seg{min-width:0;flex:0 1 auto}
 @media (max-width:760px){.rkt .rkw .of{display:block;font-size:11px}.rkt td,.rkt th{padding-left:4px!important;padding-right:4px!important}.rkt td .nm+.en{max-width:34vw}}
 @media (max-width:760px){.rkt .rkw{display:inline-block!important;white-space:normal!important;text-align:right}.rkt .rkw .of{display:block!important;margin:0!important}.rkt td .nm+.en{max-width:30vw}}
+/* v3.5 splits: wrap into a tidy grid instead of scrolling sideways */
+table.swims td:has(.laps){white-space:normal}table.swims td:nth-child(3):not(.num){white-space:normal}
+.laps{display:inline-grid;grid-template-columns:repeat(var(--c),auto);gap:2px 3px;vertical-align:middle}
+.laps .lap{margin:0;text-align:center;padding:0 4px}
+.laps.lapl .lap{font-size:11px;padding:0 3px;line-height:1.5}
+.laps.lapl .lap.l100{margin-right:4px}
+@media (max-width:760px){.laps{grid-template-columns:repeat(var(--cp),auto)}.laps .lap{font-size:11px}}
+@media print{.laps .lap{font-size:10px!important}}
+.lap.lapx{background:#fff4e0;border-color:#e0a84a;color:#8a5a00}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .lap.lapx{background:#3a2a10;color:#e0b84a}}:root[data-theme="dark"] .lap.lapx{background:#3a2a10;color:#e0b84a}
+tr.sprow{display:none}
+@media (max-width:760px){tr.sprow{display:table-row}tr.sprow td{border-top:0!important;padding-top:0!important;white-space:normal!important}tr.cmpon+tr.sprow td{background:var(--sel)}}
+@media print{tr.sprow{display:none!important}}
+@media (max-width:760px){table.swims td,table.swims th{padding-left:4px!important;padding-right:4px!important}table.swims td.en{white-space:normal!important;min-width:3.6em}table.swims td .badge{font-size:9px;padding:0 3px}}
+@media (max-width:760px){table.swims td:nth-child(3):not(.num){font-size:13px;overflow-wrap:anywhere}table.swims .chk{margin:0}}
+table.swims tr.mhead td{white-space:normal}
+table.pbt td,table.pbt th{padding-left:7px!important;padding-right:7px!important}
+@media (max-width:760px){table.pbt td,table.pbt th{padding-left:4px!important;padding-right:4px!important}table.pbt th{font-size:11.5px!important;letter-spacing:.02em}table.pbt .rkw .of{display:block;font-size:11px}table.pbt .rkw{display:inline-block;white-space:normal;text-align:right}}
+table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom}
+@media (max-width:760px){.laps.lapl .lap.l100{margin-right:0}}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -230,7 +250,7 @@ body.printing .swsum{font-size:12px!important;color:#111}body.printing .en,body.
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.4</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.5</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -655,24 +675,26 @@ function powerTabView(){
   ${heatRows.map(r=>`<tr class="click" data-sw="${r.s.i}"><td><span class="nm">${nmH(r.s.th)}</span> <span class="en">· ${r.s.age}</span></td>${r.c.map(cell).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 /* ---------- Swimmer page: every swim with splits, and split comparison ---------- */
-const lapsTxt=sp=>sp&&sp.length>1?sp.map(x=>`<span class="lap">${fmt(x)}</span>`).join(""):'<span class="hint">–</span>';
+const spMed=sp=>{const v=sp.filter(x=>x>0).sort((a,b)=>a-b);return v[Math.floor(v.length/2)]||0},spBad=(sp,x)=>!x||x>1.5*spMed(sp),spOk=sp=>!!sp&&sp.length>1&&!sp.some(x=>spBad(sp,x));
+const lapsTxt=sp=>{if(!sp||sp.length<2)return '<span class="hint">–</span>';const n=sp.length,c=n<=8?n:n<=16?8:10,cp=n<=4?n:n<=8?4:5,md=spMed(sp);let cum=0;
+  return `<div class="laps${n>8?" lapl":""}" style="--c:${c};--cp:${cp}">${sp.map((x,i)=>{cum+=x;const bad=!x||x>1.5*md;return `<span class="lap${(i+1)%2===0&&n>8?" l100":""}${bad?" lapx":""}" title="${(i+1)*50} m${bad?" · split missed by the timing":" · "+fmt(cum)}">${x?fmt(x):"–"}</span>`}).join("")}</div>`};
 const rdTag=(r,L)=>{const x={PRE:["Heat","คัดเลือก",""],FIN:["Final","ชิงชนะเลิศ"," fin"],SOP:["Swim-off","ว่ายชิงอันดับ",""]}[r&&r.rd];return x?`<span class="rdt${x[2]}">${L==="th"?x[1]:x[0]}</span>`:""};
 function swimsBlock(s,e){
   ui.sw2=ui.sw2||"ev";const key=s.i+"|"+(e?e.k:"");
   let html=`<div class="row" style="justify-content:space-between;margin:22px 0 6px"><h3 style="margin:0">All swims</h3>${segBtns("sw2",[["ev",e?"This event · "+evShort(e.k):"This event"],["all","All events"]])}</div>`;
   if(ui.sw2==="all"){const byM=new Map();s.evs.forEach(ev=>ev.list.forEach(r=>{(byM.get(r.m)||byM.set(r.m,[]).get(r.m)).push({ev,r})}));
     const ms=[...byM.entries()].sort((a,b)=>b[1][0].r.d.localeCompare(a[1][0].r.d));
-    return html+`<div class="tw"><table class="swims"><thead><tr><th>Date</th><th>Event</th><th class="num">Time</th><th>50 m splits</th><th class="num">Place</th></tr></thead><tbody>${ms.map(([m,l],mi)=>`<tr class="mhead"><td colspan="5"><b>${esc(meetName(m))}</b></td></tr>`+l.sort((a,b)=>a.ev.st-b.ev.st||a.ev.ds-b.ev.ds).map(({ev,r})=>`<tr><td class="en">${shortDate(r.d)}</td><td>${evShort(ev.k)}${r.relay?' <span class="badge">lead-off</span>':""}</td><td class="num t"><span class="pbslot">${r===ev.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td>${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>`).join("")).join("")}</tbody></table></div>`}
+    return html+`<div class="tw"><table class="swims"><thead><tr><th>Date</th><th>Event</th><th class="num">Time</th><th class="hide-sm">50 m splits</th><th class="num">Place</th></tr></thead><tbody>${ms.map(([m,l],mi)=>`<tr class="mhead"><td colspan="5"><b>${esc(meetName(m))}</b></td></tr>`+l.sort((a,b)=>a.ev.st-b.ev.st||a.ev.ds-b.ev.ds).map(({ev,r})=>`<tr><td class="en">${shortDate(r.d)}</td><td>${evShort(ev.k)}${r.relay?' <span class="badge">lead-off</span>':""}</td><td class="num t"><span class="pbslot">${r===ev.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${r.sp&&r.sp.length>1?`<tr class="sprow"><td colspan="6">${lapsTxt(r.sp)}</td></tr>`:""}`).join("")).join("")}</tbody></table></div>`}
   if(!e)return html;
   const L=e.list.slice().reverse();
-  if(!ui.cmp||ui.cmp.key!==key){const withSp=L.filter(r=>r.sp&&r.sp.length>1);const a=e.pb.sp&&e.pb.sp.length>1?e.pb:withSp[0];const b=withSp.find(r=>r!==a);ui.cmp={key,sel:[a,b].filter(Boolean).map(r=>L.indexOf(r))}}
-  html+=`<p class="hint" style="margin:0 0 6px">Tick two swims to compare their splits.</p><div class="tw"><table class="swims"><thead><tr><th></th><th>Date</th><th>Meet</th><th class="num">Time</th><th>50 m splits</th><th class="num">Place</th></tr></thead><tbody>
-   ${L.map((r,i)=>{const on=ui.cmp.sel.includes(i),can=r.sp&&r.sp.length>1;return `<tr${on?' class="cmpon"':""}><td>${can?`<input type="checkbox" class="chk" data-cmp="${i}"${on?" checked":""} aria-label="Compare this swim">`:""}</td><td class="en">${shortDate(r.d)}</td><td>${esc(meetName(r.m))}</td><td class="num t"><span class="pbslot">${r===e.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td>${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>`}).join("")}</tbody></table></div>`;
+  if(!ui.cmp||ui.cmp.key!==key){const withSp=L.filter(r=>spOk(r.sp));const a=spOk(e.pb.sp)?e.pb:withSp[0];const b=withSp.find(r=>r!==a);ui.cmp={key,sel:[a,b].filter(Boolean).map(r=>L.indexOf(r))}}
+  html+=`<p class="hint" style="margin:0 0 6px">Tick two swims to compare their splits.</p><div class="tw"><table class="swims"><thead><tr><th></th><th>Date</th><th>Meet</th><th class="num">Time</th><th class="hide-sm">50 m splits</th><th class="num">Place</th></tr></thead><tbody>
+   ${L.map((r,i)=>{const on=ui.cmp.sel.includes(i),can=spOk(r.sp);return `<tr${on?' class="cmpon"':""}><td>${can?`<input type="checkbox" class="chk" data-cmp="${i}"${on?" checked":""} aria-label="Compare this swim">`:""}</td><td class="en">${shortDate(r.d)}</td><td>${esc(meetName(r.m))}</td><td class="num t"><span class="pbslot">${r===e.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${r.sp&&r.sp.length>1?`<tr class="sprow"><td colspan="6">${lapsTxt(r.sp)}</td></tr>`:""}`}).join("")}</tbody></table></div>${L.some(r=>r.sp&&r.sp.length>1&&!spOk(r.sp))?`<p class="hint" style="margin:4px 0 0"><span class="lap lapx">amber</span> = a split the timing missed (shown as – or a doubled lap). Swims with missed splits can't be compared.</p>`:""}`;
   const [A,B]=ui.cmp.sel.map(i=>L[i]).sort((x,y)=>x.t-y.t);
   if(A&&B&&A.sp.length===B.sp.length){let ca=0,cb=0;const rows=A.sp.map((x,j)=>{ca+=x;cb+=B.sp[j];return{d:(j+1)*50,la:x,lb:B.sp[j],ca,cb}});const mx=Math.max(...rows.map(r=>Math.abs(r.la-r.lb)),1);
     html+=`<div class="relaycard" style="margin-top:12px"><b style="font-family:var(--display);font-size:17px">Split comparison</b> <span class="hint">· <span style="color:var(--blue)">${fmt(A.t)}</span> (${shortDate(A.d)}) vs <span style="color:var(--gold)">${fmt(B.t)}</span> (${shortDate(B.d)})</span>
      <div class="tw"><table class="swims" style="margin-top:6px"><thead><tr><th class="num">Distance</th><th class="num" style="color:var(--blue)">Lap A</th><th class="num" style="color:var(--gold)">Lap B</th><th>Difference per lap</th><th class="num">Total A</th><th class="num">Total B</th></tr></thead><tbody>
-     ${rows.map(r=>{const df=r.la-r.lb,w=Math.abs(df)/mx*50;return `<tr><td class="num">${r.d} m</td><td class="num t">${fmt(r.la)}</td><td class="num t">${fmt(r.lb)}</td><td><div class="dbar"><span class="mid"></span><i style="${df<=0?`right:50%;width:${w}%;background:var(--good)`:`left:50%;width:${w}%;background:var(--red)`}"></i></div><span class="${df<=0?"up":"down"}" style="font-size:13px">${df<=0?"−":"+"}${(Math.abs(df)/100).toFixed(2)} s</span></td><td class="num t">${fmt(r.ca)}</td><td class="num t">${fmt(r.cb)}</td></tr>`}).join("")}</tbody></table></div>
+     ${rows.map(r=>{const df=r.la-r.lb,w=Math.abs(df)/mx*50;return `<tr><td class="num">${r.d} m</td><td class="num t">${fmt(r.la)}</td><td class="num t">${fmt(r.lb)}</td><td><div class="dbar hide-sm"><span class="mid"></span><i style="${df<=0?`right:50%;width:${w}%;background:var(--good)`:`left:50%;width:${w}%;background:var(--red)`}"></i></div><span class="${df<=0?"up":"down"}" style="font-size:13px">${df<=0?"−":"+"}${(Math.abs(df)/100).toFixed(2)} s</span></td><td class="num t">${fmt(r.ca)}</td><td class="num t">${fmt(r.cb)}</td></tr>`}).join("")}</tbody></table></div>
      <p class="hint" style="margin-bottom:0">Green = swim A was faster on that lap, red = slower. ${(()=>{const f=rows[0],l=rows[rows.length-1];if(rows.length<2)return"";const ga=f.la-f.lb,gb=(l.la-l.lb);return ga<0&&gb>=0?"The faster swim won it in the first half.":ga>=0&&gb<0?"The faster swim won it with a stronger finish.":""})()}</p></div>`}
   else if(ui.cmp.sel.length===2)html+=`<p class="hint">These two swims don't have the same number of splits.</p>`;
   return html;
