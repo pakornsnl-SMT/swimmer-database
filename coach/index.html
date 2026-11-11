@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.33 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.34 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -309,6 +309,32 @@ table.emev tr.grph td{padding-top:6px;padding-bottom:6px}
 .mblock .mbt small{font-size:12px;opacity:.92}
 .mblock .mbs{font-weight:600}
 .mblock .mbk{position:absolute;top:8px;right:10px;font-weight:700}
+/* Times to beat (11 Nov 2026) */
+table.ttb td{vertical-align:middle}
+table.ttb .t{font:500 15px var(--mono)}
+.ttg{display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.2}
+.ttg b{font:500 14px var(--mono);color:var(--ink)}
+.ttg span{font-size:11.5px;color:var(--muted)}
+.ttg.nx{background:#e8f6ee;border-radius:8px;padding:3px 8px;margin:-3px -8px -3px 0}
+.ttg.nx b{color:#146b3a}.ttg.nx span{color:#1f9d57;font-weight:600}
+.ttok{display:inline-block;font:600 12px var(--display);letter-spacing:.04em;color:#146b3a;background:#e8f6ee;border-radius:999px;padding:2px 9px}
+.ttbar{position:relative;display:block;width:150px;height:8px;border-radius:5px;background:#e3e8f2}
+.ttbar i{position:absolute;top:0;height:8px;display:block}
+.ttbar i.g{left:0;background:#e0a400;border-radius:5px 0 0 5px}.ttbar i.b{background:var(--blue,#1d4fb8)}
+.ttbar i.me{top:-4px;width:4px;height:16px;border-radius:2px;background:var(--red,#d0202e)}
+.ttwins{margin:2px 0 8px}.ttwin{font-size:13px;padding:4px 12px;border-color:#1f9d57;color:#146b3a}.ttwin b{color:#146b3a}
+@media (max-width:600px){table.ttb th,table.ttb td{padding:6px 4px}table.ttb td:first-child{white-space:nowrap;font-size:13px}table.ttb .t{font-size:13.5px}.ttg b{font-size:12.5px}.ttg span{font-size:10.5px}.ttg.nx{padding:2px 5px;margin:-2px -5px -2px 0}table.ttb th{font-size:10.5px}.ttwin{font-size:12px;padding:3px 9px}}
+/* My Swim Year list */
+.yirgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.yircard{display:flex;flex-direction:column;gap:4px;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,#eef3fc,#fff);cursor:pointer;font:inherit;color:inherit;position:relative}
+.yircard:hover{border-color:var(--blue,#1d4fb8);box-shadow:0 2px 8px rgba(29,79,184,.12)}
+.yircard .yn b{display:block;font-size:15px}.yircard .yn small{font-size:12px;color:var(--muted)}
+.yircard .ys{font-size:12.5px;color:var(--muted)}.yircard .ys b{color:#146b3a}
+.yircard .yb{position:absolute;top:12px;right:12px;font:700 12px var(--display);letter-spacing:.04em;color:#fff;background:var(--blue,#1d4fb8);border-radius:999px;padding:3px 10px}
+.yircard.off{cursor:default;opacity:.55;background:var(--bg)}
+/* new results banner */
+.pubnew{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;background:#163f99;color:#fff;border-radius:999px;padding:10px 12px 10px 18px;font:500 14px var(--body);box-shadow:0 6px 18px rgba(0,0,0,.25);display:flex;gap:10px;align-items:center;max-width:calc(100% - 32px)}
+.pubnew button{background:#22b064;color:#fff;border:0;border-radius:999px;padding:6px 14px;font:700 13px var(--display);letter-spacing:.04em;cursor:pointer}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -384,7 +410,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.33 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.34 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -466,7 +492,7 @@ function swimmerView(){
    <td class="num">${x.imp==null?'<span class="hint">–</span>':x.imp>0?`<span class="up">−${(x.imp*100).toFixed(1)}%</span>`:`<span class="down">+${(-x.imp*100).toFixed(1)}%</span>`}</td><td class="num">${natTxt(s,x.k)}</td><td class="hide-sm en">${shortDate(x.pb.d)}</td></tr>`).join("")}
   </tbody></table></div></div>
   <div style="min-width:0"><h3>Progress · ${e?evLabel(e):""}</h3>${e?chart(e,s):""}
-  </div></div>${swimsBlock(s,e)}${swTargets(s)}`;
+  </div></div>${swTimesToBeat(s)}${swimsBlock(s,e)}${swTargets(s)}`;
 }
 function chart(e,s){
   const W=460,H=200,P={l:52,r:14,t:14,b:28},pts=e.list;
@@ -748,18 +774,36 @@ function closestTarget(s){const c=[];
     [["A","World Champs A"],["B","World Champs B"]].forEach(([lv,n])=>{const t=stdOf(s,e.k,lv);if(t&&sb&&sb>t)c.push({n,e,g:sb-t,t})});
     const ar=recOf(s,e.k,"AG");if(ar&&pb>ar[4])c.push({n:`Age group record ${ar[1]}`,e,g:pb-ar[4],t:ar[4]});
     const nr=recOf(s,e.k,"NR");if(nr&&pb>nr[4])c.push({n:"National record",e,g:pb-nr[4],t:nr[4]});
-    const th=D.thr[s.g+s.by+"|"+(ui.course||1)+"|"+e.k],nt=natOf(s,e.k),now=e.list.filter(r=>r.d.startsWith(YEAR));if(th&&nt&&nt[0]>8&&now.length){const b=Math.min(...now.map(r=>r.t));c.push({n:`Thailand top 8 (age ${s.age})`,e,g:b-th[1],t:th[1]})}});
+  });
   return c.sort((a,b)=>a.g/a.t-b.g/b.t).slice(0,3)}
 function swTargets(s){
-  const cl=closestTarget(s);
-  return `<h3 style="margin-top:20px">Targets</h3>
+  const cl=closestTarget(s),rows=s.evs.filter(e=>stdOf(s,e.k,"A")||stdOf(s,e.k,"B")||recOf(s,e.k,"AG")||recOf(s,e.k,"NR"));if(!rows.length)return"";
+  return `<h3 style="margin-top:22px">Standards and records</h3>
   ${cl.length?`<div class="row">${cl.map(x=>`<span class="chip" style="font-size:13px;padding:5px 12px;border-color:var(--gold)"><b style="color:var(--gold)">${(x.g/100).toFixed(2)} s</b> to ${x.n} · ${evShort(x.e.k)}</span>`).join("")}</div>`:""}
-  <div class="tw"><table class="tgt"><thead><tr><th>Event</th><th class="num pbc">PB</th><th class="num">Points</th><th class="num">Thailand top 8<br><span class="en" style="text-transform:none">age ${s.age}, ${YEAR}</span></th><th class="num">World Champs A<br><span class="en" style="text-transform:none">Beijing 2026</span></th><th class="num">World Champs B</th><th class="num">Age group record<br><span class="en" style="text-transform:none">${agOf(s.age)||"–"}</span></th><th class="num">National record</th></tr></thead><tbody>
-  ${s.evs.map(e=>{const pb=e.pb.t,p=pts(s,e.k,pb),sb=stdBest(e),th=D.thr[s.g+s.by+"|"+(ui.course||1)+"|"+e.k],now=e.list.filter(r=>r.d.startsWith(YEAR)),b26=now.length?Math.min(...now.map(r=>r.t)):null,ar=recOf(s,e.k,"AG"),nr=recOf(s,e.k,"NR");
-    return `<tr><td>${evShort(e.k)}</td><td class="num t pbc">${fmt(pb)}</td><td class="num">${p??"–"}</td><td class="num">${th?gapCell(b26,th[1]):'<span class="hint">–</span>'}</td><td class="num">${gapCell(sb,stdOf(s,e.k,"A"))}</td><td class="num">${gapCell(sb,stdOf(s,e.k,"B"))}</td><td class="num"${ar?` title="${esc(ar[5])} · ${fmt(ar[4])}"`:""}>${ar?gapCell(pb,ar[4]):'<span class="hint">–</span>'}</td><td class="num"${nr?` title="${esc(nr[5])} · ${fmt(nr[4])}"`:""}>${nr?gapCell(pb,nr[4]):'<span class="hint">–</span>'}</td></tr>`}).join("")}
+  <div class="tw"><table class="tgt"><thead><tr><th>Event</th><th class="num pbc">PB</th><th class="num">Points</th><th class="num">World Champs A<br><span class="en" style="text-transform:none">Beijing 2026</span></th><th class="num">World Champs B</th><th class="num">Age group record<br><span class="en" style="text-transform:none">${agOf(s.age)||"–"}</span></th><th class="num">National record</th></tr></thead><tbody>
+  ${rows.map(e=>{const pb=e.pb.t,p=pts(s,e.k,pb),sb=stdBest(e),ar=recOf(s,e.k,"AG"),nr=recOf(s,e.k,"NR");
+    return `<tr><td>${evShort(e.k)}</td><td class="num t pbc">${fmt(pb)}</td><td class="num">${p??"–"}</td><td class="num">${gapCell(sb,stdOf(s,e.k,"A"))}</td><td class="num">${gapCell(sb,stdOf(s,e.k,"B"))}</td><td class="num"${ar?` title="${esc(ar[5])} · ${fmt(ar[4])}"`:""}>${ar?gapCell(pb,ar[4]):'<span class="hint">–</span>'}</td><td class="num"${nr?` title="${esc(nr[5])} · ${fmt(nr[4])}"`:""}>${nr?gapCell(pb,nr[4]):'<span class="hint">–</span>'}</td></tr>`}).join("")}
   </tbody></table></div>
   <p class="hint">Gap = seconds still to drop. Gold = within 2%. World Championships times count swims from ${shortDate(D.std.from)} to ${shortDate(D.std.to)} (the qualifying period set in Admin). Records use all-time PBs; hover a record gap to see the holder.</p>`;
 }
+/* Times to beat: for each event swum this year, the next targets in this year's Thailand ranking (same birth year, same gender, this pool) */
+function ttbRows(s){const C=ui.course||1;return s.evs.map(e=>{const now=e.list.filter(r=>r.d.startsWith(YEAR));if(!now.length)return null;
+    const ts=(D.tl||{})[s.g+s.by+"|"+C+"|"+e.k];if(!ts||!ts.length)return null;const b=Math.min(...now.map(r=>r.t));let r=0;while(r<ts.length&&ts[r]<b)r++;r++;
+    const nx=r>1?{t:ts[r-2],rk:ts.filter(x=>x<ts[r-2]).length+1}:null,t8=ts[Math.min(7,ts.length-1)],t3=ts[Math.min(2,ts.length-1)];
+    return{e,b,r,n:ts.length,nx,t8,t3}}).filter(Boolean)}
+function ttbCell(b,t,rk,cls){if(t==null)return'<span class="hint">–</span>';if(b<=t)return`<span class="ttok">✓ in</span>`;
+  return `<span class="ttg${cls?" "+cls:""}"><b>${fmt(t)}</b><span>${((b-t)/100).toFixed(2)} s${rk?` · #${rk}`:""}</span></span>`}
+function swTimesToBeat(s){const L=ttbRows(s);if(!L.length)return"";
+  const wins=L.filter(x=>x.nx).sort((a,b)=>(a.b-a.nx.t)/a.b-(b.b-b.nx.t)/b.b).slice(0,3);
+  const bar=x=>{const g=Math.max(2,Math.min(3,x.n)/x.n*100),bl=Math.max(2,(Math.min(8,x.n)-Math.min(3,x.n))/x.n*100);
+    return `<span class="ttbar" title="#${x.r} of ${x.n}"><i class="g" style="width:${g.toFixed(1)}%"></i><i class="b" style="left:${g.toFixed(1)}%;width:${bl.toFixed(1)}%"></i><i class="me" style="left:calc(${Math.min(99,(x.r-.5)/x.n*100).toFixed(1)}% - 2px)"></i></span>`};
+  return `<h3 style="margin-top:22px">Times to beat <span class="en" style="text-transform:none;letter-spacing:0">· Thailand ranking ${YEAR}, ${s.g==="M"?"boys":"girls"} born ${s.by} (age ${s.age}), ${POOL()}</span></h3>
+  ${wins.length?`<div class="row ttwins"><span class="hint">Quick wins</span>${wins.map(x=>`<span class="chip ttwin">⚡ <b>${((x.b-x.nx.t)/100).toFixed(2)} s</b> to #${x.nx.rk} · ${evShort(x.e.k)}</span>`).join("")}</div>`:""}
+  <div class="tw"><table class="ttb"><thead><tr><th>Event</th><th class="num">Best ${YEAR}</th><th class="num"><span class="hide-sm">Next place up</span><span class="phi">Next up</span></th><th class="num">Top 8</th><th class="num hide-sm">Top 3</th><th class="hide-sm">Ranking</th></tr></thead><tbody>
+  ${L.map(x=>`<tr><td>${evShort(x.e.k)}</td><td class="num"><span class="t">${fmt(x.b)}</span><div>${rkPill(x.r,x.n)}</div></td>
+    <td class="num">${x.nx?ttbCell(x.b,x.nx.t,x.nx.rk,"nx"):'<span class="ttok">🏆 #1</span>'}</td><td class="num">${ttbCell(x.b,x.t8)}</td><td class="num hide-sm">${ttbCell(x.b,x.t3)}</td><td class="hide-sm">${bar(x)}</td></tr>`).join("")}
+  </tbody></table></div>
+  <p class="hint">Targets come from this year's Thailand ranking: same birth year, same gender, swims in ${YEAR} in this pool. Green = the next place up. The bar shows the top 3 (gold), top 8 (blue) and this swimmer's place (red). Nationals 2027 standards will be added here when TASA publishes them.</p>`}
 function swSummary(s){const z=season(s),be=bestEvents(s);
   return `<div class="kpis" style="margin-top:12px"><div class="kpi"><b>${z.meets}</b><span>meets in ${YEAR}</span></div><div class="kpi"><b>${z.races}</b><span>races in ${YEAR}</span></div><div class="kpi"><b>${z.pbs}</b><span>personal bests in ${YEAR}</span></div><div class="kpi"><b>${z.best?"−"+(z.best.drop/100).toFixed(2)+" s":"–"}</b><span>${z.best?"biggest drop · "+evShort(z.best.e.k):"biggest drop"}</span></div></div>
   ${powerPanel(s)}${be.length?`<div class="relaycard" style="margin-bottom:6px"><b style="font-family:var(--display)">Best events</b> <span class="hint">· where ${esc(s.th)} ranks highest in Thailand, age ${s.age}, ${YEAR}</span><div class="row" style="margin:8px 0 0">${be.map(b=>`<span class="chip" style="font-size:13px;padding:4px 12px">${evShort(b.k)} · <b>#${b.r}</b> of ${b.t}</span>`).join("")}</div></div>`:""}
@@ -1142,7 +1186,72 @@ document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="s
   const pg=document.createElement("style");pg.id="stPage";pg.textContent="@page{size:A4 landscape;margin:9mm}";document.head.appendChild(pg);
   const done=()=>{document.body.classList.remove("printing","land");document.title=old;pg.remove();window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
-function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint" style="margin-bottom:12px">${segBtns("rpk",[["meet","Meet Report"],["st","Summary of times"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():meetReportView())}
+function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint" style="margin-bottom:12px">${segBtns("rpk",[["meet","Meet Report"],["st","Summary of times"],["yr","My Swim Year"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():ui.rpk==="yr"?`<h2>My Swim Year ${YEAR}</h2>`+yirView():meetReportView())}
+
+/* ---------- Reports: My Swim Year (year-in-review picture per swimmer, 1080×1350, 11 Nov 2026) ---------- */
+function yirData(s){const now=ALL.filter(x=>x.s===s&&x.r.d.startsWith(YEAR));if(!now.length)return null;const z=season(s);
+  const imp=s.evs.map(e=>{const n=e.list.filter(r=>r.d.startsWith(YEAR)),o=e.list.filter(r=>r.d<String(YEAR));if(!n.length||!o.length)return null;
+    const nb=Math.min(...n.map(r=>r.t)),ob=Math.min(...o.map(r=>r.t));return nb<ob?{e,nb,ob,p:(ob-nb)/ob}:null}).filter(Boolean).sort((a,b)=>b.p-a.p);
+  const bests=s.evs.map(e=>{const n=e.list.filter(r=>r.d.startsWith(YEAR));if(!n.length)return null;const nt=natOf(s,e.k);return{e,t:Math.min(...n.map(r=>r.t)),r:nt?nt[0]:null,n:nt?nt[1]:null}}).filter(Boolean).sort((a,b)=>(a.r&&b.r?a.r/a.n-b.r/b.n:a.r?-1:b.r?1:0));
+  const rk=bestEvents(s,1)[0]||null;
+  /* positive tone: rankings are shown only in the top half */
+  return{z:{...z,pbs:s.pbs},imp,bests:bests.map(x=>x.r&&x.r/x.n<=.5?x:{...x,r:null}),rk:rk&&rk.r/rk.t<=.5?rk:null,first:!s.evs.some(e=>e.list.some(r=>r.d<String(YEAR))),nev:s.evs.filter(e=>e.list.some(r=>r.d.startsWith(YEAR))).length}}
+const YIR_ST=["","Freestyle","Backstroke","Breaststroke","Butterfly","Individual Medley"];
+async function yirPicture(s){const Y=yirData(s);if(!Y)return null;
+  try{await Promise.all(["700 100px 'Barlow Condensed'","600 30px 'Barlow Condensed'","700 60px 'Sarabun'","400 30px 'Sarabun'","500 24px 'IBM Plex Mono'"].map(f=>document.fonts.load(f)));await document.fonts.ready}catch(e){}
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  const BC="'Barlow Condensed','Sarabun',sans-serif",SA="'Sarabun','Barlow Condensed',sans-serif",MO="'IBM Plex Mono',monospace";
+  const sp=v=>{if("letterSpacing" in g)g.letterSpacing=v};
+  const rr=(x,y,w,h,r,fill)=>{g.beginPath();g.roundRect(x,y,w,h,r);g.fillStyle=fill;g.fill()};
+  const bg=g.createLinearGradient(0,0,W*.55,H);bg.addColorStop(0,"#2563d9");bg.addColorStop(.55,"#163f99");bg.addColorStop(1,"#0f2c6e");g.fillStyle=bg;g.fillRect(0,0,W,H);
+  [[1150,.08],[1220,.08]].forEach(([y0,a],i)=>{g.beginPath();g.moveTo(0,y0);for(let x=0;x<=W;x+=12)g.lineTo(x,y0+Math.sin(x/W*Math.PI*2+i*.8)*34);g.lineTo(W,H);g.lineTo(0,H);g.closePath();g.globalAlpha=a;g.fillStyle="#fff";g.fill();g.globalAlpha=1});
+  const L=64,R=W-64;g.textBaseline="alphabetic";
+  g.fillStyle="rgba(255,255,255,.92)";g.font=`600 26px ${BC}`;sp("5px");g.fillText(CLUB.name.toUpperCase(),L,92,820);g.textAlign="right";g.fillText("SMT",R,92);g.textAlign="left";sp("0px");
+  [["#e0263a",0],["#22b064",80],["#ffffff",160]].forEach(([col,dx])=>rr(L+dx,116,68,10,5,col));
+  g.fillStyle="rgba(255,255,255,.88)";g.font=`600 32px ${BC}`;sp("10px");g.fillText(String(YEAR),L,192);sp("0px");
+  g.fillStyle="#fff";g.font=`700 112px ${BC}`;g.fillText("MY SWIM YEAR",L-4,292,R-L);
+  g.font=`700 64px ${SA}`;g.fillText(s.th,L,394,R-L);
+  g.fillStyle="rgba(255,255,255,.86)";g.font=`400 30px ${SA}`;g.fillText(`${s.en}${s.en?" · ":""}${s.g==="M"?"boy":"girl"} · age ${s.age} · ${POOL()}`,L,448,R-L);
+  const tiles=[[Y.z.meets,Y.z.meets===1?"meet":"meets"],[Y.z.races,Y.z.races===1?"race":"races"],(Y.z.pbs||!Y.first?[Y.z.pbs,Y.z.pbs===1?"new PB":"new PBs",Y.z.pbs>0]:["1st","season",1]),Y.imp.length?["−"+Math.max(1,Math.round(Y.imp[0].p*100))+"%","best drop"]:[Y.nev,Y.nev===1?"event":"events"]];
+  const tw=(R-L-3*16)/4;tiles.forEach(([v,l,hi],i)=>{const x=L+i*(tw+16);rr(x,500,tw,150,22,hi?"#22b064":"rgba(255,255,255,.13)");g.textAlign="center";g.fillStyle="#fff";g.font=`700 68px ${BC}`;g.fillText(String(v),x+tw/2,588,tw-16);g.font=`400 24px ${SA}`;g.fillStyle="rgba(255,255,255,.92)";g.fillText(l,x+tw/2,628,tw-12);g.textAlign="left"});
+  let y=684;
+  if(Y.rk){const[a,b]=Y.rk.k.split("-");rr(L,y,R-L,140,26,"#fff");const gr=g.createLinearGradient(L+30,y+24,L+122,y+116);gr.addColorStop(0,"#ffd75e");gr.addColorStop(1,"#e0a400");g.beginPath();g.arc(L+76,y+70,46,0,Math.PI*2);g.fillStyle=gr;g.fill();
+    g.fillStyle="#5a3d00";g.textAlign="center";g.font=`700 ${Y.rk.r>99?28:34}px ${BC}`;g.fillText("#"+Y.rk.r,L+76,y+82);g.textAlign="left";
+    g.fillStyle="#163f99";g.font=`700 44px ${BC}`;g.fillText("Thailand ranking",L+150,y+64,R-L-170);g.fillStyle="#4b5f8c";g.font=`400 26px ${SA}`;
+    const ord=n=>n+(n%100>=11&&n%100<=13?"th":["th","st","nd","rd"][n%10]||"th");g.fillText(`${b} m ${YIR_ST[a]} · ${s.g==="M"?"boys":"girls"} age ${s.age} · ${ord(Y.rk.r)} of ${Y.rk.t}`,L+150,y+106,R-L-170);y+=140}
+  y+=62;g.fillStyle="rgba(255,255,255,.92)";g.font=`600 26px ${BC}`;sp("5px");
+  if(Y.imp.length){g.fillText(`FASTER THAN BEFORE ${YEAR}`,L,y);sp("0px");const rows=Y.imp.slice(0,4),mx=rows[0].p;y+=22;
+    rows.forEach(x=>{const top=y+12;g.fillStyle="#fff";g.font=`700 31px ${BC}`;g.fillText(evShort(x.e.k),L,top+26,190);
+      rr(272,top+8,604,20,10,"rgba(255,255,255,.18)");const gb=g.createLinearGradient(272,0,876,0);gb.addColorStop(0,"#5fd8a0");gb.addColorStop(1,"#22b064");rr(272,top+8,Math.max(24,604*x.p/mx),20,10,gb);
+      g.textAlign="right";g.fillStyle="#9ff0c4";g.font=`700 33px ${BC}`;g.fillText(`−${((x.ob-x.nb)/100).toFixed(2)} s`,R,top+30);g.textAlign="left";
+      g.fillStyle="rgba(255,255,255,.82)";g.font=`500 23px ${MO}`;g.fillText(`${fmt(x.ob)} → ${fmt(x.nb)}`,272,top+62);y+=94})}
+  else{g.fillText(`BEST TIMES IN ${YEAR}`,L,y);sp("0px");y+=22;
+    Y.bests.slice(0,4).forEach(x=>{const top=y+12;g.fillStyle="#fff";g.font=`700 31px ${BC}`;g.fillText(evShort(x.e.k),L,top+30,240);g.font=`500 34px ${MO}`;g.fillText(fmt(x.t),330,top+30);
+      if(x.r){g.textAlign="right";g.fillStyle="#ffd75e";g.font=`700 31px ${BC}`;g.fillText(`#${x.r} of ${x.n} in Thailand`,R,top+30);g.textAlign="left"}y+=76})}
+  g.fillStyle="rgba(255,255,255,.9)";g.font=`400 23px ${SA}`;g.fillText("Results from Swim Meets Thailand · smdata.in.th",L,H-34);g.textAlign="right";g.fillText("Keep going! 💪",R,H-34);g.textAlign="left";
+  return c.toDataURL("image/jpeg",.93)}
+function yirName(s){return `${CLUB.short} ${YEAR} - ${s.en||s.th}`.replace(/[\\/:*?"<>|]+/g," ")+".jpg"}
+async function yirShow(s){const o=document.getElementById("picbox"),img=o.querySelector("img");o.hidden=false;img.removeAttribute("src");img.alt="My Swim Year picture";
+  const url=await yirPicture(s);img.src=url;let a=document.getElementById("picDl");if(!a){a=document.createElement("a");a.id="picDl";a.className="chip teal";a.style.cssText="cursor:pointer;font:600 14px var(--display);padding:8px 18px;margin-right:8px;text-decoration:none";a.textContent="⬇ Download";o.querySelector("#picClose").before(a)}
+  a.hidden=false;a.href=url;a.download=yirName(s);o.querySelector("#picClose").focus()}
+/* zip without compression (PNG is already compressed) */
+function zipStore(files){const T=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;T[n]=c>>>0}
+  const crc=b=>{let c=-1;for(let i=0;i<b.length;i++)c=T[(c^b[i])&255]^(c>>>8);return(c^-1)>>>0},enc=new TextEncoder(),parts=[],cen=[];let off=0;
+  const d=new Date(),dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xffff,dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xffff;
+  for(const f of files){const nm=enc.encode(f.name),c=crc(f.data),h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,dt,true);h.setUint16(12,dd,true);h.setUint32(14,c,true);h.setUint32(18,f.data.length,true);h.setUint32(22,f.data.length,true);h.setUint16(26,nm.length,true);
+    parts.push(h.buffer,nm,f.data);const ce=new DataView(new ArrayBuffer(46));ce.setUint32(0,0x02014b50,true);ce.setUint16(4,20,true);ce.setUint16(6,20,true);ce.setUint16(8,0x0800,true);ce.setUint16(12,dt,true);ce.setUint16(14,dd,true);ce.setUint32(16,c,true);ce.setUint32(20,f.data.length,true);ce.setUint32(24,f.data.length,true);ce.setUint16(28,nm.length,true);ce.setUint32(42,off,true);cen.push(ce.buffer,nm);off+=30+nm.length+f.data.length}
+  const cs=cen.reduce((a,b)=>a+(b.byteLength||b.length),0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cen,e.buffer],{type:"application/zip"})}
+function yirView(){const L=sw.slice().sort(thCmp).map(s=>({s,y:yirData(s)})),ok=L.filter(x=>x.y);
+  return `<p class="hint" style="margin-top:0">A picture for each swimmer's ${YEAR} in the ${POOL()}: meets, races, new PBs, biggest drop, best Thailand ranking and the events where they got faster. Perfect to send to parents at the end of the year. Switch 50 m / 25 m at the top for the other pool.</p>
+  <div class="row noprint" style="margin:0 0 12px">${ok.length?`<button class="chip teal" id="yirAll" type="button" style="cursor:pointer;font:600 14px var(--display);padding:8px 16px">⬇ Download all ${ok.length} pictures (.zip)</button><span class="hint" id="yirMsg"></span>`:""}</div>
+  <div class="yirgrid">${L.map(({s,y})=>y?`<button type="button" class="yircard" data-yir="${s.i}"><span class="yn"><b>${esc(s.th)}</b><small>${esc(s.en)} · ${s.age}</small></span><span class="ys">${y.z.meets} meet${y.z.meets===1?"":"s"} · ${y.z.races} race${y.z.races===1?"":"s"} · <b>${y.z.pbs} PB${y.z.pbs===1?"":"s"}</b>${y.imp.length?` · −${Math.max(1,Math.round(y.imp[0].p*100))}%`:""}</span><span class="yb">Picture</span></button>`
+    :`<div class="yircard off"><span class="yn"><b>${esc(s.th)}</b><small>${esc(s.en)} · ${s.age}</small></span><span class="ys">No swims in ${YEAR} in the ${POOL()}</span></div>`).join("")}</div>`}
+document.getElementById("view").addEventListener("click",async e=>{const c=e.target.closest("[data-yir]");if(c){yirShow(sw[+c.dataset.yir]);return}
+  if(e.target.id!=="yirAll")return;const b=e.target,m=document.getElementById("yirMsg");b.disabled=true;const list=sw.slice().sort(thCmp).filter(s=>yirData(s)),files=[];
+  try{for(let i=0;i<list.length;i++){if(m)m.textContent=`Making ${i+1} of ${list.length}…`;const u=await yirPicture(list[i]),bin=atob(u.split(",")[1]),a=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)a[k]=bin.charCodeAt(k);files.push({name:yirName(list[i]),data:a});await new Promise(r=>setTimeout(r,0))}
+    const url=URL.createObjectURL(zipStore(files)),l=document.createElement("a");l.href=url;l.download=`${CLUB.short} - My Swim Year ${YEAR}.zip`.replace(/[\\/:*?"<>|]+/g," ");document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);if(m)m.textContent=`Done · ${files.length} pictures`}
+  catch(err){if(m)m.textContent="Couldn't make the pictures: "+(err.message||err)}b.disabled=false});
 
 /* ---------- saving entries safely when several devices edit at once (11 Nov 2026) ----------
    Each save sends only what changed on this device since the last load/save (per swimmer-event, per relay event, per name),
@@ -1490,7 +1599,9 @@ function rdWrap(){for(const k of RD_KEYS){const f=DB[k];if(typeof f!=="function"
 async function initDB(){
   if(MOCK){DB=mockDB();rdWrap();return}
   const [app,auth,fs]=await Promise.all([import(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-app.js`),import(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-auth.js`),import(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-firestore.js`)]);
-  const A=app.initializeApp(FB_CONFIG),au=auth.getAuth(A),db=fs.getFirestore(A),F=fs;
+  const A=app.initializeApp(FB_CONFIG),au=auth.getAuth(A),F=fs;
+  /* keep the club's data on this device too, so the app still opens with a weak signal at the pool */
+  let db;try{db=fs.initializeFirestore(A,{localCache:fs.persistentLocalCache({tabManager:fs.persistentMultipleTabManager()})})}catch(e){db=fs.getFirestore(A)}
   const d=(...p)=>F.doc(db,...p),c=(...p)=>F.collection(db,...p),list=async q=>(await F.getDocs(q)).docs.map(x=>({id:x.id,...x.data()}));
   DB={
     onAuth:cb=>auth.onAuthStateChanged(au,cb),
@@ -1575,7 +1686,17 @@ function mockDB(){ /* test copy kept in this browser only (for checking screens 
 
 /* ---------- public data from www.smdata.in.th (same file the public site uses) ---------- */
 let PUB=null;
-async function loadPublic(){if(PUB)return PUB;setLoad("Loading swimmer results…");const r=await fetch(DATA_URL,{cache:"no-cache"});if(!r.ok)throw new Error("Couldn't load swimmer results ("+r.status+").");PUB=await r.json();
+/* faster start (11 Nov 2026): keep the public data file on this device; open from it at once and check for a newer file in the background.
+   No database reads (the file comes from the website, not Firebase). */
+const PUB_CACHE="smt-public-v1",pubStamp=t=>{const m=/"published"\s*:\s*"([^"]*)"/.exec(String(t).slice(0,600));return m?m[1]:""};
+async function pubStore(txt){try{if("caches" in window){const c=await caches.open(PUB_CACHE);await c.put(DATA_URL,new Response(txt,{headers:{"content-type":"application/json"}}))}}catch(e){}}
+async function pubRefresh(){try{const r=await fetch(DATA_URL,{cache:"no-cache"});if(!r.ok)return;const txt=await r.text(),st=pubStamp(txt);if(!st||st===pubStamp(PUB_TXT))return;await pubStore(txt);
+    const b=document.createElement("div");b.className="pubnew";b.innerHTML=`New results are ready. <button type="button">Refresh</button>`;b.querySelector("button").onclick=()=>location.reload();document.body.appendChild(b)}catch(e){}}
+let PUB_TXT="";
+async function loadPublic(){if(PUB)return PUB;let txt="",cached=false;
+  try{if("caches" in window){const c=await caches.open(PUB_CACHE),m=await c.match(DATA_URL);if(m){txt=await m.text();cached=!!txt}}}catch(e){}
+  if(!txt){setLoad("Loading swimmer results…");const r=await fetch(DATA_URL,{cache:"no-cache"});if(!r.ok)throw new Error("Couldn't load swimmer results ("+r.status+").");txt=await r.text();pubStore(txt)}
+  PUB_TXT=txt.slice(0,600);PUB=JSON.parse(txt);if(cached)setTimeout(pubRefresh,3000);
   PUB.swimmers.forEach(s=>{for(const k in s.rs){const a=s.rs[k];while(a.length<17)a.push(0)}});PUB.byId=new Map(PUB.swimmers.map(s=>[s.id,s]));return PUB}
 const SNUM={Freestyle:1,Backstroke:2,Breaststroke:3,Butterfly:4,IM:5,Medley:5};
 let PEOPLE={};
@@ -1599,7 +1720,9 @@ function buildData(pub,rosterIds,year){
   const rec=[];["LCM","SCM"].forEach(c=>{const L=pub.records&&pub.records[c]&&pub.records[c].list||[];L.forEach(x=>{if(!x.relay&&SNUM[x.st])rec.push([x.cat,x.ag,x.g,SNUM[x.st]+"-"+x.d,Math.round(x.t*100),x.name,x.date,c==="LCM"?1:2])})});
   const st=pub.standards&&pub.standards.lists&&pub.standards.lists[0];
   const std=st?{n:st.name,from:st.from,to:st.to,t:(st.times||[]).filter(t=>SNUM[t.st]).map(t=>[t.g,SNUM[t.st]+"-"+t.d,t.lv,Math.round(t.t*100),t.c==="LCM"?1:2])}:{n:"",from:"",to:"",t:[]};
-  return{meets,sw,thr,rec,std,dir,pub:String(pub.published||"").slice(0,10)};
+  /* full sorted ranking lists only for the team's birth years and genders (Times to beat) */
+  const pre=new Set(sw.map(x=>x.g+x.by+"|")),tl={};sorted.forEach((ts,key)=>{if(pre.has(key.slice(0,key.indexOf("|")+1)))tl[key]=ts});
+  return{meets,sw,thr,tl,rec,std,dir,pub:String(pub.published||"").slice(0,10)};
 }
 
 /* ---------- start ---------- */
@@ -1612,6 +1735,8 @@ const idleOver=()=>{const a=actGet();return !!(USER&&PROFILE&&PROFILE.role!=="ad
 async function idleOut(){try{localStorage.removeItem(ACT);sessionStorage.setItem("smt.idle","1")}catch(e){}await DB.signOut();location.href=location.pathname+(MOCK?"?mock=1"+(QS.get("data")?"&data="+encodeURIComponent(QS.get("data")):""):"")}
 setInterval(()=>{if(idleOver())idleOut()},60000);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&idleOver())idleOut()});
+window.addEventListener("offline",()=>toast("No internet right now. You can still look at your swimmers; saving changes needs internet.",true));
+window.addEventListener("online",()=>toast("Back online."));
 async function boot(){
   show("#scrLoad");setLoad("Starting…");
   try{await initDB()}catch(e){setLoad("Couldn't connect. Check the internet connection and reload the page.");return}
