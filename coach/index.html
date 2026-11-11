@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.31 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.33 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -384,7 +384,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.31 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.33 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1144,6 +1144,31 @@ document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="s
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
 function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint" style="margin-bottom:12px">${segBtns("rpk",[["meet","Meet Report"],["st","Summary of times"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():meetReportView())}
 
+/* ---------- saving entries safely when several devices edit at once (11 Nov 2026) ----------
+   Each save sends only what changed on this device since the last load/save (per swimmer-event, per relay event, per name),
+   applied on top of the latest copy in the database inside a transaction. */
+const eClone=o=>JSON.parse(JSON.stringify(o||{})),eEq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+function entSnap(S){return{names:msNames(S),ent:eClone(S.ent),rel:eClone(S.rel)}}
+function entDiff(A,B){const d={ent:[],rel:[],nAdd:{},nDel:[]};
+  for(const id of new Set([...Object.keys(A.ent),...Object.keys(B.ent)])){const a=A.ent[id]||{},b=B.ent[id]||{};for(const no of new Set([...Object.keys(a),...Object.keys(b)]))if(!eEq(a[no],b[no]))d.ent.push([id,no,b[no]===undefined?null:b[no]])}
+  for(const no of new Set([...Object.keys(A.rel),...Object.keys(B.rel)]))if(!eEq(A.rel[no],B.rel[no]))d.rel.push([no,B.rel[no]===undefined?null:B.rel[no]]);
+  const an=new Map(A.names.map(x=>[x.id,x])),bn=new Map(B.names.map(x=>[x.id,x]));for(const [id,x] of bn)if(!eEq(an.get(id),x))d.nAdd[id]=x;for(const id of an.keys())if(!bn.has(id))d.nDel.push(id);
+  return d}
+function entApply(cur,d){const ent=eClone(cur.ent),rel=eClone(cur.rel);
+  for(const [id,no,v] of d.ent){if(v==null){if(ent[id]){delete ent[id][no];if(!Object.keys(ent[id]).length)delete ent[id]}}else(ent[id]=ent[id]||{})[no]=v}
+  for(const [no,v] of d.rel){if(v==null)delete rel[no];else rel[no]=v}
+  const del=new Set(d.nDel);let names=(cur.names||[]).filter(x=>!del.has(x.id)&&!d.nAdd[x.id]).concat(Object.values(d.nAdd));
+  const ix=new Map(D.sw.map((x,i)=>[x.id,i]));names.sort((a,b)=>(ix.get(a.id)??1e9)-(ix.get(b.id)??1e9));return{names,ent,rel}}
+async function syncEntry(m,S,extra){const L0=entSnap(S),d=entDiff(S.base||{names:[],ent:{},rel:{}},L0),evn=new Set((m.events||[]).map(e=>String(e.no)));
+  const out=await CTX.mcApply(m,cur=>{const r=entApply({names:cur.names||[],ent:cur.ent||{},rel:cur.rel||{}},d),nm=new Set(r.names.map(x=>x.id));
+    for(const id in r.ent){if(!nm.has(id)){delete r.ent[id];continue}for(const no in r.ent[id])if(!evn.has(String(no)))delete r.ent[id][no];if(!Object.keys(r.ent[id]).length)delete r.ent[id]}
+    for(const no in r.rel)if(!evn.has(String(no))||!(r.rel[no]||[]).length)delete r.rel[no];
+    const o={names:r.names,ent:r.ent,rel:r.rel,...(extra||{})};if(cur.status==="withdrawn")Object.assign(o,{status:"",wd:null});return o});
+  const M={names:out.names||[],ent:out.ent||{},rel:out.rel||{}},R=entApply(M,entDiff(L0,entSnap(S)));
+  S.base=eClone(M);S.names=new Set(R.names.map(x=>x.id));S.ages=Object.fromEntries(R.names.filter(x=>x.age).map(x=>[x.id,x.age]));S.ent=R.ent;S.rel=R.rel;S.mine={...S.mine,...out};S.at=Date.now()}
+/* coming back to the app after a while: load the latest entries (another device may have changed them) */
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState!=="visible"||ui.tab!=="entries")return;const S=MS[ui.emid];
+  if(S&&!S.loading&&!S.saving&&!S.esaving&&Date.now()-(S.at||0)>20000){S.stale=true;render()}});
 /* meet chooser as coloured blocks (11 Nov 2026) */
 const MB_COL=["#1e7fd8","#d9488f","#109e9e","#e0443e","#7a4fd0","#d98a0b"];
 function meetBlocks(L,cur){const t=todayL(),days=d=>d?Math.round((Date.parse(d)-Date.parse(t))/864e5):null;
@@ -1188,7 +1213,7 @@ function msLoad(m){if(MS[m.id]&&!MS[m.id].stale)return MS[m.id];if(TM[m.id])TM[m
   CTX.mcGet(m.id).then(([mine,cnt])=>{mine=mine||{};const nm=new Set((mine.names||[]).map(x=>x.id)),evn=new Set((m.events||[]).map(e=>String(e.no)));
     const ent0=Object.fromEntries(Object.entries(mine.ent||{}).filter(([id])=>nm.has(id)).map(([id,o])=>[id,Object.fromEntries(Object.entries(o||{}).filter(([no])=>evn.has(String(no))))]).filter(([,o])=>Object.keys(o).length)),
       rel0=Object.fromEntries(Object.entries(mine.rel||{}).filter(([no,l])=>evn.has(String(no))&&(l||[]).length));
-    MS[m.id]={mine,cnt,names:nm,swapMax:null,ent:ent0,rel:rel0,done:!!mine.entDone,ages:Object.fromEntries((mine.names||[]).filter(x=>x.age).map(x=>[x.id,x.age]))};render()}).catch(err=>{MS[m.id]={err:CTX.friendly(err)};render()});return MS[m.id]}
+    MS[m.id]={mine,cnt,names:nm,swapMax:null,ent:ent0,rel:rel0,done:!!mine.entDone,ages:Object.fromEntries((mine.names||[]).filter(x=>x.age).map(x=>[x.id,x.age])),at:Date.now()};MS[m.id].base=entSnap(MS[m.id]);render()}).catch(err=>{MS[m.id]={err:CTX.friendly(err)};render()});return MS[m.id]}
 function msStage(m){const t=todayL(),cap=+m.cap||0,numDl=m.numDl||m.namesDl||m.deadline||m.start,namesDl=m.namesDl||m.deadline||m.start,evDl=m.deadline||m.start;
   return{cap,numOpen:!m.closed&&cap>0&&t<=numDl,namesOpen:!m.closed&&t<=namesDl,evOpen:!m.closed&&t<=evDl,numDl,namesDl,evDl}}
 const dShort=d=>d?new Date(d+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"2-digit"}):"–";
@@ -1249,7 +1274,7 @@ document.getElementById("view").addEventListener("change",e=>{if(ui.tab!=="entri
   if(t.id==="emSel"){ui.emid=t.value;render();return}
   if(t.dataset.emage){const m=CTX.entryMeets.find(x=>x.id===ui.emid),S=MS[m.id];if(t.value)S.ages[t.dataset.emage]=+t.value;else delete S.ages[t.dataset.emage];
     const id=t.dataset.emage,x=swById(id);for(const no in (S.ent[id]||{})){const ev=m.events.find(v=>v.no===no);if(ev&&!canEnter(m,x,ev))delete S.ent[id][no];else if(ev&&S.ent[id][no]&&S.ent[id][no][2]&&!upAgs(m,x,ev).find(g=>g.id===S.ent[id][no][2]))S.ent[id][no]=S.ent[id][no].slice(0,2)}
-    S.saving=true;render();CTX.mcSave(m,{names:msNames(S),ent:S.ent}).then(()=>{S.saving=false;S.saved=true;render()}).catch(err=>{S.saving=false;CTX.toast("Couldn't save: "+CTX.friendly(err),true);render()});return}
+    S.saving=true;render();syncEntry(m,S).then(()=>{S.saving=false;S.saved=true;render()}).catch(err=>{S.saving=false;CTX.toast("Couldn't save: "+CTX.friendly(err),true);render()});return}
   if(t.dataset.emname||t.dataset.emnall){const m=CTX.entryMeets.find(x=>x.id===ui.emid),S=MS[m.id];if(ui.emNL==null)ui.emNL=true;
     const drop=id=>{S.names.delete(id);delete S.ent[id];for(const k in S.rel)S.rel[k].forEach(tm=>tm.legs=tm.legs.map(q=>q===id?"":q))};
     if(t.dataset.emnall){const max=ui._emMax??Infinity;
@@ -1261,7 +1286,7 @@ document.getElementById("view").addEventListener("change",e=>{if(ui.tab!=="entri
     else if(t.checked)S.names.add(t.dataset.emname);else drop(t.dataset.emname);
     S.saved=false;S.saving=true;render();
     clearTimeout(emT);emT=setTimeout(async()=>{const names=msNames(S);
-      try{await CTX.mcSave(m,{names,ent:S.ent,rel:S.rel});S.saving=false;S.saved=true}catch(err){S.saving=false;S.stale=true;CTX.toast("Couldn't save names: "+CTX.friendly(err),true)}render()},700)}});
+      try{await syncEntry(m,S);S.saving=false;S.saved=true}catch(err){S.saving=false;S.stale=true;CTX.toast("Couldn't save names: "+CTX.friendly(err),true)}render()},700)}});
 
 /* ---------- step 3: events ---------- */
 const RLEGS=["Back","Breast","Fly","Free"];
@@ -1341,7 +1366,7 @@ function evCard(m,S,G,cap){const n=cap?"③":"②",lim=m.lim||{},named=D.sw.filt
   return h+`</div>`}
 let entT=null;
 function saveEnt(m,S,extra){S.esaving=true;S.esaved=false;const el=document.getElementById("emSaved2");if(el)el.textContent="Saving…";clearTimeout(entT);
-  entT=setTimeout(async()=>{try{await CTX.mcSave(m,{ent:S.ent,rel:S.rel,entDone:S.done,...(extra||{})});S.esaving=false;S.esaved=true}catch(err){S.esaving=false;S.stale=true;CTX.toast("Couldn't save entries: "+CTX.friendly(err),true)}
+  entT=setTimeout(async()=>{try{await syncEntry(m,S,{entDone:S.done,...(extra||{})});S.esaving=false;S.esaved=true}catch(err){S.esaving=false;S.stale=true;CTX.toast("Couldn't save entries: "+CTX.friendly(err),true)}
     const e2=document.getElementById("emSaved2");if(e2)e2.textContent=S.esaved?"Saved ✓":""},600)}
 const curM=()=>{const m=CTX.entryMeets.find(x=>x.id===ui.emid);return[m,MS[m.id]]};
 document.getElementById("view").addEventListener("change",e=>{if(ui.tab!=="entries")return;const t=e.target;if(!t.dataset)return;
@@ -1500,6 +1525,8 @@ async function initDB(){
     meetClub:async(mid,cid)=>{const x=await F.getDoc(d("meets",mid,"clubs",cid));return x.exists()?x.data():null},
     meetClubs:mid=>list(c("meets",mid,"clubs")),
     /* mergeFields, not merge: a deep merge would keep events, relays and names that were removed (ent/rel are maps) */
+    /* read the latest entry, apply this device's changes, write back (two devices editing at once don't overwrite each other) */
+    applyEntry:(mid,cid,fn)=>F.runTransaction(db,async tx=>{const r=d("meets",mid,"clubs",cid),s=await tx.get(r),cur=s.exists()?s.data():{};const o=fn(cur);tx.set(r,{...o,updatedAt:F.serverTimestamp()},{mergeFields:[...Object.keys(o),"updatedAt"]});return{...cur,...o}}),
     saveMeetClub:(mid,cid,v)=>{const o={...v,updatedAt:F.serverTimestamp()};return F.setDoc(d("meets",mid,"clubs",cid),o,{mergeFields:Object.keys(o)})},
     delMeetClub:(mid,cid)=>F.deleteDoc(d("meets",mid,"clubs",cid)),
     count:async mid=>{const x=await F.getDoc(d("meets",mid,"meta","count"));return x.exists()?+x.data().approved||0:null},
@@ -1536,7 +1563,7 @@ function mockDB(){ /* test copy kept in this browser only (for checking screens 
     getData:async(cl,k)=>wait((S.data[cl]||{})[k]||null),setData:async(cl,k,v)=>{(S.data[cl]=S.data[cl]||{})[k]=v;save()},
     myTransfers:async cl=>Object.entries(S.transfers).filter(([,t])=>t.toClub===cl).map(([id,t])=>({id,...t})),allTransfers:async()=>Object.entries(S.transfers).map(([id,t])=>({id,...t})),
     requestTransfer:async t=>{S.transfers["t"+Date.now()]={...t,status:"open"};save()},addCorrection:async v=>{(S.corr=S.corr||{})["c"+Date.now()]={...v,status:"open",createdAt:Date.now()};save()},myCorrections:async cl=>Object.entries(S.corr||{}).filter(([,t])=>t.clubId===cl).map(([id,t])=>({id,...t})),allCorrections:async()=>Object.entries(S.corr||{}).map(([id,t])=>({id,...t})),setCorrection:async(id,v)=>{Object.assign(S.corr[id],v);save()},decideTransfer:async(t,ok)=>{if(ok)S.rosters[t.swimmerId]={clubId:t.toClub,clubName:t.toClubName};S.transfers[t.id].status=ok?"approved":"declined";save()},listMeets:async()=>Object.entries(S.meets||{}).map(([id,m])=>({id,...m})),saveMeet:async(id,v)=>{(S.meets=S.meets||{})[id]=v;save()},delMeet:async id=>{delete S.meets[id];save()},
-    meetClub:async(m,cl)=>wait(((S.mc=S.mc||{})[m]||{})[cl]||null),meetClubs:async m=>wait(Object.entries((S.mc=S.mc||{})[m]||{}).map(([id,v])=>({id,...v}))),
+    meetClub:async(m,cl)=>wait(((S.mc=S.mc||{})[m]||{})[cl]||null),applyEntry:async(m,cl,fn)=>{try{S.mc=(JSON.parse(localStorage.getItem(K)||"{}").mc)||S.mc||{}}catch(e){S.mc=S.mc||{}}const o=(S.mc[m]=S.mc[m]||{}),cur=JSON.parse(JSON.stringify(o[cl]||{})),v=fn(cur);o[cl]={...(o[cl]||{}),...v};save();return wait({...cur,...v})},meetClubs:async m=>wait(Object.entries((S.mc=S.mc||{})[m]||{}).map(([id,v])=>({id,...v}))),
     saveMeetClub:async(m,cl,v)=>{S.mc=S.mc||{};const o=(S.mc[m]=S.mc[m]||{});o[cl]={...(o[cl]||{}),...v};save()},delMeetClub:async(m,cl)=>{delete ((S.mc||{})[m]||{})[cl];save()},
     count:async m=>wait(S.cnt&&m in S.cnt?S.cnt[m]:null),recount:async m=>{const o=(S.mc||{})[m]||{},n=Object.values(o).reduce((a,x)=>a+(+x.appr||0),0);(S.cnt=S.cnt||{})[m]=n;S.teams=S.teams||{};for(const k in S.teams)if(S.teams[k].meet===m)delete S.teams[k];for(const[id,x]of Object.entries(o))if(+x.appr>0||x.status==="sent")S.teams[m+"_"+id]={meet:m,club:id,name:x.clubName||id};save();return n},
     syncMyTeam:async(m,cl,name)=>{const x=((S.mc||{})[m]||{})[cl];S.teams=S.teams||{};if(x&&x.status!=="withdrawn"&&(+x.appr>0||x.status==="sent"))S.teams[m+"_"+cl]={meet:m,club:cl,name};else delete S.teams[m+"_"+cl];save()},
@@ -1577,19 +1604,28 @@ function buildData(pub,rosterIds,year){
 
 /* ---------- start ---------- */
 let USER=null,PROFILE=null,APP=null;
+/* auto sign-out after 3 hours without use on this device (coach logins; agreed 11 Nov 2026). No database reads. */
+const IDLE_MS=3*3600e3,ACT="smt.act";
+const actGet=()=>{try{return +localStorage.getItem(ACT)||0}catch(e){return 0}},actSet=()=>{try{localStorage.setItem(ACT,String(Date.now()))}catch(e){}};
+let actT=0;["click","keydown","touchstart","scroll"].forEach(ev=>document.addEventListener(ev,()=>{const n=Date.now();if(USER&&n-actT>30000){actT=n;actSet()}},{passive:true,capture:true}));
+const idleOver=()=>{const a=actGet();return !!(USER&&PROFILE&&PROFILE.role!=="admin"&&a&&Date.now()-a>IDLE_MS)};
+async function idleOut(){try{localStorage.removeItem(ACT);sessionStorage.setItem("smt.idle","1")}catch(e){}await DB.signOut();location.href=location.pathname+(MOCK?"?mock=1"+(QS.get("data")?"&data="+encodeURIComponent(QS.get("data")):""):"")}
+setInterval(()=>{if(idleOver())idleOut()},60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&idleOver())idleOut()});
 async function boot(){
   show("#scrLoad");setLoad("Starting…");
   try{await initDB()}catch(e){setLoad("Couldn't connect. Check the internet connection and reload the page.");return}
-  DB.onAuth(async u=>{USER=u;if(!u){show("#scrLogin");return}
+  DB.onAuth(async u=>{USER=u;if(!u){show("#scrLogin");try{if(sessionStorage.getItem("smt.idle")){$("#loginMsg").textContent="You were signed out after 3 hours without using the app. Please sign in again."}}catch(e){}return}
     try{show("#scrLoad");setLoad("Checking your account…");PROFILE=await DB.getUser(u.uid);
       if(!PROFILE){show("#scrLogin");$("#loginMsg").innerHTML=`Your login works, but no SMT account is linked to it yet.<br>Send this code to SMT: <code>${escH(u.uid)}</code>`;return}
+      if(idleOver()){await idleOut();return}actSet();try{sessionStorage.removeItem("smt.idle")}catch(e){}
       const want=QS.get("club");
       if(PROFILE.role==="admin"&&!want){await adminPage();return}
       await coachPage(PROFILE.role==="admin"?want:PROFILE.clubId)}
     catch(err){show("#scrLogin");$("#loginMsg").textContent=friendly(err)}});
 }
 $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const m=$("#loginMsg");m.textContent="Signing in…";
-  try{await DB.signIn($("#lgEmail").value.trim(),$("#lgPass").value);m.textContent=""}catch(err){m.textContent=friendly(err)}});
+  try{actSet();await DB.signIn($("#lgEmail").value.trim(),$("#lgPass").value);m.textContent=""}catch(err){m.textContent=friendly(err)}});
 $("#lgForgot").addEventListener("click",async()=>{const em=$("#lgEmail").value.trim(),m=$("#loginMsg");if(!em){m.textContent="Type your email first, then tap Forgot password.";return}
   try{await DB.reset(em);m.textContent="If this email has an account, a reset link is on its way. Check your inbox and spam folder."}catch(err){m.textContent=friendly(err)}});
 document.addEventListener("click",async e=>{if(e.target.closest("[data-logout]")){await DB.signOut();location.href=location.pathname+(MOCK?"?mock=1"+(QS.get("data")?"&data="+encodeURIComponent(QS.get("data")):""):"")}});
@@ -1697,6 +1733,7 @@ async function coachPage(clubId){
     teamsFor:mid=>DB.teamsFor(mid),
     mcSave:(m,v)=>DB.saveMeetClub(m.id,CLUB.id,{clubName:CLUB.name,...v}),
     syncTeam:m=>DB.syncMyTeam(m.id,CLUB.id,CLUB.name),
+    mcApply:(m,fn)=>DB.applyEntry(m.id,CLUB.id,cur=>({clubName:CLUB.name,...fn(cur)})),
     friendly,rankAt,get people(){return PEOPLE}};
   document.title=CLUB.short+" · SMT Coach";
   $("#clubName").textContent=CLUB.name;
