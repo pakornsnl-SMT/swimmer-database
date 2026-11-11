@@ -1224,11 +1224,11 @@ async function yirPicture(s){const Y=yirData(s);if(!Y)return null;
     rows.forEach(x=>{const top=y+12;g.fillStyle="#fff";g.font=`700 31px ${BC}`;g.fillText(evShort(x.e.k),L,top+26,190);
       rr(272,top+8,604,20,10,"rgba(255,255,255,.18)");const gb=g.createLinearGradient(272,0,876,0);gb.addColorStop(0,"#5fd8a0");gb.addColorStop(1,"#22b064");rr(272,top+8,Math.max(24,604*x.p/mx),20,10,gb);
       g.textAlign="right";g.fillStyle="#9ff0c4";g.font=`700 33px ${BC}`;g.fillText(`−${((x.ob-x.nb)/100).toFixed(2)} s`,R,top+30);g.textAlign="left";
-      g.fillStyle="rgba(255,255,255,.82)";g.font=`500 23px ${MO}`;g.fillText(`${fmt(x.ob)} → ${fmt(x.nb)}`,272,top+62);y+=94})}
+      g.fillStyle="rgba(255,255,255,.82)";g.font=`500 23px ${MO}`;g.fillText(`${fmt(x.ob)} → ${fmt(x.nb)}`,272,top+60);y+=86})}
   else{g.fillText(`BEST TIMES IN ${YEAR}`,L,y);sp("0px");y+=22;
     Y.bests.slice(0,4).forEach(x=>{const top=y+12;g.fillStyle="#fff";g.font=`700 31px ${BC}`;g.fillText(evShort(x.e.k),L,top+30,240);g.font=`500 34px ${MO}`;g.fillText(fmt(x.t),330,top+30);
       if(x.r){g.textAlign="right";g.fillStyle="#ffd75e";g.font=`700 31px ${BC}`;g.fillText(`#${x.r} of ${x.n} in Thailand`,R,top+30);g.textAlign="left"}y+=76})}
-  g.fillStyle="rgba(255,255,255,.9)";g.font=`400 23px ${SA}`;g.fillText("Results from Swim Meets Thailand · smdata.in.th",L,H-34);g.textAlign="right";g.fillText("Keep going! 💪",R,H-34);g.textAlign="left";
+  g.fillStyle="rgba(255,255,255,.9)";g.font=`400 23px ${SA}`;g.fillText("Results from Swim Meets Thailand, RaceSwim & CNX · smdata.in.th",L,H-30,R-L-230);g.textAlign="right";g.fillText("Keep going! 💪",R,H-30);g.textAlign="left";
   return c.toDataURL("image/jpeg",.93)}
 function yirName(s){return `${CLUB.short} ${YEAR} - ${s.en||s.th}`.replace(/[\\/:*?"<>|]+/g," ")+".jpg"}
 async function yirShow(s){const o=document.getElementById("picbox"),img=o.querySelector("img");o.hidden=false;img.removeAttribute("src");img.alt="My Swim Year picture";
