@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.21 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.25 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -335,7 +335,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.21</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.25</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -849,10 +849,13 @@ function calendarView(){calInit();
 function manageView(){
   ui.mq=ui.mq??"";ui.taken=ui.taken||{};ui.busy=ui.busy||{};
   const n=D.sw.length,LIM=CLUB.limit||0,full=LIM&&n>=LIM,mine=new Set(CTX.myTransfers.filter(t=>t.status==="open").map(t=>t.swimmerId));
+  {const oc=document.getElementById("overChip");if(oc){const k=LIM?n-LIM:0;oc.hidden=k<=0;if(k>0)oc.textContent=`Release ${k} swimmer${k>1?"s":""}`}}
   const q=ui.mq.trim().toLowerCase();
   const found=q.length<2?[]:D.dir.filter(r=>(r[0]+" "+r[1]).toLowerCase().includes(q)).slice(0,25);
   return `<button class="back" id="mngBack">‹ Back to swimmers</button><h2>Manage team</h2><p class="hint" style="margin-top:0">Add or release swimmers. A swimmer can be in one club's coach team at a time. School and province teams are not limited. Changes are saved straight away.</p>
   <div class="relaycard" style="margin-bottom:14px"><div class="row" style="justify-content:space-between;margin-bottom:6px"><b style="font-family:var(--display);font-size:17px">Coach slots · ${n} of ${LIM||"?"} used</b><span class="hint">${full?"All slots used. Ask SMT for more slots, or release a swimmer to free one.":LIM?`${LIM-n} slot${LIM-n>1?"s":""} free`:""}</span></div><span class="bar" style="display:block"><i style="width:${LIM?Math.min(100,n/LIM*100):0}%;background:${full?"var(--red)":"linear-gradient(90deg,var(--teal),var(--gold))"}"></i></span></div>
+  ${LIM&&n>LIM&&!CTX.expired?`<div class="lock" style="border-color:var(--red);color:var(--red);margin-bottom:12px"><b>Some coach slots have ended.</b> You have ${n} swimmers but ${LIM} slot${LIM===1?"":"s"} now. Please release ${Math.max(0,n-LIM)} swimmer${n-LIM===1?"":"s"} you don't need (their results and history stay), or ask SMT to renew.</div>`:""}
+  ${(CLUB.soon||[]).length&&!CTX.expired?`<div class="lock" style="border-color:var(--gold);margin-bottom:12px">${CLUB.soon.map(b=>`${+b.n} slot${+b.n>1?"s":""} end on <b>${esc(new Date(b.end+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}))}</b>`).join(" · ")}. Ask SMT to renew so your swimmers stay in the team.</div>`:""}
   ${CTX.expired?`<div class="lock" style="border-color:var(--red);color:var(--red);margin-bottom:12px">This club's package has expired, so the team can't be changed. Contact SMT to renew.</div>`:""}
   <div class="grid2"><div style="min-width:0"><h3 style="margin-top:0">Add a swimmer</h3><input type="search" id="mq" placeholder="Type a Thai or English name" value="${esc(ui.mq)}" style="width:100%" aria-label="Search all swimmers" autocomplete="off">
     <div class="tw" style="margin-top:8px"><table><tbody>${found.map(r=>{const id=r[6],tk=ui.taken[id],b=ui.busy[id];
@@ -1092,6 +1095,10 @@ document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="s
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
 function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint" style="margin-bottom:12px">${segBtns("rpk",[["meet","Meet Report"],["st","Summary of times"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():meetReportView())}
 
+/* more swimmers than coach slots (some slots ended): names and events are locked until the coach releases swimmers (agreed 11 Nov 2026) */
+function overSlots(){return !CLUB.free&&CLUB.limit>0&&D.sw.length>CLUB.limit?D.sw.length-CLUB.limit:0}
+function overBox(){const k=overSlots();return `<div class="lock" style="border-color:var(--red);color:var(--red);margin:6px 0 0"><b>Release ${k} swimmer${k>1?"s":""} first.</b> Some coach slots have ended: you have ${D.sw.length} swimmers but ${CLUB.limit} slots. Names and events are locked until you release ${k} in Manage team (their results and history stay), or SMT renews your slots. Entries already saved are kept.<div style="margin-top:8px"><button type="button" class="chip teal" data-emmng="1" style="cursor:pointer">Go to Manage team</button></div></div>`}
+document.getElementById("view").addEventListener("click",e=>{if(!e.target.closest("[data-emmng]"))return;const b=document.querySelector('#tabs button[data-t="team"]');if(b)b.click();ui.mng=true;render()});
 /* ---------- SMT meet entries: 1 Numbers → 2 Names → 3 Events ---------- */
 const todayL=()=>new Date().toLocaleDateString("en-CA");
 const MS={};let msBusy=false;
@@ -1130,7 +1137,7 @@ function smtEntriesView(){
       <div class="row" style="margin:6px 0 0">${req?`<span class="pill pill-green">✓ ${req} sent to SMT</span>`:""}${!m.closed&&!CTX.expired?`<label class="hint">Swimmers<br><input id="emNum" type="number" min="1" max="999" value="${req||""}" style="width:80px"></label><button class="chip teal" data-emreq="1" style="cursor:pointer;padding:7px 14px">${req?"Change number":"Send to SMT"}</button>`:""}</div></div>`;
     h+=`<div class="relaycard emsec freecard" style="margin:12px 0"><h3 style="margin:0 0 6px">Names and events</h3>
       <p style="margin:4px 0">Send your swimmers' names and events to SMT <b>the usual way</b> (email or LINE) before the deadline${G.namesDl?` (names by <b>${dShort(G.namesDl)}</b>)`:""}.</p>
-      <p class="hint" style="margin:8px 0 0">With <b>coach slots</b> (299 ฿ per swimmer a year) you can enter names, events and relays right here, download the entry file for Splash or Hytek in one tap, and get swimmer reports, rankings and the relay builder. Ask SMT.</p></div>`;
+      <p class="hint" style="margin:8px 0 0">With <b>coach slots</b> (349 ฿ per swimmer a year) you can enter names, events and relays right here, download the entry file for Splash or Hytek in one tap, and get swimmer reports, rankings and the relay builder. Ask SMT.</p></div>`;
     return h}
   /* step 2 */
   const can=cap?appr:Infinity,locked=!G.namesOpen,max=locked?(S.swapMax??=named):can;
@@ -1138,6 +1145,7 @@ function smtEntriesView(){
   h+=`<div class="relaycard emsec" style="margin:12px 0"><div class="row" style="justify-content:space-between;margin:0"><h3 style="margin:0">${cap?"②":"①"} Names <span class="en">· who swims${cap?", up to "+appr:""}</span></h3>${limChip(named,cap?appr:D.sw.length,"Named")}</div>`;
   if(cap&&!appr)h+=`<p class="hint" style="margin:6px 0 0">Names open once your number is approved.</p>`;
   else if(m.closed||CTX.expired)h+=`<p class="hint">${m.closed?"Entries are closed by SMT.":"Your package has expired."}</p>`;
+  else if(overSlots())h+=overBox();
   else{h+=`<p class="hint" style="margin:4px 0 8px">${locked?`Names closed on ${dShort(G.namesDl)}. You can still <b>swap</b> a swimmer: untick one, then tick another.`:`Tick each swimmer who will swim, relay swimmers too. Saved automatically. You can change names until ${dShort(G.namesDl)}.`}${ageMode(m)==="date"?`<br><b>Ages are on ${dShort(m.ageDate)}.</b> For each named swimmer, choose the age: the older age if their birthday is on or before ${dShort(m.ageDate)}, otherwise the younger one.${noAge?` <b style="color:var(--gold)">${noAge} still to choose.</b>`:""}`:`<br>Ages by year of birth (age in ${ay}).`}${cap&&named>appr?` <b style="color:var(--red)">You have ${named-appr} more than approved. Untick ${named-appr}.</b>`:""}</p>
     ${(()=>{const op=ui.emNL!=null?ui.emNL:(!named||(cap&&named<appr));ui._emNLop=op;return `<button type="button" class="namesbtn${op?" on":""}" data-emnl aria-expanded="${op}"><span class="nbi">👥</span><span class="nbt">${named?"Change swimmers":"Choose swimmers"}<small>${named} of ${cap?appr:D.sw.length} named</small></span><span class="nbo">${op?"Hide list ▲":"Show list ▼"}</span></button>`})()}<div id="emNamesBox"${ui._emNLop?"":" hidden"}><div class="tw"><table><thead><tr><th></th><th>Swimmer</th><th class="num">Age</th></tr></thead><tbody>${D.sw.slice().sort((a,b)=>a.th.localeCompare(b.th,"th")).map(x=>{const on=S.names.has(x.id),dis=!on&&named>=max;
       return `<tr${dis?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emname="${esc(x.id)}"${on?" checked":""}${dis?" disabled":""} aria-label="Name ${esc(x.en)}"></td><td><span class="nm">${nmH(x.th)}</span> <span class="en">· ${esc(x.en)} · ${x.g==="M"?"B":"G"}</span></td><td class="num">${!x.by?"":ageMode(m)!=="date"?ay-x.by:dobOf(x)&&m.ageDate?exactAge(dobOf(x),m.ageDate):on?`<select data-emage="${esc(x.id)}" aria-label="Age on ${esc(m.ageDate)}" style="${S.ages[x.id]?"":"border-color:var(--gold);color:var(--gold)"}"><option value="">${ay-x.by-1} or ${ay-x.by}?</option>${[ay-x.by-1,ay-x.by].map(a=>`<option${S.ages[x.id]===a?" selected":""}>${a}</option>`).join("")}</select>`:`<span class="en">${ay-x.by-1}–${ay-x.by}</span>`}</td></tr>`}).join("")}</tbody></table></div><button type="button" class="chip" data-emnl style="margin-top:8px;cursor:pointer">Done · hide list ▲</button></div>
@@ -1193,8 +1201,8 @@ function evCard(m,S,G,cap){const n=cap?"③":"②",lim=m.lim||{},named=D.sw.filt
   let h=`<div class="relaycard emsec" style="margin:12px 0"><h3 style="margin:0">${n} Events <span class="en">· tick events for your named swimmers</span></h3>`;
   if(!(m.events||[]).length)return h+`<p class="hint">SMT has not loaded the events for this meet yet.</p></div>`;
   if(!named.length)return h+`<p class="hint" style="margin:4px 0 0">Name your swimmers first.</p></div>`;
-  const open=G.evOpen&&!CTX.expired,dis=open?"":" disabled",C=m.course==="SCM"?2:1;
-  h+=`<p class="hint" style="margin:4px 0 8px">${lim.meet||lim.day?`Each swimmer: <b>${lim.meet?lim.meet+" individual events in the meet":""}${lim.meet&&lim.day?", ":""}${lim.day?lim.day+" per day":""}</b>. `:""}${lim.relay?`Up to <b>${lim.relay} teams</b> per relay. `:""}Entry times start from each swimmer's SMT best in a ${C===2?"25":"50"} m pool; type a time to change it (3560 = 35.60). Saved automatically. ${open?`Deadline ${dShort(G.evDl)}.`:`<b>Events are closed.</b>`}</p>`;
+  const open=G.evOpen&&!CTX.expired&&!overSlots(),dis=open?"":" disabled",C=m.course==="SCM"?2:1;
+  h+=`<p class="hint" style="margin:4px 0 8px">${lim.meet||lim.day?`Each swimmer: <b>${lim.meet?lim.meet+" individual events in the meet":""}${lim.meet&&lim.day?", ":""}${lim.day?lim.day+" per day":""}</b>. `:""}${lim.relay?`Up to <b>${lim.relay} teams</b> per relay. `:""}Entry times start from each swimmer's SMT best in a ${C===2?"25":"50"} m pool; type a time to change it (3560 = 35.60). Saved automatically. ${open?`Deadline ${dShort(G.evDl)}.`:overSlots()?`<b style="color:var(--red)">Locked: release ${overSlots()} swimmer${overSlots()>1?"s":""} in Manage team first.</b>`:`<b>Events are closed.</b>`}</p>`;
   ui.emv=ui.emv||"sw";h+=`<div class="row">${segBtns("emv",[["sw","By swimmer"],["ev","By event"],["day","By day"],["rel","Relays"],["sum","Summary"]])}<span class="hint" id="emSaved2">${S.esaving?"Saving…":S.esaved?"Saved ✓":""}</span></div>`;
   const ind=m.events.filter(e=>e.r===1),rels=m.events.filter(e=>e.r>1),days=[...new Set(m.events.map(e=>e.day))].sort((a,b)=>a-b);
   const isFull=(c,e)=>(lim.meet&&c.tot>=lim.meet)||(lim.day&&(c.per[e.day]||0)>=lim.day);
@@ -1322,10 +1330,26 @@ return CTX;
 const FB_CONFIG={apiKey:"AIzaSyC6vuDi3FnUd-JRAgfvG_RGFKhVCBVkX7s",authDomain:"smdata-th.firebaseapp.com",projectId:"smdata-th",storageBucket:"smdata-th.firebasestorage.app",messagingSenderId:"221166535254",appId:"1:221166535254:web:6134eee1b038c0fffe31f7"};
 const FB_V="10.14.1";
 const QS=new URLSearchParams(location.search);
-/* coach slot pricing (agreed 10 Nov 2026): minimum 5 slots; 5–9 = 349 ฿, 10–29 = 299 ฿, 30+ = 249 ฿ per slot per year.
+/* coach slot pricing (agreed 11 Nov 2026): one price, 349 ฿ per slot per year, no minimum (from 1 slot). Each purchase has its own start and end date.
    The rate for the team's total number of slots applies to every slot; slots added during the year use the rate for the new total
    and end on the same date. */
-const SLOT_MIN=5,SLOT_RATE=299,slotRate=()=>SLOT_RATE,slotPrice=n=>n*slotRate(n),baht=n=>Math.round(n).toLocaleString("en-US")+" ฿";
+const SLOT_MIN=1,SLOT_RATE=349,slotRate=()=>SLOT_RATE,slotPrice=n=>n*slotRate(n),baht=n=>Math.round(n).toLocaleString("en-US")+" ฿";
+/* coach slots are bought in purchases; each purchase has its own start and end date (agreed 11 Nov 2026).
+   club.buys=[{n,start,end,rc}]. Old clubs with only limit+expires count as one purchase. */
+const dayLocal=()=>new Date().toLocaleDateString("en-CA"),
+  dPlus=(d,n)=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)},
+  yearEnd=d=>{const x=new Date(d+"T00:00:00Z");x.setUTCFullYear(x.getUTCFullYear()+1);x.setUTCDate(x.getUTCDate()-1);return x.toISOString().slice(0,10)},
+  dShow=d=>d?new Date(d+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):"";
+function buyRow(b,fresh){const v=x=>String(x==null?"":x).replace(/[&"<>]/g,m=>({"&":"&amp;",'"':"&quot;","<":"&lt;",">":"&gt;"}[m]));
+  return `<div class="row buyrow" style="margin:4px 0 0;align-items:flex-end;gap:8px"><label class="hint">Slots<br><input class="bN" type="number" min="1" step="1" value="${v(b.n)}" style="width:70px"></label><label class="hint">Start<br><input class="bS" type="date" value="${v(b.start)}"></label><label class="hint">End<br><input class="bE" type="date" value="${v(b.end)}"${fresh?' data-auto="1"':""}></label><label class="hint">Receipt no.<br><input class="bR" value="${v(b.rc)}" style="width:90px"></label><span class="bP hint" style="padding-bottom:8px;min-width:200px"></span><button type="button" class="chip" data-bren="1" title="Add the same slots for the next year" style="cursor:pointer">Renew</button><button type="button" class="chip" data-bdel="1" title="Remove this line" style="cursor:pointer">×</button></div>`}
+function clubBuys(c){if(!c)return[];if(Array.isArray(c.buys)&&c.buys.length)return c.buys;return +c.limit?[{n:+c.limit,start:"",end:c.expires||"",rc:"",old:1}]:[]}
+const buyOn=(b,day)=>(!b.start||b.start<=day)&&(!b.end||b.end>=day),
+  slotsOn=(c,day)=>clubBuys(c).reduce((a,b)=>a+(buyOn(b,day)?+b.n||0:0),0),
+  lastEnd=c=>clubBuys(c).map(b=>b.end).filter(Boolean).sort().pop()||"",
+  endingSoon=(c,day,days)=>{const ends=[...new Set(clubBuys(c).filter(b=>buyOn(b,day)&&b.end&&b.end<=dPlus(day,days||30)).map(b=>b.end))].sort();
+    /* only slots that are really lost: a renewal starting the next day cancels the warning */
+    return ends.map(e=>({end:e,n:slotsOn(c,e)-slotsOn(c,dPlus(e,1))})).filter(x=>x.n>0)},
+  buyState=(b,day)=>b.start&&b.start>day?"starts "+dShow(b.start):b.end&&b.end<day?"ended":"active";
 const DATA_URL=QS.get("data")||(/smdata\.in\.th$/.test(location.hostname)?"/data/public.json":"https://www.smdata.in.th/data/public.json");
 const MOCK=QS.get("mock")==="1";
 const $=s=>document.querySelector(s);
@@ -1546,11 +1570,11 @@ async function coachPage(clubId){
   const FREE=club.plan==="free",EMPTY_PUB={swimmers:[],meets:{},records:[],standards:[],byId:new Map()};
   const [ro,pub,cal,set,tr,meets,ppl]=await Promise.all([DB.roster(clubId),FREE?Promise.resolve(EMPTY_PUB):loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]}),DB.getData(clubId,"people").catch(()=>null)]);
   setLoad("Working out rankings…");await new Promise(r=>setTimeout(r,0));
-  const year=new Date().getFullYear(),today=new Date().toISOString().slice(0,10);
+  const year=new Date().getFullYear(),today=dayLocal();
   PEOPLE=(ppl&&ppl.m)||{};let ids=ro.map(r=>r.id);const D=buildData(pub,ids,year);
-  const CLUB={id:club.id,name:club.name||club.id,short:club.short||club.name||club.id,pkg:club.pkg||"",limit:FREE?0:+club.limit||0,expires:club.expires||"",free:FREE};
+  const CLUB={id:club.id,name:club.name||club.id,short:club.short||club.name||club.id,pkg:club.pkg||"",limit:FREE?0:slotsOn(club,today),expires:FREE?"":lastEnd(club),free:FREE,buys:FREE?[]:clubBuys(club),soon:FREE?[]:endingSoon(club,today,30),over:0};CLUB.over=FREE?0:Math.max(0,ro.length-CLUB.limit);
   const CTX={year,saved:{calendar:cal,settings:set},myTransfers:tr,meets:meets.map(m=>({n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a).filter(m=>m.b>=new Date().toISOString().slice(0,10)).sort((x,y)=>x.a.localeCompare(y.a)),
-    expired:!!(CLUB.expires&&CLUB.expires<today),toast,
+    expired:!FREE&&(clubBuys(club).length?!CLUB.limit:!!(CLUB.expires&&CLUB.expires<today)),toast,
     addSwimmer:async id=>{if(CLUB.limit&&ids.length>=CLUB.limit)return{full:true};const r=await DB.addToRoster(id,CLUB);if(r.ok){ids=ids.concat(id);APP.reload(buildData(pub,ids,year))}return r},
     releaseSwimmer:async id=>{await DB.release(id);ids=ids.filter(x=>x!==id);if(id[0]==="n"&&PEOPLE[id]){delete PEOPLE[id];await DB.setData(CLUB.id,"people",{m:PEOPLE}).catch(()=>{})}APP.reload(buildData(pub,ids,year))},
     dupCheck:v=>dupCheck(pub,v),
@@ -1572,7 +1596,8 @@ async function coachPage(clubId){
     friendly,rankAt,get people(){return PEOPLE}};
   document.title=CLUB.short+" · SMT Coach";
   $("#clubName").textContent=CLUB.name;
-  $("#pkgChips").innerHTML=`${CLUB.limit?`<span class="chip teal">${CLUB.limit} coach slots</span>`:""}${CLUB.expires?`<span class="chip ${CTX.expired?"":"gold"}" style="${CTX.expired?"color:var(--red);border-color:var(--red)":""}">${CTX.expired?"Expired":"Valid to"} ${escH(new Date(CLUB.expires+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}))}</span>`:""}`;
+  const nextEnd=CLUB.buys.filter(b=>buyOn(b,today)&&b.end).map(b=>b.end).sort()[0]||"";
+  $("#pkgChips").innerHTML=`${CLUB.limit?`<span class="chip teal">${CLUB.limit} coach slots</span>`:""}${CTX.expired?`<span class="chip" style="color:var(--red);border-color:var(--red)">Expired${CLUB.expires?" "+escH(dShow(CLUB.expires)):""}</span>`:CLUB.soon.length?CLUB.soon.map(b=>`<span class="chip" style="color:var(--red);border-color:var(--red)" title="Ask SMT to renew">${+b.n} slot${+b.n>1?"s":""} end ${escH(dShow(b.end))}</span>`).join(""):nextEnd?`<span class="chip gold">Valid to ${escH(dShow(nextEnd))}</span>`:""}${CLUB.over&&!CTX.expired?`<span class="chip" id="overChip" style="color:#fff;background:var(--red);border-color:var(--red)">Release ${CLUB.over} swimmer${CLUB.over>1?"s":""}</span>`:""}`;
   $("#userBar").innerHTML=`<span class="hint">${escH(USER.email||"")}</span>${PROFILE.role==="admin"?` <a class="chip" href="?${MOCK?"mock=1&":""}${QS.get("data")?"data="+encodeURIComponent(QS.get("data"))+"&":""}">Admin</a>`:""} <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
   CTX.loadCorrections();
   show("#scrApp");APP=window.startCoachApp(D,CTX,CLUB);
@@ -1647,12 +1672,20 @@ async function adminPage(){
       h+=`<div class="addm" style="margin:0 0 14px"><b style="font-family:var(--display);font-size:16px">Birth dates &amp; citizen IDs for team entry files</b>
         <p class="hint" style="margin:0">1 · Download the team lists. 2 · In the SMT staff app: Admin → “SMT Coach app → birth dates &amp; citizen IDs”, load the list, it makes a private file. 3 · Load that file here. Each club only ever sees its own swimmers. Delete the private file afterwards.</p>
         <div class="row" style="margin:6px 0 0"><button class="chip teal" data-tlist="1" style="cursor:pointer;padding:7px 14px">⬇ Team lists for staff app</button><label class="chip" style="cursor:pointer;padding:7px 14px">⬆ Load birth dates &amp; IDs<input type="file" id="cpLoad" accept=".json" style="display:none"></label></div></div>`;
-      h+=`<div class="tw"><table><thead><tr><th>Club</th><th>Coach slots</th><th class="num">Swimmers</th><th>Valid to</th><th></th></tr></thead><tbody>${clubs.map((c,i)=>`<tr><td><b>${escH(c.name)}</b><div class="en">${escH(c.id)}${c.short?" · "+escH(c.short):""}</div></td><td>${c.plan==="free"?'<span class="pill">Free · meet places only</span>':c.limit?`${c.limit} × ${slotRate(+c.limit)} = <b>${baht(slotPrice(+c.limit))}</b>/yr`:escH(c.pkg||"")}</td><td class="num">${counts[i]} / ${c.limit||"?"}</td><td class="en">${escH(c.expires||"")}</td>
+      const DAY=dayLocal(),soon=clubs.filter(c=>c.plan!=="free").flatMap(c=>endingSoon(c,DAY,30).map(b=>({c,b}))).sort((x,y)=>x.b.end.localeCompare(y.b.end)),
+        over=clubs.map((c,i)=>({c,n:+counts[i]||0,s:slotsOn(c,DAY)})).filter(x=>x.c.plan!=="free"&&clubBuys(x.c).length&&x.n>x.s);
+      if(soon.length||over.length)h+=`<div class="addm" style="margin:0 0 14px;border-color:var(--red)"><b style="font-family:var(--display);font-size:16px;color:var(--red)">Coach slots to renew</b>
+        ${soon.map(({c,b})=>`<div class="row" style="margin:4px 0 0;align-items:center"><span><b>${escH(c.name)}</b> · ${+b.n} slot${+b.n>1?"s":""} end <b>${escH(dShow(b.end))}</b> <span class="hint">(in ${Math.round((Date.parse(b.end)-Date.parse(DAY))/864e5)} days · ${+b.n} × ${SLOT_RATE} = ${baht(+b.n*SLOT_RATE)})</span></span><button class="chip teal" data-aedit="${escH(c.id)}" style="cursor:pointer">Renew…</button></div>`).join("")}
+        ${over.map(x=>`<div class="hint" style="margin-top:4px;color:var(--red)">${escH(x.c.name)}: ${x.n} swimmers but ${x.s} slots now. The coach has been asked to release ${x.n-x.s}.</div>`).join("")}</div>`;
+      h+=`<div class="tw"><table><thead><tr><th>Club</th><th>Coach slots</th><th class="num">Swimmers</th><th>Purchases (slots to end date)</th><th></th></tr></thead><tbody>${clubs.map((c,i)=>`<tr><td><b>${escH(c.name)}</b><div class="en">${escH(c.id)}${c.short?" · "+escH(c.short):""}</div></td><td>${c.plan==="free"?'<span class="pill">Free · meet places only</span>':`<b>${slotsOn(c,DAY)}</b> now`}</td><td class="num"${c.plan!=="free"&&+counts[i]>slotsOn(c,DAY)?' style="color:var(--red);font-weight:700"':""}>${counts[i]} / ${c.plan==="free"?"–":slotsOn(c,DAY)}</td><td class="en">${c.plan==="free"?"":clubBuys(c).map(b=>`<div${buyState(b,DAY)==="ended"?' style="opacity:.5;text-decoration:line-through"':""}>${+b.n} to ${escH(dShow(b.end)||"no end")}${buyState(b,DAY).startsWith("starts")?" · "+buyState(b,DAY):""}</div>`).join("")}</td>
         <td class="num" style="white-space:nowrap"><a class="chip teal" href="${qs("club="+encodeURIComponent(c.id))}">Open coach view</a> <button class="chip" data-aedit="${escH(c.id)}" style="cursor:pointer">Edit</button> <button class="chip" data-afill="${escH(c.id)}" style="cursor:pointer">Fill team from results</button></td></tr>`).join("")||`<tr><td class="hint" colspan="5">No clubs yet. Add the first one below.</td></tr>`}</tbody></table></div>
         <form id="clubForm" class="addm" style="margin-top:14px"><b style="font-family:var(--display);font-size:17px">${A.edit?"Edit club":"Add a club"}</b>
          <div class="row" style="margin:0"><label class="hint">Club name<br><input id="cfName" required value="${escH(e.name||"")}" style="width:260px"></label><label class="hint">Short name<br><input id="cfShort" value="${escH(e.short||"")}" placeholder="J-Fin" style="width:120px"></label><label class="hint">Club code (ID)<br><input id="cfId" required value="${escH(e.id||"")}" ${A.edit?"readonly":""} placeholder="jfin" style="width:110px" pattern="[a-z0-9-]+" title="lowercase letters, numbers and -"></label></div>
          <label class="chk" style="margin:4px 0 8px"><input type="checkbox" id="cfFree"${e.plan==="free"?" checked":""}> <span><b>Free account · meet places only</b> <span class="hint">(the coach tells SMT how many swimmers per meet; names, events and the other tools need coach slots)</span></span></label>
-         <div class="row" style="margin:0"><label class="hint">Coach slots (min ${SLOT_MIN})<br><input id="cfLimit" type="number" min="${SLOT_MIN}" step="1" value="${escH(e.limit||10)}" data-was="${escH(A.edit?e.limit||0:0)}" style="width:90px"></label><span id="cfPrice" class="hint" style="align-self:flex-end;padding-bottom:8px;min-width:280px"></span><label class="hint">Valid to<br><input id="cfExp" type="date" value="${escH(e.expires||(new Date().getFullYear()+"-12-31"))}"></label><label class="hint">Club name in results (for "Fill team")<br><input id="cfRes" value="${escH(e.resultsName||e.name||"")}" style="width:240px"></label></div>
+         <div id="cfBuys"${e.plan==="free"?" hidden":""}><b style="font-family:var(--display);font-size:15px">Coach slot purchases</b> <span class="hint">· ${SLOT_RATE} ฿ per slot for one year · each payment is one line with its own dates</span>
+           <div id="cfBuyRows">${(A.edit&&clubBuys(e).length?clubBuys(e):[{n:5,start:dayLocal(),end:yearEnd(dayLocal()),rc:""}]).map(buyRow).join("")}</div>
+           <div class="row" style="margin:4px 0 0;align-items:center"><button type="button" class="chip teal" data-badd="1" style="cursor:pointer">+ Add purchase</button><span id="cfPrice" class="hint"></span></div></div>
+         <div class="row" style="margin:6px 0 0"><label class="hint">Club name in results (for "Fill team")<br><input id="cfRes" value="${escH(e.resultsName||e.name||"")}" style="width:240px"></label></div>
          <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">${A.edit?"Save changes":"Add club"}</button>${A.edit?`<button type="button" class="chip" data-acancel="1" style="cursor:pointer">Cancel</button>`:""}</div></form>`}
     if(A.tab==="meets"&&A.mview){const m=mts.find(x=>x.id===A.mview);if(!m){A.mview=null}else{const [cl,cnt]=await Promise.all([DB.meetClubs(m.id),DB.count(m.id)]);A.mcl=cl;A.mcnt=cnt||0;const cap=+m.cap||0;
       cl.sort((a,b)=>(a.status==="waiting"?0:1)-(b.status==="waiting"?0:1)||(+a.reqAt||0)-(+b.reqAt||0)||String(a.clubName).localeCompare(String(b.clubName)));
@@ -1754,18 +1787,26 @@ async function adminPage(){
     else if(t.dataset.aok||t.dataset.ano){const tr=A.trs.find(x=>x.id===(t.dataset.aok||t.dataset.ano));t.disabled=true;try{await DB.decideTransfer(tr,!!t.dataset.aok);toast(t.dataset.aok?"Approved. The swimmer moved to "+(tr.toClubName||tr.toClub)+".":"Declined.");draw()}catch(err){toast(friendly(err),true);t.disabled=false}}
     else if(t.dataset.afill){const c=A.clubs.find(x=>x.id===t.dataset.afill);t.disabled=true;t.textContent="Loading results…";try{const pub=await loadPublic(),nm=(c.resultsName||c.name||"").trim().toLowerCase(),y=String(new Date().getFullYear()-1);
         const ids=pub.swimmers.filter(s=>String(s.club||"").trim().toLowerCase()===nm&&(s.lastMeet||"")>=y).map(s=>s.id);
-        const have=await DB.rosterCount(c.id),room=Math.max(0,(+c.limit||0)-have),pick=ids.slice(0,room);
+        const have=await DB.rosterCount(c.id),room=Math.max(0,slotsOn(c,dayLocal())-have),pick=ids.slice(0,room);
         if(!ids.length){toast(`No swimmers with the results club name "${c.resultsName||c.name}" since ${y}. Check the name in Edit.`,true);t.disabled=false;t.textContent="Fill team from results";return}
         t.textContent=`Adding ${pick.length}…`;const r=await DB.bulkAdd(pick,{id:c.id,name:c.name});toast(`Added ${r.n} swimmers${r.skip?`, ${r.skip} already in another club`:""}${ids.length>pick.length?`, ${ids.length-pick.length} not added (package limit)`:""}.`);draw()}catch(err){toast(friendly(err),true);t.disabled=false;t.textContent="Fill team from results"}}};
   const addDays=(d,n)=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
   /* price of the coach slots typed in the club form, and what adding slots costs */
-  function cfPriceShow(){const i=$("#cfLimit"),o=$("#cfPrice");if(!i||!o)return;const n=+i.value||0,was=+i.dataset.was||0;
-    if(n<SLOT_MIN){o.innerHTML=`<span style="color:var(--red)">Minimum ${SLOT_MIN} slots.</span>`;return}
-    const r=slotRate(n);let t=`${n} × ${r} = <b>${baht(slotPrice(n))}</b> per year`;
-    if(was&&n>was)t+=`<br>Adding ${n-was} slot${n-was>1?"s":""} now: ${n-was} × ${r} = <b style="color:var(--teal)">${baht((n-was)*r)}</b>, same end date`;
-    else if(was&&n<was)t+=`<br><span style="color:var(--red)">Fewer slots than before (${was}). No refunds during the year.</span>`;
-    o.innerHTML=t}
-  el.addEventListener("input",e=>{if(e.target.id==="cfLimit")cfPriceShow()});
+  /* coach slot purchases in the club form: one line per payment, each with its own start and end date */
+  function cfPriceShow(){const o=$("#cfPrice"),box=$("#cfBuyRows");if(!o||!box)return;const day=dayLocal(),L=readBuys();let now=0;
+    box.querySelectorAll(".buyrow").forEach((r,k)=>{const b=L[k],st=b?buyState(b,day):"",q=r.querySelector(".bP");if(b&&st==="active")now+=b.n;
+      if(q)q.innerHTML=b?`${b.n} × ${SLOT_RATE} = <b>${baht(b.n*SLOT_RATE)}</b> · <span style="color:${st==="active"?"var(--teal)":st==="ended"?"var(--red)":"var(--blue)"}">${st}</span>`:'<span style="color:var(--red)">Type slots and dates</span>'});
+    const bad=L.filter(b=>b&&b.start&&b.end&&b.end<b.start).length;
+    o.innerHTML=`<b>${now}</b> slot${now===1?"":"s"} in use today${bad?' · <span style="color:var(--red)">An end date is before its start date.</span>':""}`}
+  function readBuys(){return[...document.querySelectorAll("#cfBuyRows .buyrow")].map(r=>{const n=Math.floor(+r.querySelector(".bN").value||0),start=r.querySelector(".bS").value,end=r.querySelector(".bE").value;
+    return n>=SLOT_MIN&&end?{n,start,end,rc:r.querySelector(".bR").value.trim()}:null})}
+  el.addEventListener("input",e=>{if(e.target.closest&&e.target.closest("#cfBuyRows"))cfPriceShow()});
+  el.addEventListener("change",e=>{const t=e.target;if(t.id==="cfFree"){const B=$("#cfBuys");if(B)B.hidden=t.checked;if(!t.checked&&B&&!B.querySelector(".buyrow")){const d=dayLocal();$("#cfBuyRows").insertAdjacentHTML("beforeend",buyRow({n:5,start:d,end:yearEnd(d),rc:""},true))}cfPriceShow();return}if(!t.classList||!t.classList.contains("bS")||!t.value)return;const E=t.closest(".buyrow").querySelector(".bE");
+    if(!E.value||E.dataset.auto==="1"){E.value=yearEnd(t.value);E.dataset.auto="1"}cfPriceShow()});
+  el.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const box=$("#cfBuyRows");if(!box)return;
+    if(t.dataset.badd){const d=dayLocal();box.insertAdjacentHTML("beforeend",buyRow({n:"",start:d,end:yearEnd(d),rc:""},true));cfPriceShow();box.lastElementChild.querySelector(".bN").focus()}
+    else if(t.dataset.bdel){const r=t.closest(".buyrow");if(box.children.length>1||confirm("Remove the last purchase? The club will have no coach slots."))r.remove();cfPriceShow()}
+    else if(t.dataset.bren){const r=t.closest(".buyrow"),end=r.querySelector(".bE").value,st=end?dPlus(end,1):dayLocal();box.insertAdjacentHTML("beforeend",buyRow({n:r.querySelector(".bN").value,start:st,end:yearEnd(st),rc:""},true));cfPriceShow()}});
   el.onchange=async e=>{const id=e.target.id;
     if(id==="cpLoad"&&e.target.files[0]){const f=e.target.files[0];e.target.value="";try{const J=JSON.parse(await f.text());if(!J||!J.m)throw new Error("This is not an SMT private file.");let n=0,k=0;
         for(const c of A.clubs){const L=await DB.roster(c.id),cur=(await DB.getData(c.id,"people"))||{},m={...(cur.m||{})};let ch=0;
@@ -1782,12 +1823,15 @@ async function adminPage(){
         for(const ev of mf.events){const same=x=>x.g===ev.g&&x.st===ev.st&&x.d===ev.d&&x.r===ev.r;let c=L.find(x=>!used.has(x)&&String(x.no)===String(ev.no)&&same(x))||L.find(x=>!used.has(x)&&same(x)&&x.day===ev.day)||L.find(x=>!used.has(x)&&same(x));
           if(c){used.add(c);ev.lxid=String((c.ags[0]||{}).id||c.no).split("/")[0];ok++;if(ev.r>1&&c.ags.length===ev.ags.length)c.ags.forEach((q,k)=>{if(q.t){ev.ags[k].t=1;if(q.max)ev.ags[k].max=q.max}})}else delete ev.lxid}
         mf.lx=r.lx;mf.lxFile=f.name;toast(`Splash event file matched ${ok} of ${mf.events.length} events.${ok<mf.events.length?" Check the meet; unmatched events can't go in team files.":""} Tap Save changes.`,ok<mf.events.length);draw()}catch(err){toast(err.message||String(err),true)}return}
-    if(id==="mfFile"&&e.target.files[0]){try{const r=await readEventFile(e.target.files[0]);const keep=A.mform||{};A.mform={...r,lim:{meet:r.maxInd||(keep.lim||{}).meet||0,day:(keep.lim||{}).day||0,relay:r.maxRel||(keep.lim||{}).relay||0}};A.mopen=false;toast(`Read ${r.events.length} events from ${r.file}.`);draw()}catch(err){toast(err.message||String(err),true);e.target.value=""}return}if(id==="cfLimit")cfPriceShow()
+    if(id==="mfFile"&&e.target.files[0]){try{const r=await readEventFile(e.target.files[0]);const keep=A.mform||{};A.mform={...r,lim:{meet:r.maxInd||(keep.lim||{}).meet||0,day:(keep.lim||{}).day||0,relay:r.maxRel||(keep.lim||{}).relay||0}};A.mopen=false;toast(`Read ${r.events.length} events from ${r.file}.`);draw()}catch(err){toast(err.message||String(err),true);e.target.value=""}return}
     if((id==="mfStart"||id==="mfDays")&&$("#mfStart").value){$("#mfEnd").value=addDays($("#mfStart").value,Math.max(1,+$("#mfDays").value||1)-1)}
     if(id==="mfEnd"&&$("#mfStart").value&&$("#mfEnd").value){$("#mfDays").value=Math.max(1,Math.round((Date.parse($("#mfEnd").value)-Date.parse($("#mfStart").value))/864e5)+1)}};
   el.onsubmit=async e=>{e.preventDefault();const f=e.target;
     if(f.id==="clubForm"){const id=$("#cfId").value.trim().toLowerCase();if(!/^[a-z0-9-]+$/.test(id)){toast("Club code: lowercase letters, numbers and - only.",true);return}
-      try{await DB.saveClub(id,{name:$("#cfName").value.trim(),short:$("#cfShort").value.trim()||$("#cfName").value.trim(),...($("#cfFree").checked?{plan:"free",pkg:"Free · meet places only",limit:0}:{plan:"",pkg:`${Math.max(SLOT_MIN,+$("#cfLimit").value||0)} coach slots`,limit:Math.max(SLOT_MIN,+$("#cfLimit").value||0)}),expires:$("#cfExp").value,resultsName:$("#cfRes").value.trim()});toast("Club saved.");A.edit=null;draw()}catch(err){toast(friendly(err),true)}}
+      const free=$("#cfFree").checked,raw=readBuys(),buys=raw.filter(Boolean).sort((a,b)=>(a.start||"").localeCompare(b.start||""));
+      if(!free&&(raw.some(b=>!b)||!buys.length)){toast("Each purchase needs slots (1 or more) and an end date.",true);return}
+      if(!free&&buys.some(b=>b.start&&b.end<b.start)){toast("An end date is before its start date.",true);return}
+      try{await DB.saveClub(id,{name:$("#cfName").value.trim(),short:$("#cfShort").value.trim()||$("#cfName").value.trim(),...(free?{plan:"free",pkg:"Free · meet places only",limit:0}:{plan:"",buys,pkg:`${slotsOn({buys},dayLocal())} coach slots`,limit:slotsOn({buys},dayLocal()),expires:lastEnd({buys})}),resultsName:$("#cfRes").value.trim()});toast("Club saved.");A.edit=null;draw()}catch(err){toast(friendly(err),true)}}
     if(f.id==="paperForm"){const m=A.mts.find(x=>x.id===A.mview),cap=+m.cap||0,n=Math.floor(+$("#ppN").value||0),nm=$("#ppName").value.trim();if(!nm||n<1)return;
       if(cap&&A.mcnt+n>cap){toast(`Only ${Math.max(0,cap-A.mcnt)} places left.`,true);return}
       try{await DB.saveMeetClub(m.id,"paper-"+Date.now().toString(36),{clubName:nm,req:n,appr:n,status:"approved",paper:true,reqAt:Date.now()});await DB.recount(m.id);toast(`${nm}: ${n} added.`);draw()}catch(err){toast(friendly(err),true)}}
