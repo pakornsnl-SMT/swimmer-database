@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.17 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.18 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -245,6 +245,15 @@ tr.tk td{background:color-mix(in srgb,var(--teal) 13%,var(--surface))!important}
 /* v3.17 swim-up */
 .sutag{display:inline-block;background:var(--red);color:#fff;border-radius:4px;padding:0 6px;font:700 10px var(--body);letter-spacing:.03em;text-transform:uppercase;vertical-align:1px;margin-left:4px}
 .suchip{font-size:11px!important;padding:1px 8px!important;cursor:pointer;margin-left:6px;vertical-align:1px}
+/* v3.18 Meet entries: bigger step headings, clear "Choose swimmers" button */
+.emsec h3{font-size:21px!important;letter-spacing:.02em}.emsec h3 .en{font-size:14px;text-transform:none;letter-spacing:0}
+.emsec{padding:16px 18px!important}
+.namesbtn{display:flex;align-items:center;gap:12px;width:100%;max-width:520px;text-align:left;padding:12px 16px;margin:6px 0 10px;border:2px solid var(--teal);border-radius:12px;background:var(--teal-soft);color:var(--teal);cursor:pointer;font:600 16px var(--display);letter-spacing:.02em;box-shadow:0 2px 0 color-mix(in srgb,var(--teal) 35%,transparent)}
+.namesbtn:hover{background:color-mix(in srgb,var(--teal) 18%,var(--surface))}
+.namesbtn:active{transform:translateY(1px);box-shadow:none}
+.namesbtn .nbi{font-size:22px}.namesbtn .nbt{flex:1;display:flex;flex-direction:column;line-height:1.2}.namesbtn small{font:400 13px var(--body);color:var(--muted);letter-spacing:0}
+.namesbtn .nbo{font:600 13px var(--body);white-space:nowrap;background:var(--teal);color:#fff;border-radius:999px;padding:4px 12px}
+.namesbtn.on{background:var(--surface)}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -320,7 +329,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.17</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.18</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1099,7 +1108,7 @@ function smtEntriesView(){
   h+=`<div class="row" style="gap:6px">${cap?chip("①","Numbers",st1,appr?appr+" approved":req?"waiting for SMT":"due "+dShort(G.numDl))+'<span class="hint">→</span>':""}${chip(cap?"②":"①","Names",st2,named+(cap?" / "+appr:"")+" named")}<span class="hint">→</span>${chip(cap?"③":"②","Events",S.done?"done":nEnt?"part":"todo",(nEnt?nEnt+" entries · ":"")+(S.done?"finished":"due "+dShort(G.evDl)))}</div>`;
   /* step 1 */
   if(cap){const left=Math.max(0,cap-(S.cnt||0)),pct=Math.min(100,(S.cnt||0)/cap*100);
-    h+=`<div class="relaycard" style="margin:12px 0"><h3 style="margin:0 0 6px">① Numbers <span class="en">· how many swimmers ${esc(CLUB.short)} will bring</span></h3>
+    h+=`<div class="relaycard emsec" style="margin:12px 0"><h3 style="margin:0 0 6px">① Numbers <span class="en">· how many swimmers ${esc(CLUB.short)} will bring</span></h3>
      <div class="hint">This meet takes <b>${cap.toLocaleString()} swimmers</b> (relay swimmers count too). ${m.alloc==="auto"?"Places are given straight away, first come, first served.":"SMT checks each club's request and approves the number."}</div>
      <div style="height:10px;border-radius:6px;background:var(--line);margin:8px 0 4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${left<cap*.1?"var(--red)":"var(--teal)"}"></div></div>
      <div class="hint"><b>${(S.cnt||0).toLocaleString()}</b> places given · <b style="color:${left?"var(--teal)":"var(--red)"}">${left.toLocaleString()} left</b></div>
@@ -1108,12 +1117,12 @@ function smtEntriesView(){
   /* step 2 */
   const can=cap?appr:Infinity,locked=!G.namesOpen,max=locked?(S.swapMax??=named):can;
   const ay=ageYear(m),noAge=ageMode(m)==="date"?D.sw.filter(x=>S.names.has(x.id)&&x.by&&!S.ages[x.id]&&!dobOf(x)).length:0;
-  h+=`<div class="relaycard" style="margin:12px 0"><div class="row" style="justify-content:space-between;margin:0"><h3 style="margin:0">${cap?"②":"①"} Names <span class="en">· who swims${cap?", up to "+appr:""}</span></h3>${limChip(named,cap?appr:D.sw.length,"Named")}</div>`;
+  h+=`<div class="relaycard emsec" style="margin:12px 0"><div class="row" style="justify-content:space-between;margin:0"><h3 style="margin:0">${cap?"②":"①"} Names <span class="en">· who swims${cap?", up to "+appr:""}</span></h3>${limChip(named,cap?appr:D.sw.length,"Named")}</div>`;
   if(cap&&!appr)h+=`<p class="hint" style="margin:6px 0 0">Names open once your number is approved.</p>`;
   else if(m.closed||CTX.expired)h+=`<p class="hint">${m.closed?"Entries are closed by SMT.":"Your package has expired."}</p>`;
   else{h+=`<p class="hint" style="margin:4px 0 8px">${locked?`Names closed on ${dShort(G.namesDl)}. You can still <b>swap</b> a swimmer: untick one, then tick another.`:`Tick each swimmer who will swim, relay swimmers too. Saved automatically. You can change names until ${dShort(G.namesDl)}.`}${ageMode(m)==="date"?`<br><b>Ages are on ${dShort(m.ageDate)}.</b> For each named swimmer, choose the age: the older age if their birthday is on or before ${dShort(m.ageDate)}, otherwise the younger one.${noAge?` <b style="color:var(--gold)">${noAge} still to choose.</b>`:""}`:`<br>Ages by year of birth (age in ${ay}).`}${cap&&named>appr?` <b style="color:var(--red)">You have ${named-appr} more than approved. Untick ${named-appr}.</b>`:""}</p>
-    <details${ui.emNamesOpen||!named||(cap&&named<appr)?" open":""} id="emNamesBox"><summary style="cursor:pointer" class="hint"><b>${named} named</b> · tap to ${ui.emNamesOpen||!named||(cap&&named<appr)?"hide":"show or change"} the list</summary><div class="tw"><table><thead><tr><th></th><th>Swimmer</th><th class="num">Age</th></tr></thead><tbody>${D.sw.slice().sort((a,b)=>a.th.localeCompare(b.th,"th")).map(x=>{const on=S.names.has(x.id),dis=!on&&named>=max;
-      return `<tr${dis?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emname="${esc(x.id)}"${on?" checked":""}${dis?" disabled":""} aria-label="Name ${esc(x.en)}"></td><td><span class="nm">${nmH(x.th)}</span> <span class="en">· ${esc(x.en)} · ${x.g==="M"?"B":"G"}</span></td><td class="num">${!x.by?"":ageMode(m)!=="date"?ay-x.by:dobOf(x)&&m.ageDate?exactAge(dobOf(x),m.ageDate):on?`<select data-emage="${esc(x.id)}" aria-label="Age on ${esc(m.ageDate)}" style="${S.ages[x.id]?"":"border-color:var(--gold);color:var(--gold)"}"><option value="">${ay-x.by-1} or ${ay-x.by}?</option>${[ay-x.by-1,ay-x.by].map(a=>`<option${S.ages[x.id]===a?" selected":""}>${a}</option>`).join("")}</select>`:`<span class="en">${ay-x.by-1}–${ay-x.by}</span>`}</td></tr>`}).join("")}</tbody></table></div></details>
+    ${(()=>{const op=ui.emNL!=null?ui.emNL:(!named||(cap&&named<appr));ui._emNLop=op;return `<button type="button" class="namesbtn${op?" on":""}" data-emnl aria-expanded="${op}"><span class="nbi">👥</span><span class="nbt">${named?"Change swimmers":"Choose swimmers"}<small>${named} of ${cap?appr:D.sw.length} named</small></span><span class="nbo">${op?"Hide list ▲":"Show list ▼"}</span></button>`})()}<div id="emNamesBox"${ui._emNLop?"":" hidden"}><div class="tw"><table><thead><tr><th></th><th>Swimmer</th><th class="num">Age</th></tr></thead><tbody>${D.sw.slice().sort((a,b)=>a.th.localeCompare(b.th,"th")).map(x=>{const on=S.names.has(x.id),dis=!on&&named>=max;
+      return `<tr${dis?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emname="${esc(x.id)}"${on?" checked":""}${dis?" disabled":""} aria-label="Name ${esc(x.en)}"></td><td><span class="nm">${nmH(x.th)}</span> <span class="en">· ${esc(x.en)} · ${x.g==="M"?"B":"G"}</span></td><td class="num">${!x.by?"":ageMode(m)!=="date"?ay-x.by:dobOf(x)&&m.ageDate?exactAge(dobOf(x),m.ageDate):on?`<select data-emage="${esc(x.id)}" aria-label="Age on ${esc(m.ageDate)}" style="${S.ages[x.id]?"":"border-color:var(--gold);color:var(--gold)"}"><option value="">${ay-x.by-1} or ${ay-x.by}?</option>${[ay-x.by-1,ay-x.by].map(a=>`<option${S.ages[x.id]===a?" selected":""}>${a}</option>`).join("")}</select>`:`<span class="en">${ay-x.by-1}–${ay-x.by}</span>`}</td></tr>`}).join("")}</tbody></table></div><button type="button" class="chip" data-emnl style="margin-top:8px;cursor:pointer">Done · hide list ▲</button></div>
     <p class="hint" id="emSaved" style="min-height:1.2em">${S.saving?"Saving…":S.saved?"Saved ✓":""}</p>`}
   h+=`</div>`+evCard(m,S,G,cap);
   return h;
@@ -1132,7 +1141,7 @@ document.getElementById("view").addEventListener("change",e=>{if(ui.tab!=="entri
   if(t.dataset.emage){const m=CTX.entryMeets.find(x=>x.id===ui.emid),S=MS[m.id];if(t.value)S.ages[t.dataset.emage]=+t.value;else delete S.ages[t.dataset.emage];
     const id=t.dataset.emage,x=swById(id);for(const no in (S.ent[id]||{})){const ev=m.events.find(v=>v.no===no);if(ev&&!canEnter(m,x,ev))delete S.ent[id][no];else if(ev&&S.ent[id][no]&&S.ent[id][no][2]&&!upAgs(m,x,ev).find(g=>g.id===S.ent[id][no][2]))S.ent[id][no]=S.ent[id][no].slice(0,2)}
     S.saving=true;render();CTX.mcSave(m,{names:msNames(S),ent:S.ent}).then(()=>{S.saving=false;S.saved=true;render()}).catch(err=>{S.saving=false;CTX.toast("Couldn't save: "+CTX.friendly(err),true);render()});return}
-  if(t.dataset.emname){const m=CTX.entryMeets.find(x=>x.id===ui.emid),S=MS[m.id];if(t.checked)S.names.add(t.dataset.emname);else{const id=t.dataset.emname;S.names.delete(id);delete S.ent[id];for(const k in S.rel)S.rel[k].forEach(tm=>tm.legs=tm.legs.map(q=>q===id?"":q))}S.saved=false;S.saving=true;render();
+  if(t.dataset.emname){const m=CTX.entryMeets.find(x=>x.id===ui.emid),S=MS[m.id];if(ui.emNL==null)ui.emNL=true;if(t.checked)S.names.add(t.dataset.emname);else{const id=t.dataset.emname;S.names.delete(id);delete S.ent[id];for(const k in S.rel)S.rel[k].forEach(tm=>tm.legs=tm.legs.map(q=>q===id?"":q))}S.saved=false;S.saving=true;render();
     clearTimeout(emT);emT=setTimeout(async()=>{const names=msNames(S);
       try{await CTX.mcSave(m,{names,ent:S.ent,rel:S.rel});S.saving=false;S.saved=true}catch(err){S.saving=false;S.stale=true;CTX.toast("Couldn't save names: "+CTX.friendly(err),true)}render()},700)}});
 
@@ -1163,7 +1172,7 @@ function bestT(x,c,st,d){let b=0;for(const r of x.rs||[])if(r[4]===c&&r[2]===st&
 const swById=id=>D.sw.find(x=>x.id===id);
 function entCnt(m,S,id){const o=S.ent[id]||{},per={};let tot=0;for(const no in o){const e=m.events.find(v=>v.no===no);if(!e)continue;tot++;per[e.day]=(per[e.day]||0)+1}return{tot,per}}
 function evCard(m,S,G,cap){const n=cap?"③":"②",lim=m.lim||{},named=D.sw.filter(x=>S.names.has(x.id)).sort((a,b)=>a.th.localeCompare(b.th,"th"));
-  let h=`<div class="relaycard" style="margin:12px 0"><h3 style="margin:0">${n} Events <span class="en">· tick events for your named swimmers</span></h3>`;
+  let h=`<div class="relaycard emsec" style="margin:12px 0"><h3 style="margin:0">${n} Events <span class="en">· tick events for your named swimmers</span></h3>`;
   if(!(m.events||[]).length)return h+`<p class="hint">SMT has not loaded the events for this meet yet.</p></div>`;
   if(!named.length)return h+`<p class="hint" style="margin:4px 0 0">Name your swimmers first.</p></div>`;
   const open=G.evOpen&&!CTX.expired,dis=open?"":" disabled",C=m.course==="SCM"?2:1;
@@ -1242,7 +1251,7 @@ document.getElementById("view").addEventListener("click",e=>{if(ui.tab!=="entrie
     CTX.toast(`Downloaded ${r.name} (${r.athletes} swimmers).${r.warn.length?` No birth date for: ${r.warn.join(", ")}. Ask SMT to add them, or add them as corrections.`:""}`,!!r.warn.length)}
   else if(b.dataset.emgo){ui.emsw=b.dataset.emgo;ui.emv="sw";render()}});
 
-document.getElementById("view").addEventListener("click",e=>{const sm=e.target.closest("#emNamesBox > summary");if(sm)ui.emNamesOpen=!sm.parentElement.open});
+document.getElementById("view").addEventListener("click",e=>{if(ui.tab!=="entries")return;const b=e.target.closest("[data-emnl]");if(!b)return;ui.emNL=!ui._emNLop;render()});
 
 const dayDate=(m,d)=>{const x=new Date(m.start+"T00:00:00");x.setDate(x.getDate()+d-1);return x.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})};
 const legStrokes=e=>e.st===5?[2,3,4,1]:[e.st,e.st,e.st,e.st];
