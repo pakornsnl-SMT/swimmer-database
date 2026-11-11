@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.18 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.19 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -174,6 +174,8 @@ table.sttab td.num.t{font:500 12.5px var(--mono)}table.sttab td.num.t.stpb{font-
 @media print{body.printing.land table.sttab td.num.t{font-size:9.6px!important;letter-spacing:-.03em}body.printing.land table.sttab td,body.printing.land table.sttab td.en{font-size:9.2px!important}}
 @media screen{table.sttab col{width:auto!important}table.sttab td.stm{white-space:normal!important;min-width:150px}table.sttab td.num.t{font-size:12px;padding:3px 4px!important}}
 @media screen{table.sttab th,table.sttab td{padding:3px 4px!important}table.sttab th{font-size:11.5px}table.sttab td.en{font-size:12px}table.sttab td.stm{min-width:130px;font-size:12.5px}}
+.swrep .pbtag{margin-right:4px}
+.swrep td.t .pbtag{float:left;margin:2px 6px 0 0}
 /* SMT Coach colour scheme: blue (main) and red (accent) */
 :root{--bg:#f4f6fb;--surface:#ffffff;--ink:#14213d;--muted:#5a6886;--line:#d9e0ee;--teal:#1d4fb8;--teal-soft:#e3eafa;--blue:#3b7be0;--blue-soft:#e6efff;--red:#b3182d;--red-soft:#fde6e9;--gold:#dc3545;--gold-soft:#fdecee;--sel:#e3ebff;--selbar:#1d4fb8;--good:#1f8a4c;--bad:#c42a3c}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d1322;--surface:#141d31;--ink:#e6ecf8;--muted:#93a3c2;--line:#26345a;--teal:#7aa2f5;--teal-soft:#18284a;--blue:#8fb6ff;--blue-soft:#1a2a4d;--red:#ff6b78;--red-soft:#3d1a20;--gold:#ff8a94;--gold-soft:#3a1c22;--sel:#1a2a4d;--selbar:#7aa2f5}}
@@ -329,7 +331,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.18</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.19</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1038,7 +1040,7 @@ function swReport(rows,mt){const L=ui.rl||"en",T=RT[L],by=new Map();rows.forEach
     return `<div class="swrep"><div class="row" style="justify-content:space-between;margin:0 0 6px;border-bottom:1px solid var(--line);padding-bottom:6px"><div><b style="font:700 17px var(--display)">${esc(s.th)}</b> <span class="en">· ${esc(s.en)} · ${s.g==="M"?(L==="th"?"ชาย":"Boy"):(L==="th"?"หญิง":"Girl")}, ${s.age}</span></div>
      <div class="row" style="margin:0;gap:6px"><span class="chip">${l.length} ${T.swims}</span><span class="chip"><b>${pbn}</b> ${T.pbs}</span>${md.some(Boolean)?`<span class="chip">${[1,2,3].map((p,i)=>md[i]?`${medal(p)}×${md[i]}`:"").filter(Boolean).join(" ")}</span>`:""}</div></div>
      <div class="tw"><table><thead><tr><th>${T.ev}</th><th class="num">${T.pl}</th><th class="num">${T.time}</th><th class="num">${T.prev}</th><th class="num">${T.ch}</th><th class="num hide-sm">${T.pts}</th><th class="hide-sm">${T.sp}</th></tr></thead><tbody>${l.map((x,li)=>{const lp=x.r.sp||[],sok=lp.length>1&&Math.abs(lp.reduce((a,b)=>a+b,0)-x.r.t)<=5,gi=[...new Set(l.map(y=>y.e.st))].indexOf(x.e.st),ns=li>0&&l[li-1].e.st!==x.e.st;
-       return `<tr class="gr${gi%3}${ns?" gstart2":""}"><td><b>${rEv(L,x.e)}</b>${x.r.relay?` <span class="en">(${T.lead})</span>`:""}</td><td class="num">${rdTag(x.r,L)}${medal(x.r.p)}</td><td class="num t"><b>${fmt(x.r.t)}</b>${x.pb?' <span class="pbtag">PB</span>':""}</td><td class="num t" style="color:var(--muted)">${x.first?"–":fmt(x.prev)}</td>
+       return `<tr class="gr${gi%3}${ns?" gstart2":""}"><td><b>${rEv(L,x.e)}</b>${x.r.relay?` <span class="en">(${T.lead})</span>`:""}</td><td class="num">${rdTag(x.r,L)}${medal(x.r.p)}</td><td class="num t" style="white-space:nowrap">${x.pb?'<span class="pbtag">PB</span> ':""}<b>${fmt(x.r.t)}</b></td><td class="num t" style="color:var(--muted)">${x.first?"–":fmt(x.prev)}</td>
        <td class="num">${x.first?`<span class="newtag">${T.first}</span>`:x.pb?`<span class="up">−${(x.drop/100).toFixed(2)}</span>`:x.r.t>x.prev?`<span class="slow">+${((x.r.t-x.prev)/100).toFixed(2)}</span>`:"="}</td><td class="num hide-sm">${pts(s,x.e.k,x.r.t)||""}</td><td class="hide-sm en">${sok?lp.map(fmt).join(" · "):""}</td></tr>`}).join("")}</tbody></table></div>
      <div class="swsum">${swRepSummary(L,T,s,l,mt).map(t=>`<p>${t}</p>`).join("")}</div></div>`}).join("")}`}
 
