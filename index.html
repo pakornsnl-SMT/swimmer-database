@@ -4234,6 +4234,8 @@ function renderQualCard(){
   const people=g=>new Set(rows.filter(r=>r.g===g).map(r=>r.s.id)).size;
   $("#qrSum").innerHTML=`<b>${people("F")+people("M")} swimmers</b> qualified (${people("F")} ${people("F")===1?"woman":"women"}, ${people("M")} ${people("M")===1?"man":"men"}) in <b>${rows.length} events</b>${lvs.length?` · ${lvs.map(l=>`${l}: ${rows.filter(r=>r.lv===l).length}`).join(", ")}`:""}<br>${stdPools(Q).join(" and ")} swims${Q.from||Q.to?`, ${Q.from?fdate(Q.from):"…"} – ${Q.to?fdate(Q.to):"…"}`:""}${Q.meetCourse&&!stdPools(Q).includes(Q.meetCourse)?` · ${Q.meetCourse} meet`:""}`;
 }
+/* level cell: the level and its standard time, e.g. "B 2:13.00" (asked 11 Nov 2026) */
+function lvCell(x){const t=x.lv!=null&&x.std?x.std[x.lv]:null;return `<span style="white-space:nowrap"><b>${esc(x.lv||"")}</b>${t?` <span class="en">${fmt(t)}</span>`:""}</span>`}
 async function buildQualReport(L,thaiOnly,names,by,land){
   const issue=today(),rows=qualifierRows(L,thaiOnly),lvs=stdLevels(L).filter(Boolean),pools=stdPools(L),ag=stdHasAge(L);
   const crit=[`รายการ / Meet: <b>${esc(L.name)}</b>`,L.meetCourse?`สระของรายการ / Meet pool: ${poolBi(L.meetCourse)}`:"",`เกณฑ์เวลาและผลการแข่งขันจากสระ / Qualifying times and swims: ${pools.map(poolBi).join(", ")}`,
@@ -4251,8 +4253,8 @@ async function buildQualReport(L,thaiOnly,names,by,land){
     note:`ผ่านเกณฑ์ทั้งหมด ${people("F")+people("M")} คน (หญิง ${people("F")} ชาย ${people("M")}) · ${people("F")+people("M")} swimmers qualified (${people("F")} ${people("F")===1?"woman":"women"}, ${people("M")} ${people("M")===1?"man":"men"}) in ${rows.length} events.${lvs.length?` นักกีฬาที่ผ่านทั้งสองระดับนับในระดับ ${lvs[0]} · A swimmer who reaches ${lvs[0]} is counted in ${lvs[0]} only.`:""}`});
   /* fixed column widths, the same in every table of the report (the meet column takes what is left) */
   const W=(p,l)=>(land?l:p)+"%";
-  const cols=[{h:hb("ที่","No."),cls:"num",w:W(5,4)},{h:hb("ชื่อ-นามสกุล","Name"),w:W(23,20)},{h:hb("ปีเกิด","Born"),cls:"num",w:W(7,5)},...(ag?[{h:hb("อายุ","Age"),cls:"num",w:W(5,4)}]:[]),{h:hb("สังกัด","Club"),w:ag?W(17,17):W(20,20)},{h:hb("เวลา","Time"),cls:"num",w:W(9,7)},...(lvs.length?[{h:hb("ระดับ","Level"),w:W(6,5)}]:[]),{h:hb("วันที่","Date"),w:W(11,9)},{h:hb("รายการแข่งขัน","Meet")}];
-  const sCols=[{h:hb("ที่","No."),cls:"num",w:W(5,4)},{h:hb("ชื่อ-นามสกุล","Name"),w:W(21,18)},{h:hb("ปีเกิด","Born"),cls:"num",w:W(6,5)},{h:hb("สังกัด","Club"),w:W(14,16)},{h:hb("รายการ","Event"),w:W(14,12)},{h:hb("เวลา","Time"),cls:"num",w:W(8,7)},...(lvs.length?[{h:hb("ระดับ","Level"),w:W(6,5)}]:[]),{h:hb("วันที่","Date"),w:W(11,9)},{h:hb("รายการแข่งขัน","Meet")}];
+  const cols=[{h:hb("ที่","No."),cls:"num",w:W(5,4)},{h:hb("ชื่อ-นามสกุล","Name"),w:W(23,20)},{h:hb("ปีเกิด","Born"),cls:"num",w:W(7,5)},...(ag?[{h:hb("อายุ","Age"),cls:"num",w:W(5,4)}]:[]),{h:hb("สังกัด","Club"),w:ag?W(17,17):W(20,20)},{h:hb("เวลา","Time"),cls:"num",w:W(9,7)},...(lvs.length?[{h:hb("ระดับ","Level"),w:W(8,6)}]:[]),{h:hb("วันที่","Date"),w:W(11,9)},{h:hb("รายการแข่งขัน","Meet")}];
+  const sCols=[{h:hb("ที่","No."),cls:"num",w:W(5,4)},{h:hb("ชื่อ-นามสกุล","Name"),w:W(20,18)},{h:hb("ปีเกิด","Born"),cls:"num",w:W(6,5)},{h:hb("สังกัด","Club"),w:W(13,15)},{h:hb("รายการ","Event"),w:W(14,12)},{h:hb("เวลา","Time"),cls:"num",w:W(8,7)},...(lvs.length?[{h:hb("ระดับ","Level"),w:W(8,6)}]:[]),{h:hb("วันที่","Date"),w:W(11,9)},{h:hb("รายการแข่งขัน","Meet")}];
   /* by swimmer: one row per swimmer with all their qualifying events */
   if(by==="swimmer")["F","M"].forEach(g=>{const gr=rows.filter(r=>r.g===g);if(!gr.length)return;
     const per=new Map();gr.forEach(x=>(per.get(x.s.id)||per.set(x.s.id,[]).get(x.s.id)).push(x));
@@ -4262,13 +4264,13 @@ async function buildQualReport(L,thaiOnly,names,by,land){
     B.push({t:"table",fixed:true,caption:`${list.length} คน · ${list.length} swimmer${list.length===1?"":"s"}`,cols:sCols,
       rows:list.flatMap((l,i)=>{const s0=l[0].s,N=nameFor(s0,names);const cnt=`${l.length} รายการ / event${l.length===1?"":"s"}${lvs.length?` (${lvs.map(v=>`${v} ${l.filter(x=>x.lv===v).length}`).join(" · ")})`:""}`;
         return l.map((x,j)=>[j?"":i+1,j?"":`<b>${esc(N.main)}</b>${N.sub?`<br><span class="en">${esc(N.sub)}</span>`:""}<br><span class="en">${cnt}</span>`,j?"":s0.birthYear||"",j?"":esc(s0.club||""),
-          `${evTh(x.st,x.d)}<br><span class="en">${x.d}m ${SHORT[x.st]}${showPool?" · "+x.c:""}</span>`,`<b>${fmt(x.r.time)}</b>`,...(lvs.length?[`<b>${x.lv}</b>`]:[]),rDate(x.r.date),esc(x.r.meet||"")+(x.r.relay?` <span class="en">(relay lead-off)</span>`:"")])})})});
+          `${evTh(x.st,x.d)}<br><span class="en">${x.d}m ${SHORT[x.st]}${showPool?" · "+x.c:""}</span>`,`<b>${fmt(x.r.time)}</b>`,...(lvs.length?[lvCell(x)]:[]),rDate(x.r.date),esc(x.r.meet||"")+(x.r.relay?` <span class="en">(relay lead-off)</span>`:"")])})})});
   else ["F","M"].forEach(g=>{const gr=rows.filter(r=>r.g===g);if(!gr.length)return;
     B.push(sec(g==="F"?"หญิง":"ชาย",g==="F"?"Women":"Men"));
     evKeys.forEach(k=>{const l=gr.filter(r=>`${r.st}|${r.d}|${r.c}`===k);if(!l.length)return;const[st,d,c]=k.split("|");
       const std=ag?"":Object.entries(l[0].std).filter(([,t])=>t).map(([lv,t])=>`${lv||"เกณฑ์ / Standard"} ${fmt(t)}`).join(" · ");
       B.push({t:"table",caption:`${evTh(st,d)} ${g==="F"?"หญิง":"ชาย"} · ${evEn(st,d)} — ${g==="F"?"Women":"Men"}${showPool?` · ${poolBi(c)}`:""} <span class="en">(${l.length} qualified${std?` · ${std}`:""})</span>`,cols,fixed:true,
-        rows:l.map((x,i)=>{const N=nameFor(x.s,names);return[i+1,`${esc(N.main)}${N.sub?`<br><span class="en">${esc(N.sub)}</span>`:""}`,x.s.birthYear||"",...(ag?[x.age??""]:[]),esc(x.s.club||""),`<b>${fmt(x.r.time)}</b>`,...(lvs.length?[`<b>${x.lv}</b>`]:[]),rDate(x.r.date),esc(x.r.meet||"")+(x.r.relay?` <span class="en">(relay lead-off)</span>`:"")]})})})});
+        rows:l.map((x,i)=>{const N=nameFor(x.s,names);return[i+1,`${esc(N.main)}${N.sub?`<br><span class="en">${esc(N.sub)}</span>`:""}`,x.s.birthYear||"",...(ag?[x.age??""]:[]),esc(x.s.club||""),`<b>${fmt(x.r.time)}</b>`,...(lvs.length?[lvCell(x)]:[]),rDate(x.r.date),esc(x.r.meet||"")+(x.r.relay?` <span class="en">(relay lead-off)</span>`:"")]})})})});
   if(!rows.length)B.push({t:"html",html:`<p>ยังไม่มีนักกีฬาที่ผ่านเกณฑ์ · No swimmer has a qualifying time yet.</p>`});
   const miss=evKeys.flatMap(k=>["F","M"].filter(g=>L.times.some(x=>`${x.st}|${x.d}|${x.c}`===k&&(x.g===g||x.g==="X"))&&!cnt(g,k)).map(g=>{const[st,d,c]=k.split("|");return`${d}m ${SHORT[st]} ${g==="F"?"W":"M"}${showPool?" "+c:""}`}));
   B.push({t:"html",cls:"rp-note",html:`ใช้เวลาที่ดีที่สุดของนักกีฬาแต่ละคนในช่วงเวลาที่กำหนด รวมเวลาช่วงแรกของการว่ายผลัด (relay lead-off) · Each swimmer's best official time in the period is used, including relay lead-off splits; DNS, DSQ and DNF swims are not counted.`
