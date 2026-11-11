@@ -2767,8 +2767,9 @@ async function loadUpcoming(){const FS="https://firestore.googleapis.com/v1/proj
   const teams=[];let tok="";do{const x=await j(FS+"teams?pageSize=300"+(tok?"&pageToken="+encodeURIComponent(tok):""));(x.documents||[]).forEach(d=>{const f=d.fields||{};teams.push({meet:(f.meet||{}).stringValue||"",name:(f.name||{}).stringValue||""})});tok=x.nextPageToken||""}while(tok);
   return{meets,teams}}
 function renderUpcoming(){const B=$("#umBody");if(!B)return;
-  if(!UM.busy&&(!UM.data||Date.now()-UM.at>5*60e3)){UM.busy=true;loadUpcoming().then(d=>{UM.data=d;UM.err=""}).catch(e=>{UM.err=String(e&&e.message||e)}).finally(()=>{UM.busy=false;UM.at=Date.now();if(ui.view==="meets")renderUpcoming()})}
-  if(!UM.data){B.innerHTML=UM.err?`<p class="hint">Couldn't load the meet list right now. Please try again later. The list is on <b>www.smdata.in.th</b>.</p>`:`<p class="hint">Loading…</p>`;return}
+  /* load once, then at most every 5 minutes; after an error wait 2 minutes (never retry in a loop: each try is a database read) */
+  if(!UM.busy&&(!UM.at||Date.now()-UM.at>(UM.err?2*60e3:5*60e3))){UM.busy=true;loadUpcoming().then(d=>{UM.data=d;UM.err=""}).catch(e=>{UM.err=String(e&&e.message||e)}).finally(()=>{UM.busy=false;UM.at=Date.now();if(ui.view==="meets")renderUpcoming()})}
+  if(!UM.data){B.innerHTML=UM.err?`<p class="hint">Couldn't load the meet list right now. It will try again in 2 minutes. The list is on <b>www.smdata.in.th</b>.</p>`:`<p class="hint">Loading…</p>`;return}
   const today=new Date().toISOString().slice(0,10),M=UM.data.meets.filter(m=>(m.end||m.start||"")>=today).sort((a,b)=>String(a.start).localeCompare(String(b.start)));
   if(!M.length){B.innerHTML=`<p class="hint">No upcoming meets yet.</p>`;return}
   B.innerHTML=M.map(m=>{const T=UM.data.teams.filter(t=>t.meet===m.id).map(t=>t.name).sort((a,b)=>a.localeCompare(b,"th"));
