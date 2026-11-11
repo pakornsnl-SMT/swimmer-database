@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.28 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.29 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -365,7 +365,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.28</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.29 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1404,8 +1404,13 @@ const friendly=err=>{const c=(err&&err.code)||"";if(/wrong-password|invalid-cred
 
 /* ---------- database layer: real Firebase, or an in-browser test copy with ?mock=1 ---------- */
 let DB;
+/* read counter: database reads made by this browser today (shown in Admin), to see what uses the free daily limit */
+const RD_KEYS=["getUser","getClub","listClubs","listUsers","roster","rosterCount","getData","myTransfers","allTransfers","myCorrections","allCorrections","listMeets","meetClub","meetClubs","count","teamsFor"];
+function rdLoad(){const day=dayLocal();try{const o=JSON.parse(localStorage.getItem("smt.reads")||"{}");return o.day===day?o:{day,n:0}}catch(e){return{day,n:0}}}
+function rdAdd(n){const o=rdLoad();o.n+=n;try{localStorage.setItem("smt.reads",JSON.stringify(o))}catch(e){}const el=document.getElementById("rdCount");if(el)el.textContent=`${o.n.toLocaleString("en-US")} database reads from this browser today`}
+function rdWrap(){for(const k of RD_KEYS){const f=DB[k];if(typeof f!=="function")continue;DB[k]=async(...a)=>{const r=await f(...a);rdAdd(Array.isArray(r)?Math.max(1,r.length):1);return r}}rdAdd(0)}
 async function initDB(){
-  if(MOCK){DB=mockDB();return}
+  if(MOCK){DB=mockDB();rdWrap();return}
   const [app,auth,fs]=await Promise.all([import(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-app.js`),import(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-auth.js`),import(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-firestore.js`)]);
   const A=app.initializeApp(FB_CONFIG),au=auth.getAuth(A),db=fs.getFirestore(A),F=fs;
   const d=(...p)=>F.doc(db,...p),c=(...p)=>F.collection(db,...p),list=async q=>(await F.getDocs(q)).docs.map(x=>({id:x.id,...x.data()}));
@@ -1462,6 +1467,7 @@ async function initDB(){
       if(!cs.exists())throw{code:"smt/not-open"};const tot=+cs.data().approved||0,old=ks.exists()?+ks.data().appr||0:0,nt=tot-old+n;if(nt>cap)throw{code:"smt/full",left:Math.max(0,cap-(tot-old))};
       tx.set(kr,{clubName,req:n,appr:n,status:"approved",reqAt:F.serverTimestamp(),updatedAt:F.serverTimestamp()},{merge:true});tx.set(cr,{approved:nt});return nt})
   };
+  rdWrap();
 }
 function mockDB(){ /* test copy kept in this browser only (for checking screens without touching the real database) */
   const K="smt.mockdb",load=()=>{try{return JSON.parse(localStorage.getItem(K))||null}catch(e){return null}};
