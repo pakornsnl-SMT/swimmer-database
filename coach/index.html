@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.11 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.14 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -220,6 +220,28 @@ tr.click:hover td.pbc{background:color-mix(in srgb,var(--teal) 18%,transparent)}
 /* v3.8 calendar: thicker phase bar on each day */
 .cd{box-shadow:inset 0 8px 0 var(--ph,transparent)!important;padding-top:11px!important}
 .cd .cph{color:var(--ph,var(--muted));font-weight:600}
+/* v3.12 progress chart: tap a dot */
+.pchart .cpt:hover circle:last-of-type{stroke:var(--red);stroke-width:2}
+.cptcard{border:1px solid var(--line);border-left:4px solid var(--red);border-radius:10px;padding:10px 12px;background:var(--surface)}
+.cpth{display:flex;align-items:center;gap:10px}.cpth b{font:700 15px var(--display);letter-spacing:.02em}
+.cpth .chip{font-size:18px;line-height:1;padding:4px 12px;cursor:pointer}.cpth .chip[disabled]{opacity:.35;cursor:default}
+.cptb{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:8px;align-items:flex-end}
+.cpd{display:flex;flex-direction:column;gap:1px}.cpd b{font-size:15px}
+.cpthd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:6px 0 4px}.cpthd b{font:700 15px var(--display);letter-spacing:.02em}
+.cptlist{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+table.cpttab{width:100%;border-collapse:collapse;font-size:13px}table.cpttab th{position:sticky;top:0;background:var(--surface);z-index:1;font-size:11.5px}
+table.cpttab td,table.cpttab th{padding:4px 6px!important;white-space:nowrap}table.cpttab td.cptm{white-space:normal;max-width:220px}
+table.cpttab td.num.t{font:500 13px var(--mono)}table.cpttab td.cpb{color:var(--teal);font-weight:700}
+table.cpttab tr.on td{background:color-mix(in srgb,var(--red) 10%,transparent)}table.cpttab tr.on td:first-child{box-shadow:inset 3px 0 var(--red)}
+table.cpttab tr:hover td{background:var(--bg)}
+table.cpttab td.num.t.stpb{font-weight:700}
+@media (max-width:760px){table.cpttab{font-size:12px}table.cpttab td,table.cpttab th{padding:4px 3px!important}table.cpttab td.cptm{max-width:32vw;font-size:11.5px}table.cpttab td.num.t{font-size:12px}table.cpttab .rdt{display:none}}
+/* v3.13 Meet entries: ticked events stand out in their group's colour */
+tr.tk td{background:var(--teal-soft)!important;font-weight:600}
+tr.gr1.tk td{background:var(--green-soft)!important}tr.gr2.tk td{background:var(--red-soft)!important}
+tr.tk td:first-child{box-shadow:inset 6px 0 var(--teal)!important}tr.gr1.tk td:first-child{box-shadow:inset 6px 0 var(--green)!important}tr.gr2.tk td:first-child{box-shadow:inset 6px 0 var(--red)!important}
+tr.tk td .en{font-weight:400}tr.tk input.et,tr.tk input[data-emt]{border-color:var(--teal);background:var(--surface)}
+tr.tk td{background:color-mix(in srgb,var(--teal) 13%,var(--surface))!important}tr.gr1.tk td{background:color-mix(in srgb,var(--green) 15%,var(--surface))!important}tr.gr2.tk td{background:color-mix(in srgb,var(--red) 12%,var(--surface))!important}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -295,7 +317,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.11</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.14</div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -376,10 +398,10 @@ function swimmerView(){
   ${s.evs.map(x=>`<tr class="click" data-ch="${x.k}"${x.k===ui.chart?' style="background:var(--teal-soft)"':''}><td>${evShort(x.k)}${x.pb.relay?' <span class="badge">relay lead-off</span>':''}</td><td class="num t pbc">${fmt(x.pb.t)}</td>
    <td class="num">${x.imp==null?'<span class="hint">–</span>':x.imp>0?`<span class="up">−${(x.imp*100).toFixed(1)}%</span>`:`<span class="down">+${(-x.imp*100).toFixed(1)}%</span>`}</td><td class="num">${natTxt(s,x.k)}</td><td class="hide-sm en">${shortDate(x.pb.d)}</td></tr>`).join("")}
   </tbody></table></div></div>
-  <div style="min-width:0"><h3>Progress · ${e?evLabel(e):""}</h3>${e?chart(e):""}
+  <div style="min-width:0"><h3>Progress · ${e?evLabel(e):""}</h3>${e?chart(e,s):""}
   </div></div>${swimsBlock(s,e)}${swTargets(s)}`;
 }
-function chart(e){
+function chart(e,s){
   const W=460,H=200,P={l:52,r:14,t:14,b:28},pts=e.list;
   const ts=pts.map(p=>p.t),mn=Math.min(...ts),mx=Math.max(...ts),pad=Math.max((mx-mn)*0.15,50),y0=mn-pad,y1=mx+pad;
   const d0=+new Date(pts[0].d),d1=+new Date(pts[pts.length-1].d),span=Math.max(d1-d0,1);
@@ -387,13 +409,24 @@ function chart(e){
   const Y=t=>P.t+(t-y0)/(y1-y0)*(H-P.t-P.b); // faster = higher on chart
   const ticks=[0,1,2,3].map(i=>y0+(y1-y0)*i/3);
   const line=pts.map((p,i)=>(i?"L":"M")+X(p).toFixed(1)+" "+Y(p.t).toFixed(1)).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Times over time, faster is higher">
+  const ck=(s?s.i:"")+"|"+e.k;if(ui.cptK!==ck){ui.cptK=ck;ui.cpt=pts.length-1}const sel=Math.min(Math.max(0,+ui.cpt||0),pts.length-1),sp=pts[sel];
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Times over time, faster is higher" class="pchart">
    ${ticks.map(t=>`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"/><text x="${P.l-6}" y="${Y(t)+4}" text-anchor="end">${fmt(Math.round(t))}</text>`).join("")}
    <text x="${P.l}" y="${H-8}">${shortDate(pts[0].d)}</text><text x="${W-P.r}" y="${H-8}" text-anchor="end">${shortDate(pts[pts.length-1].d)}</text>
    <path d="${line}" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
-   ${pts.map(p=>`<circle cx="${X(p)}" cy="${Y(p.t)}" r="${p===e.pb?5.5:3.5}" fill="${p===e.pb?'var(--gold)':'var(--teal)'}"><title>${shortDate(p.d)} ${fmt(p.t)}</title></circle>`).join("")}
-  </svg><p class="hint">Lower on the chart is slower. Gold dot is the personal best.</p>`;
+   <line x1="${X(sp)}" x2="${X(sp)}" y1="${P.t}" y2="${H-P.b}" stroke="var(--teal)" stroke-dasharray="3 3" opacity=".45"/>
+   ${pts.map((p,i)=>`<g class="cpt" data-cpt="${i}" style="cursor:pointer"><circle cx="${X(p)}" cy="${Y(p.t)}" r="13" fill="transparent"/>${i===sel?`<circle cx="${X(p)}" cy="${Y(p.t)}" r="9" fill="none" stroke="var(--red)" stroke-width="2"/>`:""}<circle cx="${X(p)}" cy="${Y(p.t)}" r="${p===e.pb?5.5:3.5}" fill="${p===e.pb?'var(--gold)':'var(--teal)'}"/><title>${shortDate(p.d)} · ${esc(meetName(p.m))} · ${fmt(p.t)}</title></g>`).join("")}
+  </svg><p class="hint" style="margin:2px 0 8px">Lower on the chart is slower. Gold dot is the personal best. Tap a dot or a row to match them.</p>${cptCard(e,s,sel)}`;
 }
+/* history of this one event under the chart (like Summary of times, one event): tap a row or a dot */
+function cptCard(e,s,i){const L=e.list;if(!L||!L.length)return"";let best=null;const rows=L.map((p,k)=>{const prev=L[k-1],pb=best==null||p.t<best;if(pb)best=p.t;return{p,k,d:prev?(p.t-prev.t)/100:null,pb}}).reverse();
+  return `<div class="cpthd"><b>History · ${esc(evLabel(e))}</b><span class="hint">${L.length} swim${L.length>1?"s":""} · newest first</span></div>
+  <div class="cptlist"><table class="cpttab"><thead><tr><th>Date</th><th>Meet</th><th class="num">Time</th><th class="num">Change</th><th class="num">Place</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr data-cpt="${r.k}" class="${r.k===i?"on":""}" style="cursor:pointer"><td class="en">${shortDate(r.p.d)}</td><td class="cptm" title="${esc(meetName(r.p.m))}">${esc(meetName(r.p.m))}${r.p.relay?' <span class="hint">lead-off</span>':""}</td>
+    <td class="num t${r.p===e.pb?" stpb":r.pb&&r.k>0?" cpb":""}">${fmt(r.p.t)}</td><td class="num">${r.d==null?'<span class="hint">first</span>':`<span style="color:${r.d<0?"var(--green)":r.d>0?"var(--amber,#b7791f)":"inherit"}">${r.d<0?"−":"+"}${Math.abs(r.d).toFixed(2)}</span>`}</td>
+    <td class="num">${typeof rdTag==="function"?rdTag(r.p):""}${r.p.p?medal(r.p.p):"–"}</td></tr>`).join("")}</tbody></table></div>
+  <p class="hint" style="margin:4px 0 0"><span class="stpb" style="padding:0 4px">bold</span> = personal best now · <b style="color:var(--teal)">blue</b> = a new best at the time · change is against the swim before.</p>`}
+
 
 function eventView(){
   const keys=[...new Set(sw.flatMap(s=>s.evs.map(e=>e.k)))].sort((a,b)=>{const[x,y]=a.split("-").map(Number),[p,q]=b.split("-").map(Number);return x-p||y-q});
@@ -885,7 +918,8 @@ function render(){
 document.getElementById('poolSw').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;setCourse(+b.dataset.c);document.querySelectorAll('#poolSw button').forEach(x=>x.setAttribute('aria-pressed',x===b));render()});
 document.getElementById('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ui.tab=b.dataset.t;if(ui.tab==="team"){ui.sel=null;ui.mng=false}render()});
 view.addEventListener('click',e=>{
-  const s=e.target.closest('[data-seg]');if(s){ui[s.dataset.seg]=s.dataset.v;if(s.dataset.seg==="rt"||s.dataset.seg==="rg")ui.rfix={};render();return}
+  const cg=e.target.closest('[data-cpt]');if(cg&&cg.closest('#view .pchart, #view .cpttab')){ui.cpt=+cg.dataset.cpt;render();return}
+const s=e.target.closest('[data-seg]');if(s){ui[s.dataset.seg]=s.dataset.v;if(s.dataset.seg==="rt"||s.dataset.seg==="rg")ui.rfix={};render();return}
   const sk=e.target.closest('[data-sick]');if(sk){ui.rout.add(+sk.dataset.sick);render();return}
   const us=e.target.closest('[data-unsick]');if(us){ui.rout.delete(+us.dataset.unsick);render();return}
   if(e.target.closest('#rreset')){ui.rout.clear();ui.rfix={};render();return}
@@ -1137,12 +1171,12 @@ function evCard(m,S,G,cap){const n=cap?"③":"②",lim=m.lim||{},named=D.sw.filt
     h+=`<div class="row"><select id="emSw" aria-label="Swimmer">${named.map(y=>{const k=entCnt(m,S,y.id).tot;return `<option value="${esc(y.id)}"${y.id===x.id?" selected":""}>${esc(y.th)} · ${ageOf(m,y)}${k?` (${k})`:""}</option>`}).join("")}</select>${dayChips(c)}</div>
      <div class="row"><span class="hint">Order</span>${segBtns("emo",[["st","By stroke"],["day","By day"]])}</div>`;
     h+=list.length?`<div class="tw"><table><thead><tr><th><input type="checkbox" class="chk" data-emall="${esc(x.id)}"${allOn?" checked":""}${open?"":" disabled"} aria-label="Tick all"></th><th>Event <span class="en" style="text-transform:none;letter-spacing:0">← tick to swim all</span></th><th class="num hide-sm">#</th><th class="hide-sm">Day</th><th class="num">Entry time</th></tr></thead><tbody>${list.map(({e,g},li)=>{const on=!!mine[e.no],full=!on&&isFull(c,e),gk=ui.emo==="day"?e.day:e.st,gi=ui.emo==="day"?days.indexOf(e.day):[1,2,3,4,5].indexOf(e.st),newG=li===0||gk!==(ui.emo==="day"?list[li-1].e.day:list[li-1].e.st);
-      return `${newG?`<tr class="grph gr${gi%3}"><td colspan="5">${ui.emo==="day"?`Day ${e.day} · ${dayDate(m,e.day)}`:`${SN[e.st]} <span style="font-weight:400">${ST[e.st]}</span>`}<span class="grn">${(n=>n?n+" ticked":"")(list.filter(o=>(ui.emo==="day"?o.e.day:o.e.st)===gk&&mine[o.e.no]).length)}</span></td></tr>`:""}<tr class="gr${gi%3}"${full?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emev="${esc(x.id)}|${esc(e.no)}"${on?" checked":""}${full||!open?" disabled":""} aria-label="Enter event ${esc(e.no)}"></td><td>${evLbl(e)} <span class="en">· ${agLbl(g)}${e.g==="X"?" · mixed":""}</span>${full?' <span class="en">· limit reached</span>':""}<div class="ph en">#${esc(e.no)} · Day ${e.day} · ${dayDate(m,e.day)}</div></td><td class="num en hide-sm">${esc(e.no)}</td><td class="en hide-sm">Day ${e.day} · ${dayDate(m,e.day)}</td><td class="num">${tIn(x,e,mine[e.no],full)}</td></tr>`}).join("")}</tbody></table></div><p class="hint">Empty box = SMT best (shown in grey). Type a time and the event is ticked for you: 3560 = 35.60 · 23555 = 2:35.55.</p>`:`<p class="hint">No individual event fits this swimmer's age and gender.</p>`}
+      return `${newG?`<tr class="grph gr${gi%3}"><td colspan="5">${ui.emo==="day"?`Day ${e.day} · ${dayDate(m,e.day)}`:`${SN[e.st]} <span style="font-weight:400">${ST[e.st]}</span>`}<span class="grn">${(n=>n?n+" ticked":"")(list.filter(o=>(ui.emo==="day"?o.e.day:o.e.st)===gk&&mine[o.e.no]).length)}</span></td></tr>`:""}<tr class="gr${gi%3}${on?" tk":""}"${full?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emev="${esc(x.id)}|${esc(e.no)}"${on?" checked":""}${full||!open?" disabled":""} aria-label="Enter event ${esc(e.no)}"></td><td>${evLbl(e)} <span class="en">· ${agLbl(g)}${e.g==="X"?" · mixed":""}</span>${full?' <span class="en">· limit reached</span>':""}<div class="ph en">#${esc(e.no)} · Day ${e.day} · ${dayDate(m,e.day)}</div></td><td class="num en hide-sm">${esc(e.no)}</td><td class="en hide-sm">Day ${e.day} · ${dayDate(m,e.day)}</td><td class="num">${tIn(x,e,mine[e.no],full)}</td></tr>`}).join("")}</tbody></table></div><p class="hint">Empty box = SMT best (shown in grey). Type a time and the event is ticked for you: 3560 = 35.60 · 23555 = 2:35.55.</p>`:`<p class="hint">No individual event fits this swimmer's age and gender.</p>`}
   else if(ui.emv==="ev"){const evs=ind.slice().sort(byStroke);if(!ui.emev||!ind.find(e=>e.no===ui.emev))ui.emev=evs[0]&&evs[0].no;const e=ind.find(v=>v.no===ui.emev);
     h+=`<div class="row"><select id="emEv" aria-label="Event">${evs.map(v=>{const k=named.filter(y=>(S.ent[y.id]||{})[v.no]).length;return `<option value="${esc(v.no)}"${v.no===e.no?" selected":""}>${gName(v.g)} ${evName(v)} · #${esc(v.no)} · Day ${v.day}${k?` (${k})`:""}</option>`}).join("")}</select></div>`;
     const rows=named.filter(y=>gOk(e,y)&&agFor(m,y,e)).map(y=>({y,pb:bestT(y,C,e.st,e.d)})).sort((a,b)=>(a.pb||1e9)-(b.pb||1e9));
     h+=rows.length?`<div class="tw"><table><thead><tr><th></th><th>Swimmer</th><th class="hide-sm">Entries so far</th><th class="num">Entry time</th></tr></thead><tbody>${rows.map(({y})=>{const mine=S.ent[y.id]||{},on=!!mine[e.no],c=entCnt(m,S,y.id),full=!on&&isFull(c,e);
-      return `<tr${full?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emev="${esc(y.id)}|${esc(e.no)}"${on?" checked":""}${full||!open?" disabled":""}></td><td><span class="nm">${nmH(y.th)}</span> <span class="en">· ${y.g==="M"?"B":"G"} · ${agLbl(agFor(m,y,e))}</span>${full?'<div class="en">limit reached</div>':""}</td><td class="hide-sm en">${c.tot}${lim.meet?"/"+lim.meet:""} in meet${lim.day?` · Day ${e.day}: ${c.per[e.day]||0}/${lim.day}`:""}</td><td class="num">${tIn(y,e,mine[e.no],full)}</td></tr>`}).join("")}</tbody></table></div><p class="hint">Fastest first. Type a time and the swimmer is ticked for you.</p>`:`<p class="hint">None of your named swimmers fits this event.</p>`}
+      return `<tr${on?' class="tk"':""}${full?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emev="${esc(y.id)}|${esc(e.no)}"${on?" checked":""}${full||!open?" disabled":""}></td><td><span class="nm">${nmH(y.th)}</span> <span class="en">· ${y.g==="M"?"B":"G"} · ${agLbl(agFor(m,y,e))}</span>${full?'<div class="en">limit reached</div>':""}</td><td class="hide-sm en">${c.tot}${lim.meet?"/"+lim.meet:""} in meet${lim.day?` · Day ${e.day}: ${c.per[e.day]||0}/${lim.day}`:""}</td><td class="num">${tIn(y,e,mine[e.no],full)}</td></tr>`}).join("")}</tbody></table></div><p class="hint">Fastest first. Type a time and the swimmer is ticked for you.</p>`:`<p class="hint">None of your named swimmers fits this event.</p>`}
   else if(ui.emv==="day"){if(!days.includes(+ui.emd))ui.emd=days[0];
     h+=`<div class="row"><div class="seg">${days.map(d=>`<button data-emday="${d}" aria-pressed="${+ui.emd===d}">Day ${d} · ${dayDate(m,d)}</button>`).join("")}</div></div>`;
     h+=m.events.filter(e=>e.day===+ui.emd).sort(byDay).map(e=>{if(e.r>1){const tm=S.rel[e.no]||[];return `<h4 style="margin:12px 0 4px">#${esc(e.no)} · ${gName(e.g)} ${evName(e)} <span class="en">· ${tm.length} team${tm.length===1?"":"s"}</span></h4>${tm.map((t,i)=>`<div class="en">Team ${"ABCDEFGH"[i]} · ${t.legs.map(id=>{const y=swById(id);return y?esc(y.th):"–"}).join(", ")}</div>`).join("")}`}
@@ -1396,7 +1430,7 @@ function teamLxf(m,T){const L=m.lx;if(!L||!L.sessions)return{err:"SMT hasn't loa
     const en=Object.entries((T.ent||{})[n.id]||{}).map(([no,v])=>{const e=evById(no);return e&&eid(e)?`<ENTRY eventid="${X(eid(e))}" entrytime="${lxT(v&&v[0])}"${v&&v[0]?` entrycourse="${X(L.course)}"`:""}/>`:""}).join("");
     return`<ATHLETE athleteid="${aid}" firstname="${X(f)}" lastname="${X(l)}" firstname.en="${X(fe)}" lastname.en="${X(le)}" gender="${n.g}" birthdate="${X(dob)}"${P.cid?` license="${X(P.cid)}"`:""} nation="THA" domicile="${X((f+" "+l).trim())}"><ENTRIES>${en}</ENTRIES></ATHLETE>`}).join("");
   let rn=0;const rel=Object.entries(T.rel||{}).flatMap(([no,Ls])=>{const e=evById(no);if(!e||!eid(e))return[];return Ls.map(t=>{rn++;const g=(e.ags||[]).find(q=>q.id===t.ag)||{};
-    return`<RELAY number="${rn}" gender="${e.g}" agemin="${g.t?-1:g.min||-1}" agemax="${g.t?-1:g.max||-1}" agetotalmin="${g.t?g.min||-1:-1}" agetotalmax="${g.t?g.max||-1:-1}"><ENTRIES><ENTRY eventid="${X(eid(e))}" entrytime="${lxT(t.t)}"${t.t?` entrycourse="${X(L.course)}"`:""}>${t.legs.some(Boolean)?`<RELAYPOSITIONS>${t.legs.map((id,k)=>id&&aidOf[id]?`<RELAYPOSITION athleteid="${aidOf[id]}" number="${k+1}"/>`:"").join("")}</RELAYPOSITIONS>`:""}</ENTRY></ENTRIES></RELAY>`})}).join("");
+    return`<RELAY number="${rn}" gender="${e.g}" agemin="${g.t?-1:g.min||-1}" agemax="${g.t?-1:g.max||-1}" agetotalmin="${g.t?g.min||-1:-1}" agetotalmax="${g.t?g.max||-1:-1}"><ENTRIES><ENTRY eventid="${X(eid(e))}" entrytime="${lxT(relSeed(m,e,t))}"${relSeed(m,e,t)?` entrycourse="${X(L.course)}"`:""}>${t.legs.some(Boolean)?`<RELAYPOSITIONS>${t.legs.map((id,k)=>id&&aidOf[id]?`<RELAYPOSITION athleteid="${aidOf[id]}" number="${k+1}"/>`:"").join("")}</RELAYPOSITIONS>`:""}</ENTRY></ENTRIES></RELAY>`})}).join("");
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<LENEX version="3.0" created="${new Date().toISOString().slice(0,19)}"><CONSTRUCTOR name="Swim Meets Thailand" version="1"><CONTACT name="Swim Meets Thailand" internet="https://www.smdata.in.th"/></CONSTRUCTOR><MEETS><MEET name="${X(L.name)}" city="${X(L.city)}" nation="${X(L.nation)}" course="${X(L.course)}">${L.ageDate?`<AGEDATE value="${X(L.ageDate)}" type="${X(L.ageType)}"/>`:""}${L.sessions}<CLUBS><CLUB name="${X(T.clubName)}" nation="THA"><ATHLETES>${ath}</ATHLETES>${rel?`<RELAYS>${rel}</RELAYS>`:""}</CLUB></CLUBS></MEET></MEETS></LENEX>`;
   const fn=(T.clubShort+"_"+(m.name||"meet")).replace(/[^\w฀-๿-]+/g,"_").slice(0,80);return{blob:zipOne(fn+".lef",xml),name:fn+".lxf",athletes:ppl.length,warn}}
 /* one team's Hytek Meet Manager entry file (.hy3 in a .zip), layout matched to Team Manager's export:
@@ -1406,6 +1440,11 @@ function hy3Line(rec,fields){const a=Array(128).fill(" ");rec.split("").forEach(
   const s=a.join(""),o=[...s].reduce((x,c,i)=>i%2===0?x+c.charCodeAt(0):x,0),e=[...s].reduce((x,c,i)=>i%2===1?x+c.charCodeAt(0):x,0),v=String(Math.floor((o+2*e)/21)+205).slice(-2);return s+v[1]+v[0]}
 /* Hytek age groups for an event: the meet's own when it was set up from a Hytek file, otherwise those matched from the organiser's Hytek event file */
 const hyAgs=(m,e)=>m.src==="Hytek"?e.ags:(e.hyags||null);
+/* relay entry time: the coach's typed time, otherwise the sum of the 4 swimmers' best times for their legs (same as the
+   grey number on the relay card); 0 = NT. Needs the public results (PUB). */
+function relSeed(m,e,t){if(t.t)return t.t;if(typeof PUB==="undefined"||!PUB||!PUB.byId||!t.legs||t.legs.length<4||!t.legs.every(Boolean))return 0;
+  const c=m.course==="SCM"?2:1,LS=e.st===5?[2,3,4,1]:[e.st,e.st,e.st,e.st];let sum=0;
+  for(let l=0;l<4;l++){const p=PUB.byId.get(t.legs[l]);if(!p||!p.rs)return 0;let b=0;for(const k in p.rs){const a=p.rs[k];if(a[7]&&(!a[10]||String(a[10]).toUpperCase().startsWith("EXH"))&&a[2]===LS[l]&&a[3]===e.d&&a[4]===c&&(!b||a[7]<b))b=a[7]}if(!b)return 0;sum+=b}return sum}
 function teamHy3(m,T){if(m.src!=="Hytek"&&!m.hyFile)return{err:"SMT hasn't loaded this meet's Hytek event file yet. Ask SMT, or use the Splash .lxf file."};
   const crs={LCM:"L",SCM:"S",SCY:"Y"}[m.course]||"L",md=d=>{const[y,mo,da]=String(d||"").split("-");return y?mo+da+y:""},secs=cs=>cs?(cs/100).toFixed(2):"0.00",STK=" ABCDE";
   const ageOn=(n,P)=>{const ad=m.ageMode==="date"&&m.ageDate?m.ageDate:String(m.start).slice(0,4)+"-12-31";if(P.dob){const[y,mo,d]=P.dob.split("-").map(Number),[Y,M,D]=ad.split("-").map(Number);return Y-y-((M<mo||(M===mo&&D<d))?1:0)}return n.age||(+ad.slice(0,4)-n.by)};
@@ -1424,7 +1463,7 @@ function teamHy3(m,T){if(m.src!=="Hytek"&&!m.hyFile)return{err:"SMT hasn't loade
     for(const [no,v] of Object.entries((T.ent||{})[n.id]||{})){const e=evById(no);if(!e)continue;const HA=hyAgs(m,e);if(!HA||!HA.length){warn.push(`event #${e.no} is not in the Hytek event file`);continue}const fit=HA.find(q=>(!q.min||age>=q.min)&&(!q.max||age<=q.max)),ag=fit||HA[0]||{};if(!fit)warn.push(`${n.th||n.en} (age ${age}) in event #${e.no}`);const[en,el]=split(ag.id||e.no);
       L.push(hy3Line("E1",[[3,1,g],[4,5,id,1],[9,5,le||fe],[14,1,g],[15,1,e.g==="X"?"X":e.g],[18,4,e.d,1],[22,1,STK[e.st]],[23,3,ag.min||0,1],[26,3,ag.max||109,1],[35,4,"0.00",1],[39,3,en,1],[42,1,el],[47,4,"0",1],[51,1,crs],[52,8,secs(v&&v[0]),1],[60,1,crs]]))}});
   for(const [no,Ls] of Object.entries(T.rel||{})){const e=evById(no);if(!e)continue;const HA=hyAgs(m,e);if(!HA||!HA.length){warn.push(`relay #${e.no} is not in the Hytek event file`);continue}Ls.forEach((t,i)=>{const mg=e.ags.find(q=>q.id===t.ag)||e.ags[0]||{},ag=m.src==="Hytek"?mg:(HA.find(q=>(q.min||0)===(mg.min||0)&&(q.max||0)===(mg.max||0)&&!!q.t===!!mg.t)||HA[0]),[en,el]=split(ag.id||e.no),G=e.g==="X"?"X":e.g;
-    L.push(hy3Line("F1",[[3,5,code],[8,1,"ABCDEFGH"[i]],[12,1,"0"],[13,1,G],[14,1,G],[15,1,G==="M"?"B":G==="F"?"G":"X"],[18,4,e.d*4,1],[22,1,STK[e.st]],[23,3,ag.min||0,1],[26,3,ag.max||109,1],[31,1,"0"],[32,1,crs],[35,4,"0.00",1],[39,3,en,1],[42,1,el],[44,7,secs(t.t),1],[51,1,crs],[53,7,secs(t.t),1],[60,1,crs],[85,1,"4"]]));
+    L.push(hy3Line("F1",[[3,5,code],[8,1,"ABCDEFGH"[i]],[12,1,"0"],[13,1,G],[14,1,G],[15,1,G==="M"?"B":G==="F"?"G":"X"],[18,4,e.d*4,1],[22,1,STK[e.st]],[23,3,ag.min||0,1],[26,3,ag.max||109,1],[31,1,"0"],[32,1,crs],[35,4,"0.00",1],[39,3,en,1],[42,1,el],[44,7,secs(relSeed(m,e,t)),1],[51,1,crs],[53,7,secs(relSeed(m,e,t)),1],[60,1,crs],[85,1,"4"]]));
     const legs=t.legs.map((id,k)=>{if(!id||!num[id])return null;const n=ppl.find(x=>x.id===id),P=T.people[id]||{},le=P.isNew?P.enL:sp(n.en)[1]||sp(n.en)[0];return[n.g==="M"?"M":"F",num[id],le,k+1]}).filter(Boolean);
     L.push(hy3Line("F3",legs.flatMap(([g,id,le,k],j)=>{const c=3+j*13;return[[c,1,g],[c+1,5,id,1],[c+6,5,le],[c+11,1,"F"],[c+12,1,k]]})))})}
   const fn=`${code}-Entries-${String(m.name||"meet").replace(/[^\w ]+/g,"").trim()}-${md(m.start)}`.replace(/\s+/g," ").slice(0,90);
@@ -1633,10 +1672,10 @@ async function adminPage(){
       const q=v=>{v=String(v??"");return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v},csv="\ufeff"+[H,...rows].map(r=>r.map(q).join(",")).join("\r\n");
       const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download=("Entries_"+m.name).replace(/[^\w\u0E00-\u0E7F-]+/g,"_").slice(0,80)+".csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
       toast(`Downloaded ${rows.length} rows (${cl.length} club${cl.length===1?"":"s"}).`)}
-    else if(t.dataset.mhy3){const m=A.mts.find(x=>x.id===A.mview),x=A.mcl.find(y=>y.id===t.dataset.mhy3),club=(A.clubs||[]).find(c=>c.id===x.id)||{},PP=((await DB.getData(x.id,"people").catch(()=>null))||{}).m||{};
+    else if(t.dataset.mhy3){await loadPublic().catch(()=>null);const m=A.mts.find(x=>x.id===A.mview),x=A.mcl.find(y=>y.id===t.dataset.mhy3),club=(A.clubs||[]).find(c=>c.id===x.id)||{},PP=((await DB.getData(x.id,"people").catch(()=>null))||{}).m||{};
       const r=teamHy3(m,{clubName:club.resultsName||club.name||x.clubName,clubShort:club.short||x.id,code:x.id,names:x.names||[],ent:x.ent||{},rel:x.rel||{},people:PP});if(r.err){toast(r.err,true);return}
       const u=URL.createObjectURL(r.blob),a=document.createElement("a");a.href=u;a.download=r.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},2000);toast(`Downloaded ${r.name}.${r.warn.length?` No birth date for ${r.warn.length} swimmer(s).`:""}`,!!r.warn.length)}
-    else if(t.dataset.mlxf){const m=A.mts.find(x=>x.id===A.mview),x=A.mcl.find(y=>y.id===t.dataset.mlxf),club=(A.clubs||[]).find(c=>c.id===x.id)||{},PP=((await DB.getData(x.id,"people").catch(()=>null))||{}).m||{};
+    else if(t.dataset.mlxf){await loadPublic().catch(()=>null);const m=A.mts.find(x=>x.id===A.mview),x=A.mcl.find(y=>y.id===t.dataset.mlxf),club=(A.clubs||[]).find(c=>c.id===x.id)||{},PP=((await DB.getData(x.id,"people").catch(()=>null))||{}).m||{};
       const r=teamLxf(m,{clubName:club.resultsName||club.name||x.clubName,clubShort:club.short||x.id,names:x.names||[],ent:x.ent||{},rel:x.rel||{},people:PP});if(r.err){toast(r.err,true);return}
       const u=URL.createObjectURL(r.blob),a=document.createElement("a");a.href=u;a.download=r.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},2000);toast(`Downloaded ${r.name}.${r.warn.length?` No birth date for ${r.warn.length} swimmer(s).`:""}`,!!r.warn.length)}
     else if(t.dataset.mpdel){if(t.dataset.sure){await DB.delMeetClub(A.mview,t.dataset.mpdel);await DB.recount(A.mview);toast("Removed.");draw()}else{t.dataset.sure="1";t.textContent="Tap again"}}
