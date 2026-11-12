@@ -340,7 +340,10 @@ table.ttb .t{font:500 15px var(--mono)}
 .idchk{background:#fdecee;border:1px solid var(--red);color:var(--red);border-radius:999px;padding:1px 8px;font:600 11.5px var(--body);cursor:pointer}
 .tidw{color:var(--red);font-weight:600;font-size:12px}
 .tidnote{margin:10px 0 0;padding:10px 12px;border:1px solid var(--red);border-radius:10px;background:#fff6f7;font-size:13px}
-.forteam{display:inline-block;font-size:14px;font-weight:600;color:var(--teal);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin-top:4px;line-height:1.35}.mhead .forteam{margin:0 0 0 10px;vertical-align:1px}
+.forteam{display:inline-block;font-size:14px;font-weight:600;color:var(--teal);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin:3px 0 0 8px;line-height:1.35}.mhead .forteam{margin:0 0 0 10px;vertical-align:1px}
+.swsw{display:inline-flex;align-items:center;gap:8px}.swsw .hint{font-weight:600}
+.swsw .seg{border:2px solid var(--teal);border-radius:12px;padding:3px;background:var(--surface);box-shadow:0 2px 8px rgba(29,79,184,.15)}
+.swsw .seg button{font-size:15px;font-weight:600;padding:8px 16px;border-radius:9px}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -498,7 +501,7 @@ function swimmerView(){
    <td class="num">${x.imp==null?'<span class="hint">–</span>':x.imp>0?`<span class="up">−${(x.imp*100).toFixed(1)}%</span>`:`<span class="down">+${(-x.imp*100).toFixed(1)}%</span>`}</td><td class="num">${natTxt(s,x.k)}</td><td class="hide-sm en">${shortDate(x.pb.d)}</td></tr>`).join("")}
   </tbody></table></div></div>
   <div style="min-width:0"><h3>Progress · ${e?evLabel(e):""}</h3>${e?chart(e,s):""}
-  </div></div>${swTimesToBeat(s)}${swimsBlock(s,e)}${swTargets(s)}`;
+  </div></div>${swimsBlock(s,e)}${swTimesToBeat(s)}${swTargets(s)}`;
 }
 function chart(e,s){
   const W=460,H=200,P={l:52,r:14,t:14,b:28},pts=e.list;
@@ -876,7 +879,7 @@ const lapsTxt=sp=>{if(!sp||sp.length<2)return '<span class="hint">–</span>';co
 const rdTag=(r,L)=>{const x={PRE:["Heat","คัดเลือก",""],FIN:["Final","ชิงชนะเลิศ"," fin"],SOP:["Swim-off","ว่ายชิงอันดับ",""]}[r&&r.rd];return x?`<span class="rdt${x[2]}">${L==="th"?x[1]:x[0]}</span>`:""};
 function swimsBlock(s,e){
   ui.sw2=ui.sw2||"ev";const key=s.i+"|"+(e?e.k:"");
-  let html=`<div class="row" style="justify-content:space-between;margin:22px 0 6px"><h3 style="margin:0">All swims</h3>${segBtns("sw2",[["ev",e?"This event · "+evShort(e.k):"This event"],["all","All events"]])}</div>`;
+  let html=`<div class="row swhd" style="justify-content:space-between;margin:22px 0 8px"><h3 style="margin:0">All swims</h3><span class="swsw"><span class="hint">Show</span>${segBtns("sw2",[["ev",e?"This event · "+evShort(e.k):"This event"],["all","All events"]])}</span></div>`;
   if(ui.sw2==="all"){const byM=new Map();s.evs.forEach(ev=>ev.list.forEach(r=>{(byM.get(r.m)||byM.set(r.m,[]).get(r.m)).push({ev,r})}));
     const ms=[...byM.entries()].sort((a,b)=>b[1][0].r.d.localeCompare(a[1][0].r.d));
     return html+`<div class="tw"><table class="swims"><thead><tr><th>Date</th><th>Event</th><th class="num">Time</th><th class="hide-sm">50 m splits</th><th class="num">Place</th></tr></thead><tbody>${ms.map(([m,l],mi)=>`<tr class="mhead"><td colspan="5"><b>${esc(meetName(m))}</b>${l[0].r.tm?`<span class="forteam">Representing ${esc(l[0].r.tm)}</span>`:""}</td></tr>`+l.sort((a,b)=>a.ev.st-b.ev.st||a.ev.ds-b.ev.ds).map(({ev,r})=>`<tr><td class="en">${shortDate(r.d)}</td><td>${evShort(ev.k)}${r.relay?' <span class="badge">lead-off</span>':""}</td><td class="num t"><span class="pbslot">${r===ev.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${r.sp&&r.sp.length>1?`<tr class="sprow"><td colspan="6">${lapsTxt(r.sp)}</td></tr>`:""}`).join("")).join("")}</tbody></table></div>`}
