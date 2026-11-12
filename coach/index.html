@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.35 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.36 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -340,6 +340,7 @@ table.ttb .t{font:500 15px var(--mono)}
 .idchk{background:#fdecee;border:1px solid var(--red);color:var(--red);border-radius:999px;padding:1px 8px;font:600 11.5px var(--body);cursor:pointer}
 .tidw{color:var(--red);font-weight:600;font-size:12px}
 .tidnote{margin:10px 0 0;padding:10px 12px;border:1px solid var(--red);border-radius:10px;background:#fff6f7;font-size:13px}
+.forteam{display:block;font-size:12.5px;color:var(--muted);font-weight:500;margin-top:1px}.mhead .forteam{display:inline;margin-left:8px}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -415,7 +416,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.35 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.36 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -450,7 +451,7 @@ const shortDate=d=>new Date(d+"T00:00:00").toLocaleDateString("en-GB",{day:"nume
 const meetName=id=>(D.meets[id]||{}).n||"";
 function buildSw(C){return D.sw.map((s,i)=>{
   const ev={};
-  for(const r of s.rs){if(r[4]!==C)continue;const k=r[2]+"-"+r[3];(ev[k]=ev[k]||[]).push({m:r[0],d:r[1],t:r[5],p:r[6],relay:r[7],sp:r[8]||[],rd:r[9]||""})}
+  for(const r of s.rs){if(r[4]!==C)continue;const k=r[2]+"-"+r[3];(ev[k]=ev[k]||[]).push({m:r[0],d:r[1],t:r[5],p:r[6],relay:r[7],sp:r[8]||[],rd:r[9]||"",tm:r[10]||""})}
   const evs=Object.entries(ev).map(([k,list])=>{
     list.sort((a,b)=>a.d.localeCompare(b.d));
     const pb=list.reduce((a,b)=>b.t<a.t?b:a);
@@ -878,12 +879,12 @@ function swimsBlock(s,e){
   let html=`<div class="row" style="justify-content:space-between;margin:22px 0 6px"><h3 style="margin:0">All swims</h3>${segBtns("sw2",[["ev",e?"This event · "+evShort(e.k):"This event"],["all","All events"]])}</div>`;
   if(ui.sw2==="all"){const byM=new Map();s.evs.forEach(ev=>ev.list.forEach(r=>{(byM.get(r.m)||byM.set(r.m,[]).get(r.m)).push({ev,r})}));
     const ms=[...byM.entries()].sort((a,b)=>b[1][0].r.d.localeCompare(a[1][0].r.d));
-    return html+`<div class="tw"><table class="swims"><thead><tr><th>Date</th><th>Event</th><th class="num">Time</th><th class="hide-sm">50 m splits</th><th class="num">Place</th></tr></thead><tbody>${ms.map(([m,l],mi)=>`<tr class="mhead"><td colspan="5"><b>${esc(meetName(m))}</b></td></tr>`+l.sort((a,b)=>a.ev.st-b.ev.st||a.ev.ds-b.ev.ds).map(({ev,r})=>`<tr><td class="en">${shortDate(r.d)}</td><td>${evShort(ev.k)}${r.relay?' <span class="badge">lead-off</span>':""}</td><td class="num t"><span class="pbslot">${r===ev.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${r.sp&&r.sp.length>1?`<tr class="sprow"><td colspan="6">${lapsTxt(r.sp)}</td></tr>`:""}`).join("")).join("")}</tbody></table></div>`}
+    return html+`<div class="tw"><table class="swims"><thead><tr><th>Date</th><th>Event</th><th class="num">Time</th><th class="hide-sm">50 m splits</th><th class="num">Place</th></tr></thead><tbody>${ms.map(([m,l],mi)=>`<tr class="mhead"><td colspan="5"><b>${esc(meetName(m))}</b>${l[0].r.tm?`<span class="forteam">for ${esc(l[0].r.tm)}</span>`:""}</td></tr>`+l.sort((a,b)=>a.ev.st-b.ev.st||a.ev.ds-b.ev.ds).map(({ev,r})=>`<tr><td class="en">${shortDate(r.d)}</td><td>${evShort(ev.k)}${r.relay?' <span class="badge">lead-off</span>':""}</td><td class="num t"><span class="pbslot">${r===ev.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${r.sp&&r.sp.length>1?`<tr class="sprow"><td colspan="6">${lapsTxt(r.sp)}</td></tr>`:""}`).join("")).join("")}</tbody></table></div>`}
   if(!e)return html;
   const L=e.list.slice().reverse();
   if(!ui.cmp||ui.cmp.key!==key){const withSp=L.filter(r=>spOk(r.sp));const a=spOk(e.pb.sp)?e.pb:withSp[0];const b=withSp.find(r=>r!==a);ui.cmp={key,sel:[a,b].filter(Boolean).map(r=>L.indexOf(r))}}
   html+=`<p class="hint" style="margin:0 0 6px">Tick two swims to compare their splits.</p><div class="tw"><table class="swims"><thead><tr><th></th><th>Date</th><th>Meet</th><th class="num">Time</th><th class="hide-sm">50 m splits</th><th class="num">Place</th></tr></thead><tbody>
-   ${L.map((r,i)=>{const on=ui.cmp.sel.includes(i),can=spOk(r.sp);return `<tr${on?' class="cmpon"':""}><td>${can?`<input type="checkbox" class="chk" data-cmp="${i}"${on?" checked":""} aria-label="Compare this swim">`:""}</td><td class="en">${shortDate(r.d)}</td><td>${esc(meetName(r.m))}</td><td class="num t"><span class="pbslot">${r===e.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${r.sp&&r.sp.length>1?`<tr class="sprow"><td colspan="6">${lapsTxt(r.sp)}</td></tr>`:""}`}).join("")}</tbody></table></div>${L.some(r=>r.sp&&r.sp.length>1&&!spOk(r.sp))?`<p class="hint" style="margin:4px 0 0"><span class="lap lapx">amber</span> = a split the timing missed (shown as – or a doubled lap). Swims with missed splits can't be compared.</p>`:""}`;
+   ${L.map((r,i)=>{const on=ui.cmp.sel.includes(i),can=spOk(r.sp);return `<tr${on?' class="cmpon"':""}><td>${can?`<input type="checkbox" class="chk" data-cmp="${i}"${on?" checked":""} aria-label="Compare this swim">`:""}</td><td class="en">${shortDate(r.d)}</td><td>${esc(meetName(r.m))}${r.tm?`<span class="forteam">for ${esc(r.tm)}</span>`:""}</td><td class="num t"><span class="pbslot">${r===e.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${r.sp&&r.sp.length>1?`<tr class="sprow"><td colspan="6">${lapsTxt(r.sp)}</td></tr>`:""}`}).join("")}</tbody></table></div>${L.some(r=>r.sp&&r.sp.length>1&&!spOk(r.sp))?`<p class="hint" style="margin:4px 0 0"><span class="lap lapx">amber</span> = a split the timing missed (shown as – or a doubled lap). Swims with missed splits can't be compared.</p>`:""}`;
   const [A,B]=ui.cmp.sel.map(i=>L[i]).sort((x,y)=>x.t-y.t);
   if(A&&B&&A.sp.length===B.sp.length){let ca=0,cb=0;const rows=A.sp.map((x,j)=>{ca+=x;cb+=B.sp[j];return{d:(j+1)*50,la:x,lb:B.sp[j],ca,cb}});const mx=Math.max(...rows.map(r=>Math.abs(r.la-r.lb)),1);
     html+=`<div class="relaycard" style="margin-top:12px"><b style="font-family:var(--display);font-size:17px">Split comparison</b> <span class="hint">· <span style="color:var(--blue)">${fmt(A.t)}</span> (${shortDate(A.d)}) vs <span style="color:var(--gold)">${fmt(B.t)}</span> (${shortDate(B.d)})</span>
@@ -1732,7 +1733,7 @@ function buildData(pub,rosterIds,year){
   const thr={},sorted=new Map();best.forEach((b,key)=>{const ts=[...b.values()].sort((x,y)=>x-y);sorted.set(key,ts);thr[key]=[ts[Math.min(2,ts.length-1)],ts[Math.min(7,ts.length-1)],ts[Math.min(15,ts.length-1)],ts.length]});
   const meets={},sw=[];
   for(const id of rosterIds){const s=pub.byId.get(id);if(!s){const p=PEOPLE[id];if(p&&p.isNew&&p.dob)sw.push({id,th:[p.thF,p.thL].filter(Boolean).join(" ")||[p.enF,p.enL].join(" "),en:[p.enF,p.enL].filter(Boolean).join(" "),g:p.g,by:+p.dob.slice(0,4),last:"",rs:[],nat:{},isNew:true});continue}const rs=[];
-    for(const k in s.rs){const a=s.rs[k];if(!valid(a)||(a[4]!==1&&a[4]!==2))continue;const dt=dateOf(a);if(!dt)continue;const m=M[a[0]];meets[a[0]]={n:m.n||"",s:m.s,e:m.e||m.s};rs.push([a[0],dt,a[2],a[3],a[4],a[7],a[6]||0,a[13]?1:0,Array.isArray(a[11])?a[11]:[],a[5]||""])}
+    for(const k in s.rs){const a=s.rs[k];if(!valid(a)||(a[4]!==1&&a[4]!==2))continue;const dt=dateOf(a);if(!dt)continue;const m=M[a[0]];meets[a[0]]={n:m.n||"",s:m.s,e:m.e||m.s};rs.push([a[0],dt,a[2],a[3],a[4],a[7],a[6]||0,a[13]?1:0,Array.isArray(a[11])?a[11]:[],a[5]||"",m.t&&m.t!=="C"&&a[16]&&m.tm&&m.tm[a[16]-1]?m.tm[a[16]-1][0]:""])}
     const nat={},pre=s.gender+s.birthYear+"|";sorted.forEach((ts,key)=>{if(!key.startsWith(pre))return;const b=best.get(key),t=b.get(s.id);if(t==null)return;let r=0;while(r<ts.length&&ts[r]<t)r++;nat[key.slice(pre.length)]=[r+1,ts.length]});
     sw.push({id,th:s.nameTh||s.nameEn||"",en:s.nameEn||"",g:s.gender,by:s.birthYear,last:s.lastMeet||"",rs,nat})}
   sw.sort((a,b)=>(a.g>b.g?1:a.g<b.g?-1:0)||a.by-b.by||a.en.localeCompare(b.en));
