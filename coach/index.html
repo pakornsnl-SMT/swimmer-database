@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.38 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.39 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -176,6 +176,36 @@ table.sttab td.num.t{font:500 12.5px var(--mono)}table.sttab td.num.t.stpb{font-
 @media screen{table.sttab th,table.sttab td{padding:3px 4px!important}table.sttab th{font-size:11.5px}table.sttab td.en{font-size:12px}table.sttab td.stm{min-width:130px;font-size:12.5px}}
 .swrep .pbtag{margin-right:4px}
 .swrep td.t .pbtag{float:left;margin:2px 6px 0 0}
+/* v3.39 Portfolio */
+.pfpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:14px 0 4px}
+.pfall{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-size:15px}
+.pfsw{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;background:var(--surface);font-size:14px;line-height:1.35}
+.pfsw.on{border-color:var(--teal);background:var(--teal-soft);box-shadow:inset 3px 0 0 var(--teal)}
+.pfsw input,.pfall input{width:18px;height:18px;margin-top:2px;flex:none}
+.pfwrap{display:flex;flex-direction:column;gap:22px}
+.pfdoc{background:#fff;color:#14213d;border:1px solid var(--line);border-radius:12px;padding:0 0 16px;overflow:hidden;font-size:13px}
+.pfband{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;background:var(--teal);color:#fff;padding:18px 22px}
+.pftitle{font:700 22px var(--display);letter-spacing:.01em}.pftitle-en{font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+.pfwho{text-align:right;font-size:14px;line-height:1.45}.pfwho b{font:700 18px var(--display)}.pfwho span{opacity:.9;font-size:12.5px}
+.pfstripe{display:flex;height:5px}.pfstripe i{flex:5;background:#123a91}.pfstripe i:nth-child(2){flex:2;background:var(--good)}.pfstripe i:nth-child(3){flex:4;background:var(--red)}
+.pfh{margin:16px 22px 6px;font:700 15px var(--display);color:var(--teal);border-bottom:2px solid var(--teal-soft);padding-bottom:3px}
+.pfh .pfen{font-weight:600}
+.pfen{color:#5a6886;font-size:.86em}
+table.pfkv,table.pftab{width:calc(100% - 44px);margin:0 22px;border-collapse:collapse}
+table.pfkv th{width:30%;text-transform:none;letter-spacing:0;text-align:left;vertical-align:top;font:600 12.5px var(--body);color:#14213d;padding:5px 8px;border-bottom:1px solid #e6ebf4;background:#f6f8fd}
+table.pfkv td{padding:5px 8px;border-bottom:1px solid #e6ebf4;vertical-align:top}
+table.pftab th{font:600 11.5px var(--body);text-align:left;color:#14213d;background:#f6f8fd;border:1px solid #dfe5f0;padding:4px 6px;text-transform:none;letter-spacing:0}
+table.pftab td{border:1px solid #e3e8f2;padding:4px 6px;vertical-align:top}
+table.pftab td.num,table.pftab th.num{text-align:right}table.pftab td.t{font-family:var(--mono)}table.pftab td.nw,table.pftab .nw{white-space:nowrap}
+table.pftab tbody tr:nth-child(even) td{background:#fafbfe}
+.pfbest{color:var(--teal);font-weight:700;background:var(--teal-soft)!important}
+.pffoot{margin:16px 22px 0;padding-top:8px;border-top:1px solid var(--line);font-size:11.5px;color:#14213d;line-height:1.5}.pffoot span{color:#5a6886}
+@media print{body.pfprint .pfdoc{border:0;border-radius:0;padding:0;font-size:11px}
+body.pfprint .pfwrap{gap:0}body.pfprint .pfnew{break-before:page;page-break-before:always}
+body.pfprint .pfband{padding:12px 14px}body.pfprint .pfh{margin:12px 0 5px}body.pfprint table.pfkv,body.pfprint table.pftab{width:100%;margin:0}body.pfprint .pffoot{margin:12px 0 0}
+body.pfprint table.pftab td,body.pfprint table.pftab th,body.pfprint table.pfkv td,body.pfprint table.pfkv th{padding:3px 5px!important}
+body.pfprint table.pftab thead{display:table-header-group}body.pfprint h2{display:none}}
+@media print{body.pfprint .pfh{break-after:avoid;page-break-after:avoid}body.pfprint table.pftab tr{break-inside:avoid}body.pfprint .pffoot{break-inside:avoid}}
 /* SMT Coach colour scheme: blue (main) and red (accent) */
 :root{--bg:#f4f6fb;--surface:#ffffff;--ink:#14213d;--muted:#5a6886;--line:#d9e0ee;--teal:#1d4fb8;--teal-soft:#e3eafa;--blue:#3b7be0;--blue-soft:#e6efff;--red:#b3182d;--red-soft:#fde6e9;--gold:#dc3545;--gold-soft:#fdecee;--sel:#e3ebff;--selbar:#1d4fb8;--good:#1f8a4c;--bad:#c42a3c}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d1322;--surface:#141d31;--ink:#e6ecf8;--muted:#93a3c2;--line:#26345a;--teal:#7aa2f5;--teal-soft:#18284a;--blue:#8fb6ff;--blue-soft:#1a2a4d;--red:#ff6b78;--red-soft:#3d1a20;--gold:#ff8a94;--gold-soft:#3a1c22;--sel:#1a2a4d;--selbar:#7aa2f5}}
@@ -421,7 +451,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.38 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.39 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1210,7 +1240,7 @@ document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="s
   const pg=document.createElement("style");pg.id="stPage";pg.textContent="@page{size:A4 landscape;margin:9mm}";document.head.appendChild(pg);
   const done=()=>{document.body.classList.remove("printing","land");document.title=old;pg.remove();window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
-function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint" style="margin-bottom:12px">${segBtns("rpk",[["meet","Meet Report"],["st","Summary of times"],["yr","My Swim Year"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():ui.rpk==="yr"?`<h2>My Swim Year ${YEAR}</h2>`+yirView():meetReportView())}
+function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint" style="margin-bottom:12px">${segBtns("rpk",[["meet","Meet Report"],["st","Summary of times"],["yr","My Swim Year"],["pf","Portfolio"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():ui.rpk==="yr"?`<h2>My Swim Year ${YEAR}</h2>`+yirView():ui.rpk==="pf"?`<h2 class="noprint">Portfolio</h2>`+portfolioView():meetReportView())}
 
 /* ---------- Reports: My Swim Year (year-in-review picture per swimmer, 1080×1350, 11 Nov 2026) ---------- */
 function yirData(s){const now=ALL.filter(x=>x.s===s&&x.r.d.startsWith(YEAR));if(!now.length)return null;const z=season(s);
@@ -1276,6 +1306,76 @@ document.getElementById("view").addEventListener("click",async e=>{const c=e.tar
   try{for(let i=0;i<list.length;i++){if(m)m.textContent=`Making ${i+1} of ${list.length}…`;const u=await yirPicture(list[i]),bin=atob(u.split(",")[1]),a=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)a[k]=bin.charCodeAt(k);files.push({name:yirName(list[i]),data:a});await new Promise(r=>setTimeout(r,0))}
     const url=URL.createObjectURL(zipStore(files)),l=document.createElement("a");l.href=url;l.download=`${CLUB.short} - My Swim Year ${YEAR}.zip`.replace(/[\\/:*?"<>|]+/g," ");document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);if(m)m.textContent=`Done · ${files.length} pictures`}
   catch(err){if(m)m.textContent="Couldn't make the pictures: "+(err.message||err)}b.disabled=false});
+
+/* ---------- Reports: Portfolio (coach version, 13 Nov 2026) ----------
+   A bilingual record per swimmer: profile, personal bests with World Aquatics points, season bests by year and,
+   if chosen, the full competition history. No issuing organisation and no reference code (the verified portfolio
+   stays with SMT staff). EXH swims count; DNS/DSQ/DNF never count (time must be > 0); relay lead-offs count. */
+const PF_BT={1:{"1-50":[23.61,20.91],"1-100":[51.71,46.40],"1-200":[112.23,102.00],"1-400":[234.18,219.96],"1-800":[484.12,452.12],"1-1500":[920.48,870.67],"2-50":[26.86,23.55],"2-100":[57.13,51.60],"2-200":[123.14,111.92],"3-50":[29.16,25.95],"3-100":[64.13,56.88],"3-200":[137.55,125.48],"4-50":[24.43,22.27],"4-100":[54.60,49.45],"4-200":[121.81,110.34],"5-200":[125.70,112.69],"5-400":[263.65,242.50]},
+  2:{"1-50":[22.83,19.90],"1-100":[50.25,44.84],"1-200":[110.31,98.61],"1-400":[230.25,212.25],"1-800":[477.42,440.46],"1-1500":[908.24,846.88],"2-50":[25.23,22.11],"2-100":[54.02,48.33],"2-200":[118.04,105.63],"3-50":[28.37,24.95],"3-100":[62.36,55.28],"3-200":[132.50,120.16],"4-50":[23.94,21.32],"4-100":[52.71,47.71],"4-200":[119.32,106.85],"5-100":[55.11,49.28],"5-200":[121.63,108.88],"5-400":[255.48,234.81]}};
+const PF_TH=["","ฟรีสไตล์","กรรเชียง","กบ","ผีเสื้อ","เดี่ยวผสม"],PF_EN=["","Freestyle","Backstroke","Breaststroke","Butterfly","Individual Medley"];
+const PF_SRC_TH="ผลการแข่งขันทั้งหมดดำเนินการอย่างเป็นทางการโดย Swim Meets Thailand, RaceSwim และ CNX",PF_SRC_EN="All results officially processed by Swim Meets Thailand, RaceSwim and CNX";
+const pfPts=(g,c,st,d,t)=>{const b=(PF_BT[c]||{})[st+"-"+d];return b&&t>0?Math.floor(1000*Math.pow(b[g==="F"?0:1]/(t/100),3)):null};
+const pfDate=v=>{const[y,m,d]=String(v||"").split("-");return d?`${d}/${m}/${y}`:v||""};
+const pfBi=(th,en)=>`${th}<br><span class="pfen">${en}</span>`;
+const pfEv=(st,d)=>pfBi(`${PF_TH[st]} ${d} ม.`,`${d} m ${PF_EN[st]}`);
+const pfPool=c=>`<span class="nw">${c===2?"25 m":"50 m"}</span>`;
+function pfDefaults(){if(ui.pfSel)return;const y=new Date().getFullYear();ui.pfSel=new Set();ui.pfFrom=y-2;ui.pfTo=y;ui.pfHist=false}
+function pfYears(){const ys=new Set();D.sw.forEach(s=>(s.rs||[]).forEach(r=>{if(r[1])ys.add(+r[1].slice(0,4))}));const L=[...ys].filter(Boolean).sort();return L.length?L:[new Date().getFullYear()]}
+/* one swimmer's numbers for the chosen years */
+function pfData(s){const y0=+ui.pfFrom,y1=+ui.pfTo;
+  const rs=(s.rs||[]).filter(r=>r[5]>0&&r[1]&&+r[1].slice(0,4)>=y0&&+r[1].slice(0,4)<=y1).map(r=>({m:r[0],d:r[1],st:r[2],ds:r[3],c:r[4],t:r[5],pl:r[6],rel:r[7],tm:r[10]||""})).sort((a,b)=>a.d.localeCompare(b.d));
+  const ev=new Map();rs.forEach(r=>{const k=r.c+"|"+r.st+"|"+r.ds;(ev.get(k)||ev.set(k,[]).get(k)).push(r)});
+  const keys=[...ev.keys()].sort((a,b)=>{const[ca,sa,da]=a.split("|").map(Number),[cb,sb,db]=b.split("|").map(Number);return ca-cb||sa-sb||da-db});
+  const pbs=keys.map(k=>{const L=ev.get(k),best=L.reduce((a,b)=>b.t<a.t?b:a),first=L[0];return{k,best,n:L.length,impr:L.length>1&&first.t>best.t?(first.t-best.t)/first.t*100:null,p:pfPts(s.g,best.c,best.st,best.ds,best.t)}});
+  const years=[];for(let y=y0;y<=y1;y++)years.push(y);
+  const sb=keys.map(k=>{const L=ev.get(k),by={};L.forEach(r=>{const y=+r.d.slice(0,4);if(by[y]==null||r.t<by[y].t)by[y]=r});return{k,by}});
+  return{rs,pbs,sb,years,meets:new Set(rs.map(r=>r.m)).size}}
+function pfDoc(s,first){const P=pfData(s),y=new Date().getFullYear(),y0=+ui.pfFrom,y1=+ui.pfTo;
+  const per=y0===y1?String(y0):`${y0} – ${y1}`;
+  const kv=[["ชื่อ-นามสกุล","Full name (Thai)",esc(s.th||"—")],["ชื่อภาษาอังกฤษ","Full name (English)",esc(s.en||"—")],["เพศ","Gender",s.g==="F"?"หญิง / Female":"ชาย / Male"],
+    ["ปีเกิด","Year of birth",s.by?`${s.by} (พ.ศ. ${s.by+543}) · อายุ ${y-s.by} ปีในปี ${y} / age ${y-s.by} in ${y}`:"—"],["สังกัด","Club / team",esc(CLUB.name)],
+    ["ช่วงการแข่งขัน","Competition period",P.rs.length?`${pfDate(P.rs[0].d)} – ${pfDate(P.rs[P.rs.length-1].d)}`:"—"],
+    ["สถิติรวม","Summary",`${P.meets} รายการแข่งขัน / meets · ${P.rs.length} ครั้งที่ลงแข่ง / swims · ${P.pbs.length} ประเภท / events`],
+    ["แหล่งข้อมูล","Source",pfBi(PF_SRC_TH,PF_SRC_EN)]];
+  const mn=id=>esc((D.meets[id]||{}).n||"");
+  const pbT=P.pbs.length?`<table class="pftab"><thead><tr><th>${pfBi("ประเภท","Event")}</th><th>${pfBi("สระ","Pool")}</th><th class="num">${pfBi("เวลาดีที่สุด","Best time")}</th><th class="num">${pfBi("คะแนน","WA points")}</th><th class="num">${pfBi("พัฒนาการ","Improved")}</th><th>${pfBi("วันที่","Date")}</th><th>${pfBi("รายการแข่งขัน","Meet")}</th></tr></thead><tbody>${P.pbs.map(x=>`<tr><td>${pfEv(x.best.st,x.best.ds)}</td><td>${pfPool(x.best.c)}</td><td class="num t"><b>${fmt(x.best.t)}</b></td><td class="num">${x.p??"—"}</td><td class="num">${x.impr!=null?x.impr.toFixed(1)+"%":"—"}</td><td class="nw">${pfDate(x.best.d)}</td><td>${mn(x.best.m)}${x.best.rel?' <span class="pfen">(relay lead-off)</span>':""}</td></tr>`).join("")}</tbody></table>`:`<p class="hint">ไม่มีผลการแข่งขันในช่วงเวลานี้ · No swims in this period.</p>`;
+  const sbT=P.pbs.length&&P.years.length>1?`<h3 class="pfh">${pfBi("เวลาดีที่สุดในแต่ละปี","Season best times by year")}</h3><table class="pftab"><thead><tr><th>${pfBi("ประเภท","Event")}</th><th>${pfBi("สระ","Pool")}</th>${P.years.map(yy=>`<th class="num">${yy}</th>`).join("")}</tr></thead><tbody>${P.sb.map(x=>{const[c,st,d]=x.k.split("|").map(Number),best=Math.min(...Object.values(x.by).map(r=>r.t));return`<tr><td>${pfEv(st,d)}</td><td>${pfPool(c)}</td>${P.years.map(yy=>{const r=x.by[yy];return r?`<td class="num t${r.t===best?" pfbest":""}">${fmt(r.t)}</td>`:`<td class="num pfen">–</td>`}).join("")}</tr>`}).join("")}</tbody></table>`:"";
+  const hT=ui.pfHist&&P.rs.length?`<h3 class="pfh">${pfBi("ประวัติการแข่งขัน","Competition history")}</h3><table class="pftab pfhist"><thead><tr><th>${pfBi("วันที่","Date")}</th><th>${pfBi("รายการแข่งขัน","Meet")}</th><th>${pfBi("ประเภท","Event")}</th><th>${pfBi("สระ","Pool")}</th><th class="num">${pfBi("เวลา","Time")}</th><th class="num">${pfBi("อันดับ","Place")}</th></tr></thead><tbody>${P.rs.slice().reverse().map(r=>`<tr><td class="nw">${pfDate(r.d)}</td><td>${mn(r.m)}${r.tm?` <span class="pfen">· for ${esc(r.tm)}</span>`:""}${r.rel?' <span class="pfen">(relay lead-off)</span>':""}</td><td>${pfEv(r.st,r.ds)}</td><td>${pfPool(r.c)}</td><td class="num t">${fmt(r.t)}</td><td class="num">${r.pl>0&&!r.rel?r.pl:"–"}</td></tr>`).join("")}</tbody></table>`:"";
+  return`<section class="pfdoc${first?"":" pfnew"}">
+    <div class="pfband"><div><div class="pftitle">แฟ้มสะสมผลงานนักกีฬาว่ายน้ำ</div><div class="pftitle-en">Swimmer Performance Portfolio</div></div><div class="pfwho"><b>${esc(s.th||s.en)}</b>${s.th&&s.en?`<br>${esc(s.en)}`:""}<br><span>ช่วงเวลา / Period: ${per}</span></div></div>
+    <div class="pfstripe"><i></i><i></i><i></i></div>
+    <h3 class="pfh">${pfBi("ข้อมูลนักกีฬา","Athlete profile")}</h3>
+    <table class="pfkv">${kv.map(([t,e,v])=>`<tr><th>${pfBi(t,e)}</th><td>${v}</td></tr>`).join("")}</table>
+    <h3 class="pfh">${pfBi("สถิติที่ดีที่สุด","Personal best times")}</h3>${pbT}${sbT}${hT}
+    <div class="pffoot">${PF_SRC_TH}<br>${PF_SRC_EN}<br><span>คะแนน World Aquatics คำนวณจากเวลาฐานของ World Aquatics · World Aquatics points from the World Aquatics base times · จัดทำเมื่อ / Made on ${pfDate(new Date().toISOString().slice(0,10))}</span></div>
+  </section>`}
+function portfolioView(){pfDefaults();const ys=pfYears(),list=D.sw.map((s,i)=>[s,i]).filter(([s])=>s.rs&&s.rs.length).sort((a,b)=>String(a[0].th).localeCompare(String(b[0].th),"th"));
+  [...ui.pfSel].forEach(i=>{if(!D.sw[i])ui.pfSel.delete(i)});const all=list.length&&list.every(([,i])=>ui.pfSel.has(i)),n=ui.pfSel.size;
+  const yo=v=>ys.map(y=>`<option value="${y}"${+v===y?" selected":""}>${y}</option>`).join("");
+  const docs=list.filter(([,i])=>ui.pfSel.has(i)).map(([s],k)=>pfDoc(s,k===0)).join("");
+  return`<div class="noprint">
+    <p class="hint" style="margin:0 0 10px">A formal, bilingual record of each swimmer's results (Thai and English), for school, university and scholarship applications. Tick the swimmers, then <b>Download PDF</b>: one file, each swimmer starting on a new page.</p>
+    <div class="row" style="gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <label class="hint">From year<br><select id="pfFrom">${yo(ui.pfFrom)}</select></label>
+      <label class="hint">To year<br><select id="pfTo">${yo(ui.pfTo)}</select></label>
+      <label class="hint" style="display:flex;gap:6px;align-items:center;padding-bottom:6px"><input type="checkbox" id="pfHist"${ui.pfHist?" checked":""}> Include full competition history</label>
+      <button class="chip teal" id="pfPdf" type="button" style="margin-left:auto;cursor:pointer;font:600 14px var(--display);padding:8px 16px"${n?"":" disabled"}>⬇ Download PDF${n?` (${n})`:""}</button></div>
+    ${ui.pfHist&&n>10?`<div class="hint" style="color:var(--red);margin-top:6px">${n} swimmers with full history can be many pages; the PDF may take a little while.</div>`:""}
+    <div class="pfpick"><label class="pfall"><input type="checkbox" id="pfAll"${all?" checked":""}> <b>Tick all</b> <span class="hint">(${list.length})</span></label>
+      ${list.map(([s,i])=>`<label class="pfsw${ui.pfSel.has(i)?" on":""}"><input type="checkbox" data-pfi="${i}"${ui.pfSel.has(i)?" checked":""}> <span><b>${esc(s.th||s.en)}</b><br><span class="hint">${esc(s.th?s.en||"":"")}${s.by?" · "+s.by:""}</span></span></label>`).join("")}</div>
+    <h3 style="margin:18px 0 8px">${n?`Preview (${n})`:"Preview"}</h3>${n?"":`<div class="lock">Tick one or more swimmers above to see their portfolio.</div>`}</div>
+    <div class="pfwrap">${docs}</div>`}
+document.getElementById("view").addEventListener("change",e=>{const t=e.target;if(!t.closest||!document.getElementById("pfAll"))return;
+  if(t.id==="pfFrom"||t.id==="pfTo"){ui[t.id]=+t.value;if(+ui.pfFrom>+ui.pfTo){const a=ui.pfFrom;ui.pfFrom=ui.pfTo;ui.pfTo=a}render();return}
+  if(t.id==="pfHist"){ui.pfHist=t.checked;render();return}
+  if(t.id==="pfAll"){document.querySelectorAll("[data-pfi]").forEach(c=>t.checked?ui.pfSel.add(+c.dataset.pfi):ui.pfSel.delete(+c.dataset.pfi));render();return}
+  if(t.dataset&&t.dataset.pfi!=null){t.checked?ui.pfSel.add(+t.dataset.pfi):ui.pfSel.delete(+t.dataset.pfi);render()}});
+document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="pfPdf")return;const old=document.title;
+  document.title=(CLUB.short+" - Portfolio").replace(/[\\/:*?"<>|]+/g," ");document.body.classList.add("printing","pfprint");
+  const pg=document.createElement("style");pg.id="pfPage";pg.textContent="@page{size:A4 portrait;margin:11mm}";document.head.appendChild(pg);
+  const done=()=>{document.body.classList.remove("printing","pfprint");document.title=old;pg.remove();window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
 
 /* ---------- saving entries safely when several devices edit at once (11 Nov 2026) ----------
    Each save sends only what changed on this device since the last load/save (per swimmer-event, per relay event, per name),
