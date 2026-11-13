@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.36 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.37 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -297,18 +297,20 @@ table.emev tr.grph td{padding-top:6px;padding-bottom:6px}
 .wdcard{border-color:var(--red)!important;background:#fff6f7}
 
 /* meet chooser blocks */
-.mblocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:0 0 14px}
-.mblock{position:relative;display:flex;gap:12px;align-items:center;text-align:left;padding:12px 14px;border:0;border-radius:14px;background:var(--mc);color:#fff;cursor:pointer;font:inherit;box-shadow:0 2px 6px rgba(0,0,0,.12);opacity:.78;transition:opacity .12s,transform .12s,box-shadow .12s}
-.mblock:hover{opacity:.95;transform:translateY(-1px)}
-.mblock.on{opacity:1;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--mc),0 6px 16px rgba(0,0,0,.18)}
-.mblock .mbd{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:54px;padding:6px 4px;border-radius:10px;background:rgba(255,255,255,.22);line-height:1}
+.mblocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px 12px;margin:12px 0 16px}
+.mblock{position:relative;display:flex;gap:12px;align-items:center;text-align:left;padding:12px 14px;border:2px solid var(--mc);border-radius:14px;background:var(--surface);color:var(--ink);cursor:pointer;font:inherit;box-shadow:0 1px 3px rgba(0,0,0,.08);transition:transform .12s,box-shadow .12s,background .12s}
+.mblock:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.12);background:color-mix(in srgb,var(--mc) 6%,var(--surface))}
+.mblock.on{background:var(--mc);color:#fff;box-shadow:0 0 0 3px var(--surface),0 0 0 6px var(--mc),0 8px 18px rgba(0,0,0,.22);transform:translateY(-2px)}
+.mblock .mbd{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:54px;padding:6px 4px;border-radius:10px;background:color-mix(in srgb,var(--mc) 14%,var(--surface));color:var(--mc);line-height:1}
+.mblock.on .mbd{background:rgba(255,255,255,.22);color:#fff}
 .mblock .mbd b{font:700 26px var(--display)}
 .mblock .mbd small{font:600 12px var(--display);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
 .mblock .mbt{display:flex;flex-direction:column;min-width:0;gap:2px}
 .mblock .mbt b{font:700 16px var(--display);line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mblock .mbt small{font-size:12px;opacity:.92}
+.mblock .mbt small{font-size:12px;color:var(--muted,#5a6886)}
+.mblock.on .mbt small{color:#fff;opacity:.95}
 .mblock .mbs{font-weight:600}
-.mblock .mbk{position:absolute;top:8px;right:10px;font-weight:700}
+.mblock .mbk{position:absolute;top:-12px;right:12px;background:var(--surface);color:var(--mc);border:2px solid var(--mc);border-radius:999px;padding:1px 10px;font:700 12px var(--display);letter-spacing:.04em;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 /* Times to beat (11 Nov 2026) */
 table.ttb td{vertical-align:middle}
 table.ttb .t{font:500 15px var(--mono)}
@@ -419,7 +421,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.36 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.37 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1308,7 +1310,7 @@ function meetBlocks(L,cur){const t=todayL(),days=d=>d?Math.round((Date.parse(d)-
     return `<button type="button" role="listitem" class="mblock${on?" on":""}" data-emsel="${esc(x.id)}" style="--mc:${MB_COL[i%MB_COL.length]}" aria-pressed="${on}">
       <span class="mbd"><b>${d.getDate()}</b><small>${d.toLocaleDateString("en-GB",{month:"short"})} ${String(d.getFullYear()).slice(2)}</small></span>
       <span class="mbt"><b>${esc(x.name)}</b><small>${x.city?esc(x.city)+" · ":""}${x.course==="SCM"?"25 m":"50 m"}</small>
-      <small class="mbs">${st?esc(st)+" · ":""}${n==null?"":n<0?"entries closed":n===0?"closes today":`closes in ${n} day${n===1?"":"s"}`}</small></span>${on?'<span class="mbk">✓</span>':""}</button>`}).join("")}</div>`}
+      <small class="mbs">${st?esc(st)+" · ":""}${n==null?"":n<0?"entries closed":n===0?"closes today":`closes in ${n} day${n===1?"":"s"}`}</small></span>${on?'<span class="mbk">✓ Selected</span>':""}</button>`}).join("")}</div>`}
 document.getElementById("view").addEventListener("click",e=>{if(ui.tab!=="entries")return;const b=e.target.closest("[data-emsel]");if(!b)return;ui.emid=b.dataset.emsel;ui.emWd=false;render()});
 /* a withdrawn club that starts again: the next save makes it a normal entry */
 {const _save=CTX.mcSave;CTX.mcSave=(m,v)=>{const S=MS[m.id];if(S&&S.mine&&S.mine.status==="withdrawn"&&!("status" in v)){v={...v,status:"",wd:null};S.mine={...S.mine,status:"",wd:null}}return _save(m,v)}}
