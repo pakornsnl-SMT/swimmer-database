@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.37 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.38 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -421,7 +421,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.37 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.38 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1770,7 +1770,8 @@ async function boot(){
     try{show("#scrLoad");setLoad("Checking your account…");PROFILE=await DB.getUser(u.uid);
       if(!PROFILE){show("#scrLogin");$("#loginMsg").innerHTML=`Your login works, but no SMT account is linked to it yet.<br>Send this code to SMT: <code>${escH(u.uid)}</code>`;return}
       if(idleOver()){await idleOut();return}actSet();try{sessionStorage.removeItem("smt.idle")}catch(e){}
-      const want=QS.get("club");
+      const want=QS.get("club"),pv=QS.get("preview");
+      if(PROFILE.role==="admin"&&pv){await coachPage("preview",pv);return}
       if(PROFILE.role==="admin"&&!want){await adminPage();return}
       await coachPage(PROFILE.role==="admin"?want:PROFILE.clubId)}
     catch(err){show("#scrLogin");$("#loginMsg").textContent=friendly(err)}});
@@ -1853,12 +1854,14 @@ function rankAt(sid,st,d,course,until){const ck=sid+"|"+st+"|"+d+"|"+course+"|"+
 function rankAt0(sid,st,d,course,until){const me=PUB.byId.get(sid);if(!me||!me.birthYear)return null;const L=rankIndex().get(me.gender+"|"+me.birthYear+"|"+st+"-"+d+"|"+course)||[],from=until.slice(0,4)+"-01-01",best=new Map();
   for(const [t,dt,id] of L)if(dt>=from&&dt<=until&&(!best.has(id)||t<best.get(id)))best.set(id,t);
   if(!best.has(sid))return null;const times=[...best.values()].sort((a,b)=>a-b),mine=best.get(sid);return{rank:times.indexOf(mine)+1,total:times.length,times,mine}}
-async function coachPage(clubId){
+async function coachPage(clubId,PV){
   if(!clubId){show("#scrLogin");$("#loginMsg").textContent="Your account isn't linked to a club yet. Please contact SMT.";return}
-  setLoad("Loading your club…");
-  const club=await DB.getClub(clubId);if(!club){show("#scrLogin");$("#loginMsg").textContent="Club not found. Please contact SMT.";return}
+  setLoad(PV?"Loading the preview…":"Loading your club…");
+  /* PV = admin preview of any team, built from public results only: read-only, nothing is saved */
+  let pvIds=null;if(PV){const P=await loadPublic(),nm=PV.trim().toLowerCase(),y=String(new Date().getFullYear()-1),all=P.swimmers.filter(s=>String(s.club||"").trim().toLowerCase()===nm);pvIds=(all.some(s=>(s.lastMeet||"")>=y)?all.filter(s=>(s.lastMeet||"")>=y):all).map(s=>s.id)}
+  const club=PV?{id:"preview",name:PV,short:PV,buys:[{n:Math.max(1,pvIds.length),start:"2000-01-01",end:"2999-12-31"}]}:await DB.getClub(clubId);if(!club){show("#scrLogin");$("#loginMsg").textContent="Club not found. Please contact SMT.";return}
   const FREE=club.plan==="free",EMPTY_PUB={swimmers:[],meets:{},records:[],standards:[],byId:new Map()};
-  const [ro,pub,cal,set,tr,meets,ppl]=await Promise.all([DB.roster(clubId),FREE?Promise.resolve(EMPTY_PUB):loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]}),DB.getData(clubId,"people").catch(()=>null)]);
+  const [ro,pub,cal,set,tr,meets,ppl]=PV?[pvIds.map(id=>({id})),await loadPublic(),null,null,[],[],null]:await Promise.all([DB.roster(clubId),FREE?Promise.resolve(EMPTY_PUB):loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]}),DB.getData(clubId,"people").catch(()=>null)]);
   setLoad("Working out rankings…");await new Promise(r=>setTimeout(r,0));
   const year=new Date().getFullYear(),today=dayLocal();
   PEOPLE=(ppl&&ppl.m)||{};let ids=ro.map(r=>r.id);const D=buildData(pub,ids,year);
@@ -1886,13 +1889,18 @@ async function coachPage(clubId){
     syncTeam:m=>DB.syncMyTeam(m.id,CLUB.id,CLUB.name),
     mcApply:(m,fn)=>DB.applyEntry(m.id,CLUB.id,cur=>({clubName:CLUB.name,...fn(cur)})),
     friendly,rankAt,get people(){return PEOPLE}};
+  if(PV){const no=async()=>{toast("Preview only: nothing is saved.");return{ok:false,preview:true}};
+    ["addSwimmer","releaseSwimmer","suggestCorrection","editNewSwimmer","addNewSwimmer","requestTransfer","saveCalendar","mcRequest","mcSave","mcApply","syncTeam"].forEach(k=>CTX[k]=no);
+    CTX.saveSettings=async()=>{};CTX.loadCorrections=async()=>{};CTX.entryMeets=[];CTX.expired=false;CLUB.soon=[];CLUB.over=0}
   document.title=CLUB.short+" · SMT Coach";
   $("#clubName").textContent=CLUB.name;
   const nextEnd=CLUB.buys.filter(b=>buyOn(b,today)&&b.end).map(b=>b.end).sort()[0]||"";
   $("#pkgChips").innerHTML=`${CLUB.limit?`<span class="chip teal">${CLUB.limit} coach slots</span>`:""}${CTX.expired?`<span class="chip" style="color:var(--red);border-color:var(--red)">Expired${CLUB.expires?" "+escH(dShow(CLUB.expires)):""}</span>`:CLUB.soon.length?CLUB.soon.map(b=>`<span class="chip" style="color:var(--red);border-color:var(--red)" title="Ask SMT to renew">${+b.n} slot${+b.n>1?"s":""} end ${escH(dShow(b.end))}</span>`).join(""):nextEnd?`<span class="chip gold">Valid to ${escH(dShow(nextEnd))}</span>`:""}${CLUB.over&&!CTX.expired?`<span class="chip" id="overChip" style="color:#fff;background:var(--red);border-color:var(--red)">Release ${CLUB.over} swimmer${CLUB.over>1?"s":""}</span>`:""}`;
   $("#userBar").innerHTML=`<span class="hint">${escH(USER.email||"")}</span>${PROFILE.role==="admin"?` <a class="chip" href="?${MOCK?"mock=1&":""}${QS.get("data")?"data="+encodeURIComponent(QS.get("data"))+"&":""}">Admin</a>`:""} <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
   CTX.loadCorrections();
+  if(PV){$("#pkgChips").innerHTML=`<span class="chip" style="background:#fff4d6;border-color:#c98a00;color:#7a5200;font-weight:700">Preview · read-only · ${ids.length} swimmer${ids.length===1?"":"s"} from public results</span>`;document.title=CLUB.short+" · Preview · SMT Coach"}
   show("#scrApp");APP=window.startCoachApp(D,CTX,CLUB);
+  if(PV){const st=document.createElement("style");st.textContent='#tabs button[data-t="entries"],.mngbar{display:none!important}';document.head.appendChild(st)}
   /* free account: meet places only (number of swimmers per meet); the other tools are for paying clubs */
   document.querySelectorAll("#tabs button").forEach(b=>b.hidden=FREE&&b.dataset.t!=="entries");const ps=$("#poolSw");if(ps)ps.hidden=FREE;if(FREE){const tb=document.querySelector('#tabs button[data-t="entries"]');if(tb)tb.click()}
   (window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>{try{rankIndex()}catch(e){}});
@@ -1961,6 +1969,9 @@ async function adminPage(){
     const open=trs.filter(t=>t.status==="open");
     let h=`<div class="row" style="margin-bottom:14px"><div class="seg">${[["clubs","Clubs"],["meets","Upcoming meets"],["corr","Corrections"],["coaches","Coach accounts"],["transfers",`Transfer requests${open.length?" ("+open.length+")":""}`]].map(([v,l])=>`<button data-at="${v}" aria-pressed="${A.tab===v}">${l}</button>`).join("")}</div></div>`;
     if(A.tab==="clubs"){const e=A.edit?clubs.find(c=>c.id===A.edit)||{}:{};
+      h+=`<div class="addm" style="margin:0 0 14px"><b style="font-family:var(--display);font-size:16px">Preview any team</b>
+        <p class="hint" style="margin:0">See any club in the results as a coach would: team, swimmers, rankings, goals, relays and reports, for example to show a club before it signs up. Read-only: nothing is saved and no coach slots are used. Meet entries are hidden.</p>
+        <div class="row" style="margin:6px 0 0;align-items:center"><input type="text" id="pvName" placeholder="Type part of a club name" style="min-width:280px" autocomplete="off"><button class="chip teal" data-pvfind="1" style="cursor:pointer;padding:7px 14px">Find</button></div><div id="pvList" style="margin-top:6px"></div></div>`;
       h+=`<div class="addm" style="margin:0 0 14px"><b style="font-family:var(--display);font-size:16px">Birth dates &amp; citizen IDs for team entry files</b>
         <p class="hint" style="margin:0">1 · Download the team lists. 2 · In the SMT staff app: Admin → “SMT Coach app → birth dates &amp; citizen IDs”, load the list, it makes a private file. 3 · Load that file here. Each club only ever sees its own swimmers. Delete the private file afterwards.</p>
         <div class="row" style="margin:6px 0 0"><button class="chip teal" data-tlist="1" style="cursor:pointer;padding:7px 14px">⬇ Team lists for staff app</button><label class="chip" style="cursor:pointer;padding:7px 14px">⬆ Load birth dates &amp; IDs<input type="file" id="cpLoad" accept=".json" style="display:none"></label></div></div>`;
@@ -2078,6 +2089,11 @@ async function adminPage(){
     else if(t.dataset.aedit){A.edit=t.dataset.aedit;draw()}else if(t.dataset.acancel){A.edit=null;draw()}
     else if(t.dataset.adel){if(t.dataset.sure){await DB.delUser(t.dataset.adel);toast("Access removed.");draw()}else{t.dataset.sure="1";t.textContent="Tap again to confirm"}}
     else if(t.dataset.aok||t.dataset.ano){const tr=A.trs.find(x=>x.id===(t.dataset.aok||t.dataset.ano));t.disabled=true;try{await DB.decideTransfer(tr,!!t.dataset.aok);toast(t.dataset.aok?"Approved. The swimmer moved to "+(tr.toClubName||tr.toClub)+".":"Declined.");draw()}catch(err){toast(friendly(err),true);t.disabled=false}}
+    else if(t.dataset.pvfind){const box=$("#pvList"),q=($("#pvName").value||"").trim().toLowerCase();if(q.length<2){box.innerHTML='<span class="hint">Type at least 2 letters.</span>';return}
+      box.innerHTML='<span class="hint">Loading results…</span>';const P=await loadPublic(),y=String(new Date().getFullYear()-1),M=new Map();
+      P.swimmers.forEach(s=>{const c=String(s.club||"").trim();if(!c||!c.toLowerCase().includes(q))return;const o=M.get(c)||{n:0,a:0};o.n++;if((s.lastMeet||"")>=y)o.a++;M.set(c,o)});
+      const L=[...M].sort((a,b)=>b[1].a-a[1].a||b[1].n-a[1].n).slice(0,12);
+      box.innerHTML=L.length?L.map(([c,o])=>`<a class="chip" style="margin:0 6px 6px 0" href="${qs("preview="+encodeURIComponent(c))}" target="_blank" rel="noopener">${escH(c)} <span class="hint">${o.a} active</span></a>`).join(""):'<span class="hint">No club found.</span>';return}
     else if(t.dataset.afill){const c=A.clubs.find(x=>x.id===t.dataset.afill);t.disabled=true;t.textContent="Loading results…";try{const pub=await loadPublic(),nm=(c.resultsName||c.name||"").trim().toLowerCase(),y=String(new Date().getFullYear()-1);
         const ids=pub.swimmers.filter(s=>String(s.club||"").trim().toLowerCase()===nm&&(s.lastMeet||"")>=y).map(s=>s.id);
         const have=await DB.rosterCount(c.id),room=Math.max(0,slotsOn(c,dayLocal())-have),pick=ids.slice(0,room);
