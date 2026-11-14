@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.39 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.40 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -383,6 +383,13 @@ table.ttb .t{font:500 15px var(--mono)}
 .swsw{display:inline-flex;align-items:center;gap:8px}.swsw .hint{font-weight:600}
 .swsw .seg{border:2px solid var(--teal);border-radius:12px;padding:3px;background:var(--surface);box-shadow:0 2px 8px rgba(29,79,184,.15)}
 .swsw .seg button{font-size:15px;font-weight:600;padding:8px 16px;border-radius:9px}
+/* v3.40 coach insights */
+.insbox{margin:26px 0 8px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--surface)}
+.inssec{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.inssec h4{margin:0 0 6px;font:700 15px var(--display);color:var(--teal);letter-spacing:.02em}
+.insbadge{font:700 12.5px var(--display);padding:3px 10px;border-radius:999px;letter-spacing:.02em}
+.insnote{margin:6px 0 0;font-size:14px;color:var(--muted);line-height:1.55}.insnote b{color:var(--ink)}
+.inscards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.inscard{border:1px solid var(--line);border-radius:10px;padding:10px 12px}.inscard.acc{border:2px solid var(--teal)}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -458,7 +465,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.39 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.40 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -540,7 +547,7 @@ function swimmerView(){
    <td class="num">${x.imp==null?'<span class="hint">–</span>':x.imp>0?`<span class="up">−${(x.imp*100).toFixed(1)}%</span>`:`<span class="down">+${(-x.imp*100).toFixed(1)}%</span>`}</td><td class="num">${natTxt(s,x.k)}</td><td class="hide-sm en">${shortDate(x.pb.d)}</td></tr>`).join("")}
   </tbody></table></div></div>
   <div style="min-width:0"><h3>Progress · ${e?evLabel(e):""}</h3>${e?chart(e,s):""}
-  </div></div>${swimsBlock(s,e)}${swTimesToBeat(s)}${swTargets(s)}`;
+  </div></div>${swimsBlock(s,e)}${swTimesToBeat(s)}${swInsights(s)}${swTargets(s)}`;
 }
 function chart(e,s){
   const W=460,H=200,P={l:52,r:14,t:14,b:28},pts=e.list;
@@ -1384,6 +1391,78 @@ document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="p
   const done=()=>{document.body.classList.remove("printing","pfprint");document.title=old;pg.remove();window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
 
+/* ---------- Swimmer page: coach insights (14 Nov 2026) ----------
+   1 Pacing from splits vs the Thailand top 8 (same birth year and gender, this year).
+   2 Where today's top 3 (the 3 older birth years) were at the same age.
+   3 Best-event finder. Coach-only views; public results only. */
+const INS_SN=["","Free","Back","Breast","Fly","IM"];
+const insEv=k=>{const[st,d]=k.split("-").map(Number);return d+" "+INS_SN[st]};
+const insSec=cs=>(cs/100).toFixed(1);
+function insRaw(s){return D.sw[s.i]||{rs:[],nat:{}}}
+/* 1 ---- pacing */
+function insPace(s){const R=insRaw(s),C=ui.course,Y=String(YEAR),cand=new Map();
+  R.rs.forEach(r=>{if(r[4]!==C||r[3]<100||r[3]>400||!(r[8]&&r[8].length===r[3]/50))return;const k=r[2]+"-"+r[3];if(!D.ins.pace[s.g+s.by+"|"+C+"|"+k])return;const o=cand.get(k)||{n:0,best:null,last:null};o.n++;
+    if(r[1].slice(0,4)===Y&&(!o.best||r[5]<o.best[5]))o.best=r;if(!o.last||r[1]>o.last[1])o.last=r;cand.set(k,o)});
+  if(!cand.size)return`<p class="hint" style="margin:4px 0 0">No races with 50 m splits in this pool to compare yet (splits are missing for some meets).</p>`;
+  const keys=[...cand.keys()].sort((a,b)=>cand.get(b).n-cand.get(a).n);ui.insPace=ui.insPace||{};let k=ui.insPace[s.i];if(!cand.has(k))k=keys[0];
+  const o=cand.get(k),r=o.best||o.last,mine=r[8],top=D.ins.pace[s.g+s.by+"|"+C+"|"+k],n=mine.length,h=n/2;
+  const drop=a=>{const f=a.slice(0,h).reduce((x,y)=>x+y,0),b=a.slice(h).reduce((x,y)=>x+y,0);return(b-f)/f*100},dm=drop(mine),dt=drop(top.avg),diff=dm-dt;
+  const verdict=diff>3?["Fades at the end","var(--gold-soft)","var(--bad)"]:diff<-3?["Strong finish","var(--teal-soft)","var(--good)"]:["Even pace, like the top 8","var(--teal-soft)","var(--teal)"];
+  const myT=mine.reduce((x,y)=>x+y,0),tT=top.avg.reduce((x,y)=>x+y,0);let worst=0,wv=-1e9;mine.forEach((v,i)=>{const g=v-top.avg[i]/tT*myT;if(g>wv){wv=g;worst=i}});
+  const all=mine.concat(top.avg),lo=Math.min(...all),hi=Math.max(...all),W=640,bw=Math.min(26,(W-80)/n/2.6),step=(W-70)/n,yv=v=>130-(20+(hi>lo?(v-lo)/(hi-lo):.5)*80);
+  const bars=mine.map((v,i)=>{const x=60+step*i+step/2;return`<rect x="${(x-bw-2).toFixed(1)}" y="${yv(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(130-yv(v)).toFixed(1)}" fill="var(--teal)"/><rect x="${(x+2).toFixed(1)}" y="${yv(top.avg[i]).toFixed(1)}" width="${bw.toFixed(1)}" height="${(130-yv(top.avg[i])).toFixed(1)}" fill="#b9c3d6"/><text x="${(x-bw/2-2).toFixed(1)}" y="${(yv(v)-5).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--ink)">${insSec(v)}</text><text x="${x.toFixed(1)}" y="148" text-anchor="middle" font-size="11" fill="var(--muted)">${["1st","2nd","3rd"][i]||i+1+"th"} 50</text>`}).join("");
+  const sel=keys.length>1?`<select data-inspace="${s.i}" aria-label="Event">${keys.map(x=>`<option value="${x}"${x===k?" selected":""}>${insEv(x)} (${cand.get(x).n})</option>`).join("")}</select>`:"";
+  return`<div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 4px"><span><b>${insEv(k)}</b> · ${fmt(r[5])} <span class="hint">${pfDate(r[1])}${o.best?"":" (latest with splits)"}</span></span><span style="display:flex;gap:8px;align-items:center">${sel}<span class="insbadge" style="background:${verdict[1]};color:${verdict[2]}">${verdict[0]}</span></span></div>
+    <svg viewBox="0 0 ${W} 156" width="100%" role="img" aria-label="Seconds per 50 m compared with the Thailand top 8"><line x1="50" y1="130" x2="${W-10}" y2="130" stroke="var(--line)"/><text x="0" y="12" font-size="11" fill="var(--muted)">Seconds per 50 m (shorter bar = faster)</text>
+      <rect x="${W-230}" y="2" width="11" height="11" fill="var(--teal)"/><text x="${W-214}" y="12" font-size="11" fill="var(--ink)">This swimmer</text><rect x="${W-120}" y="2" width="11" height="11" fill="#b9c3d6"/><text x="${W-104}" y="12" font-size="11" fill="var(--ink)">Top 8 average</text>${bars}</svg>
+    <p class="insnote">Second half ${dm>=0?dm.toFixed(0)+"% slower":Math.abs(dm).toFixed(0)+"% faster"} than the first half · the Thailand top 8 (born ${s.by}, ${top.n} with splits): ${dt>=0?dt.toFixed(0)+"% slower":Math.abs(dt).toFixed(0)+"% faster"}.${wv>=5?` Compared with how the top 8 share out their race, the most time goes on the ${["1st","2nd","3rd"][worst]||worst+1+"th"} 50 (${insSec(wv)} s more than their pattern at this swimmer's speed).`:" The 50 m splits follow the top 8 pattern closely."}</p>`}
+/* 2 ---- today's top 3 at the same age */
+function insChamp(s){const R=insRaw(s),C=ui.course,cand=new Map();
+  R.rs.forEach(r=>{if(r[4]!==C)return;const k=r[2]+"-"+r[3],ch=D.ins.champ[s.g+s.by+"|"+C+"|"+k];if(!ch)return;const o=cand.get(k)||{n:0,ages:{}};o.n++;const a=+r[1].slice(0,4)-s.by;if(o.ages[a]==null||r[5]<o.ages[a])o.ages[a]=r[5];cand.set(k,o)});
+  if(!cand.size)return`<p class="hint" style="margin:4px 0 0">Not enough history yet among the older top swimmers in this pool's events.</p>`;
+  const keys=[...cand.keys()].sort((a,b)=>cand.get(b).n-cand.get(a).n);ui.insCh=ui.insCh||{};let k=ui.insCh[s.i];if(!cand.has(k))k=keys[0];
+  const ch=D.ins.champ[s.g+s.by+"|"+C+"|"+k],me=cand.get(k).ages,ages=[...new Set(Object.keys(ch.ages).concat(Object.keys(me)).map(Number))].filter(a=>a>=7&&a<=YEAR-s.by+1).sort((a,b)=>a-b);
+  const bandAges=ages.filter(a=>ch.ages[a]),myAges=ages.filter(a=>me[a]!=null);
+  const vals=[];bandAges.forEach(a=>vals.push(ch.ages[a][0],ch.ages[a][1]));myAges.forEach(a=>vals.push(me[a]));const lo=Math.min(...vals),hi=Math.max(...vals),W=640;
+  const x=a=>ages.length>1?70+(a-ages[0])/(ages[ages.length-1]-ages[0])*(W-140):W/2,y=v=>24+(hi>lo?(v-lo)/(hi-lo):.5)*100;
+  const band=bandAges.length?`<path d="M${bandAges.map(a=>x(a).toFixed(1)+" "+y(ch.ages[a][0]).toFixed(1)).join(" L")} L${bandAges.slice().reverse().map(a=>x(a).toFixed(1)+" "+y(ch.ages[a][1]).toFixed(1)).join(" L")} Z" fill="var(--teal-soft)" stroke="#9fb6e6"/>`:"";
+  const line=myAges.length?`<polyline points="${myAges.map(a=>x(a).toFixed(1)+","+y(me[a]).toFixed(1)).join(" ")}" fill="none" stroke="var(--teal)" stroke-width="3"/>${myAges.map(a=>`<circle cx="${x(a).toFixed(1)}" cy="${y(me[a]).toFixed(1)}" r="4.5" fill="var(--teal)"/><text x="${x(a).toFixed(1)}" y="${(y(me[a])-9).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--ink)">${fmt(me[a])}</text>`).join("")}`:"";
+  const A=myAges.length?myAges[myAges.length-1]:null,bA=A!=null?(ch.ages[A]?A:bandAges.reduce((p,a)=>Math.abs(a-A)<Math.abs(p-A)?a:p,bandAges[0])):null,bb=bA!=null?ch.ages[bA]:null,t=A!=null?me[A]:null;
+  const rel=!bb||t==null?"":t<=bb[0]?`faster than all of them at that age.`:t<=bb[1]?`inside the top-3 band.`:`${insSec(t-bb[1])} s from the band.`;
+  const sel=keys.length>1?`<select data-insch="${s.i}" aria-label="Event">${keys.map(x2=>`<option value="${x2}"${x2===k?" selected":""}>${insEv(x2)}</option>`).join("")}</select>`:"";
+  return`<div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 4px"><span><b>${insEv(k)}</b> <span class="hint">· ${C===2?"25":"50"} m pool · best time at each age</span></span>${sel}</div>
+    <svg viewBox="0 0 ${W} 160" width="100%" role="img" aria-label="Best time at each age compared with today's top 3 at the same age"><text x="0" y="12" font-size="11" fill="var(--muted)">Higher on the chart = faster</text>
+      <rect x="${W-250}" y="2" width="14" height="11" fill="var(--teal-soft)" stroke="#9fb6e6"/><text x="${W-230}" y="12" font-size="11" fill="var(--ink)">Today's top 3 at that age</text>
+      <line x1="50" y1="138" x2="${W-40}" y2="138" stroke="var(--line)"/>${ages.map(a=>`<text x="${x(a).toFixed(1)}" y="154" text-anchor="middle" font-size="11" fill="var(--muted)">age ${a}</text>`).join("")}${band}${line}</svg>
+    <p class="insnote">${bb?`At ${bA}, today's Thailand top 3 born ${ch.from}–${ch.to} swam ${fmt(bb[0])}–${fmt(bb[1])}.`:""}${t!=null&&bb?` This swimmer at ${A}: ${fmt(t)}, ${rel}`:""}</p>`}
+/* 3 ---- best-event finder */
+function insFind(s){const R=insRaw(s),C=ui.course,Y=String(YEAR),last2=String(YEAR-1),yb={},raced=new Set();
+  R.rs.forEach(r=>{if(r[4]!==C)return;const k=r[2]+"-"+r[3];if(r[1].slice(0,4)>=last2)raced.add(k);if(r[1].slice(0,4)!==Y)return;if(yb[k]==null||r[5]<yb[k])yb[k]=r[5]});
+  const ev=Object.keys(yb).map(k=>{const[st,d]=k.split("-").map(Number),p=pfPts(s.g,C,st,d,yb[k]),nat=(R.nat||{})[C+"|"+k],th=D.thr[s.g+s.by+"|"+C+"|"+k];return{k,st,d,t:yb[k],p,nat,gap:th&&nat&&nat[0]>8?yb[k]-th[1]:null}}).filter(e=>e.p!=null);
+  if(!ev.length)return`<p class="hint" style="margin:4px 0 0">No races in this pool this year yet.</p>`;
+  const strong=ev.slice().sort((a,b)=>b.p-a.p)[0];
+  const gain=ev.filter(e=>e.gap!=null&&e.k!==strong.k).sort((a,b)=>a.gap/a.t-b.gap/b.t)[0];
+  const sp={};ev.forEach(e=>{if(e.st<5)sp[e.st]=Math.max(sp[e.st]||0,e.p)});const avg=Object.values(sp).reduce((a,b)=>a+b,0)/Math.max(1,Object.keys(sp).length);
+  const age=YEAR-s.by,pool=[[5,200],[5,400],[1,400],[2,200],[3,200],[4,200],[1,200],[2,100],[3,100],[4,100],[2,50],[3,50],[4,50]].filter(([st,d])=>!(d>=400&&age<10));
+  let tryE=null,tryWhy="";pool.forEach(([st,d])=>{const k=st+"-"+d;if(raced.has(k))return;let sc=0,why="";
+    if(st===5){const top=Object.entries(sp).sort((a,b)=>b[1]-a[1]).slice(0,2);if(top.length<2)return;sc=(top[0][1]+top[1][1])/2;why=`strong in ${INS_SN[top[0][0]]} and ${INS_SN[top[1][0]]}`}
+    else if(sp[st]){sc=sp[st];why=`good at ${INS_SN[st]} (${sp[st]} points)`}else return;
+    if(sc>=avg&&(!tryE||sc>tryE.sc)){tryE={k,sc};tryWhy=why}});
+  const sugg=ev.slice().sort((a,b)=>b.p-a.p).slice(0,4);
+  const card=(lab,col,title,sub,acc)=>`<div class="inscard${acc?" acc":""}"><div style="font-size:12.5px;color:${col};font-weight:600">${lab}</div><div style="font:700 19px var(--display)">${title}</div><div class="hint">${sub}</div></div>`;
+  return`<div class="inscards">${card("Strongest event","var(--teal)",insEv(strong.k),`${strong.p} points${strong.nat?` · #${strong.nat[0]} of ${strong.nat[1]} in Thailand`:""}`,1)}
+    ${gain?card("Closest to the top 8","var(--good)",insEv(gain.k),`${insSec(gain.gap)} s to the top 8 · now #${gain.nat[0]}`):card("Closest to the top 8","var(--good)","Top 8 already","in every event raced this year")}
+    ${tryE?card("Worth trying","#b26a00",insEv(tryE.k),`Not raced lately · ${tryWhy}`):card("Worth trying","#b26a00","—","Already races a wide range of events")}</div>
+    <p class="insnote">Best events this year by World Aquatics points: ${sugg.map(e=>`<b>${insEv(e.k)}</b> (${e.p})`).join(" · ")}. “Worth trying” is a hint from stroke strengths, not a prediction.</p>`}
+function swInsights(s){if(!D.ins)return"";const raw=insRaw(s);if(!raw.rs||!raw.rs.length)return"";
+  return`<div class="insbox"><h3 style="margin:0 0 2px">Coach insights <span class="hint" style="font-weight:400;font-size:13px">· coach only, not for parent reports · ${ui.course===2?"25":"50"} m pool</span></h3>
+    <div class="inssec"><h4>1 · Pacing</h4>${insPace(s)}</div>
+    <div class="inssec"><h4>2 · At the same age as today's top 3</h4>${insChamp(s)}</div>
+    <div class="inssec"><h4>3 · Best-event finder</h4>${insFind(s)}</div></div>`}
+document.getElementById("view").addEventListener("change",e=>{const t=e.target;
+  if(t.dataset&&t.dataset.inspace!=null){ui.insPace=ui.insPace||{};ui.insPace[t.dataset.inspace]=t.value;render()}
+  else if(t.dataset&&t.dataset.insch!=null){ui.insCh=ui.insCh||{};ui.insCh[t.dataset.insch]=t.value;render()}});
+
 /* ---------- saving entries safely when several devices edit at once (11 Nov 2026) ----------
    Each save sends only what changed on this device since the last load/save (per swimmer-event, per relay event, per name),
    applied on top of the latest copy in the database inside a transaction. */
@@ -1855,7 +1934,20 @@ function buildData(pub,rosterIds,year){
   const std=st?{n:st.name,from:st.from,to:st.to,t:(st.times||[]).filter(t=>SNUM[t.st]).map(t=>[t.g,SNUM[t.st]+"-"+t.d,t.lv,Math.round(t.t*100),t.c==="LCM"?1:2])}:{n:"",from:"",to:"",t:[]};
   /* full sorted ranking lists only for the team's birth years and genders (Times to beat) */
   const pre=new Set(sw.map(x=>x.g+x.by+"|")),tl={};sorted.forEach((ts,key)=>{if(pre.has(key.slice(0,key.indexOf("|")+1)))tl[key]=ts});
-  return{meets,sw,thr,tl,rec,std,dir,pub:String(pub.published||"").slice(0,10)};
+  /* coach insights (14 Nov 2026): pacing of the Thailand top 8 (same birth year, this year) and where today's top 3
+     of the 3 older birth years were at each age. Only for the team's own events; public results only. */
+  const ins={pace:{},champ:{}},teamKeys=new Set();sw.forEach(x=>x.rs.forEach(r=>teamKeys.add(x.g+x.by+"|"+r[4]+"|"+r[2]+"-"+r[3])));
+  const rankIds=key=>{const b=best.get(key);return b?[...b].sort((p,q)=>p[1]-q[1]):[]};
+  const bestSwim=(s,c,st,d,yy)=>{let o=null;if(!s)return o;for(const k in s.rs){const a=s.rs[k];if(a[4]!==c||a[2]!==st||a[3]!==d||!valid(a)||!(Array.isArray(a[11])&&a[11].length===d/50))continue;const dt=dateOf(a);if(!dt||dt.slice(0,4)!==yy)continue;if(!o||a[7]<o[7])o=a}return o};
+  teamKeys.forEach(key=>{const[gb,cs,ev]=key.split("|"),g=gb[0],by=+gb.slice(1),c=+cs,[st,d]=ev.split("-").map(Number);
+    if(d>=100&&d<=400){const segs=[];rankIds(key).slice(0,8).forEach(([id])=>{const a=bestSwim(pub.byId.get(id),c,st,d,Y);if(a)segs.push(a[11])});
+      if(segs.length>=3)ins.pace[key]={n:segs.length,avg:segs[0].map((_,i)=>Math.round(segs.reduce((t,x)=>t+x[i],0)/segs.length))}}
+    const mem=[];for(let k=1;k<=3;k++)rankIds(g+(by-k)+"|"+c+"|"+ev).slice(0,3).forEach(([id])=>{const m=pub.byId.get(id);if(m)mem.push(m)});
+    if(mem.length>=3){const ages={};mem.forEach(m=>{const per={};for(const k in m.rs){const a=m.rs[k];if(a[4]!==c||a[2]!==st||a[3]!==d||!valid(a))continue;const dt=dateOf(a);if(!dt)continue;const age=+dt.slice(0,4)-m.birthYear;if(per[age]==null||a[7]<per[age])per[age]=a[7]}
+        for(const age in per)(ages[age]=ages[age]||[]).push(per[age])});
+      const out={};for(const age in ages){const L=ages[age];if(L.length>=3)out[age]=[Math.min(...L),Math.max(...L),L.length]}
+      if(Object.keys(out).length)ins.champ[key]={from:by-3,to:by-1,ages:out}}});
+  return{meets,sw,thr,tl,rec,std,dir,ins,pub:String(pub.published||"").slice(0,10)};
 }
 
 /* ---------- start ---------- */
