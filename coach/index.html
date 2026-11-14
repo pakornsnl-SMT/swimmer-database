@@ -390,6 +390,16 @@ table.ttb .t{font:500 15px var(--mono)}
 .insnote{margin:6px 0 0;font-size:14px;color:var(--muted);line-height:1.55}.insnote b{color:var(--ink)}
 .inscards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
 .inscard{border:1px solid var(--line);border-radius:10px;padding:10px 12px}.inscard.acc{border:2px solid var(--teal)}
+/* v3.40 insights: bigger text (user request 14 Nov) */
+.insbox h3{font:700 23px var(--display)!important;letter-spacing:.01em}
+.insbox h3 .hint{font:500 15px var(--body)!important}
+.inssec h4{font-size:19px!important}
+.insbox .inssec>.row>span{font-size:16.5px}
+.insbox .inssec>.row .hint{font-size:14.5px}
+.insbadge{font-size:14px!important;padding:4px 12px!important}
+.insbox select{font-size:15px}
+.insnote{font-size:15.5px!important}
+.inscard{padding:12px 14px!important}.inscard>div:first-child{font-size:15px!important}.inscard>div:nth-child(2){font-size:23px!important}.inscard .hint{font-size:14.5px}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
