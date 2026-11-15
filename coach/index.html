@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.42 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.43 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -362,7 +362,7 @@ table.ttb .t{font:500 15px var(--mono)}
 .ttbar i.g{left:0;background:#e0a400;border-radius:5px 0 0 5px}.ttbar i.b{background:var(--blue,#1d4fb8)}
 .ttbar i.me{top:-4px;width:4px;height:16px;border-radius:2px;background:var(--red,#d0202e)}
 .ttwins{margin:2px 0 8px}.ttwin{font-size:13px;padding:4px 12px;border-color:#1f9d57;color:#146b3a}.ttwin b{color:#146b3a}
-@media (max-width:600px){table.ttb th,table.ttb td{padding:6px 4px}table.ttb td:first-child{white-space:nowrap;font-size:13px}table.ttb .t{font-size:13.5px}.ttg b{font-size:12.5px}.ttg span{font-size:10.5px}.ttg.nx{padding:2px 5px;margin:-2px -5px -2px 0}table.ttb th{font-size:10.5px}.ttwin{font-size:12px;padding:3px 9px}}
+@media (max-width:600px){table.ttb th,table.ttb td{padding:6px 4px}table.ttb td:first-child{white-space:nowrap;font-size:13px}table.ttb .t{font-size:13.5px}.ttg b{font-size:12.5px}.ttg span{font-size:11px}.ttg.nx{padding:2px 5px;margin:-2px -5px -2px 0}table.ttb th{font-size:10.5px}.ttwin{font-size:12px;padding:3px 9px}}
 /* My Swim Year list */
 .yirgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
 .yircard{display:flex;flex-direction:column;gap:4px;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,#eef3fc,#fff);cursor:pointer;font:inherit;color:inherit;position:relative}
@@ -473,6 +473,59 @@ table.pbt td,table.pbt th{padding-left:7px!important;padding-right:7px!important
 @media (max-width:760px){table.pbt td,table.pbt th{padding-left:4px!important;padding-right:4px!important}table.pbt th{font-size:11.5px!important;letter-spacing:.02em}table.pbt .rkw .of{display:block;font-size:11px}table.pbt .rkw{display:inline-block;white-space:normal;text-align:right}}
 table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom}
 @media (max-width:760px){.laps.lapl .lap.l100{margin-right:0}}
+
+/* v3.43 responsive pass: phones, tablets, desktops */
+/* wide tables: soft fade on the side that has more to see (class set by script) */
+.tw.more-r{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 36px),transparent)}
+.tw.more-l{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(to left,#000 calc(100% - 36px),transparent)}
+.tw.more-l.more-r{-webkit-mask-image:linear-gradient(to right,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(to right,transparent,#000 36px,#000 calc(100% - 36px),transparent)}
+@media print{.tw{-webkit-mask-image:none!important;mask-image:none!important}}
+/* small labels never below 11 px */
+.badge,.pbtag,.rdt{font-size:11px!important}
+/* tablets: the two-column blocks stack, so tables and charts get the full width */
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+@media (min-width:761px) and (max-width:1000px){table.swl th:nth-child(7),table.swl td:nth-child(7){display:none}svg.pchart{max-height:300px}}
+/* touch screens (phones and tablets): buttons and boxes big enough for a finger */
+@media (max-width:760px),(pointer:coarse){
+ button.chip,a.chip,.sick,[data-pic]{min-height:32px;padding-top:5px!important;padding-bottom:5px!important}
+ input:not([type=checkbox]):not([type=radio]),select{min-height:36px}
+ input[type=checkbox],input[type=radio]{width:20px;height:20px}
+ .seg button{min-height:36px}
+}
+/* phones */
+@media (max-width:760px){
+ /* switches wrap into tidy pills instead of hiding options off the side */
+ .seg{flex-wrap:wrap;overflow:visible;border:0;border-radius:0;gap:6px;max-width:100%}
+ .seg button{border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:6px 13px}
+ .seg button[aria-pressed="true"],.seg button.on{border-color:var(--teal)}
+ .swsw{flex-wrap:wrap}.swsw .seg{gap:0;border:2px solid var(--teal);border-radius:12px}.swsw .seg button{border:0;border-radius:9px;padding:8px 12px;font-size:14px}
+ span.chip{white-space:normal;max-width:100%}
+ /* calendar month fits the screen: 7 equal columns */
+ .cal{min-width:0;grid-template-columns:repeat(7,minmax(0,1fr))}
+ .cdh{padding:6px 0;text-align:center;font-size:11px;letter-spacing:0}
+ .cd{min-height:58px;padding:9px 3px 3px!important;gap:2px}
+ .cn{font-size:12px}.cph{font-size:10px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .cm{font-size:10px;padding:1px 3px;border-radius:3px}
+ /* "Representing ..." sits on its own line under the meet name */
+ table.swims .forteam.ftc{display:none}table.swims .forteam.fts{display:block;width:fit-content;max-width:100%;margin:0 0 5px;font-size:13px;padding:2px 10px;border-radius:8px}
+ /* tighter cells so 5-6 column tables fit */
+ table.heat td,table.heat th{padding-left:3px!important;padding-right:3px!important}
+}
+@media (max-width:760px){svg.pchart text{font-size:15.5px}}
+.forteam.fts{display:none}
+@media (max-width:760px){table.swims .forteam.fts{display:block}}
+.forteam{border-radius:9px}
+@media (max-width:760px){
+ table.swims td,table.swims th{overflow-wrap:normal;word-break:normal}
+ table.heat td{font-size:13px}
+ table.emev td,table.emev th{padding-left:4px!important;padding-right:4px!important}
+}
+@media (max-width:420px){
+ table.swims td{font-size:13px}table.swims .rdt{display:none}table.swims .pbslot .badge{padding:0 3px}
+}
+@media (max-width:760px){table.emev .tin{width:64px;padding:5px 4px}table.emev th{letter-spacing:0}}
+@media (max-width:760px){th{white-space:normal!important}td.cmd{white-space:normal!important}}
+@media (max-width:760px){.dbar{width:64px}}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -480,7 +533,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.42 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.43 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -546,7 +599,7 @@ function teamView(){
     <div class="kpi"><b>${tot}</b><span>personal bests in ${YEAR}</span></div>
     <div class="kpi"><b>${(avg*100).toFixed(1)}%</b><span>average time drop vs before ${YEAR}</span></div></div>
   ${(()=>{const n=D.sw.length,L=CLUB.limit||0,k=L?n-L:0;return `<button type="button" class="mngbar${k>0?" over":""}" id="mngOpen"><span class="mi">👥</span><span class="mt"><b>Manage team</b><small>${k>0?`${n} swimmers but ${L} slots · release ${k}`:`Add or release swimmers${L?` · ${n} of ${L} coach slots used`:""}`}</small></span>${L?`<span class="mbar"><i style="width:${Math.min(100,n/L*100).toFixed(1)}%"></i></span>`:""}<span class="mgo">Open →</span></button>`})()}<div class="row">${segBtns("g",[["all","All"],["M","Boys"],["F","Girls"]])}<input type="search" id="q" placeholder="Search name" value="${esc(ui.q)}" aria-label="Search swimmer"><span class="hint">Sort</span>${segBtns("ts",[["name","Name ก–ฮ"],["age","Age"],["pbs","PBs 2026"],["rank","Best rank"]])}</div>
-  <div class="tw"><table><thead><tr><th>Swimmer</th><th class="num">Age</th><th class="num hide-sm">Meets</th><th class="num"><span class="hide-sm">PBs ${YEAR}</span><span class="phi">PBs</span></th><th><span class="hide-sm">Biggest drop</span><span class="phi">Drop</span></th><th class="hide-sm">Best Thailand rank</th><th class="hide-sm">Last raced</th></tr></thead><tbody>
+  <div class="tw"><table class="swl"><thead><tr><th>Swimmer</th><th class="num">Age</th><th class="num hide-sm">Meets</th><th class="num"><span class="hide-sm">PBs ${YEAR}</span><span class="phi">PBs</span></th><th><span class="hide-sm">Biggest drop</span><span class="phi">Drop</span></th><th class="hide-sm">Best Thailand rank</th><th class="hide-sm">Last raced</th></tr></thead><tbody>
   ${list.map(s=>`<tr class="click" data-sw="${s.i}"><td><div class="nm">${nmH(s.th)}</div><div class="en">${esc(s.en)}</div></td><td class="num">${s.age}</td><td class="num hide-sm">${s.meets}</td><td class="num">${s.pbs||"–"}</td>
     <td>${s.best&&s.best.imp>0?`<span class="up">−${(s.best.imp*100).toFixed(1)}%</span><div class="en hide-sm">${evLabel(s.best)}</div><div class="en ph">${evShort(s.best.k)}</div>`:`<span class="hint">–</span>`}</td><td class="hide-sm">${(b=>b?`${rkPill(b.r,b.t," · "+evShort(b.k))}`:'<span class="hint">–</span>')(bestEvents(s,1)[0])}</td><td class="hide-sm en">${s.last?shortDate(s.last):""}</td></tr>`).join("")}
   </tbody></table></div><p class="hint">Tap a swimmer for personal bests and a progress chart. Age by birth year.</p>`;
@@ -565,7 +618,7 @@ function swimmerView(){
   </div></div>${swimsBlock(s,e)}${swTimesToBeat(s)}${swInsights(s)}${swTargets(s)}`;
 }
 function chart(e,s){
-  const W=460,H=200,P={l:52,r:14,t:14,b:28},pts=e.list;
+  const W=460,H=200,P={l:(window.innerWidth||1000)<760&&!document.body.classList.contains("printing")?70:52,r:14,t:14,b:28},pts=e.list;
   const ts=pts.map(p=>p.t),mn=Math.min(...ts),mx=Math.max(...ts),pad=Math.max((mx-mn)*0.15,50),y0=mn-pad,y1=mx+pad;
   const d0=+new Date(pts[0].d),d1=+new Date(pts[pts.length-1].d),span=Math.max(d1-d0,1);
   const X=p=>pts.length===1?(P.l+W-P.r)/2:P.l+(+new Date(p.d)-d0)/span*(W-P.l-P.r);
@@ -769,9 +822,9 @@ function goalsTop(){
   return `<h2>Goals · Thailand top ${N}</h2><p class="hint" style="margin-top:0">Each swimmer's ${YEAR} best (${POOL()}) against the time needed for Thailand's top ${N} in their own age (birth year). Ranks use all Thai swimmers in SMT, updated ${shortDate(D.pub)}.</p>
   <div class="kpis"><div class="kpi"><b>${cnt.in}</b><span>swims already in the top ${N}</span></div><div class="kpi"><b>${cnt.close}</b><span>within 0.5 s</span></div><div class="kpi"><b>${cnt.near}</b><span>within 2 s</span></div></div>
   <div class="row"><span class="hint">Target</span>${segBtns("gt",[["3","Top 3"],["8","Top 8"],["16","Top 16"]])}<span class="hint">Show</span>${segBtns("gs",[["close","Within 0.5 s"],["near","Within 2 s"],["in","Already in"],["all","All"]])}</div>
-  <div class="tw"><table><thead><tr><th>Swimmer</th><th>Event</th><th class="num">${YEAR} best</th><th class="num">Top ${N} time</th><th class="num">Gap</th><th class="num hide-sm">Thailand rank</th></tr></thead><tbody>
-  ${show.length?show.map(x=>`<tr class="click" data-sw="${x.s.i}" data-k="${x.e.k}"><td><span class="nm">${nmH(x.s.th)}</span> <span class="en">· ${x.s.age}</span></td><td>${evShort(x.e.k)}</td><td class="num t">${fmt(x.best)}</td><td class="num t">${fmt(x.target)}</td>
-   <td class="num">${x.inn?`<span class="pill pill-green">In ✓</span>`:`<span class="pill ${x.gap<=50?"pill-gold":"pill-blue"}">${(x.gap/100).toFixed(2)} s to go</span>`}</td><td class="num hide-sm">${rkPill(x.nt[0],x.nt[1])}</td></tr>`).join(""):`<tr><td colspan="6" class="hint">Nobody in this group yet.</td></tr>`}
+  <div class="tw"><table><thead><tr><th>Swimmer</th><th class="hide-sm">Event</th><th class="num">${YEAR} best</th><th class="num">Top ${N} time</th><th class="num">Gap</th><th class="num hide-sm">Thailand rank</th></tr></thead><tbody>
+  ${show.length?show.map(x=>`<tr class="click" data-sw="${x.s.i}" data-k="${x.e.k}"><td><span class="nm">${nmH(x.s.th)}</span> <span class="en">· ${x.s.age}</span><b class="ph" style="font-weight:600">${evShort(x.e.k)}</b></td><td class="hide-sm">${evShort(x.e.k)}</td><td class="num t">${fmt(x.best)}</td><td class="num t">${fmt(x.target)}</td>
+   <td class="num">${x.inn?`<span class="pill pill-green">In ✓</span>`:`<span class="pill ${x.gap<=50?"pill-gold":"pill-blue"}">${(x.gap/100).toFixed(2)} s<span class="hide-sm"> to go</span></span>`}</td><td class="num hide-sm">${rkPill(x.nt[0],x.nt[1])}</td></tr>`).join(""):`<tr><td colspan="6" class="hint">Nobody in this group yet.</td></tr>`}
   </tbody></table></div>`;
 }
 
@@ -948,12 +1001,12 @@ function swimsBlock(s,e){
   const L=e.list.slice().reverse();
   if(!ui.cmp||ui.cmp.key!==key){const withSp=L.filter(r=>spOk(r.sp));const a=spOk(e.pb.sp)?e.pb:withSp[0];const b=withSp.find(r=>r!==a);ui.cmp={key,sel:[a,b].filter(Boolean).map(r=>L.indexOf(r))}}
   html+=`<p class="hint" style="margin:0 0 6px">Tick two swims to compare their splits.</p><div class="tw"><table class="swims"><thead><tr><th></th><th>Date</th><th>Meet</th><th class="num">Time</th><th class="hide-sm">50 m splits</th><th class="num">Place</th></tr></thead><tbody>
-   ${L.map((r,i)=>{const on=ui.cmp.sel.includes(i),can=spOk(r.sp);return `<tr${on?' class="cmpon"':""}><td>${can?`<input type="checkbox" class="chk" data-cmp="${i}"${on?" checked":""} aria-label="Compare this swim">`:""}</td><td class="en">${shortDate(r.d)}</td><td>${esc(meetName(r.m))}${r.tm?`<span class="forteam">Representing ${esc(r.tm)}</span>`:""}</td><td class="num t"><span class="pbslot">${r===e.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${r.sp&&r.sp.length>1?`<tr class="sprow"><td colspan="6">${lapsTxt(r.sp)}</td></tr>`:""}`}).join("")}</tbody></table></div>${L.some(r=>r.sp&&r.sp.length>1&&!spOk(r.sp))?`<p class="hint" style="margin:4px 0 0"><span class="lap lapx">amber</span> = a split the timing missed (shown as – or a doubled lap). Swims with missed splits can't be compared.</p>`:""}`;
+   ${L.map((r,i)=>{const on=ui.cmp.sel.includes(i),can=spOk(r.sp);return `<tr${on?' class="cmpon"':""}><td>${can?`<input type="checkbox" class="chk" data-cmp="${i}"${on?" checked":""} aria-label="Compare this swim">`:""}</td><td class="en">${shortDate(r.d)}</td><td>${esc(meetName(r.m))}${r.tm?`<span class="forteam ftc">Representing ${esc(r.tm)}</span>`:""}</td><td class="num t"><span class="pbslot">${r===e.pb?'<span class="badge">PB</span>':""}</span>${fmt(r.t)}</td><td class="hide-sm">${lapsTxt(r.sp)}</td><td class="num">${rdTag(r)}${medal(r.p)}</td></tr>${(r.sp&&r.sp.length>1)||r.tm?`<tr class="sprow"><td colspan="6">${r.tm?`<span class="forteam fts">Representing ${esc(r.tm)}</span>`:""}${r.sp&&r.sp.length>1?lapsTxt(r.sp):""}</td></tr>`:""}`}).join("")}</tbody></table></div>${L.some(r=>r.sp&&r.sp.length>1&&!spOk(r.sp))?`<p class="hint" style="margin:4px 0 0"><span class="lap lapx">amber</span> = a split the timing missed (shown as – or a doubled lap). Swims with missed splits can't be compared.</p>`:""}`;
   const [A,B]=ui.cmp.sel.map(i=>L[i]).sort((x,y)=>x.t-y.t);
   if(A&&B&&A.sp.length===B.sp.length){let ca=0,cb=0;const rows=A.sp.map((x,j)=>{ca+=x;cb+=B.sp[j];return{d:(j+1)*50,la:x,lb:B.sp[j],ca,cb}});const mx=Math.max(...rows.map(r=>Math.abs(r.la-r.lb)),1);
     html+=`<div class="relaycard" style="margin-top:12px"><b style="font-family:var(--display);font-size:17px">Split comparison</b> <span class="hint">· <span style="color:var(--blue)">${fmt(A.t)}</span> (${shortDate(A.d)}) vs <span style="color:var(--gold)">${fmt(B.t)}</span> (${shortDate(B.d)})</span>
-     <div class="tw"><table class="swims" style="margin-top:6px"><thead><tr><th class="num">Distance</th><th class="num" style="color:var(--blue)">Lap A</th><th class="num" style="color:var(--gold)">Lap B</th><th>Difference per lap</th><th class="num">Total A</th><th class="num">Total B</th></tr></thead><tbody>
-     ${rows.map(r=>{const df=r.la-r.lb,w=Math.abs(df)/mx*50;return `<tr><td class="num">${r.d} m</td><td class="num t">${fmt(r.la)}</td><td class="num t">${fmt(r.lb)}</td><td><div class="dbar hide-sm"><span class="mid"></span><i style="${df<=0?`right:50%;width:${w}%;background:var(--good)`:`left:50%;width:${w}%;background:var(--red)`}"></i></div><span class="${df<=0?"up":"down"}" style="font-size:13px">${df<=0?"−":"+"}${(Math.abs(df)/100).toFixed(2)} s</span></td><td class="num t">${fmt(r.ca)}</td><td class="num t">${fmt(r.cb)}</td></tr>`}).join("")}</tbody></table></div>
+     <div class="tw"><table class="swims" style="margin-top:6px"><thead><tr><th class="num">Distance</th><th class="num" style="color:var(--blue)">Lap A</th><th class="num" style="color:var(--gold)">Lap B</th><th>Difference per lap</th><th class="num hide-sm">Total A</th><th class="num hide-sm">Total B</th></tr></thead><tbody>
+     ${rows.map(r=>{const df=r.la-r.lb,w=Math.abs(df)/mx*50;return `<tr><td class="num">${r.d} m</td><td class="num t">${fmt(r.la)}</td><td class="num t">${fmt(r.lb)}</td><td><div class="dbar hide-sm"><span class="mid"></span><i style="${df<=0?`right:50%;width:${w}%;background:var(--good)`:`left:50%;width:${w}%;background:var(--red)`}"></i></div><span class="${df<=0?"up":"down"}" style="font-size:13px">${df<=0?"−":"+"}${(Math.abs(df)/100).toFixed(2)} s</span></td><td class="num t hide-sm">${fmt(r.ca)}</td><td class="num t hide-sm">${fmt(r.cb)}</td></tr>`}).join("")}</tbody></table></div>
      <p class="hint" style="margin-bottom:0">Green = swim A was faster on that lap, red = slower. ${(()=>{const f=rows[0],l=rows[rows.length-1];if(rows.length<2)return"";const ga=f.la-f.lb,gb=(l.la-l.lb);return ga<0&&gb>=0?"The faster swim won it in the first half.":ga>=0&&gb<0?"The faster swim won it with a stronger finish.":""})()}</p></div>`}
   else if(ui.cmp.sel.length===2)html+=`<p class="hint">These two swims don't have the same number of splits.</p>`;
   return html;
@@ -993,7 +1046,7 @@ function calendarView(){calInit();
   <div class="row legend">${Object.entries({Base:"base",Build:"build",Specific:"specific",Taper:"taper",Championship:"race",Rest:"rest"}).map(([n,c])=>`<span><i style="background:${PH_COL[c]}"></i>${n}</span>`).join("")}<span><b class="ymeet prA" style="position:static">A</b> main meet</span><span><b class="ymeet prB" style="position:static">B</b> important</span><span><b class="ymeet prC" style="position:static">C</b> practice meet</span></div>
   <div class="row" style="justify-content:space-between;margin-top:16px"><h3 style="margin:0">${mName}</h3><div class="row" style="margin:0"><button class="chip" data-cmv="-1" style="cursor:pointer">‹ Prev</button><button class="chip" data-cmv="0" style="cursor:pointer">Today</button><button class="chip" data-cmv="1" style="cursor:pointer">Next ›</button></div></div>
   <div class="tw">${grid}</div>
-  <div class="grid2" style="margin-top:18px"><div style="min-width:0"><h3 style="margin-top:0">Meets</h3><div class="tw"><table><tbody>${ui.cmeets.slice().sort((a,b)=>a.a.localeCompare(b.a)).filter(m=>m.a.startsWith(String(y))).map(m=>`<tr${m.b<today?' style="opacity:.6"':""}><td style="white-space:nowrap" class="en">${shortDate(m.a)}${m.b!==m.a?"–"+shortDate(m.b):""}</td><td><b class="ymeet pr${m.pr}" style="position:static">${m.pr}</b> ${esc(m.n)}${m.ex?' <span class="badge">example</span>':""}</td><td class="num" style="white-space:nowrap">${m.b<today?'<span class="hint">raced</span>':(k=>ui.mAsk===k?`<span class="hint">Remove?</span> <button class="sick" data-mdel="${k}">Yes</button> <button class="sick" data-mno="1" style="color:var(--muted)">No</button>`:`<button class="sick" data-mask="${k}" style="color:var(--muted)">Remove</button>`)(ui.cmeets.indexOf(m))}</td></tr>`).join("")}</tbody></table></div>
+  <div class="grid2" style="margin-top:18px"><div style="min-width:0"><h3 style="margin-top:0">Meets</h3><div class="tw"><table><tbody>${ui.cmeets.slice().sort((a,b)=>a.a.localeCompare(b.a)).filter(m=>m.a.startsWith(String(y))).map(m=>`<tr${m.b<today?' style="opacity:.6"':""}><td style="white-space:nowrap" class="en cmd">${shortDate(m.a)}${m.b!==m.a?"–<wbr>"+shortDate(m.b):""}</td><td><b class="ymeet pr${m.pr}" style="position:static">${m.pr}</b> ${esc(m.n)}${m.ex?' <span class="badge">example</span>':""}</td><td class="num" style="white-space:nowrap">${m.b<today?'<span class="hint">raced</span>':(k=>ui.mAsk===k?`<span class="hint">Remove?</span> <button class="sick" data-mdel="${k}">Yes</button> <button class="sick" data-mno="1" style="color:var(--muted)">No</button>`:`<button class="sick" data-mask="${k}" style="color:var(--muted)">Remove</button>`)(ui.cmeets.indexOf(m))}</td></tr>`).join("")}</tbody></table></div>
      ${(()=>{const have=new Set(ui.cmeets.map(m=>m.n+"|"+m.a)),list=SMT_LIST.map((m,i)=>({m,i})).filter(({m})=>!have.has(m.n+"|"+m.a)&&m.b>=iso(new Date()));const sel=ui.amSel??(list[0]?String(list[0].i):"custom"),cus=sel==="custom",pick=cus?null:SMT_LIST[+sel];
     return `<form class="addm" id="addMeet"><label class="hint" for="amS">Add a meet</label><select id="amS" style="width:100%">${list.length?`<optgroup label="SMT meet list">${list.map(({m,i})=>`<option value="${i}"${String(i)===sel?" selected":""}>${shortDate(m.a)}${m.b!==m.a?"–"+shortDate(m.b):""} · ${esc(m.n)}${m.ex?" (example)":""}</option>`).join("")}</optgroup>`:""}<option value="custom"${cus?" selected":""}>Other meet (type it in)…</option></select>
      ${cus?`<div class="row" style="margin:0"><input id="amN" placeholder="Meet name" required style="flex:1 1 180px"><label class="hint">From <input id="amA" type="date" required></label><label class="hint">To <input id="amB" type="date"></label></div>`:`<div class="hint">${pick?`${esc(pick.city||"")}${pick.city?" · ":""}${pick.c===2?"25 m":"50 m"} pool${pick.dl?" · entries close "+shortDate(pick.dl):""}`:""}</div>`}
@@ -1427,12 +1480,12 @@ function insPace(s){const R=insRaw(s),C=ui.course,Y=String(YEAR),cand=new Map();
   const drop=a=>{const f=a.slice(0,h).reduce((x,y)=>x+y,0),b=a.slice(h).reduce((x,y)=>x+y,0);return(b-f)/f*100},dm=drop(mine),dt=drop(top.avg),diff=dm-dt;
   const verdict=diff>3?["Fades at the end","var(--gold-soft)","var(--bad)"]:diff<-3?["Strong finish","var(--teal-soft)","var(--good)"]:["Even pace, like the top 8","var(--teal-soft)","var(--teal)"];
   const myT=mine.reduce((x,y)=>x+y,0),tT=top.avg.reduce((x,y)=>x+y,0);let worst=0,wv=-1e9;mine.forEach((v,i)=>{const g=v-top.avg[i]/tT*myT;if(g>wv){wv=g;worst=i}});
-  const all=mine.concat(top.avg),lo=Math.min(...all),hi=Math.max(...all),W=640,bw=Math.min(26,(W-80)/n/2.6),step=(W-70)/n,yv=v=>130-(20+(hi>lo?(v-lo)/(hi-lo):.5)*80);
-  const bars=mine.map((v,i)=>{const x=60+step*i+step/2;return`<rect x="${(x-bw-2).toFixed(1)}" y="${yv(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(130-yv(v)).toFixed(1)}" fill="var(--teal)"/><rect x="${(x+2).toFixed(1)}" y="${yv(top.avg[i]).toFixed(1)}" width="${bw.toFixed(1)}" height="${(130-yv(top.avg[i])).toFixed(1)}" fill="#b9c3d6"/><text x="${(x-bw/2-2).toFixed(1)}" y="${(yv(v)-5).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--ink)">${insSec(v)}</text><text x="${x.toFixed(1)}" y="148" text-anchor="middle" font-size="11" fill="var(--muted)">${["1st","2nd","3rd"][i]||i+1+"th"} 50</text>`}).join("");
+  const NW=insNarrow(),F=NW?14:11,all=mine.concat(top.avg),lo=Math.min(...all),hi=Math.max(...all),W=NW?380:640,bw=Math.min(26,(W-80)/n/2.6),step=(W-70)/n,yv=v=>130-((NW?38:20)+(hi>lo?(v-lo)/(hi-lo):.5)*(NW?62:80));
+  const bars=mine.map((v,i)=>{const x=60+step*i+step/2;return`<rect x="${(x-bw-2).toFixed(1)}" y="${yv(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(130-yv(v)).toFixed(1)}" fill="var(--teal)"/><rect x="${(x+2).toFixed(1)}" y="${yv(top.avg[i]).toFixed(1)}" width="${bw.toFixed(1)}" height="${(130-yv(top.avg[i])).toFixed(1)}" fill="#b9c3d6"/><text x="${(x-bw/2-2).toFixed(1)}" y="${(yv(v)-5).toFixed(1)}" text-anchor="middle" style="font-size:${F}px" fill="var(--ink)">${insSec(v)}</text><text x="${x.toFixed(1)}" y="150" text-anchor="middle" style="font-size:${F}px" fill="var(--muted)">${["1st","2nd","3rd"][i]||i+1+"th"} 50</text>`}).join("");
   const sel=keys.length>1?`<select data-inspace="${s.i}" aria-label="Event">${keys.map(x=>`<option value="${x}"${x===k?" selected":""}>${insEv(x)} (${cand.get(x).n})</option>`).join("")}</select>`:"";
   return`<div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 4px"><span><b>${insEv(k)}</b> · ${fmt(r[5])} <span class="hint">${pfDate(r[1])}${o.best?"":" (latest with splits)"}</span></span><span style="display:flex;gap:8px;align-items:center">${sel}<span class="insbadge" style="background:${verdict[1]};color:${verdict[2]}">${verdict[0]}</span></span></div>
-    <svg viewBox="0 0 ${W} 156" width="100%" role="img" aria-label="Seconds per 50 m compared with the Thailand top 8"><line x1="50" y1="130" x2="${W-10}" y2="130" stroke="var(--line)"/><text x="0" y="12" font-size="11" fill="var(--muted)">Seconds per 50 m (shorter bar = faster)</text>
-      <rect x="${W-230}" y="2" width="11" height="11" fill="var(--teal)"/><text x="${W-214}" y="12" font-size="11" fill="var(--ink)">This swimmer</text><rect x="${W-120}" y="2" width="11" height="11" fill="#b9c3d6"/><text x="${W-104}" y="12" font-size="11" fill="var(--ink)">Top 8 average</text>${bars}</svg>
+    <svg viewBox="0 0 ${W} 156" width="100%" role="img" aria-label="Seconds per 50 m compared with the Thailand top 8"><line x1="50" y1="130" x2="${W-10}" y2="130" stroke="var(--line)"/><text x="0" y="13" style="font-size:${F}px" fill="var(--muted)">Seconds per 50 m (shorter bar = faster)</text>
+      ${NW?`<rect x="0" y="22" width="12" height="12" fill="var(--teal)"/><text x="17" y="33" style="font-size:${F}px" fill="var(--ink)">This swimmer</text><rect x="130" y="22" width="12" height="12" fill="#b9c3d6"/><text x="147" y="33" style="font-size:${F}px" fill="var(--ink)">Top 8 average</text>`:`<rect x="${W-230}" y="2" width="11" height="11" fill="var(--teal)"/><text x="${W-214}" y="12" font-size="11" fill="var(--ink)">This swimmer</text><rect x="${W-120}" y="2" width="11" height="11" fill="#b9c3d6"/><text x="${W-104}" y="12" font-size="11" fill="var(--ink)">Top 8 average</text>`}${bars}</svg>
     <p class="insnote">Second half ${dm>=0?dm.toFixed(0)+"% slower":Math.abs(dm).toFixed(0)+"% faster"} than the first half · the Thailand top 8 (born ${s.by}, ${top.n} with splits): ${dt>=0?dt.toFixed(0)+"% slower":Math.abs(dt).toFixed(0)+"% faster"}.${wv>=5?` Compared with how the top 8 share out their race, the most time goes on the ${["1st","2nd","3rd"][worst]||worst+1+"th"} 50 (${insSec(wv)} s more than their pattern at this swimmer's speed).`:" The 50 m splits follow the top 8 pattern closely."}</p>`}
 /* 2 ---- today's top 3 at the same age */
 function insChamp(s){const R=insRaw(s),C=ui.course,cand=new Map();
@@ -1442,17 +1495,17 @@ function insChamp(s){const R=insRaw(s),C=ui.course,cand=new Map();
   const keys=[...cand.keys()].sort((a,b)=>cand.get(b).n-cand.get(a).n);ui.insCh=ui.insCh||{};let k=ui.insCh[s.i];if(!cand.has(k))k=keys[0];
   const ch=D.ins.champ[s.g+s.by+"|"+C+"|"+k],me=cand.get(k).ages,ages=[...new Set(Object.keys(ch.ages).concat(Object.keys(me)).map(Number))].filter(a=>a>=Math.min(...Object.keys(me).map(Number))&&a<=YEAR-s.by).sort((a,b)=>a-b);
   const bandAges=ages.filter(a=>ch.ages[a]),myAges=ages.filter(a=>me[a]!=null);
-  const vals=[];bandAges.forEach(a=>vals.push(ch.ages[a][0],ch.ages[a][1]));myAges.forEach(a=>vals.push(me[a]));const lo=Math.min(...vals),hi=Math.max(...vals),W=640;
-  const x=a=>ages.length>1?70+(a-ages[0])/(ages[ages.length-1]-ages[0])*(W-140):W/2,y=v=>42+(hi>lo?(v-lo)/(hi-lo):.5)*84;
+  const vals=[];bandAges.forEach(a=>vals.push(ch.ages[a][0],ch.ages[a][1]));myAges.forEach(a=>vals.push(me[a]));const lo=Math.min(...vals),hi=Math.max(...vals),NW=insNarrow(),F=NW?14:11,W=NW?380:640;
+  const x=a=>ages.length>1?(NW?50:70)+(a-ages[0])/(ages[ages.length-1]-ages[0])*(W-(NW?100:140)):W/2,y=v=>(NW?60:42)+(hi>lo?(v-lo)/(hi-lo):.5)*(NW?68:84);
   const band=bandAges.length===1?`<rect x="${(x(bandAges[0])-9).toFixed(1)}" y="${y(ch.ages[bandAges[0]][0]).toFixed(1)}" width="18" height="${Math.max(3,y(ch.ages[bandAges[0]][1])-y(ch.ages[bandAges[0]][0])).toFixed(1)}" fill="var(--teal-soft)" stroke="#9fb6e6"/>`:bandAges.length?`<path d="M${bandAges.map(a=>x(a).toFixed(1)+" "+y(ch.ages[a][0]).toFixed(1)).join(" L")} L${bandAges.slice().reverse().map(a=>x(a).toFixed(1)+" "+y(ch.ages[a][1]).toFixed(1)).join(" L")} Z" fill="var(--teal-soft)" stroke="#9fb6e6"/>`:"";
-  const line=myAges.length?`<polyline points="${myAges.map(a=>x(a).toFixed(1)+","+y(me[a]).toFixed(1)).join(" ")}" fill="none" stroke="var(--teal)" stroke-width="3"/>${myAges.map(a=>`<circle cx="${x(a).toFixed(1)}" cy="${y(me[a]).toFixed(1)}" r="4.5" fill="var(--teal)"/><text x="${x(a).toFixed(1)}" y="${(y(me[a])-9).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--ink)">${fmt(me[a])}</text>`).join("")}`:"";
+  const line=myAges.length?`<polyline points="${myAges.map(a=>x(a).toFixed(1)+","+y(me[a]).toFixed(1)).join(" ")}" fill="none" stroke="var(--teal)" stroke-width="3"/>${myAges.map(a=>`<circle cx="${x(a).toFixed(1)}" cy="${y(me[a]).toFixed(1)}" r="4.5" fill="var(--teal)"/><text x="${x(a).toFixed(1)}" y="${(y(me[a])-9).toFixed(1)}" text-anchor="middle" style="font-size:${F}px" fill="var(--ink)">${fmt(me[a])}</text>`).join("")}`:"";
   const A=myAges.length?myAges[myAges.length-1]:null,bA=A!=null?(ch.ages[A]?A:bandAges.reduce((p,a)=>Math.abs(a-A)<Math.abs(p-A)?a:p,bandAges[0])):null,bb=bA!=null?ch.ages[bA]:null,t=A!=null?me[A]:null;
   const rel=!bb||t==null?"":t<=bb[0]?`faster than all of them at that age.`:t<=bb[1]?`inside the top-3 band.`:`${insSec(t-bb[1])} s from the band.`;
   const sel=keys.length>1?`<select data-insch="${s.i}" aria-label="Event">${keys.map(x2=>`<option value="${x2}"${x2===k?" selected":""}>${insEv(x2)}</option>`).join("")}</select>`:"";
   return`<div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 4px"><span><b>${insEv(k)}</b> <span class="hint">· ${C===2?"25":"50"} m pool · best time at each age</span></span>${sel}</div>
-    <svg viewBox="0 0 ${W} 160" width="100%" role="img" aria-label="Best time at each age compared with today's top 3 at the same age"><text x="0" y="12" font-size="11" fill="var(--muted)">Higher on the chart = faster</text>
-      <rect x="${W-250}" y="2" width="14" height="11" fill="var(--teal-soft)" stroke="#9fb6e6"/><text x="${W-230}" y="12" font-size="11" fill="var(--ink)">Today's top 3 at that age</text>
-      <line x1="50" y1="138" x2="${W-40}" y2="138" stroke="var(--line)"/>${ages.map(a=>`<text x="${x(a).toFixed(1)}" y="154" text-anchor="middle" font-size="11" fill="var(--muted)">age ${a}</text>`).join("")}${band}${line}</svg>
+    <svg viewBox="0 0 ${W} 160" width="100%" role="img" aria-label="Best time at each age compared with today's top 3 at the same age"><text x="0" y="13" style="font-size:${F}px" fill="var(--muted)">Higher on the chart = faster</text>
+      ${NW?`<rect x="0" y="22" width="15" height="12" fill="var(--teal-soft)" stroke="#9fb6e6"/><text x="21" y="33" style="font-size:${F}px" fill="var(--ink)">Today's top 3 at that age</text>`:`<rect x="${W-250}" y="2" width="14" height="11" fill="var(--teal-soft)" stroke="#9fb6e6"/><text x="${W-230}" y="12" font-size="11" fill="var(--ink)">Today's top 3 at that age</text>`}
+      <line x1="50" y1="138" x2="${W-40}" y2="138" stroke="var(--line)"/>${ages.map(a=>`<text x="${x(a).toFixed(1)}" y="155" text-anchor="middle" style="font-size:${F}px" fill="var(--muted)">age ${a}</text>`).join("")}${band}${line}</svg>
     <p class="insnote">${bb?`At ${bA}, today's Thailand top 3 born ${ch.from}–${ch.to} swam ${fmt(bb[0])}–${fmt(bb[1])}.`:""}${t!=null&&bb?` This swimmer at ${A}: ${fmt(t)}, ${rel}`:""}</p>`}
 /* 3 ---- best-event finder */
 function insFind(s){const R=insRaw(s),C=ui.course,Y=String(YEAR),last2=String(YEAR-1),yb={},raced=new Set();
@@ -1481,6 +1534,8 @@ function swInsights(s){if(!D.ins)return"";const raw=insRaw(s);if(!raw.rs||!raw.r
 document.getElementById("view").addEventListener("change",e=>{const t=e.target;
   if(t.dataset&&t.dataset.inspace!=null){ui.insPace=ui.insPace||{};ui.insPace[t.dataset.inspace]=t.value;render()}
   else if(t.dataset&&t.dataset.insch!=null){ui.insCh=ui.insCh||{};ui.insCh[t.dataset.insch]=t.value;render()}});
+
+function insNarrow(){return(window.innerWidth||1000)<600&&!document.body.classList.contains("printing")}
 
 /* ---------- Record holders (14 Nov 2026) ----------
    Records list the holder's name, not the app ID. A record is linked to a swimmer only when the name (Thai or English,
@@ -2397,4 +2452,4 @@ async function adminPage(){
 boot();
 
 </script>
-</body></html>
+<script>(function(){var q=0;function chk(){q=0;document.querySelectorAll(".tw").forEach(function(t){var w=t.scrollWidth-t.clientWidth;t.classList.toggle("more-r",w>4&&t.scrollLeft<w-4);t.classList.toggle("more-l",w>4&&t.scrollLeft>4)})}function later(){if(!q){q=1;requestAnimationFrame(chk)}}new MutationObserver(later).observe(document.body,{childList:true,subtree:true});addEventListener("resize",later);document.addEventListener("scroll",function(e){if(e.target&&e.target.classList&&e.target.classList.contains("tw"))later()},true);later()})();</script></body></html>
