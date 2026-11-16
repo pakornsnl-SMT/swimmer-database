@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.53 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.54 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -586,7 +586,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.53 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.54 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1168,7 +1168,12 @@ function newSwBox(full){if(CTX.expired)return"";const v=ui.nv||{};
 (()=>{const view=document.getElementById("view");
   const read=()=>({thF:$v("nvThF"),thL:$v("nvThL"),enF:$v("nvEnF"),enL:$v("nvEnL"),g:$v("nvG"),dob:$v("nvDob"),cid:$v("nvCid").replace(/\D/g,"")});
   const $v=id=>{const e=document.getElementById(id);return e?e.value.trim():""};
-  async function save(v){ui.nvBusy=true;render();try{const r=await CTX.addNewSwimmer(v);if(r.full)CTX.toast("Your package is full.",true);else if(!r.ok)CTX.toast("Couldn't add the swimmer. Try again.",true);else{CTX.toast(`${v.thF} ${v.thL} added to ${CLUB.short}.`);ui.nv=null;ui.nvOpen=false;ui.nvDups=null}}
+  /* already in this team? same citizen ID, or same Thai name and birth date (v3.54) */
+  const nk=x=>String(x||"").replace(/\s+/g,"").toLowerCase();
+  const inTeam=v=>D.sw.find(x=>{const P=(CTX.people||{})[x.id]||{};if(v.cid&&P.cid&&String(P.cid).replace(/\D/g,"")===v.cid)return true;
+    return nk(x.th)===nk(v.thF+v.thL)&&(P.dob?P.dob===v.dob:String(x.by)===String(v.dob).slice(0,4))});
+  async function save(v){if(ui.nvBusy)return;const same=inTeam(v);if(same){CTX.toast(`${same.th} is already in your team. ${v.cid?"Same citizen ID":"Same name and birth date"}, so it wasn't added again.`,true);return}
+    ui.nvBusy=true;render();try{const r=await CTX.addNewSwimmer(v);if(r.full)CTX.toast("Your package is full.",true);else if(!r.ok)CTX.toast("Couldn't add the swimmer. Try again.",true);else{CTX.toast(`${v.thF} ${v.thL} added to ${CLUB.short}.`);ui.nv=null;ui.nvOpen=false;ui.nvDups=null}}
     catch(err){CTX.toast(CTX.friendly?CTX.friendly(err):String(err),true)}ui.nvBusy=false;render()}
   view.addEventListener("click",e=>{const t=e.target;if(t.id==="nvOpen"){ui.nvOpen=true;ui.nvDups=null;render()}else if(t.id==="nvCancel"){ui.nvOpen=false;ui.nv=null;ui.nvDups=null;render()}
     else if(t.id==="nvForce"){const v=read();ui.nv=v;save(v)}else if(t.closest("[data-addid]")&&t.closest("#nvForm")){ui.nvOpen=false;ui.nv=null;ui.nvDups=null}});
