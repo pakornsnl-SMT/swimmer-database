@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.50 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.51 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -442,6 +442,22 @@ table.ttb .t{font:500 15px var(--mono)}
 .emorgnote>span{display:block;color:var(--muted);margin-top:2px}
 .mblock .mbd{flex:none}.mblock .mbd small{white-space:nowrap}
 @media (max-width:760px){.emsort{margin-left:0}.emfs{gap:6px}.emf{padding:6px 10px;font-size:13px}}
+
+/* v3.51 "Add swimmers" button on the Swimmers tab (replaces the Manage team bar look) */
+.mngbar.addsw{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;width:auto;margin:4px 0 18px;padding:0;border:0;background:none;cursor:default;box-shadow:none;transform:none}
+.mngbar.addsw:hover{transform:none;box-shadow:none}
+.addbtn{display:inline-flex;align-items:center;gap:14px;padding:12px 26px 12px 14px;border:0;border-radius:16px;background:var(--red,#c42a3c);color:#fff;cursor:pointer;text-align:left;font:inherit;box-shadow:0 4px 14px rgba(196,42,60,.28);transition:transform .12s,box-shadow .12s,background .12s}
+.addbtn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(196,42,60,.35);background:#a8212f}
+.addbtn:focus-visible{outline:3px solid #f6b9c0;outline-offset:2px}
+.addbtn .ai{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.2);font:700 28px/1 var(--display)}
+.addbtn .at{display:flex;flex-direction:column;gap:1px}
+.addbtn .at b{font:700 22px/1.15 var(--display);letter-spacing:.03em;text-transform:uppercase;color:#fff}
+.addbtn .at small{font-size:14px;color:#ffe3e6;font-weight:600}
+.addbtn.full{background:#5a6886;box-shadow:0 4px 14px rgba(40,50,80,.22)}.addbtn.full:hover{background:#46526d}
+.addbtn.over{background:#fff;color:var(--red);border:2px solid var(--red);box-shadow:none}.addbtn.over .ai{background:#fdecee}.addbtn.over .at b{color:var(--red)}.addbtn.over .at small{color:var(--red)}
+.relink{background:none;border:0;padding:6px 4px;font:600 14px var(--body,inherit);color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.relink:hover{color:var(--red)}
+@media (max-width:600px){.addbtn{width:100%;padding:12px 16px 12px 12px}.addbtn .at b{font-size:20px}.mngbar.addsw{margin-bottom:14px}}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -570,7 +586,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.50 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.51 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -635,7 +651,10 @@ function teamView(){
     <div class="kpi"><b>${active}</b><span>raced since July</span></div>
     <div class="kpi"><b>${tot}</b><span>personal bests in ${YEAR}</span></div>
     <div class="kpi"><b>${(avg*100).toFixed(1)}%</b><span>average time drop vs before ${YEAR}</span></div></div>
-  ${(()=>{const n=D.sw.length,L=CLUB.limit||0,k=L?n-L:0;return `<button type="button" class="mngbar${k>0?" over":""}" id="mngOpen"><span class="mi">👥</span><span class="mt"><b>Manage team</b><small>${k>0?`${n} swimmers but ${L} slots · release ${k}`:`Add or release swimmers${L?` · ${n} of ${L} coach slots used`:""}`}</small></span>${L?`<span class="mbar"><i style="width:${Math.min(100,n/L*100).toFixed(1)}%"></i></span>`:""}<span class="mgo">Open →</span></button>`})()}<div class="row">${segBtns("g",[["all","All"],["M","Boys"],["F","Girls"]])}<input type="search" id="q" placeholder="Search name" value="${esc(ui.q)}" aria-label="Search swimmer"><span class="hint">Sort</span>${segBtns("ts",[["name","Name ก–ฮ"],["age","Age"],["pbs","PBs 2026"],["rank","Best rank"]])}</div>
+  ${(()=>{const n=D.sw.length,L=CLUB.limit||0,k=L?n-L:0,free=L?L-n:0;
+  if(k>0)return `<div class="mngbar addsw"><button type="button" class="addbtn over" id="mngOpen"><span class="ai">👥</span><span class="at"><b>Release swimmers</b><small>${n} swimmers but ${L} slots · release ${k}</small></span></button></div>`;
+  if(L&&free<=0)return `<div class="mngbar addsw"><button type="button" class="addbtn full" id="mngOpen"><span class="ai">👥</span><span class="at"><b>All ${L} slots used</b><small>Release a swimmer or buy more slots</small></span></button></div>`;
+  return `<div class="mngbar addsw"><button type="button" class="addbtn" id="mngOpen"><span class="ai">＋</span><span class="at"><b>Add swimmers</b><small>${L?`${free} coach slot${free===1?"":"s"} free · ${n} of ${L} used`:"Search by Thai or English name"}</small></span></button>${n?`<button type="button" class="relink" data-mngopen="1">Release a swimmer</button>`:""}</div>`})()}<div class="row">${segBtns("g",[["all","All"],["M","Boys"],["F","Girls"]])}<input type="search" id="q" placeholder="Search name" value="${esc(ui.q)}" aria-label="Search swimmer"><span class="hint">Sort</span>${segBtns("ts",[["name","Name ก–ฮ"],["age","Age"],["pbs","PBs 2026"],["rank","Best rank"]])}</div>
   <div class="tw"><table class="swl"><thead><tr><th>Swimmer</th><th class="num">Age</th><th class="num hide-sm">Meets</th><th class="num"><span class="hide-sm">PBs ${YEAR}</span><span class="phi">PBs</span></th><th><span class="hide-sm">Biggest drop</span><span class="phi">Drop</span></th><th class="hide-sm">Best Thailand rank</th><th class="hide-sm">Last raced</th></tr></thead><tbody>
   ${list.map(s=>`<tr class="click" data-sw="${s.i}"><td><div class="nm">${nmH(s.th)}</div><div class="en">${esc(s.en)}</div></td><td class="num">${s.age}</td><td class="num hide-sm">${s.meets}</td><td class="num">${s.pbs||"–"}</td>
     <td>${s.best&&s.best.imp>0?`<span class="up">−${(s.best.imp*100).toFixed(1)}%</span><div class="en hide-sm">${evLabel(s.best)}</div><div class="en ph">${evShort(s.best.k)}</div>`:`<span class="hint">–</span>`}</td><td class="hide-sm">${(b=>b?`${rkPill(b.r,b.t," · "+evShort(b.k))}`:'<span class="hint">–</span>')(bestEvents(s,1)[0])}</td><td class="hide-sm en">${s.last?shortDate(s.last):""}</td></tr>`).join("")}
@@ -1218,7 +1237,7 @@ const s=e.target.closest('[data-seg]');if(s){ui[s.dataset.seg]=s.dataset.v;if(s.
   const rf=e.target.closest('[data-rfill]');if(rf){fillRelay(MEET.relays.find(r=>r.no==+rf.dataset.rfill));render();return}
   const rd=e.target.closest('[data-rdel]');if(rd){const[no,n]=rd.dataset.rdel.split("-").map(Number);ui.rent[no].splice(n,1);for(const k in ui.et)if(k.startsWith("R|"+no+"|"))delete ui.et[k];render();return}
   if(e.target.closest('#goent')){ui.tab="entries";ui.em="rel";render();window.scrollTo({top:0});return}
-  if(e.target.closest('#mngOpen')){ui.mng=true;render();return}if(e.target.closest('#mngBack')){ui.mng=false;render();return}
+  if(e.target.closest('#mngOpen,[data-mngopen]')){ui.mng=true;render();return}if(e.target.closest('#mngBack')){ui.mng=false;render();return}
   const tq=e.target.closest('[data-treq]');if(tq){ui.tform=tq.dataset.treq;render();return}if(e.target.closest('[data-tcancel]')){ui.tform=null;render();return}
   const ad=e.target.closest('[data-addid]');if(ad){const id=ad.dataset.addid;mngDo(id,"Adding…",async()=>{const r=await CTX.addSwimmer(id);if(r.full){CTX.toast("The package is full.",true)}else if(r.taken){ui.taken[id]={name:r.taken,id:r.takenId}}else{CTX.toast("Added to the team.")}});return}
   const ra=e.target.closest('[data-relask]');if(ra){ui.relAsk=ra.dataset.relask;render();return}
