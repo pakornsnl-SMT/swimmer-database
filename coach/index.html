@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.43 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.45 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -405,6 +405,20 @@ table.ttb .t{font:500 15px var(--mono)}
 .rechd{font:700 16px var(--display);color:#7a5200;letter-spacing:.02em}.recmedal{font-size:18px}
 .reclist{margin-top:6px;display:flex;flex-direction:column;gap:4px;font-size:14.5px}.recrow .t{font-family:var(--mono);font-weight:700}
 .reclink{color:var(--teal);font-weight:700;text-decoration:underline;text-underline-offset:2px}.recrow{padding:3px 0}
+
+/* v3.44 relay swimmer list */
+.rlt th.rlh{cursor:pointer;user-select:none;white-space:nowrap}.rlt th.rlh.on{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.rlt td.rlused{font-weight:800;color:var(--ink)}
+.rlt td.rlbest{background:#fff3cf;box-shadow:inset 0 0 0 1px #f0c94a}
+.rlt tr.rlin td:first-child{box-shadow:inset 3px 0 0 var(--teal)}
+.rlt tr.rlaway td{opacity:.5}.rlt tr.rlaway td:last-child{opacity:1}
+.rlt .rltag{font-size:12px;padding:1px 7px;border-radius:5px}
+.rlg{display:inline-block;font:700 11px var(--display);border-radius:4px;padding:0 5px;margin-left:4px;color:#fff;vertical-align:middle}.rlg.b{background:var(--blue)}.rlg.g{background:var(--red)}
+.rlback{color:var(--teal)!important;border-color:var(--teal)!important}
+@media (max-width:760px){.rlt td,.rlt th{padding-left:2px!important;padding-right:2px!important}.rlt td.t{font-size:12.5px}.rlt th.rlh{white-space:nowrap!important;font-size:11px;letter-spacing:0}.rlt td:first-child{max-width:90px}.rllist .row label{width:100%}.rlt .sick{padding:3px 5px!important;font-size:11.5px;min-height:30px}.rlsub{font-size:12px;color:var(--muted)}.rlsub .rlg{margin-left:4px}}
+
+/* v3.45 names list: English name and gender in the same style as the Thai name */
+.nmen{font-weight:600;color:var(--ink);font-size:inherit}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -533,7 +547,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.43 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.45 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -689,7 +703,7 @@ function relayView(){
   <div class="row"><span class="hint">Teams</span>${segBtns("rn",[["1","A"],["2","A–B"],["3","A–C"],["4","A–D"],["max","As many as possible"]])}</div>`;
   h+=`<div class="row" style="align-items:flex-start"><span class="hint" style="padding-top:3px">Not swimming today</span>${out.length?out.map(s=>`<button class="chip" data-unsick="${s.i}" style="cursor:pointer;background:var(--surface);color:var(--bad);border-color:var(--bad)" aria-label="Put ${esc(s.en)} back">${esc(s.th)} ↺</button>`).join(""):`<span class="hint" style="padding-top:3px">Nobody. Tap <b>Away</b> next to a swimmer (sick, family trip, anything) to take them out and rebuild the teams.</span>`}
    ${out.length||Object.keys(ui.rfix).length?`<button class="chip" id="rreset" style="cursor:pointer;background:var(--surface);color:var(--ink)">Reset all changes</button>`:""}</div>`;
-  if(!teams.length)return h+`<div class="lock">Not enough swimmers with 50 m times for this relay. Try another age group.</div>`;
+  if(!teams.length)return h+`<div class="lock">Not enough swimmers with 50 m times for this relay. Try another age group.</div>`+relayList([]);
   h+=`<div class="grid2">${teams.map((t,n)=>{
     const earlier=new Set(teams.slice(0,n).flatMap(x=>x.legs.map(l=>l.s.i)));
     return `<div class="relaycard"><div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="teamtag t${n%4}">Team ${"ABCDEFGHIJKL"[n]}</span><span class="total">${fmt(t.tot)}</span></div>
@@ -701,7 +715,7 @@ function relayView(){
   if(want&&teams.length<want)h+=`<p class="hint">Only ${teams.length} team${teams.length>1?"s":""} possible with the swimmers available.</p>`;
   h+=`<div class="row" style="margin-top:12px"><button class="chip teal" id="goent" style="cursor:pointer;font:600 14px var(--display);padding:8px 16px">Use for meet entries →</button><span class="hint">Planning only here. The real relay entries are made in Meet entries → Relays.</span></div>`;
   h+=`<p class="hint">Change a swimmer with the drop-down; the teams below rebuild around your choice. Choosing someone from a later team moves them up.</p>`;
-  return h;
+  return h+relayList(teams);
 }
 
 const MEET={n:"Example: Bangkok Open Age Group 2026",dl:"2026-11-20",lim:{day:3,meet:6},rlim:2,relays:[{no:11,day:0,rt:"free",g:"M"},{no:12,day:0,rt:"free",g:"F"},{no:13,day:1,rt:"medley",g:"X"}],
@@ -1169,6 +1183,7 @@ document.getElementById('tabs').addEventListener('click',e=>{const b=e.target.cl
 view.addEventListener('click',e=>{
   const cg=e.target.closest('[data-cpt]');if(cg&&cg.closest('#view .pchart, #view .cpttab')){ui.cpt=+cg.dataset.cpt;render();return}
 const s=e.target.closest('[data-seg]');if(s){ui[s.dataset.seg]=s.dataset.v;if(s.dataset.seg==="rt"||s.dataset.seg==="rg")ui.rfix={};render();return}
+  const rls=e.target.closest('[data-rls]');if(rls){ui.rls=rls.dataset.rls;render();return}
   const sk=e.target.closest('[data-sick]');if(sk){ui.rout.add(+sk.dataset.sick);render();return}
   const us=e.target.closest('[data-unsick]');if(us){ui.rout.delete(+us.dataset.unsick);render();return}
   if(e.target.closest('#rreset')){ui.rout.clear();ui.rfix={};render();return}
@@ -1210,7 +1225,7 @@ view.addEventListener('change',e=>{const t=e.target;
   if(t.dataset.all){const cnt=()=>Object.values(ui.ent).filter(Boolean).length;if(t.checked){const n0=cnt();tickAll(t.dataset.all,true);if(t.dataset.mixed&&cnt()===n0)tickAll(t.dataset.all,false)}else tickAll(t.dataset.all,false);render();return}
   if(t.dataset.et){const v=parseT(t.value),n=document.getElementById("n"+t.id.slice(1));if(v===null){t.classList.add("bad");n.className="tnote bad";n.textContent="Try 3560 or 23555";return}
     t.classList.remove("bad");n.className="tnote";if(v){ui.et[t.dataset.et]=v;t.value=fmt(v);n.textContent=tNote(v,+t.dataset.pb)}else{delete ui.et[t.dataset.et];n.textContent=""}return}
-  if(t.id==="apC"){ui.apC=t.value;const[n,u]=PH_LEN[t.value],A=document.getElementById('apA');document.getElementById('apL').value=n;document.getElementById('apU').value=u;if(A.value)document.getElementById('apB').value=addDays(A.value,(u==="w"?n*7:n)-1);return}else if(t.id==="amS"){ui.amSel=t.value}else if(t.dataset.cmp!=null){const i=+t.dataset.cmp;let s=ui.cmp.sel.filter(x=>x!==i);if(t.checked){s.push(i);if(s.length>2)s=s.slice(-2)}ui.cmp.sel=s}else if(t.id==="agEdges"){const v=[...new Set(t.value.split(/[^0-9]+/).map(Number).filter(n=>n>0&&n<40))].sort((a,b)=>a-b);if(v.length)ui.agEdges=v}else if(t.id==="rmSel")ui.rm=t.value;else if(t.id==="evSel")ui.ev=t.value;else if(t.id==="eaSel")ui.ea=t.value;else if(t.id==="raSel"){ui.ra=t.value;ui.rfix={};if(t.value==="t"&&!ui.rtMax)ui.rtMax=61;if(t.value==="c"){const A=[...new Set(sw.map(s=>s.age))].sort((a,b)=>a-b);if(ui.raLo==null)ui.raLo=A[0];if(ui.raHi==null)ui.raHi=A[A.length-1]}}else if(t.id==="rtMin"||t.id==="rtMax"){ui[t.id]=Math.max(0,+t.value||0)||"";ui.rfix={}}else if(t.id==="raLo"||t.id==="raHi"){ui[t.id]=+t.value;if(+ui.raLo>+ui.raHi){if(t.id==="raLo")ui.raHi=ui.raLo;else ui.raLo=ui.raHi}ui.rfix={}}else if(t.dataset.rsel){const[n,l]=t.dataset.rsel.split("-").map(Number);for(const k in ui.rfix)if(+k.split("-")[0]>n)delete ui.rfix[k];ui.rfix[t.dataset.rsel]=+t.value;}else if(t.id==="entSw")ui.sel=+t.value;else if(t.dataset.ent)ui.ent[t.dataset.ent]=t.checked;else return;render()});
+  if(t.id==="apC"){ui.apC=t.value;const[n,u]=PH_LEN[t.value],A=document.getElementById('apA');document.getElementById('apL').value=n;document.getElementById('apU').value=u;if(A.value)document.getElementById('apB').value=addDays(A.value,(u==="w"?n*7:n)-1);return}else if(t.id==="amS"){ui.amSel=t.value}else if(t.dataset.cmp!=null){const i=+t.dataset.cmp;let s=ui.cmp.sel.filter(x=>x!==i);if(t.checked){s.push(i);if(s.length>2)s=s.slice(-2)}ui.cmp.sel=s}else if(t.id==="agEdges"){const v=[...new Set(t.value.split(/[^0-9]+/).map(Number).filter(n=>n>0&&n<40))].sort((a,b)=>a-b);if(v.length)ui.agEdges=v}else if(t.id==="rmSel")ui.rm=t.value;else if(t.id==="evSel")ui.ev=t.value;else if(t.id==="eaSel")ui.ea=t.value;else if(t.id==="rlAge")ui.rlAge=t.value;else if(t.id==="raSel"){ui.ra=t.value;ui.rfix={};if(t.value==="t"&&!ui.rtMax)ui.rtMax=61;if(t.value==="c"){const A=[...new Set(sw.map(s=>s.age))].sort((a,b)=>a-b);if(ui.raLo==null)ui.raLo=A[0];if(ui.raHi==null)ui.raHi=A[A.length-1]}}else if(t.id==="rtMin"||t.id==="rtMax"){ui[t.id]=Math.max(0,+t.value||0)||"";ui.rfix={}}else if(t.id==="raLo"||t.id==="raHi"){ui[t.id]=+t.value;if(+ui.raLo>+ui.raHi){if(t.id==="raLo")ui.raHi=ui.raLo;else ui.raLo=ui.raHi}ui.rfix={}}else if(t.dataset.rsel){const[n,l]=t.dataset.rsel.split("-").map(Number);for(const k in ui.rfix)if(+k.split("-")[0]>n)delete ui.rfix[k];ui.rfix[t.dataset.rsel]=+t.value;}else if(t.id==="entSw")ui.sel=+t.value;else if(t.dataset.ent)ui.ent[t.dataset.ent]=t.checked;else return;render()});
 document.getElementById('picbox').addEventListener('click',e=>{if(e.target.id==='picClose'||e.target.id==='picbox')e.currentTarget.hidden=true});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('picbox').hidden=true});
 render();
@@ -1557,6 +1572,44 @@ function teamRecords(){const G=[];sw.forEach((s,idx)=>{const L=hrOf(s);if(L.leng
     <div class="reclist">${G.map(([s,idx,L])=>{const nr=L.filter(r=>r[0]==="NR"),ag=L.filter(r=>r[0]!=="NR");return`<div class="recrow"><a href="#" class="reclink" data-recsw="${idx}">${esc(s.th)}</a> · ${[nr.length?`<b>${nr.length} national</b>`:"",ag.length?`<b>${ag.length} age-group</b>`:""].filter(Boolean).join(" + ")} record${L.length>1?"s":""}<div class="hint" style="margin:1px 0 0 2px">${nr.length?"National: "+ev(nr):""}${nr.length&&ag.length?" · ":""}${ag.length?"Age group: "+ev(ag):""}</div></div>`}).join("")}</div></div>`}
 document.getElementById("view").addEventListener("click",e=>{const b=e.target.closest("[data-recsw]");if(!b)return;e.preventDefault();ui.sel=+b.dataset.recsw;ui.from="power";ui.tab="team";ui.chart=null;render();window.scrollTo(0,0)});
 
+
+/* ---------- Relay builder: list of swimmers under the teams (v3.44) ---------- */
+var RLS={1:"Free",2:"Back",3:"Breast",4:"Fly"};
+function relayList(teams){
+  const order=RLEG[ui.rt],FREE=ui.rt==="free",X=ui.rg==="X",cols=FREE?[1]:[2,3,4,1];
+  const ag=ui.rlAge||"same",ages=[...new Set(sw.map(s=>s.age))].sort((a,b)=>a-b);
+  const GR=[["u10","10 & under",0,10],["11-12","11–12",11,12],["13-14","13–14",13,14],["15-17","15–17",15,17],["18o","18 & over",18,99]];
+  let inAge;
+  if(ag==="same"){const C=ui.ra==="c",lo=C?+ui.raLo||0:0,hi=C?+ui.raHi||99:ui.ra==="open"||ui.ra==="t"?99:+ui.ra;inAge=a=>a>=lo&&a<=hi}
+  else if(ag==="all")inAge=()=>true;
+  else{const g=GR.find(x=>x[0]===ag);if(g)inAge=a=>a>=g[2]&&a<=g[3];else inAge=a=>a===+ag}
+  /* who is in which team and leg */
+  const where={};teams.forEach((t,n)=>t.legs.forEach((l,li)=>{where[l.s.i]={n,li,st:order[li]}}));
+  const rows=sw.filter(s=>(X||s.g===ui.rg)&&inAge(s.age)).map(s=>({s,t:cols.map(st=>pbOf(s,st,50)),w:where[s.i],away:ui.rout.has(s.i)}));
+  /* fastest in each column (among swimmers shown and not away) */
+  const best=cols.map((st,k)=>Math.min(...rows.filter(r=>!r.away&&r.t[k]).map(r=>r.t[k])));
+  const so=ui.rls||"team",NO=1e9;
+  const tk=r=>r.w?r.w.n*10+r.w.li:r.away?2e4:1e4;
+  rows.sort(so==="name"?(a,b)=>a.s.th.localeCompare(b.s.th,"th"):so==="age"?(a,b)=>b.s.age-a.s.age||a.s.th.localeCompare(b.s.th,"th"):
+    so.startsWith("c")?(a,b)=>(a.t[+so.slice(1)]||NO)-(b.t[+so.slice(1)]||NO):
+    (a,b)=>tk(a)-tk(b)||(a.t[cols.length-1]||NO)-(b.t[cols.length-1]||NO));
+  const opt=(v,l)=>`<option value="${v}"${ag===v?" selected":""}>${l}</option>`;
+  const th=(k,l,num)=>`<th class="${num?"num ":""}rlh${so===k?" on":""}" data-rls="${k}" role="button" tabindex="0" title="Sort">${l}${so===k?`<span class="hide-sm"> ▾</span>`:""}</th>`;
+  const gTag=s=>X?` <span class="rlg ${s.g==="M"?"b":"g"}">${s.g==="M"?"B":"G"}</span>`:"";
+  let h=`<div class="relaycard rllist" style="margin-top:16px"><div class="row" style="justify-content:space-between;margin:0 0 4px">
+    <b style="font-family:var(--display);font-size:18px">Swimmers for this relay</b>
+    <label class="hint row" style="margin:0;gap:6px">Show ages <select id="rlAge" aria-label="Ages to show">${opt("same","Same as relay")}${opt("all","All ages")}${GR.map(g=>opt(g[0],g[1])).join("")}${ages.map(a=>opt(String(a),"Age "+a)).join("")}</select></label></div>
+    <p class="hint" style="margin:0 0 8px">${X?"Boys and girls":ui.rg==="M"?"Boys":"Girls"} · 50 m personal bests${FREE?" (Freestyle)":""}. <b>Bold</b> = the time used in a team. Gold = fastest in that column. Tap a column title to sort.</p>
+    <div class="tw"><table class="rlt"><thead><tr>${th("name","Swimmer")}${th("age","Age",1).replace("<th class=\"","<th class=\"hide-sm ")}${cols.map((st,k)=>th("c"+k,RLS[st]+`<span class="hide-sm"> 50</span>`,1)).join("")}${th("team","Team").replace("<th class=\"","<th class=\"hide-sm ")}<th class="num"></th></tr></thead><tbody>`;
+  if(!rows.length)h+=`<tr><td colspan="${cols.length+4}" class="hint">No ${X?"":ui.rg==="M"?"boys ":"girls "}swimmers in this age group.</td></tr>`;
+  h+=rows.map(r=>{const w=r.w;
+    return `<tr class="${r.away?"rlaway":w?"rlin":""}"><td><span class="nm">${nmH(r.s.th)}</span><span class="hide-sm">${gTag(r.s)}</span><span class="ph rlsub">${w&&!r.away?`<span class="teamtag t${w.n%4} rltag">${"ABCDEFGHIJKL"[w.n]}</span> ${FREE?"Leg "+(w.li+1):RLS[w.st]} · `:""}${r.s.age}${gTag(r.s)}</span></td><td class="num hide-sm">${r.s.age}</td>
+    ${cols.map((st,k)=>{const t=r.t[k];if(!t)return `<td class="num hint">–</td>`;const used=w&&w.st===st,top=!r.away&&t===best[k];return `<td class="num t${used?" rlused":""}${top?" rlbest":""}">${fmt(t)}</td>`}).join("")}
+    <td class="hide-sm">${r.away?`<span class="hint">Away</span>`:w?`<span class="teamtag t${w.n%4} rltag">${"ABCDEFGHIJKL"[w.n]}</span> <span class="en">${FREE?"Leg "+(w.li+1):RLS[w.st]}</span>`:`<span class="hint">–</span>`}</td>
+    <td class="num">${r.away?`<button class="sick rlback" data-unsick="${r.s.i}" aria-label="Put ${esc(r.s.en)} back">↺ Back</button>`:`<button class="sick" data-sick="${r.s.i}" aria-label="${esc(r.s.en)} is away">Away</button>`}</td></tr>`}).join("");
+  return h+`</tbody></table></div></div>`;
+}
+
 /* ---------- saving entries safely when several devices edit at once (11 Nov 2026) ----------
    Each save sends only what changed on this device since the last load/save (per swimmer-event, per relay event, per name),
    applied on top of the latest copy in the database inside a transaction. */
@@ -1669,7 +1722,7 @@ function smtEntriesView(){
   else if(overSlots())h+=overBox();
   else{h+=`<p class="hint" style="margin:4px 0 8px">${locked?`Names closed on ${dShort(G.namesDl)}. You can still <b>swap</b> a swimmer: untick one, then tick another.`:`Tick each swimmer who will swim, relay swimmers too. Saved automatically. You can change names until ${dShort(G.namesDl)}.`}${ageMode(m)==="date"?`<br><b>Ages are on ${dShort(m.ageDate)}.</b> For each named swimmer, choose the age: the older age if their birthday is on or before ${dShort(m.ageDate)}, otherwise the younger one.${noAge?` <b style="color:var(--gold)">${noAge} still to choose.</b>`:""}`:`<br>Ages by year of birth (age in ${ay}).`}${cap&&named>appr?` <b style="color:var(--red)">You have ${named-appr} more than approved. Untick ${named-appr}.</b>`:""}</p>
     ${(()=>{const op=ui.emNL!=null?ui.emNL:(!named||(cap&&named<appr));ui._emNLop=op;return `<button type="button" class="namesbtn${op?" on":""}" data-emnl aria-expanded="${op}"><span class="nbi">👥</span><span class="nbt">${named?"Change swimmers":"Choose swimmers"}<small>${named} of ${cap?appr:D.sw.length} named</small></span><span class="nbo">${op?"Hide list ▲":"Show list ▼"}</span></button>`})()}<div id="emNamesBox"${ui._emNLop?"":" hidden"}><div class="tw"><table><thead><tr><th>${locked?"":`<input type="checkbox" class="chk" data-emnall="1"${named&&named>=Math.min(D.sw.length,can)?" checked":""} aria-label="Select all swimmers" title="Select all">`}</th><th>Swimmer${locked?"":` <span class="en" style="text-transform:none;letter-spacing:0">← select all</span>`}</th><th class="num">Age</th></tr></thead><tbody>${D.sw.slice().sort((a,b)=>a.th.localeCompare(b.th,"th")).map(x=>{const on=S.names.has(x.id),dis=!on&&named>=max;
-      return `<tr${dis?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emname="${esc(x.id)}"${on?" checked":""}${dis?" disabled":""} aria-label="Name ${esc(x.en)}"></td><td><span class="nm">${nmH(x.th)}</span> <span class="en">· ${esc(x.en)} · ${x.g==="M"?"B":"G"}</span></td><td class="num">${!x.by?"":ageMode(m)!=="date"?ay-x.by:dobOf(x)&&m.ageDate?exactAge(dobOf(x),m.ageDate):on?`<select data-emage="${esc(x.id)}" aria-label="Age on ${esc(m.ageDate)}" style="${S.ages[x.id]?"":"border-color:var(--gold);color:var(--gold)"}"><option value="">${ay-x.by-1} or ${ay-x.by}?</option>${[ay-x.by-1,ay-x.by].map(a=>`<option${S.ages[x.id]===a?" selected":""}>${a}</option>`).join("")}</select>`:`<span class="en">${ay-x.by-1}–${ay-x.by}</span>`}</td></tr>`}).join("")}</tbody></table></div><button type="button" class="chip" data-emnl style="margin-top:8px;cursor:pointer">Done · hide list ▲</button></div>
+      return `<tr${dis?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emname="${esc(x.id)}"${on?" checked":""}${dis?" disabled":""} aria-label="Name ${esc(x.en)}"></td><td><span class="nm">${nmH(x.th)}</span> <span class="nmen">· ${esc(x.en)} · ${x.g==="M"?"B":"G"}</span></td><td class="num">${!x.by?"":ageMode(m)!=="date"?ay-x.by:dobOf(x)&&m.ageDate?exactAge(dobOf(x),m.ageDate):on?`<select data-emage="${esc(x.id)}" aria-label="Age on ${esc(m.ageDate)}" style="${S.ages[x.id]?"":"border-color:var(--gold);color:var(--gold)"}"><option value="">${ay-x.by-1} or ${ay-x.by}?</option>${[ay-x.by-1,ay-x.by].map(a=>`<option${S.ages[x.id]===a?" selected":""}>${a}</option>`).join("")}</select>`:`<span class="en">${ay-x.by-1}–${ay-x.by}</span>`}</td></tr>`}).join("")}</tbody></table></div><button type="button" class="chip" data-emnl style="margin-top:8px;cursor:pointer">Done · hide list ▲</button></div>
     <p class="hint" id="emSaved" style="min-height:1.2em">${S.saving?"Saving…":S.saved?"Saved ✓":""}</p>`}
   h+=`</div>`+evCard(m,S,G,cap);
   return h+wdBox(m,G,req||appr||named||nEnt);
