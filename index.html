@@ -5310,6 +5310,25 @@ const h=(location.hash||"").slice(1);show(VIEWS.includes(h)?h:"swimmers");
 })();
 })();
 </script>
+<script>
+/* Keep scroll position (v1, 16 Nov 2026): when a part of the page is redrawn, any box that scrolls inside
+   (lists, tables) goes back to where it was, instead of jumping to the top. Works for every list on its own. */
+(function(){
+  const M=new Map();
+  const hd=el=>{for(let a=el,k=0;a&&a!==document.body&&k<5;a=a.parentElement,k++){for(let s=a.previousElementSibling;s;s=s.previousElementSibling){if(/^H[1-4]$/.test(s.tagName))return s.textContent.trim().slice(0,40);const h=s.querySelector&&s.querySelector("h1,h2,h3,h4");if(h)return h.textContent.trim().slice(0,40)}}return ""};
+  const path=el=>{const P=[];for(let a=el;a&&a!==document.body;a=a.parentElement){if(a.id){P.unshift("#"+CSS.escape(a.id));return P.join(">")}const p=a.parentElement;if(!p)break;P.unshift(a.tagName.toLowerCase()+":nth-child("+([...p.children].indexOf(a)+1)+")")}return "body>"+P.join(">")};
+  const key=el=>(el.dataset&&el.dataset.keep)?"k:"+el.dataset.keep:path(el)+"|"+hd(el);
+  document.addEventListener("scroll",e=>{const el=e.target;if(!el||el===document||el===document.documentElement||el===document.body||!el.getBoundingClientRect)return;
+    M.set(key(el),{el,top:el.scrollTop,left:el.scrollLeft,t:Date.now()})},true);
+  let q=0;const fix=()=>{q=0;const now=Date.now();
+    for(const [k,v] of M){if(now-v.t>36e5){M.delete(k);continue}
+      if(v.el&&v.el.isConnected)continue;
+      let el=null;if(k.startsWith("k:"))el=document.querySelector('[data-keep="'+CSS.escape(k.slice(2))+'"]');
+      else{const pp=k.slice(0,k.lastIndexOf("|"));try{el=document.querySelector(pp.replace(/^body>/,"body > ").replace(/>/g," > "))}catch(_){el=null}if(el&&key(el)!==k)el=null}
+      if(!el)continue;v.el=el;if(el.scrollTop||el.scrollLeft){v.top=el.scrollTop;v.left=el.scrollLeft;continue}el.scrollTop=v.top;el.scrollLeft=v.left}};
+  new MutationObserver(()=>{if(!q){q=1;Promise.resolve().then(fix)}}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
 
 <p style="text-align:center;font-size:11px;opacity:.75;margin:16px 12px 24px">This site uses Google Analytics (cookies) to count visits. · เว็บไซต์นี้ใช้ Google Analytics (คุกกี้) เพื่อนับจำนวนผู้เข้าชม</p>
 </body>
