@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.51 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.53 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -586,7 +586,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.51 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.53 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1142,7 +1142,7 @@ function manageView(){
       return `<tr><td><span class="nm">${nmH(r[0]||r[1])}</span> <span class="en">· ${r[3]||"?"}${r[1]&&r[0]?" · "+esc(r[1]):""}</span><div class="en"${tk?' style="color:var(--red)"':""}>${tk?`In ${esc(tk.name)}'s coach team. They must release this swimmer first.`:r[2]?"Results club: "+esc(r[2]):"&nbsp;"}</div></td>
       <td class="num">${b?`<span class="hint">${esc(b)}</span>`:tk?(mine.has(id)?`<span class="pill pill-gold">Transfer requested</span>`:ui.tform===id?"":`<button class="chip" data-treq="${id}" style="cursor:pointer;border-color:var(--blue);color:var(--blue)">Request transfer</button>`):(full||CTX.expired?'<span class="hint">No free slot</span>':`<button class="chip teal" data-addid="${id}" style="cursor:pointer">Add to ${esc(CLUB.short)}</button>`)}</td></tr>
       ${tk&&ui.tform===id?`<tr class="cmpon"><td colspan="2"><form class="row" id="tfm" data-id="${id}" style="margin:0"><b style="font-family:var(--display)">Transfer request to SMT</b><select id="trR" aria-label="Reason"><option>Family moved to ${esc(CLUB.short)}</option><option>Swimmer and parents chose ${esc(CLUB.short)}</option><option>Club closed or stopped training</option><option>Other</option></select><input id="trN" placeholder="Note for SMT (optional)" style="flex:1 1 180px"><button class="chip teal" style="cursor:pointer;padding:6px 14px">Send request</button><button type="button" class="sick" data-tcancel="1" style="color:var(--muted)">Cancel</button></form></td></tr>`:""}`}).join("")||`<tr><td class="hint">${q.length<2?"Type at least 2 letters to search all "+D.dir.length.toLocaleString()+" active swimmers in SMT.":"No swimmer found."}</td></tr>`}</tbody></table></div>${newSwBox(full)}</div>
-   <div style="min-width:0"><h3 style="margin-top:0">${esc(CLUB.short)} team (${n})</h3>${(()=>{const k=D.sw.filter(x=>{const P=(CTX.people||{})[x.id];return P&&P.cid&&tidIssues(P.cid,x.by).length}).length;return k?`<p class="tidw" style="margin:-4px 0 8px">⚠ ${k} swimmer${k>1?"s have":" has"} an ID to check. Tap <span class="idchk" style="cursor:default">⚠ check ID</span> to send the right number from the ID card to SMT.</p>`:""})()}<div class="tw" style="max-height:560px;overflow:auto"><table><tbody>
+   <div style="min-width:0"><h3 style="margin-top:0">${esc(CLUB.short)} team (${n})</h3>${(()=>{const k=D.sw.filter(x=>{const P=(CTX.people||{})[x.id];return P&&P.cid&&tidIssues(P.cid,x.by).length}).length;return k?`<p class="tidw" style="margin:-4px 0 8px">⚠ ${k} swimmer${k>1?"s have":" has"} an ID to check. Tap <span class="idchk" style="cursor:default">⚠ check ID</span> to send the right number from the ID card to SMT.</p>`:""})()}<div class="tw" data-keep="mteam" style="max-height:560px;overflow:auto"><table><tbody>
     ${D.sw.map((s,i)=>({s,i})).sort((a,b)=>thCmp(a.s,b.s)).map(({s})=>{const b=ui.busy[s.id];return `<tr><td><span class="nm">${nmH(s.th)}</span>${s.isNew?' <span class="pill pill-green" title="Not in SMT yet">new</span>':""} <span class="en">· ${(CTX.people||{})[s.id]&&CTX.people[s.id].dob?new Date(CTX.people[s.id].dob+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):s.by}${(CTX.people||{})[s.id]&&CTX.people[s.id].cid?(tidIssues(CTX.people[s.id].cid,s.by).length?` · <button type="button" class="idchk" data-corr="${esc(s.id)}" data-corrf="cid" title="${esc(tidMsg(tidIssues(CTX.people[s.id].cid,s.by)))} Tap to send the right number to SMT.">⚠ check ID</button>`:' · <span title="Citizen ID on file" style="color:var(--green)">ID ✓</span>'):""}</span></td><td class="num">${b?`<span class="hint">${esc(b)}</span>`:ui.relAsk===s.id?`<span class="hint">Release?</span> <button class="sick" data-relyes="${s.id}">Yes, release</button> <button class="sick" data-relno="1" style="color:var(--muted)">No</button>`:CTX.expired?"":`<button class="chip" data-corr="${s.id}" title="${s.isNew?"Edit details":"Suggest a correction to SMT"}" style="cursor:pointer;padding:3px 9px">✎</button> <button class="sick" data-relask="${s.id}">Release</button>`}</td></tr>${ui.corr===s.id?corrForm(s):""}`}).join("")||`<tr><td class="hint">No swimmers yet. Search on the left to add your team.</td></tr>`}</tbody></table></div>${corrList()}</div></div>
   ${CTX.myTransfers.length?`<h3>Transfer requests</h3><div class="tw"><table><tbody>${CTX.myTransfers.map(t=>`<tr><td>${esc(t.swimmerName||t.swimmerId)}</td><td class="en">from ${esc(t.fromClubName||t.fromClub)}</td><td>${t.status==="open"?'<span class="pill pill-gold">Waiting for SMT</span>':t.status==="approved"?'<span class="pill pill-green">Approved</span>':'<span class="pill pill-blue">Declined</span>'}</td></tr>`).join("")}</tbody></table></div>`:""}
   <div class="relaycard" style="margin-top:14px;border-color:var(--blue)"><b style="font-family:var(--display);font-size:17px;color:var(--blue)">How it works</b><ul style="margin:6px 0 0;padding-left:18px">
@@ -1190,7 +1190,7 @@ function corrForm(s){const f=ui.corrF||"nameTh",nw=s.isNew;
 function corrList(){const L=(CTX.myCorrections||[]).slice(0,12);if(!L.length)return"";
   return `<h3 style="margin:14px 0 4px">Corrections sent to SMT</h3><div class="tw"><table><tbody>${L.map(c=>`<tr><td><span class="nm">${nmH(c.swimmerName||"")}</span> <span class="en">· ${CF[c.field]||c.field}: ${esc(c.old||"–")} → <b>${esc(c.value)}</b></span></td><td class="num">${c.status==="open"?'<span class="pill pill-gold">Waiting for SMT</span>':c.status==="accepted"?'<span class="pill pill-green">Accepted</span>':'<span class="pill">Declined</span>'}</td></tr>`).join("")}</tbody></table></div>`}
 (()=>{const view=document.getElementById("view");
-  view.addEventListener("click",e=>{const b=e.target.closest("[data-corr],[data-crx]");if(!b)return;if(b.dataset.crx){ui.corr=null;render();return}ui.corr=ui.corr===b.dataset.corr?null:b.dataset.corr;ui.corrF=b.dataset.corrf||"nameTh";render()});
+  view.addEventListener("click",e=>{const b=e.target.closest("[data-corr],[data-crx]");if(!b)return;if(b.dataset.crx){ui.corr=null;render();return}ui.corr=ui.corr===b.dataset.corr?null:b.dataset.corr;ui.corrF=b.dataset.corrf||"nameTh";render();const fm=document.getElementById("crForm");if(fm)fm.scrollIntoView({block:"nearest"})});
   view.addEventListener("change",e=>{if(e.target.id==="crF"){ui.corrF=e.target.value;render()}});
   view.addEventListener("submit",async e=>{if(e.target.id!=="crForm")return;e.preventDefault();e.stopPropagation();const id=e.target.dataset.id,s=D.sw.find(x=>x.id===id);if(!s)return;
     const f=document.getElementById("crF").value;let v=document.getElementById("crV").value.trim();const note=(document.getElementById("crN")||{}).value||"";
@@ -1654,6 +1654,7 @@ function relayList(teams){
 
 /* organiser badge for meets run by CNX / RaceSwim (v3.46) */
 function orgBadge(m){const o=m&&m.org;return o==="CNX"||o==="RaceSwim"?` <span class="orgb org-${o.toLowerCase()}" title="Entries through ${o}">${o}</span>`:""}
+
 
 /* ---------- saving entries safely when several devices edit at once (11 Nov 2026) ----------
    Each save sends only what changed on this device since the last load/save (per swimmer-event, per relay event, per name),
@@ -2593,4 +2594,21 @@ async function adminPage(){
 boot();
 
 </script>
-<script>(function(){var q=0;function chk(){q=0;document.querySelectorAll(".tw").forEach(function(t){var w=t.scrollWidth-t.clientWidth;t.classList.toggle("more-r",w>4&&t.scrollLeft<w-4);t.classList.toggle("more-l",w>4&&t.scrollLeft>4)})}function later(){if(!q){q=1;requestAnimationFrame(chk)}}new MutationObserver(later).observe(document.body,{childList:true,subtree:true});addEventListener("resize",later);document.addEventListener("scroll",function(e){if(e.target&&e.target.classList&&e.target.classList.contains("tw"))later()},true);later()})();</script></body></html>
+<script>(function(){var q=0;function chk(){q=0;document.querySelectorAll(".tw").forEach(function(t){var w=t.scrollWidth-t.clientWidth;t.classList.toggle("more-r",w>4&&t.scrollLeft<w-4);t.classList.toggle("more-l",w>4&&t.scrollLeft>4)})}function later(){if(!q){q=1;requestAnimationFrame(chk)}}new MutationObserver(later).observe(document.body,{childList:true,subtree:true});addEventListener("resize",later);document.addEventListener("scroll",function(e){if(e.target&&e.target.classList&&e.target.classList.contains("tw"))later()},true);later()})();</script><script>/* Keep scroll position (v1, 16 Nov 2026): when a part of the page is redrawn, any box that scrolls inside
+   (lists, tables) goes back to where it was, instead of jumping to the top. Works for every list on its own. */
+(function(){
+  const M=new Map();
+  const hd=el=>{for(let a=el,k=0;a&&a!==document.body&&k<5;a=a.parentElement,k++){for(let s=a.previousElementSibling;s;s=s.previousElementSibling){if(/^H[1-4]$/.test(s.tagName))return s.textContent.trim().slice(0,40);const h=s.querySelector&&s.querySelector("h1,h2,h3,h4");if(h)return h.textContent.trim().slice(0,40)}}return ""};
+  const path=el=>{const P=[];for(let a=el;a&&a!==document.body;a=a.parentElement){if(a.id){P.unshift("#"+CSS.escape(a.id));return P.join(">")}const p=a.parentElement;if(!p)break;P.unshift(a.tagName.toLowerCase()+":nth-child("+([...p.children].indexOf(a)+1)+")")}return "body>"+P.join(">")};
+  const key=el=>(el.dataset&&el.dataset.keep)?"k:"+el.dataset.keep:path(el)+"|"+hd(el);
+  document.addEventListener("scroll",e=>{const el=e.target;if(!el||el===document||el===document.documentElement||el===document.body||!el.getBoundingClientRect)return;
+    M.set(key(el),{el,top:el.scrollTop,left:el.scrollLeft,t:Date.now()})},true);
+  let q=0;const fix=()=>{q=0;const now=Date.now();
+    for(const [k,v] of M){if(now-v.t>36e5){M.delete(k);continue}
+      if(v.el&&v.el.isConnected)continue;
+      let el=null;if(k.startsWith("k:"))el=document.querySelector('[data-keep="'+CSS.escape(k.slice(2))+'"]');
+      else{const pp=k.slice(0,k.lastIndexOf("|"));try{el=document.querySelector(pp.replace(/^body>/,"body > ").replace(/>/g," > "))}catch(_){el=null}if(el&&key(el)!==k)el=null}
+      if(!el)continue;v.el=el;if(el.scrollTop||el.scrollLeft){v.top=el.scrollTop;v.left=el.scrollLeft;continue}el.scrollTop=v.top;el.scrollLeft=v.left}};
+  new MutationObserver(()=>{if(!q){q=1;Promise.resolve().then(fix)}}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script></body></html>
