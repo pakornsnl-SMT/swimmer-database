@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.47 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.50 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -570,7 +570,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.47 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.50 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1738,7 +1738,7 @@ function smtEntriesView(m0,pre){
       <div class="row" style="margin:6px 0 0">${req?`<span class="pill pill-green">✓ ${req} sent to SMT</span>`:""}${!m.closed&&!CTX.expired?`<label class="hint">Swimmers<br><input id="emNum" type="number" min="1" max="999" value="${req||""}" style="width:80px"></label><button class="chip teal" data-emreq="1" style="cursor:pointer;padding:7px 14px">${req?"Change number":"Send to SMT"}</button>`:""}</div></div>`;
     h+=`<div class="relaycard emsec freecard" style="margin:12px 0"><h3 style="margin:0 0 6px">Names and events</h3>
       <p style="margin:4px 0">Send your swimmers' names and events to SMT <b>the usual way</b> (email or LINE) before the deadline${G.namesDl?` (names by <b>${dShort(G.namesDl)}</b>)`:""}.</p>
-      <p class="hint" style="margin:8px 0 0">With <b>coach slots</b> (349 ฿ per swimmer a year) you can enter names, events and relays right here, download the entry file for Splash or Hytek in one tap, and get swimmer reports, rankings and the relay builder. Ask SMT.</p></div>`;
+      <p class="hint" style="margin:8px 0 0">With <b>coach slots</b> (299 ฿ per swimmer a year) you can enter names, events and relays right here, download the entry file for Splash or Hytek in one tap, and get swimmer reports, rankings and the relay builder. Ask SMT.</p></div>`;
     return h+wdBox(m,G,req||appr)}
   /* step 2 */
   const can=cap?appr:Infinity,locked=!G.namesOpen,max=locked?(S.swapMax??=named):can;ui._emMax=max;
@@ -1980,10 +1980,10 @@ return CTX;
 const FB_CONFIG={apiKey:"AIzaSyC6vuDi3FnUd-JRAgfvG_RGFKhVCBVkX7s",authDomain:"smdata-th.firebaseapp.com",projectId:"smdata-th",storageBucket:"smdata-th.firebasestorage.app",messagingSenderId:"221166535254",appId:"1:221166535254:web:6134eee1b038c0fffe31f7"};
 const FB_V="10.14.1";
 const QS=new URLSearchParams(location.search);
-/* coach slot pricing (agreed 11 Nov 2026): one price, 349 ฿ per slot per year, no minimum (from 1 slot). Each purchase has its own start and end date.
+/* coach slot pricing (changed 16 Nov 2026, was 349): one price, 299 ฿ per slot per year, no minimum (from 1 slot). Each purchase has its own start and end date.
    The rate for the team's total number of slots applies to every slot; slots added during the year use the rate for the new total
    and end on the same date. */
-const SLOT_MIN=1,SLOT_RATE=349,slotRate=()=>SLOT_RATE,slotPrice=n=>n*slotRate(n),baht=n=>Math.round(n).toLocaleString("en-US")+" ฿";
+const SLOT_MIN=1,SLOT_RATE=299,slotRate=()=>SLOT_RATE,slotPrice=n=>n*slotRate(n),baht=n=>Math.round(n).toLocaleString("en-US")+" ฿";
 /* coach slots are bought in purchases; each purchase has its own start and end date (agreed 11 Nov 2026).
    club.buys=[{n,start,end,rc}]. Old clubs with only limit+expires count as one purchase. */
 const dayLocal=()=>new Date().toLocaleDateString("en-CA"),
