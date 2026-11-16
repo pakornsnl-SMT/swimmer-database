@@ -629,6 +629,17 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
 .umn{white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px}
 .umgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 16px;margin-top:10px;font-size:14px}
 .umgrid span::before{content:"✓ ";color:#1f9d57;font-weight:700}
+/* Results to check: fits the page without scrolling sideways (12 Nov 2026) */
+.qctab{width:100%;table-layout:fixed;border-collapse:collapse}
+.qctab th,.qctab td{overflow-wrap:anywhere;vertical-align:top}
+.qcbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:4px 0 10px}.qcbar select{max-width:340px}
+.qcsel{display:inline-flex;flex-wrap:wrap;gap:8px;align-items:center;background:#eef6f6;border-radius:10px;padding:6px 10px}
+.qctab tr.qcon td{background:#eef6f6}.qctab input[type=checkbox]{width:18px;height:18px;cursor:pointer}
+.qctab .qcwhy{font-size:12px;line-height:1.3;margin-top:2px}
+.qctab .qcact{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.qctab .qcact>button,.qctab .qcact>span>button[data-qdel]{padding:5px 10px;font-size:12.5px;white-space:nowrap}
+@media (max-width:640px){.qctab colgroup{display:none}.qctab thead{display:none}.qctab tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:8px 0;border-bottom:1px solid var(--line)}.qctab td{border:0;padding:0}.qctab td.num{text-align:left}.qctab td:last-child{grid-column:1/-1}.qctab .qcact{flex-direction:row}}
+.orgb{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;color:#fff;border-radius:5px;padding:1px 6px;margin-left:4px;vertical-align:middle;white-space:nowrap}.orgb.org-cnx{background:#6b3fa0}.orgb.org-raceswim{background:#d9611c}
 </style>
 
 <header>
@@ -793,7 +804,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
         <div class="field"><label class="lbl" for="qrList">Qualifying times</label><select id="qrList"></select></div>
         <div class="field" id="qrPoolF"><label class="lbl" for="qrPool">Swims from</label><select id="qrPool"><option value="">Both pools (each with its own times)</option><option value="LCM">50 m pool only</option><option value="SCM">25 m pool only</option></select></div>
         <div class="rrsum" id="qrSum"></div>
-        <div class="rprow"><div class="field"><label class="lbl" for="qrNat">Swimmers</label><select id="qrNat"><option value="th" selected>Thai swimmers only</option><option value="all">All nationalities</option></select></div><div class="field"><label class="lbl" for="qrBy">Arrange by</label><select id="qrBy"><option value="event" selected>Event</option><option value="swimmer">Swimmer</option></select></div><div class="field"><label class="lbl" for="qrPage">Page</label><select id="qrPage"><option value="land" selected>Landscape</option><option value="port">Portrait</option></select></div><div class="field"><label class="lbl" for="qrNames">Swimmer names</label><select id="qrNames"><option value="both" selected>Thai and English</option><option value="th">Thai only</option><option value="en">English only</option></select></div></div>
+        <div class="rprow"><div class="field"><label class="lbl" for="qrNat">Swimmers</label><select id="qrNat"><option value="th" selected>Thai swimmers only</option><option value="all">All nationalities</option></select></div><div class="field"><label class="lbl" for="qrBy">Arrange by</label><select id="qrBy"><option value="event" selected>Event</option><option value="swimmer">Swimmer (by name)</option><option value="prio">Swimmer (by priority)</option></select></div><div class="field"><label class="lbl" for="qrGender">Women and men</label><select id="qrGender"><option value="sep" selected>Separate</option><option value="comb">Combined</option></select></div><div class="field"><label class="lbl" for="qrAge">Age groups</label><select id="qrAge"><option value="all" selected>All ages together</option><option value="group">One list per age group</option></select></div><div class="field"><label class="lbl" for="qrCap">Team places <span class="hint">(priority only)</span></label><input id="qrCap" type="number" min="0" step="1" placeholder="all" style="width:90px"></div><div class="field"><label class="lbl" for="qrPage">Page</label><select id="qrPage"><option value="land" selected>Landscape</option><option value="port">Portrait</option></select></div><div class="field"><label class="lbl" for="qrNames">Swimmer names</label><select id="qrNames"><option value="both" selected>Thai and English</option><option value="th">Thai only</option><option value="en">English only</option></select></div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="button" id="qrGo">Preview list</button><button class="ghost" type="button" id="qrXlsx">Download Excel</button></div><span class="msg" id="qrMsg" role="status"></span>
       </div>
       <div class="panel rcard">
@@ -821,7 +832,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   <!-- MANAGE (owner only) -->
   <section id="view-meets" hidden>
     <div class="panel">
-      <div class="prof-hd" style="margin-bottom:4px"><h2>Upcoming meets</h2><span class="sub">Meets taking entries through SMT, and the teams whose places are confirmed. · รายการแข่งขันที่กำลังจะมาถึง และทีมที่ได้รับการยืนยันแล้ว</span></div>
+      <div class="prof-hd" style="margin-bottom:4px"><h2>Upcoming meets</h2><span class="sub">Upcoming meets, and the teams whose places are confirmed for SMT meets. Meets marked CNX or RaceSwim take entries through the organiser. · รายการแข่งขันที่กำลังจะมาถึง และทีมที่ได้รับการยืนยันแล้ว</span></div>
       <div id="umBody"><p class="hint">Loading…</p></div>
     </div>
   </section>
@@ -864,9 +875,22 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div class="msg" id="qcMsg"></div>
     </div>
 
+    <div class="panel" style="margin-bottom:18px" id="ncPanel">
+      <div class="dup-hd"><h3 style="margin:0">Swimmers with no club <span class="mono" id="ncCount"></span></h3><button class="ghost" id="ncGo" type="button">Check now</button></div>
+      <div class="hint" style="margin:6px 0 0">Swimmers whose profile has no club, although they have swum for a club. School, province, region and country teams never change a swimmer's club, so the suggestion is the club team at their most recent <b>club</b> meet. Tick the ones that are right, then confirm once.</div>
+      <div id="ncOut" style="margin-top:10px"></div>
+      <div class="msg" id="ncMsg" role="status"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:18px" id="chPanel">
+      <div class="dup-hd"><h3 style="margin:0">Club changes <span class="mono" id="chCount"></span></h3><span class="row" style="gap:8px;align-items:center"><select id="chMonths" aria-label="Period"><option value="3">Last 3 months</option><option value="6">Last 6 months</option><option value="12" selected>Last 12 months</option><option value="24">Last 2 years</option></select><button class="ghost" id="chGo" type="button">Check now</button></span></div>
+      <div class="hint" style="margin:6px 0 0">Swimmers whose club at club meets changed in this period, worked out from results. School, province and national teams don't count. A “change” can also be two spellings of one club that aren't merged yet: merge them in Club names.</div>
+      <div id="chOut" style="margin-top:10px"></div>
+    </div>
+
     <div class="panel" style="margin-bottom:18px" id="idcPanel">
       <div class="dup-hd"><h3 style="margin:0">ID check (all swimmers)</h3><button class="ghost" id="idcGo" type="button">Check now</button></div>
-      <div class="hint" style="margin:6px 0 0">Looks through everyone already in the app for signs that one ID number belongs to two people: two swimmer profiles with the same ID number, or one swimmer who swam for two different teams at the same meet. Each upload also shows its own ID check before you upload.</div>
+      <div class="hint" style="margin:6px 0 0">Looks through everyone already in the app for ID problems: two swimmer profiles with the same ID number, one swimmer who swam for two different teams at the same meet, and Thai ID numbers that fail the government checks (check digit, first digit vs birth year, province code). Each upload also shows its own ID check before you upload.</div>
       <div id="idcOut" style="margin-top:10px"></div>
       <div class="msg" id="idcMsg" role="status"></div>
     </div>
@@ -1014,6 +1038,15 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
         <button class="ghost" type="submit">Merge names</button>
       </form>
       <div class="msg" id="clubMsg" role="status"></div>
+      <details id="renBox" style="margin-top:14px"><summary><b>Rename a club / change its code</b></summary>
+        <div class="hint" style="margin:6px 0 10px">For when a club wants a different name (for example a shorter one). Every swimmer of the club gets the new name, the club's past meets show it too, and future uploads that still use the old name are filed under the new one. Fill in <b>New name</b>, <b>New code</b> or both; leave one empty to keep it as it is.</div>
+        <form id="fClubRen" class="clubmerge" autocomplete="off">
+          <div class="field" style="position:relative"><label class="lbl" for="rnFrom">Club</label><input type="text" id="rnFrom" placeholder="Type part of a club name or code" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="rnFromList" aria-autocomplete="list"><div class="suggest" id="rnFromList" role="listbox" hidden></div></div>
+          <div class="field"><label class="lbl" for="rnTo">New name</label><input type="text" id="rnTo" placeholder="Keep the name" autocomplete="off" maxlength="80"></div>
+          <div class="field" style="max-width:150px"><label class="lbl" for="rnCode">New code</label><input type="text" id="rnCode" placeholder="Keep the code" autocomplete="off" maxlength="10" style="text-transform:uppercase"></div>
+          <span id="rnGoW"><button class="ghost" type="submit">Rename</button></span>
+        </form>
+      </details>
       <details id="splitBox" style="margin-top:14px"><summary><b>Undo a merge / split a club</b></summary>
         <div class="hint" style="margin:6px 0 10px">If two different clubs were merged by mistake, choose the club, tick the swimmers who really belong to the other club, and move them there. Their past meet results get the right team name back wherever the app can tell the two clubs apart (for example by club code).</div>
         <div class="field" style="position:relative;max-width:520px"><label class="lbl" for="spClub">Club</label><input type="text" id="spClub" placeholder="Type part of a club name or code" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="spClubList" aria-autocomplete="list"><div class="suggest" id="spClubList" role="listbox" hidden></div></div>
@@ -1362,6 +1395,9 @@ function renderProfile(){
 }
 /* entry time vs result: negative = swam faster than the entry */
 /* teams a swimmer swam for other than clubs: school, province, region, country */
+/* club periods from results at club meets (school/province/national teams never count), oldest first */
+function clubHistory(sid){const L=resOf(sid).filter(r=>(r.teamType||"C")==="C"&&r.team&&r.date).map(r=>({team:canonClub(r.team)||r.team,d:r.meetStart||r.date,m:mKey(r)})).sort((a,b)=>a.d.localeCompare(b.d));
+  const P=[];L.forEach(x=>{const k=clubKey(x.team);let p=P[P.length-1];if(!p||p.k!==k){p={k,team:x.team,from:x.d,to:x.d,meets:new Set()};P.push(p)}p.to=x.d;p.meets.add(x.m)});return P}
 function representation(s){
   const m=new Map();resOf(s.id).forEach(r=>{const t=r.teamType||"C";if(t==="C"||!r.team||isDns(r))return;const k=t+"|"+r.team;const o=m.get(k)||{t,team:r.team,years:new Set(),meets:new Set(),when:new Map()};o.years.add(r.date.slice(0,4));o.meets.add(r.meet);o.when.set(mKey(r),{meet:r.meet,date:r.meetStart||r.date});m.set(k,o)});
   const order="NRPS";return[...m.values()].map(o=>({...o,years:[...o.years].sort(),meets:[...o.meets],list:[...o.when.values()].sort((a,b)=>b.date.localeCompare(a.date))})).sort((a,b)=>order.indexOf(a.t)-order.indexOf(b.t)||a.team.localeCompare(b.team));
@@ -1390,6 +1426,8 @@ function idCard(s){
       ${fact("Born",s.birthYear?String(s.birthYear):"",s.birthYear?`age ${yr-s.birthYear} in ${yr}`:"")}
       ${state.isStaff&&priv.has(s.id)?fact("Citizen ID / passport",`<span class="mono">${esc(fmtCid(priv.get(s.id).cid))||"—"}</span>`,`${priv.get(s.id).dob?"born "+fmtDob(priv.get(s.id).dob)+" · ":""}only you can see this`):""}
       ${fact("Club",esc(s.club||""),s.clubCode?esc(s.clubCode):"")}
+      ${state.isStaff?(()=>{const P=clubHistory(s.id);if(!P.length)return"";const mo=d=>new Date(d+"T00:00:00").toLocaleDateString("en-GB",{month:"short",year:"numeric"}),now=new Date(Date.now()-365*864e5).toISOString().slice(0,10);
+        return`<div style="grid-column:1/-1"><dt>Club history <small style="display:inline;font-weight:400">· staff only · from results at club meets</small></dt><dd><ol class="qfact" style="margin:2px 0 0;padding-left:20px">${P.slice().reverse().map((p,i)=>`<li><b>${esc(p.team)}</b> <small style="display:inline">· ${mo(p.from)}${i===0&&p.to>=now?" – now":p.from.slice(0,7)===p.to.slice(0,7)?"":" – "+mo(p.to)} · ${p.meets.size} meet${p.meets.size>1?"s":""}</small></li>`).join("")}</ol>${P.length>1?`<small>${P.length-1} club change${P.length>2?"s":""}. School, province and national teams are not counted.</small>`:""}</dd></div>`})():""}
       ${(()=>{if(!recIdx)buildRecIdx();const cur=(recIdx.bySwimmer.get(s.id)||[]).slice().sort(recOrder);const old=formerRecs(s.id,cur);
         const line=(x,cls)=>`<span class="chip rec ${cls}">${recShort(x)}${x.cat==="AG"?" "+agLabel(x.ag):""}</span> ${esc(recEvent(x))} ${x.course} · <b>${fmt(x.t)}</b>${x.date?` <span class="recyr">${fdate(x.date)}</span>`:""}`;
         return(cur.length?`<div style="grid-column:1/-1"><dt>Current records</dt><dd class="reclist">${cur.map(x=>line(x,x.cat==="NR"?"nr":"agr")).join("<br>")}</dd></div>`:"")+
@@ -1440,7 +1478,8 @@ function editHtml(s){
     </div>
     <div class="edit-sec">
       <label class="lbl" for="eCid">Citizen ID / passport / licence no. <span class="tag">Staff only</span></label>
-      <input type="text" id="eCid" class="mono" value="${esc(fmtCid((priv.get(s.id)||{}).cid))}" placeholder="Citizen ID, passport or licence no." style="max-width:320px">
+      <input type="text" id="eCid" class="mono" value="${esc(fmtCid((priv.get(s.id)||{}).cid))}" placeholder="Citizen ID, passport or licence no." style="max-width:320px" data-by="${esc(s.birthYear||"")}">
+      <span class="hint" id="eCidChk" style="color:var(--bad);font-weight:600">${(()=>{const L=thaiIdIssues((priv.get(s.id)||{}).cid,s.birthYear);return L.length?"⚠ Not a valid Thai ID: "+esc(L.join("; "))+". Please check it against the ID card. You can still save.":""})()}</span>
       <span class="hint">Kept in your private area; viewers can never read it. Changing it to a corrected ID relinks the swimmer, so future uploads with that ID land on this profile. If another profile already uses the corrected ID, the two are merged.</span>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="primary" type="submit" id="eSave">Save changes</button><button class="ghost" type="button" data-edit-cancel>Cancel</button><span class="msg" id="eMsg">${esc(editMsg)}</span></div>
@@ -2242,6 +2281,7 @@ function naMatches(){
   return state.swimmers.filter(s=>(!team||s.club===team)&&(now===""||(now==="(none)"?!s.nation:String(s.nation||"").toUpperCase()===now))&&(!q.length||q.every(t=>fold([s.nameTh,s.nameEn].join(" ")).includes(t))))
     .sort((a,b)=>a.name.localeCompare(b.name,"th"));
 }
+let naKeep=false;
 function renderNatTool(){
   const pn=$("#natPanel");if(!pn)return;if(!canEdit()){pn.hidden=true;return}pn.hidden=false;
   const t=$("#naTeam").value,n=$("#naNow").value;
@@ -2255,19 +2295,23 @@ function renderNatTool(){
     $("#naList").innerHTML=`<div class="hint">Choose a team, a current nationality or part of a name above to see the swimmers. <button type="button" class="lnk" id="naAllBtn">Show all ${state.swimmers.length.toLocaleString()} swimmers</button></div>`;return}
   $("#naGo").disabled=false;
   const list=naMatches();const shown=list.slice(0,300);const sel=list.filter(s=>!naUnticked.has(s.id)).length;
+  const naSc=naKeep&&$("#naList .tbl-wrap")?$("#naList .tbl-wrap").scrollTop:0;naKeep=false;
   $("#naList").innerHTML=list.length?`<div class="tbl-wrap" style="margin-top:0;max-height:320px;overflow:auto"><table><thead><tr><th><input type="checkbox" id="naAll" ${naUnticked.size?"":"checked"} aria-label="Select all"></th><th>Swimmer</th><th>Club</th><th>Nationality</th><th class="num">Born</th></tr></thead><tbody>${shown.map(s=>`<tr class="trrow"><td><input type="checkbox" data-na="${esc(s.id)}" ${naUnticked.has(s.id)?"":"checked"} aria-label="Include ${esc(s.name)}"></td><td>${esc(s.name)}${altName(s)?`<br><span class="hint">${esc(altName(s))}</span>`:""}</td><td>${esc(s.club||"")}</td><td><span class="flagnt${isThai(s)?"":" foreign"}">${esc(s.nation||"—")}</span></td><td class="num t">${s.birthYear||""}</td></tr>`).join("")}</tbody></table></div>
     <div class="hint" style="margin-top:6px">${sel.toLocaleString()} of ${list.length.toLocaleString()} selected${list.length>shown.length?` · first ${shown.length} shown; all ${list.length.toLocaleString()} matching swimmers are included`:""}</div>`
     :`<div class="hint">No swimmers match these filters.</div>`;
+  if(naSc&&$("#naList .tbl-wrap"))$("#naList .tbl-wrap").scrollTop=naSc;
   $("#naGo").textContent=naConfirm?`Confirm: set ${sel.toLocaleString()} swimmer${sel===1?"":"s"} to ${norm($("#naNew").value).toUpperCase()||"…"}`:"Apply";
 }
 ["#naTeam","#naNow"].forEach(id=>$(id).addEventListener("change",()=>{naUnticked=new Set();naConfirm=false;$("#naMsg").textContent="";renderNatTool()}));
 $("#naQ").addEventListener("input",()=>{clearTimeout(qTimer);qTimer=setTimeout(()=>{naUnticked=new Set();naConfirm=false;renderNatTool();const i=$("#naQ");i.focus()},250)});
-$("#naList").addEventListener("click",e=>{if(e.target.id==="naAllBtn"){naShowAll=true;renderNatTool()}});
+$("#naList").addEventListener("click",e=>{if(e.target.id==="naAllBtn"){naShowAll=true;renderNatTool();return}
+  /* tap anywhere on a swimmer's row to tick or untick them */
+  const tr=e.target.closest("tr.trrow");if(tr&&!e.target.closest("input")){const c=tr.querySelector("input[data-na]");if(c){c.checked=!c.checked;c.dispatchEvent(new Event("change",{bubbles:true}))}}});
 $("#naNew").addEventListener("input",()=>{naConfirm=false;$("#naGo").textContent="Apply"});
 $("#naList").addEventListener("change",e=>{
   if(e.target.id==="naAll"){naUnticked=e.target.checked?new Set():new Set(naMatches().map(s=>s.id))}
   else if(e.target.dataset.na){e.target.checked?naUnticked.delete(e.target.dataset.na):naUnticked.add(e.target.dataset.na)}
-  naConfirm=false;renderNatTool()});
+  naConfirm=false;naKeep=true;renderNatTool()});
 $("#naGo").onclick=async()=>{const m=$("#naMsg");
   const code=norm($("#naNew").value).toUpperCase();
   if(!/^[A-Z]{2,4}$/.test(code)&&!/^[\u0E00-\u0E7F]+$/.test(code)){msg(m,"Enter the nationality as a country code, e.g. THA, JPN or SGP.",false);return}
@@ -2662,7 +2706,7 @@ function clubPicker(id){const inp=$("#"+id),box=$("#"+id+"List");let hits=[],idx
   box.addEventListener("click",e=>{const b=e.target.closest("[data-i]");if(b)pick(hits[+b.dataset.i])});
   inp.addEventListener("blur",()=>setTimeout(close,120));
 }
-clubPicker("cmFrom");clubPicker("cmTo");clubPicker("spClub");
+clubPicker("cmFrom");clubPicker("cmTo");clubPicker("spClub");clubPicker("rnFrom");
 /* ---- undo a merge / split a club ---- */
 let spPick=new Set(),spFor="";
 function spRows(club){return state.swimmers.filter(s=>s.club===club).map(s=>{const rs=resOf(s.id).filter(r=>r.team===club).sort((a,b)=>b.date.localeCompare(a.date));const last=rs[0];return{s,code:(last&&last.teamCode)||s.clubCode||"",last}}).sort((a,b)=>a.code.localeCompare(b.code)||a.s.name.localeCompare(b.s.name,"th"))}
@@ -2715,6 +2759,32 @@ const pickedClub=id=>{const inp=$("#"+id);if(inp.dataset.name)return inp.dataset
 $("#fClubMerge").addEventListener("submit",e=>{e.preventDefault();const f=pickedClub("cmFrom"),t=pickedClub("cmTo");
   if(!f||!t){msg($("#clubMsg"),`Pick ${!f?"the club to merge":"the club to keep"} from the list that appears while you type.`,false);return}
   mergeClub(f,t).then(()=>{if(/\berr\b/.test($("#clubMsg").className))return;["cmFrom","cmTo"].forEach(id=>{$("#"+id).value="";$("#"+id).dataset.name=""})})});
+/* rename = move every swimmer and meet team name to a new name, and remember the old one as an alias */
+$("#fClubRen").addEventListener("submit",e=>{e.preventDefault();const m=$("#clubMsg"),f=pickedClub("rnFrom");let t=$("#rnTo").value.replace(/\s+/g," ").trim();const code=$("#rnCode").value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(!f){msg(m,"Pick the club from the list that appears while you type.",false);return}
+  if(t===f)t="";const cur=clubStats().find(c=>c.name===f),curCodes=cur?[...cur.codes]:[];
+  const newCode=code&&!(curCodes.length===1&&curCodes[0]===code)?code:"";
+  if(!t&&!newCode){msg(m,"Type a new name, a new code, or both.",false);return}
+  const other=t?clubStats().find(c=>c.name!==f&&fold(c.name)===fold(t)):null;
+  const codeUser=newCode?clubStats().find(c=>c.name!==f&&c.name!==(other&&other.name)&&c.codes.has(newCode)):null;
+  const what=[t?(other?`merge “${esc(f)}” into “${esc(other.name)}” (that name already exists)`:`rename “${esc(f)}” to “${esc(t)}”`):"",newCode?`change the code ${curCodes.length?esc(curCodes.join(", "))+" ":""}to ${esc(newCode)}`:""].filter(Boolean).join(" and ");
+  $("#rnGoW").innerHTML=`<span class="confirm">${what.charAt(0).toUpperCase()+what.slice(1)}?${codeUser?` <b style="color:var(--bad)">${esc(newCode)} is already used by “${esc(codeUser.name)}”.</b>`:""} <button type="button" class="yes" data-rnyes>Yes, change</button><button type="button" data-rnno>Cancel</button></span>`;
+  Object.assign($("#rnGoW").dataset,{from:f,to:other?other.name:t,code:newCode})});
+/* set one code for every swimmer of a club and for that team in every meet */
+async function setClubCode(name,code,old){const m=$("#clubMsg");bulkN++;
+  try{const sw=state.swimmers.filter(s=>(s.club===name||(old&&s.club===old))&&s.clubCode!==code);
+    const meetsDone=Promise.all([...meetsById].filter(([,mt])=>(mt.tm||[]).some(x=>x[0]===name&&x[1]!==code)).map(async([id,mt])=>{const v={...mt,tm:mt.tm.map(x=>x[0]===name?[name,code]:x)};if(await withRetry(()=>db.collection("meets").doc(id).set(v)))meetsById.set(id,v)}));
+    const res=await runJobs(sw.map(s=>[s.id,null]),sid=>withRetry(()=>db.collection("swimmers").doc(sid).update({clubCode:code})),(n,t,eta)=>{m.textContent=`Updating code: swimmer ${n} of ${t}${eta}`});
+    await meetsDone;return res}
+  finally{bulkN--;if(!bulkN&&bulkPending){bulkPending=false;flushSwimmers()}}}
+$("#rnGoW").addEventListener("click",async e=>{const w=$("#rnGoW");
+  if(e.target.closest("[data-rnno]")){w.innerHTML=`<button class="ghost" type="submit">Rename</button>`;return}
+  if(e.target.closest("[data-rnyes]")){const f=w.dataset.from,t=w.dataset.to,code=w.dataset.code,m=$("#clubMsg");w.innerHTML=`<button class="ghost" type="submit" disabled>Saving…</button>`;
+    let ok=true,name=f;
+    if(t){await mergeClub(f,t);ok=!/\berr\b/.test(m.className);if(ok)name=t}
+    if(ok&&code){try{const r=await setClubCode(name,code,f);if(r.denied||r.failed){ok=false;msg(m,r.denied?permErr({code:"invalid_argument"}):`${r.failed} swimmers couldn't get the new code. Press the button again to finish.`,false)}}catch(err){ok=false;msg(m,permErr(err),false)}}
+    w.innerHTML=`<button class="ghost" type="submit">Rename</button>`;
+    if(ok){["rnFrom","rnTo","rnCode"].forEach(id=>{$("#"+id).value="";$("#"+id).dataset.name=""});renderClubs();msg(m,`Done. ${t?`“${f}” is now “${t}”`:`“${f}”`}${code?`${t?", code":" now has the code"} ${code}`:""}. Publish the public data to update the website and the coach app.`,true)}}});
 const clubChoice=new Map();   // pair → name to keep
 $("#clubSugg").onclick=async e=>{
   if(e.target.closest("[data-clubclear]")){clubChoice.clear();renderClubs();return}
@@ -2773,6 +2843,9 @@ function renderUpcoming(){const B=$("#umBody");if(!B)return;
   const today=new Date().toISOString().slice(0,10),M=UM.data.meets.filter(m=>(m.end||m.start||"")>=today).sort((a,b)=>String(a.start).localeCompare(String(b.start)));
   if(!M.length){B.innerHTML=`<p class="hint">No upcoming meets yet.</p>`;return}
   B.innerHTML=M.map(m=>{const T=UM.data.teams.filter(t=>t.meet===m.id).map(t=>t.name).sort((a,b)=>a.localeCompare(b,"th"));
+    const org=m.org==="CNX"||m.org==="RaceSwim"?m.org:"";
+    if(org)return `<div class="umcard"><div class="umhd"><div><h3>${esc(m.name)} <span class="orgb org-${org.toLowerCase()}">${org}</span></h3><div class="hint">${esc(fperiod(m.start,m.end))}${m.city?" · "+esc(m.city):""} · ${m.course==="SCM"?"25 m pool":"50 m pool"}</div></div></div>
+      <p class="hint" style="margin:6px 0 0">Organised by ${org}. Entries through ${org}'s own system. · จัดโดย ${org} ส่งรายชื่อผ่านระบบของ ${org}</p></div>`;
     return `<div class="umcard"><div class="umhd"><div><h3>${esc(m.name)}</h3><div class="hint">${esc(fperiod(m.start,m.end))}${m.city?" · "+esc(m.city):""} · ${m.course==="SCM"?"25 m pool":"50 m pool"}${m.deadline?` · entries close <b>${esc(fdate(m.deadline))}</b>`:""}</div></div><span class="umn"><b>${T.length}</b> team${T.length===1?"":"s"}</span></div>
       ${T.length?`<div class="umgrid">${T.map(n=>`<span>${esc(n)}</span>`).join("")}</div>`:`<p class="hint" style="margin:6px 0 0">No team confirmed yet.</p>`}</div>`}).join("")+`<p class="hint">Teams appear once SMT confirms their places. Names only. · แสดงเฉพาะชื่อทีมที่ได้รับการยืนยันจำนวนนักกีฬาแล้ว</p>`}
 function render(){
@@ -3149,26 +3222,29 @@ function cl2Rows(text){
 /* Hy-Tek Meet Manager results (.hy3), e.g. meets run by RaceSwim. Fixed columns:
    B1 meet · C1 team · D1 swimmer · E1 individual entry · E2 result (P heats / F final) · G1 splits (by pool length).
    A Thai citizen ID is used only when it has 13 digits; shorter ones are often mistyped (a digit missing), so those
-   swimmers are matched by English name, birth date and gender instead. Relays are not read from .hy3 yet. */
+   swimmers are matched by English name, birth date and gender instead. Relays: the lead-off swimmer's split is read (F1/F2/F3/G1). */
 function hy3Rows(text){
   const L=text.split(/\r?\n/);const cut=(l,a,b)=>(l.slice(a,b)||"").trim();
   const md=v=>{const m=String(v||"").match(/^(\d\d)(\d\d)(\d{4})$/);return m?`${m[3]}-${m[1]}-${m[2]}`:""};
   const CRS={L:"LCM",S:"SCM",Y:"SCY"},STK={A:"Freestyle",B:"Backstroke",C:"Breaststroke",D:"Butterfly",E:"Medley"},PLEN={LCM:50,SCM:25,SCY:25};
   const STAT=c=>c==="Q"?"DSQ":c==="R"?"DNS":c==="D"?"DNF":"";
-  let meet={name:"",start:"",end:""},team={code:"",name:""},madeUpIds=0,shortIds=0,relays=0;const people=new Map(),items=[];let it=null,res=null;
+  let meet={name:"",start:"",end:""},team={code:"",name:""},madeUpIds=0,shortIds=0,relays=0;const people=new Map(),items=[],rels=[];let it=null,res=null,rl=null;
   for(const l of L){const t=l.slice(0,2);
     if(t==="B1"){const m=l.slice(47).match(/(\d{8})(\d{8})/);meet={name:cut(l,2,47),start:m?md(m[1]):"",end:m?md(m[2]):""}}
     else if(t==="C1")team={code:cut(l,2,7),name:cut(l,7,37)};
     else if(t==="D1"){const raw=cut(l,69,83).replace(/\s/g,"");let id="";
       if(/^[1-8]\d{12}$/.test(raw))id=raw;else if(/^\d{11,12}$/.test(raw))shortIds++;else if(raw)madeUpIds++;
       people.set(cut(l,3,8),{team:{...team},sex:l[2],last:cut(l,8,28),first:cut(l,28,48),id,birth:md(cut(l,88,96))})}
-    else if(t==="E1"){it={hid:cut(l,3,8),dist:+cut(l,15,21),st:l[21],ev:cut(l,36,41).replace(/^0+/,""),seed:cut(l,42,50),res:[]};items.push(it);res=null}
+    else if(t==="F1"){rl={team:{...team},dist:+cut(l,15,21),st:l[21],ev:cut(l,36,41).replace(/^0+/,""),sex:l[13],res:[],legs:[]};rels.push(rl);it=null;res=null;relays++}
+    else if(t==="F2"&&rl){const dm=l.slice(80).match(/(\d{8})/);res={round:l[2],time:cut(l,3,11),crs:l[11],code:l[12],date:dm?md(dm[1]):"",G:[]};rl.res.push(res)}
+    else if(t==="F3"&&rl){for(let k=0;k<8;k++){const g=l.slice(2+13*k,15+13*k);if(g.length<13||!g.trim())break;rl.legs.push({hid:g.slice(1,6).trim(),round:g[11],leg:g[12]})}}
+    else if(t==="E1"){rl=null;it={hid:cut(l,3,8),dist:+cut(l,15,21),st:l[21],ev:cut(l,36,41).replace(/^0+/,""),seed:cut(l,42,50),res:[]};items.push(it);res=null}
     else if(t==="E2"&&it){res={round:l[2],time:cut(l,3,11),crs:l[11],code:l[12],place:cut(l,29,33),date:md(cut(l,87,95)),G:[]};it.res.push(res)}
     else if(t==="G1"&&res){for(const m of l.slice(2).matchAll(/([A-Z])\s*(\d+)\s+(\d+:\d+\.\d+|\d+\.\d+)/g))res.G.push([+m[2],m[3]])}
-    else if(t==="F1")relays++;
   }
   const head=["MEETNAME","MEETDATE","MEETENDDATE","SESSIONDATE","COURSE","EVENTNUMBER","STROKE","DISTANCE","RELAYCOUNT","ROUND","GENDER","CLUBNAME","CLUBCODE","CLUBNATION",
-    "FIRSTNAMEEN","LASTNAMEEN","BIRTHDATE","NATION","LICENSE","XSID","PLACE","STATUS","SWIMTIME","ENTRYTIME",...Array.from({length:30},(_,i)=>"SPLIT"+(i+1)*50)];
+    "FIRSTNAMEEN","LASTNAMEEN","BIRTHDATE","NATION","LICENSE","XSID","PLACE","STATUS","SWIMTIME","ENTRYTIME",...Array.from({length:30},(_,i)=>"SPLIT"+(i+1)*50),
+    "FIRSTNAMEEN1","LASTNAMEEN1","BIRTHDATE1","LICENSE1","NATION1","GENDER1","XSID1"];
   const idx=Object.fromEntries(head.map((h,i)=>[h,i]));const rows=[head];
   const put=o=>{const r=head.map(()=>"");Object.entries(o).forEach(([k,v])=>{if(k in idx)r[idx[k]]=v??""});rows.push(r)};
   const base={MEETNAME:meet.name,MEETDATE:meet.start,MEETENDDATE:meet.end&&meet.end!==meet.start?meet.end:""};
@@ -3188,7 +3264,20 @@ function hy3Rows(text){
       put({...base,...club,FIRSTNAMEEN:p.first,LASTNAMEEN:p.last,BIRTHDATE:p.birth,NATION:club.CLUBNATION,LICENSE:p.id,GENDER:p.sex,XSID:xs.get(x.hid),
         SESSIONDATE:r.date,COURSE:crs,EVENTNUMBER:x.ev,STROKE:STK[x.st]||"",DISTANCE:x.dist,RELAYCOUNT:1,ROUND:r.round==="P"?"PRE":hasPrelims?"FIN":"TIM",
         PLACE:/^\d+$/.test(r.place)&&+r.place>0&&!st?r.place:"",STATUS:st,SWIMTIME:st||!tm?"":fmt(tm),ENTRYTIME:parseTime(x.seed)?fmt(parseTime(x.seed)):"",...(st?{}:sp)})}}
-  return{rows,meet,teams:[...codes],unmatched:MM.unmatched,matchedId:MM.n.id,matchedName:MM.n.name,madeUpIds,shortIds,relays};
+  /* relays (12 Nov 2026): F1 relay entry · F2 result · F3 swimmers with leg numbers · G1 splits. The lead-off swimmer's split at
+     the leg distance (e.g. 50 m of a 4×50) counts as an individual time, as for Splash and .cl2 files; a DSQ/DNS relay doesn't count. */
+  let relayRowsN=0;
+  for(const x of rels){if(/coach/i.test(x.team.name)||!x.dist)continue;const tc=x.team,club={CLUBNAME:tc.name||tc.code,CLUBCODE:tc.code,CLUBNATION:natMeet?tc.code:""};
+    const legN=Math.max(4,new Set(x.legs.filter(g=>g.round===x.legs[0]?.round).map(g=>g.leg)).size)||4,legD=x.dist/legN;
+    for(const r of x.res){if(r.round!=="P"&&r.round!=="F")continue;
+      const lead=x.legs.find(g=>g.round===r.round&&g.leg==="1")||x.legs.find(g=>g.leg==="1");const p=lead&&people.get(lead.hid);if(!p)continue;
+      if(!xs.has(lead.hid))xs.set(lead.hid,match({first:p.first,last:p.last},p.birth,p.sex,p.id,/^THA$/i.test(tc.code)));
+      const crs=CRS[r.crs]||"SCM",st=STAT(r.code),sp={};const maxN=Math.max(0,...r.G.map(g=>g[0])),u=maxN&&[12.5,25,50].includes(x.dist/maxN)?x.dist/maxN:PLEN[crs];
+      r.G.forEach(([n,v])=>{const d=n*u;if(d%50===0&&d<=legD)sp["SPLIT"+d]=fmt(parseTime(v))});
+      if(!sp["SPLIT"+legD])continue;relayRowsN++;
+      put({...base,...club,SESSIONDATE:r.date,COURSE:crs,EVENTNUMBER:x.ev,STROKE:STK[x.st]||"Freestyle",DISTANCE:legD,RELAYCOUNT:legN,ROUND:r.round==="P"?"PRE":hasPrelims?"FIN":"TIM",GENDER:x.sex,STATUS:st,
+        FIRSTNAMEEN1:p.first,LASTNAMEEN1:p.last,BIRTHDATE1:p.birth,LICENSE1:p.id,NATION1:club.CLUBNATION,GENDER1:p.sex,XSID1:xs.get(lead.hid),...(st?{}:sp)})}}
+  return{rows,meet,teams:[...codes],unmatched:MM.unmatched,matchedId:MM.n.id,matchedName:MM.n.name,madeUpIds,shortIds,relays,relayRowsN};
 }
 let importNote="";
 let lastFile=null,autoFill=null,readGen=0;
@@ -3245,7 +3334,7 @@ async function readFile(file,quiet){
         ${C.madeUpIds?` ${C.madeUpIds} ID${C.madeUpIds>1?"s":""} that ${C.madeUpIds>1?"are":"is"} not a Thai citizen ID (passport or made-up numbers) ${C.madeUpIds>1?"were":"was"} ignored; those swimmers are matched by English name and birth date.`:""}
         ${C.fakeHeats?` <span style="color:var(--bad)">${C.fakeHeats} heats time${C.fakeHeats>1?"s were":" was"} left out</span>: the file had the entry time copied into the heats column, but no heats were swum. Only real swims are uploaded. (For RaceSwim meets, the .hy3 file is cleaner.)`:""}
         ${C.shortIds?` <span style="color:var(--bad)">${C.shortIds} citizen ID${C.shortIds>1?"s have":" has"} a digit missing in the file</span>, so ${C.shortIds>1?"those swimmers are":"that swimmer is"} matched by English name and birth date instead. Check “may already be in the app” below.`:""}
-        ${C.relays?` ${C.relays} relay${C.relays>1?"s":""} in this .hy3 file ${C.relays>1?"are":"is"} not read (lead-off times from .hy3 are not supported yet).`:""}
+        ${C.relays?` ${C.relays} relay${C.relays>1?"s":""} in this file: ${C.relayRowsN||0} lead-off time${(C.relayRowsN||0)===1?"":"s"} read (the first swimmer's split counts; DSQ and DNS relays don't).`:""}
         ${un.length?`<br><span style="color:var(--bad)">${un.length} Thai swimmer${un.length>1?"s have":" has"} no ID and no match, so ${un.length>1?"they":"it"} will be added as new: ${esc(un.slice(0,15).map(([n,b])=>n+(b?" ("+b.slice(0,4)+")":"")).join(", "))}${un.length>15?", …":""}. Check Possible duplicates after uploading.</span>`:""}</div>`}
     const wb=(isLenex||isCl2)?{SheetNames:[]}:XLSX.read(await file.arrayBuffer(),{type:"array"});
     for(const name of wb.SheetNames){const r=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:""});
@@ -3791,20 +3880,37 @@ function qcScan(){const out=[];for(const sw of state.swimmers){const L=resOf(sw.
       if(!(/^P/i.test(r.round||"")&&!r.place&&r.entry>0&&Math.abs(r.entry-r.time)<.005)&&(h.dayBest==null||r.time<h.dayBest))h.dayBest=r.time})}
   return out.sort((a,b)=>b.lvl-a.lvl||(b.r.date>a.r.date?1:-1))}
 function renderQc(){const P=$("#qcPanel");if(!P)return;if(!state.isStaff||state.demo){P.hidden=true;return}P.hidden=false;
-  const L=$("#qcList"),list=qcList.slice(0,150);$("#qcCount").textContent=qcList.length?`(${qcList.length})`:"";const nCopy=qcList.filter(x=>x.copy).length;
-  L.innerHTML=(nCopy?`<div class="bulkbar"><b>${nCopy} heats time${nCopy>1?"s":""} copied from the entry time</b> <span class="hint">· from files that wrote the entry time into the heats column; these swims never happened</span> <span data-qcopyw><button type="button" class="primary" data-qcopy>Delete all ${nCopy}</button></span></div>`:"")+(list.length?`<div class="tbl-wrap" style="margin-top:0"><table><thead><tr><th>Swimmer</th><th>Event</th><th>Meet</th><th class="num">Time</th><th>Why</th><th></th></tr></thead><tbody>${list.map(x=>{const o=swimmerById(x.sid)||{};return`<tr data-qrow="${esc(x.sid+"|"+x.r.id)}"><td><button type="button" class="lnk" data-qopen="${esc(x.sid)}">${esc(o.name||"")}</button><div class="hint">${o.birthYear?"born "+o.birthYear:""}${o.club?" · "+esc(o.club):""}</div></td><td>${esc(qcEv(x.r))}</td><td class="hint">${esc(x.r.meet||"")}<br>${esc(x.r.date)}</td><td class="num mono">${fmt(x.r.time)}${x.r.entry?`<div class="hint">entry ${fmt(x.r.entry)}</div>`:""}</td>
-      <td>${x.f.map(([l,t])=>`<div style="color:${l==="bad"?"var(--bad)":"inherit"}">${l==="bad"?"⚠ ":""}${esc(t)}</div>`).join("")}</td><td style="white-space:nowrap"><button type="button" class="ghost" data-qok>Time is right</button> <span data-qdelw><button type="button" class="ghost" data-qdel style="color:var(--bad);border-color:var(--bad)">Delete</button></span></td></tr>`}).join("")}</tbody></table></div>${qcList.length>list.length?`<div class="hint">Showing ${list.length} of ${qcList.length}. Deal with these to see more.</div>`:""}`
+  const L=$("#qcList"),meets=[...qcList.reduce((m,x)=>m.set(x.r.meet||"",(m.get(x.r.meet||"")||0)+1),new Map())].sort((a,b)=>b[1]-a[1]);
+  if(qcMeet&&!meets.some(([n])=>n===qcMeet))qcMeet="";const shown=qcList.filter(x=>!qcMeet||(x.r.meet||"")===qcMeet),list=shown.slice(0,150);
+  const kOf=x=>x.sid+"|"+x.r.id;qcSel.forEach(k=>{if(!qcList.some(x=>kOf(x)===k))qcSel.delete(k)});const allOn=list.length&&list.every(x=>qcSel.has(kOf(x)));$("#qcCount").textContent=qcList.length?`(${qcList.length})`:"";const nCopy=qcList.filter(x=>x.copy).length;
+  L.innerHTML=(nCopy?`<div class="bulkbar"><b>${nCopy} heats time${nCopy>1?"s":""} copied from the entry time</b> <span class="hint">· from files that wrote the entry time into the heats column; these swims never happened</span> <span data-qcopyw><button type="button" class="primary" data-qcopy>Delete all ${nCopy}</button></span></div>`:"")+(list.length?`<div class="qcbar"><label class="hint">Meet <select id="qcMeet"><option value="">All meets (${qcList.length})</option>${meets.map(([n,c])=>`<option value="${esc(n)}"${n===qcMeet?" selected":""}>${esc(n||"(no meet name)")} (${c})</option>`).join("")}</select></label>
+      ${qcSel.size?`<span class="qcsel"><b>${qcSel.size} ticked</b> <button type="button" class="primary" data-qbok>✓ Time is right for ${qcSel.size}</button> <span data-qbdelw><button type="button" class="ghost" data-qbdel style="color:var(--bad);border-color:var(--bad)">Delete ${qcSel.size}</button></span> <button type="button" class="lnk" data-qbclear>Untick all</button></span>`:`<span class="hint">Tick results, then confirm them all at once.</span>`}</div>
+    <div style="margin-top:0"><table class="qctab"><colgroup><col style="width:4%"><col style="width:26%"><col style="width:30%"><col style="width:22%"><col style="width:18%"></colgroup><thead><tr><th><input type="checkbox" data-qselall${allOn?" checked":""} aria-label="Tick all shown" title="Tick all ${list.length} shown"></th><th>Swimmer</th><th>Event · meet</th><th class="num">Time · why</th><th></th></tr></thead><tbody>${list.map(x=>{const o=swimmerById(x.sid)||{};return`<tr data-qrow="${esc(x.sid+"|"+x.r.id)}"${qcSel.has(kOf(x))?' class="qcon"':""}><td><input type="checkbox" data-qsel${qcSel.has(kOf(x))?" checked":""} aria-label="Tick"></td><td><button type="button" class="lnk" data-qopen="${esc(x.sid)}">${esc(o.name||"")}</button><div class="hint">${o.birthYear?"born "+o.birthYear:""}${o.club?" · "+esc(o.club):""}</div></td><td>${esc(qcEv(x.r))}<div class="hint">${esc(x.r.meet||"")} · ${esc(x.r.date)}</div></td><td class="num"><span class="mono" style="font-size:15px">${fmt(x.r.time)}</span>${x.r.entry?`<div class="hint mono">entry ${fmt(x.r.entry)}</div>`:""}
+      ${x.f.map(([l,t])=>`<div class="qcwhy" style="color:${l==="bad"?"var(--bad)":"var(--muted)"}">${l==="bad"?"⚠ ":""}${esc(t)}</div>`).join("")}</td><td><div class="qcact"><button type="button" class="ghost" data-qok>✓ Time is right</button><span data-qdelw><button type="button" class="ghost" data-qdel style="color:var(--bad);border-color:var(--bad)">Delete</button></span></div></td></tr>`}).join("")}</tbody></table></div>${shown.length>list.length?`<div class="hint">Showing ${list.length} of ${shown.length}. Deal with these to see more, or choose one meet above.</div>`:""}`
     :`<div class="hint">${qcOk?"No results to check.":"Press “Check results” to look through every result."}</div>`)}
 async function qcRun(){const m=$("#qcMsg");msg(m,"Checking…",true);await qcLoadOk();await new Promise(r=>setTimeout(r,0));qcList=qcScan();renderQc();msg(m,`Checked ${state.results.length.toLocaleString()} results: ${qcList.filter(x=>x.lvl===2).length} likely wrong, ${qcList.filter(x=>x.lvl===1).length} worth a look.`,true)}
 $("#qcRun").onclick=qcRun;
+let qcSel=new Set(),qcMeet="";
+$("#qcList").addEventListener("change",e=>{const t=e.target;
+  if(t.id==="qcMeet"){qcMeet=t.value;qcSel.clear();renderQc();return}
+  if(t.matches("[data-qselall]")){const shown=qcList.filter(x=>!qcMeet||(x.r.meet||"")===qcMeet).slice(0,150);shown.forEach(x=>t.checked?qcSel.add(x.sid+"|"+x.r.id):qcSel.delete(x.sid+"|"+x.r.id));renderQc();return}
+  if(t.matches("[data-qsel]")){const k=t.closest("[data-qrow]").dataset.qrow;t.checked?qcSel.add(k):qcSel.delete(k);renderQc()}});
 $("#qcList").onclick=async e=>{
+  if(e.target.closest("[data-qbclear]")){qcSel.clear();renderQc();return}
+  if(e.target.closest("[data-qbok]")){const keys=[...qcSel],m=$("#qcMsg");try{msg(m,`Saving ${keys.length}…`,true);await qcSaveOk(keys);const K=new Set(keys);qcList=qcList.filter(x=>!K.has(x.sid+"|"+x.r.id));qcSel.clear();renderQc();msg(m,`${keys.length} result${keys.length>1?"s":""} marked as right.`,true)}catch(err){msg(m,permErr(err),false)}return}
+  if(e.target.closest("[data-qbdel]")){e.target.closest("[data-qbdelw]").innerHTML=`<span class="confirm">Delete ${qcSel.size} result${qcSel.size>1?"s":""}? <button type="button" class="yes" data-qbdelyes>Delete</button><button type="button" data-qbdelno>Keep</button></span>`;return}
+  if(e.target.closest("[data-qbdelno]")){renderQc();return}
+  if(e.target.closest("[data-qbdelyes]")){const by=new Map();[...qcSel].forEach(k=>{const[sid,rid]=k.split("|");(by.get(sid)||by.set(sid,[]).get(sid)).push(rid)});const m=$("#qcMsg");let ok=0,bad=0,i=0;const gone=new Set();
+    for(const[sid,ids]of by){i++;msg(m,`Deleting… swimmer ${i} of ${by.size}`,true);const done=await rewriteDoc(sid,(all,body)=>{ids.forEach(id=>delete all[id]);body.del=[...new Set([...(body.del||[]),...ids])]}).catch(()=>false);if(done){ok+=ids.length;ids.forEach(id=>gone.add(sid+"|"+id))}else bad+=ids.length}
+    qcList=qcList.filter(x=>!gone.has(x.sid+"|"+x.r.id));qcSel.clear();renderQc();msg(m,`Deleted ${ok} result${ok===1?"":"s"}${bad?`, ${bad} couldn't be deleted (try again)`:""}.`,!bad);return}
   if(e.target.closest("[data-qcopy]")){const n=qcList.filter(x=>x.copy).length;e.target.closest("[data-qcopyw]").innerHTML=`<span class="confirm">Delete ${n} copied heats times? <button type="button" class="yes" data-qcopyyes>Delete</button><button type="button" data-qcopyno>Keep</button></span>`;return}
   if(e.target.closest("[data-qcopyno]")){renderQc();return}
   if(e.target.closest("[data-qcopyyes]")){const by=new Map();qcList.filter(x=>x.copy).forEach(x=>(by.get(x.sid)||by.set(x.sid,[]).get(x.sid)).push(x.r.id));const m=$("#qcMsg");let ok=0,bad=0,i=0;
     for(const[sid,ids]of by){i++;msg(m,`Deleting… swimmer ${i} of ${by.size}`,true);const done=await rewriteDoc(sid,(all,body)=>{ids.forEach(id=>delete all[id]);body.del=[...new Set([...(body.del||[]),...ids])]}).catch(()=>false);done?ok+=ids.length:bad+=ids.length}
     qcList=qcList.filter(x=>!x.copy);renderQc();msg(m,`Deleted ${ok} copied heats times${bad?`, ${bad} couldn't be deleted (try again)`:""}.`,!bad);return}const op=e.target.closest("[data-qopen]");if(op){ui.sel=op.dataset.qopen;ui.pmode="meets";ui.ev=null;show("swimmers");window.scrollTo(0,0);return}
   const row=e.target.closest("[data-qrow]");if(!row)return;const[sid,rid]=row.dataset.qrow.split("|");
-  if(e.target.closest("[data-qok]")){try{await qcSaveOk([sid+"|"+rid]);qcList=qcList.filter(x=>!(x.sid===sid&&x.r.id===rid));renderQc()}catch(err){msg($("#qcMsg"),permErr(err),false)}return}
+  if(e.target.closest("[data-qsel]"))return;
+  if(e.target.closest("[data-qok]")){try{qcSel.delete(sid+"|"+rid);await qcSaveOk([sid+"|"+rid]);qcList=qcList.filter(x=>!(x.sid===sid&&x.r.id===rid));renderQc()}catch(err){msg($("#qcMsg"),permErr(err),false)}return}
   if(e.target.closest("[data-qdel]")){e.target.closest("[data-qdelw]").innerHTML=`<span class="confirm">Delete? <button type="button" class="yes" data-qdelyes>Delete</button><button type="button" data-qdelno>Keep</button></span>`;return}
   if(e.target.closest("[data-qdelno]")){renderQc();return}
   if(e.target.closest("[data-qdelyes]")){try{if(!(await deleteResult(sid,rid)))throw{code:"unavailable"};qcList=qcList.filter(x=>!(x.sid===sid&&x.r.id===rid));renderQc();msg($("#qcMsg"),"Deleted.",true)}catch(err){msg($("#qcMsg"),permErr(err),false)}}};
@@ -3844,6 +3950,15 @@ function updateDupBadge(){const n=dupPairs.filter(p=>p.level!=="low").length;
   $("#tab-manage").innerHTML=`Admin${n?`<span class="badge" title="${n} possible duplicate swimmers">${n}</span>`:""}${c?`<span class="badge club" title="${c>=30?"30 or more":c} look-alike club names">${c>=30?"30+":c}</span>`:""}`}
 /* Thai citizen ID check digit: a wrong check digit almost always means a typo */
 function thaiIdOk(id){if(!/^\d{13}$/.test(id))return null;let sum=0;for(let i=0;i<12;i++)sum+=+id[i]*(13-i);return(11-sum%11)%10===+id[12]}
+/* Thai ID checks (12 Nov 2026), only for 13-digit numbers (passports and licence numbers are skipped):
+   1) the government's check digit; 2) the first digit (type of person) against the birth year: 1 and 2 are for people born from 1984,
+   3 for people already registered before 1984; 3) digits 2–3 are the province code (10–96). */
+function thaiIdIssues(raw,by){const id=String(raw||"").replace(/[\s-]/g,"");if(!/^\d{13}$/.test(id))return[];const out=[],f=+id[0],pc=+id.slice(1,3);by=+by||0;
+  if(!thaiIdOk(id))out.push("the last digit (check digit) doesn't match the other 12");
+  if(by>=1985&&f===3)out.push(`starts with 3 (registered before 1984) but born ${by}`);
+  if(by&&by<=1983&&(f===1||f===2))out.push(`starts with ${f} (born from 1984) but born ${by}`);
+  if(pc<10||pc>96)out.push(`digits 2–3 (${id.slice(1,3)}) are not a province code`);
+  return out}
 function dupSide(s,other,keep){
   const r=resOf(s.id).filter(valid);const ds=r.map(x=>x.date).sort();const pv=priv.get(s.id)||{},po=priv.get(other.id)||{};
   let idHtml=esc(pv.cid||"—");if(pv.cid&&po.cid&&pv.cid.length===po.cid.length){idHtml=[...pv.cid].map((c,i)=>c!==po.cid[i]?`<mark>${esc(c)}</mark>`:esc(c)).join("")}
@@ -4235,8 +4350,10 @@ function renderQualCard(){
   $("#qrSum").innerHTML=`<b>${people("F")+people("M")} swimmers</b> qualified (${people("F")} ${people("F")===1?"woman":"women"}, ${people("M")} ${people("M")===1?"man":"men"}) in <b>${rows.length} events</b>${lvs.length?` · ${lvs.map(l=>`${l}: ${rows.filter(r=>r.lv===l).length}`).join(", ")}`:""}<br>${stdPools(Q).join(" and ")} swims${Q.from||Q.to?`, ${Q.from?fdate(Q.from):"…"} – ${Q.to?fdate(Q.to):"…"}`:""}${Q.meetCourse&&!stdPools(Q).includes(Q.meetCourse)?` · ${Q.meetCourse} meet`:""}`;
 }
 /* level cell: the level and its standard time, e.g. "B 2:13.00" (asked 11 Nov 2026) */
+/* World Aquatics points of the swim (same formula as the other reports) */
+function qPts(x){const p=points(x.r,x.s.gender);return p==null?'<span class="en">–</span>':String(p)}
 function lvCell(x){const t=x.lv!=null&&x.std?x.std[x.lv]:null;return `<span style="white-space:nowrap"><b>${esc(x.lv||"")}</b>${t?` <span class="en">${fmt(t)}</span>`:""}</span>`}
-async function buildQualReport(L,thaiOnly,names,by,land){
+async function buildQualReport(L,thaiOnly,names,by,land,opt){opt=opt||{};
   const issue=today(),rows=qualifierRows(L,thaiOnly),lvs=stdLevels(L).filter(Boolean),pools=stdPools(L),ag=stdHasAge(L);
   const crit=[`รายการ / Meet: <b>${esc(L.name)}</b>`,L.meetCourse?`สระของรายการ / Meet pool: ${poolBi(L.meetCourse)}`:"",`เกณฑ์เวลาและผลการแข่งขันจากสระ / Qualifying times and swims: ${pools.map(poolBi).join(", ")}`,
     `ช่วงเวลาที่นับผล / Qualifying period: ${L.from||L.to?`${L.from?rDate(L.from):"…"} – ${L.to?rDate(L.to):"…"}`:"ทั้งหมด / all time"}`,
@@ -4248,29 +4365,53 @@ async function buildQualReport(L,thaiOnly,names,by,land){
   const cnt=(g,k,l)=>rows.filter(r=>r.g===g&&`${r.st}|${r.d}|${r.c}`===k&&(l==null||r.lv===l)).length;
   const showPool=pools.length>1;
   B.push({t:"table",cols:[{h:hb("ประเภท","Event")},...["F","M"].flatMap(g=>(lvs.length?lvs:[null]).map(l=>({h:hb(`${g==="F"?"หญิง":"ชาย"}${l?" "+l:""}`,`${g==="F"?"Women":"Men"}${l?" "+l:""}`),cls:"num"})))],
-    rows:[...evKeys.filter(k=>cnt("F",k)||cnt("M",k)).map(k=>{const[st,d,c]=k.split("|");return[`${evTh(st,d)}${showPool?" · "+c:""}<br><span class="en">${evEn(st,d)}</span>`,...["F","M"].flatMap(g=>(lvs.length?lvs:[null]).map(l=>cnt(g,k,l)||"–"))]}),
-      [`<b>รวม (คน)</b><br><span class="en">Total swimmers</span>`,...["F","M"].flatMap(g=>(lvs.length?lvs:[null]).map(l=>`<b>${new Set(rows.filter(r=>r.g===g&&(l==null||r.lv===l)).map(r=>r.s.id)).size}</b>`))]],
+    rows:[...evKeys.filter(k=>cnt("F",k)||cnt("M",k)).map(k=>{const[st,d,c]=k.split("|");return[`<span style="white-space:nowrap">${evTh(st,d)} <span class="en">· ${evEn(st,d)}${showPool?" · "+c:""}</span></span>`,...["F","M"].flatMap(g=>(lvs.length?lvs:[null]).map(l=>cnt(g,k,l)||"–"))]}),
+      [`<b>รวม (คน)</b> <span class="en">· Total swimmers</span>`,...["F","M"].flatMap(g=>(lvs.length?lvs:[null]).map(l=>`<b>${new Set(rows.filter(r=>r.g===g&&(l==null||r.lv===l)).map(r=>r.s.id)).size}</b>`))]],
     note:`ผ่านเกณฑ์ทั้งหมด ${people("F")+people("M")} คน (หญิง ${people("F")} ชาย ${people("M")}) · ${people("F")+people("M")} swimmers qualified (${people("F")} ${people("F")===1?"woman":"women"}, ${people("M")} ${people("M")===1?"man":"men"}) in ${rows.length} events.${lvs.length?` นักกีฬาที่ผ่านทั้งสองระดับนับในระดับ ${lvs[0]} · A swimmer who reaches ${lvs[0]} is counted in ${lvs[0]} only.`:""}`});
   /* fixed column widths, the same in every table of the report (the meet column takes what is left) */
   const W=(p,l)=>(land?l:p)+"%";
-  const cols=[{h:hb("ที่","No."),cls:"num",w:W(5,4)},{h:hb("ชื่อ-นามสกุล","Name"),w:W(23,20)},{h:hb("ปีเกิด","Born"),cls:"num",w:W(7,5)},...(ag?[{h:hb("อายุ","Age"),cls:"num",w:W(5,4)}]:[]),{h:hb("สังกัด","Club"),w:ag?W(17,17):W(20,20)},{h:hb("เวลา","Time"),cls:"num",w:W(9,7)},...(lvs.length?[{h:hb("ระดับ","Level"),w:W(8,6)}]:[]),{h:hb("วันที่","Date"),w:W(11,9)},{h:hb("รายการแข่งขัน","Meet")}];
-  const sCols=[{h:hb("ที่","No."),cls:"num",w:W(5,4)},{h:hb("ชื่อ-นามสกุล","Name"),w:W(20,18)},{h:hb("ปีเกิด","Born"),cls:"num",w:W(6,5)},{h:hb("สังกัด","Club"),w:W(13,15)},{h:hb("รายการ","Event"),w:W(14,12)},{h:hb("เวลา","Time"),cls:"num",w:W(8,7)},...(lvs.length?[{h:hb("ระดับ","Level"),w:W(8,6)}]:[]),{h:hb("วันที่","Date"),w:W(11,9)},{h:hb("รายการแข่งขัน","Meet")}];
+  const cols=[{h:hb("ที่","No."),cls:"num",w:W(5,4)},{h:hb("ชื่อ-นามสกุล","Name"),w:W(21,19)},{h:hb("ปีเกิด","Born"),cls:"num",w:W(6,5)},...(ag?[{h:hb("อายุ","Age"),cls:"num",w:W(5,4)}]:[]),{h:hb("สังกัด","Club"),w:ag?W(15,16):W(18,19)},{h:hb("เวลา","Time"),cls:"num",w:W(9,7)},{h:hb("คะแนน","Pts"),cls:"num",w:W(6,5)},...(lvs.length?[{h:hb("ระดับ","Level"),w:W(8,6)}]:[]),{h:hb("วันที่","Date"),w:W(10,9)},{h:hb("รายการแข่งขัน","Meet")}];
+  const sCols=[{h:hb("ที่","No."),cls:"num",w:W(5,4)},{h:hb("ชื่อ-นามสกุล","Name"),w:W(19,17)},{h:hb("ปีเกิด","Born"),cls:"num",w:W(5,5)},{h:hb("สังกัด","Club"),w:W(12,14)},{h:hb("รายการ","Event"),w:W(13,12)},{h:hb("เวลา","Time"),cls:"num",w:W(8,7)},{h:hb("คะแนน","Pts"),cls:"num",w:W(6,5)},...(lvs.length?[{h:hb("ระดับ","Level"),w:W(8,6)}]:[]),{h:hb("วันที่","Date"),w:W(10,9)},{h:hb("รายการแข่งขัน","Meet")}];
   /* by swimmer: one row per swimmer with all their qualifying events */
-  if(by==="swimmer")["F","M"].forEach(g=>{const gr=rows.filter(r=>r.g===g);if(!gr.length)return;
-    const per=new Map();gr.forEach(x=>(per.get(x.s.id)||per.set(x.s.id,[]).get(x.s.id)).push(x));
-    const list=[...per.values()].sort((a,b)=>{const na=nameFor(a[0].s,names).main,nb=nameFor(b[0].s,names).main;return na.localeCompare(nb,"th")});
-    B.push(sec(g==="F"?"หญิง":"ชาย",g==="F"?"Women":"Men"));
-    /* one line per qualifying swim; the swimmer's details are written on their first line only */
-    B.push({t:"table",fixed:true,caption:`${list.length} คน · ${list.length} swimmer${list.length===1?"":"s"}`,cols:sCols,
-      rows:list.flatMap((l,i)=>{const s0=l[0].s,N=nameFor(s0,names);const cnt=`${l.length} รายการ / event${l.length===1?"":"s"}${lvs.length?` (${lvs.map(v=>`${v} ${l.filter(x=>x.lv===v).length}`).join(" · ")})`:""}`;
-        return l.map((x,j)=>[j?"":i+1,j?"":`<b>${esc(N.main)}</b>${N.sub?`<br><span class="en">${esc(N.sub)}</span>`:""}<br><span class="en">${cnt}</span>`,j?"":s0.birthYear||"",j?"":esc(s0.club||""),
-          `${evTh(x.st,x.d)}<br><span class="en">${x.d}m ${SHORT[x.st]}${showPool?" · "+x.c:""}</span>`,`<b>${fmt(x.r.time)}</b>`,...(lvs.length?[lvCell(x)]:[]),rDate(x.r.date),esc(x.r.meet||"")+(x.r.relay?` <span class="en">(relay lead-off)</span>`:"")])})})});
-  else ["F","M"].forEach(g=>{const gr=rows.filter(r=>r.g===g);if(!gr.length)return;
-    B.push(sec(g==="F"?"หญิง":"ชาย",g==="F"?"Women":"Men"));
-    evKeys.forEach(k=>{const l=gr.filter(r=>`${r.st}|${r.d}|${r.c}`===k);if(!l.length)return;const[st,d,c]=k.split("|");
+  /* priority (asked 11 Nov 2026): most events at the first level (A), then the next level (B, C…), then World Aquatics points
+     (best swim first, then the next best…), then name. Works for any number of levels, e.g. SEA Age Group A/B/C. */
+  const prio=by==="prio",ptsOf=x=>points(x.r,x.s.gender)||0,lvRank=v=>{const i=lvs.indexOf(v);return i<0?99:i};
+  const prioCmp=(a,b)=>{for(const v of lvs){const d=b.filter(x=>x.lv===v).length-a.filter(x=>x.lv===v).length;if(d)return d}
+    const pa=a.map(ptsOf).sort((x,y)=>y-x),pb=b.map(ptsOf).sort((x,y)=>y-x);for(let i=0;i<Math.max(pa.length,pb.length);i++){const d=(pb[i]||0)-(pa[i]||0);if(d)return d}return 0};
+  if(prio)doc.sub+=`<br>ลำดับ / Order: ตามลำดับความสำคัญ — จำนวนรายการระดับ ${lvs.join(" → ")} แล้วคะแนน / by priority — events at level ${lvs.join(", then ")}, then points`;
+  /* layout options (12 Nov 2026): women and men separate or combined; all ages together or one list per age group;
+     team places: the first N swimmers of each list are "Selected", the rest "Reserves" (priority order only) */
+  const comb=opt.gender==="comb",AGS=ag?[...new Map(L.times.filter(x=>x.lo>=0||x.hi>=0).map(x=>[x.lo+"|"+x.hi,{lo:+x.lo,hi:+x.hi}])).values()].sort((a,b)=>(a.lo<0?-1:a.lo)-(b.lo<0?-1:b.lo)||(a.hi<0?99:a.hi)-(b.hi<0?99:b.hi)):[];
+  const byAge=opt.age==="group"&&AGS.length>0,cap=prio?Math.max(0,Math.floor(+opt.cap||0)):0;
+  const agTh=a=>a.lo<0?`${a.hi} ปีและต่ำกว่า`:a.hi<0?`${a.lo} ปีขึ้นไป`:a.lo===a.hi?`อายุ ${a.lo} ปี`:`อายุ ${a.lo}–${a.hi} ปี`,agEn=a=>a.lo<0?`${a.hi} & under`:a.hi<0?`${a.lo} & over`:a.lo===a.hi?`age ${a.lo}`:`age ${a.lo}–${a.hi}`;
+  const inAg=(a,age)=>age!=null&&(a.lo<0||age>=a.lo)&&(a.hi<0||age<=a.hi);
+  const gTh=gs=>gs.length>1?"หญิงและชาย":gs[0]==="F"?"หญิง":"ชาย",gEn=gs=>gs.length>1?"Women and men":gs[0]==="F"?"Women":"Men";
+  if(comb)doc.sub+=`<br>เพศ / Gender: รวมหญิงและชาย / women and men combined`;
+  if(byAge)doc.sub+=`<br>แยกตามรุ่นอายุ / One list per age group`;
+  if(cap)doc.sub+=`<br>จำนวนที่นั่ง / Team places: ${cap} คนแรกของแต่ละรายชื่อ / the first ${cap} of each list (ที่เหลือเป็นสำรอง / the rest are reserves)`;
+  const genders=comb?[["F","M"]]:[["F"],["M"]];
+  const swTable=(list,caption,start)=>({t:"table",fixed:true,caption,cols:sCols,
+      rows:list.flatMap((l,i)=>{const s0=l[0].s,N=nameFor(s0,names);const cnt=`${comb?(s0.gender==="F"?"หญิง W · ":"ชาย M · "):""}${l.length} รายการ / event${l.length===1?"":"s"}${lvs.length?` (${lvs.map(v=>`${v} ${l.filter(x=>x.lv===v).length}`).join(" · ")})`:""}`;
+        return l.map((x,j)=>[j?"":start+i+1,j?"":`<b>${esc(N.main)}</b>${N.sub?`<br><span class="en">${esc(N.sub)}</span>`:""}<br><span class="en">${cnt}</span>`,j?"":s0.birthYear||"",j?"":esc(s0.club||""),
+          `${evTh(x.st,x.d)}<br><span class="en">${x.d}m ${SHORT[x.st]}${showPool?" · "+x.c:""}</span>`,`<b>${fmt(x.r.time)}</b>`,qPts(x),...(lvs.length?[lvCell(x)]:[]),rDate(x.r.date),esc(x.r.meet||"")+(x.r.relay?` <span class="en">(relay lead-off)</span>`:"")])})});
+  /* by swimmer: one row per swimmer with all their qualifying events */
+  if(by==="swimmer"||prio)genders.forEach(gs=>{const gr=rows.filter(r=>gs.includes(r.g));if(!gr.length)return;
+    B.push(sec(gTh(gs),gEn(gs)));
+    (byAge?AGS.map(a=>({a,r:gr.filter(x=>inAg(a,x.age))})):[{a:null,r:gr}]).forEach(({a,r})=>{if(!r.length)return;
+      const per=new Map();r.forEach(x=>(per.get(x.s.id)||per.set(x.s.id,[]).get(x.s.id)).push(x));
+      if(prio)per.forEach(l=>l.sort((x,y)=>lvRank(x.lv)-lvRank(y.lv)||ptsOf(y)-ptsOf(x)));
+      const list=[...per.values()].sort((a,b)=>(prio?prioCmp(a,b):0)||nameFor(a[0].s,names).main.localeCompare(nameFor(b[0].s,names).main,"th"));
+      const head=(a?`<b>${agTh(a)} · ${agEn(a)}</b> · `:"");
+      /* one line per qualifying swim; the swimmer's details are written on their first line only */
+      if(cap&&list.length>cap){B.push(swTable(list.slice(0,cap),`${head}ติดทีม / Selected · ${cap} คน · ${cap} swimmer${cap===1?"":"s"}`,0));B.push(swTable(list.slice(cap),`${head}สำรอง / Reserves · ${list.length-cap} คน · ${list.length-cap} swimmer${list.length-cap===1?"":"s"}`,cap))}
+      else B.push(swTable(list,`${head}${list.length} คน · ${list.length} swimmer${list.length===1?"":"s"}`,0))})});
+  else{const evTable=(g,k)=>{const l=rows.filter(r=>r.g===g&&`${r.st}|${r.d}|${r.c}`===k);if(!l.length)return;const[st,d,c]=k.split("|");
       const std=ag?"":Object.entries(l[0].std).filter(([,t])=>t).map(([lv,t])=>`${lv||"เกณฑ์ / Standard"} ${fmt(t)}`).join(" · ");
       B.push({t:"table",caption:`${evTh(st,d)} ${g==="F"?"หญิง":"ชาย"} · ${evEn(st,d)} — ${g==="F"?"Women":"Men"}${showPool?` · ${poolBi(c)}`:""} <span class="en">(${l.length} qualified${std?` · ${std}`:""})</span>`,cols,fixed:true,
-        rows:l.map((x,i)=>{const N=nameFor(x.s,names);return[i+1,`${esc(N.main)}${N.sub?`<br><span class="en">${esc(N.sub)}</span>`:""}`,x.s.birthYear||"",...(ag?[x.age??""]:[]),esc(x.s.club||""),`<b>${fmt(x.r.time)}</b>`,...(lvs.length?[lvCell(x)]:[]),rDate(x.r.date),esc(x.r.meet||"")+(x.r.relay?` <span class="en">(relay lead-off)</span>`:"")]})})})});
+        rows:l.map((x,i)=>{const N=nameFor(x.s,names);return[i+1,`${esc(N.main)}${N.sub?`<br><span class="en">${esc(N.sub)}</span>`:""}`,x.s.birthYear||"",...(ag?[x.age??""]:[]),esc(x.s.club||""),`<b>${fmt(x.r.time)}</b>`,qPts(x),...(lvs.length?[lvCell(x)]:[]),rDate(x.r.date),esc(x.r.meet||"")+(x.r.relay?` <span class="en">(relay lead-off)</span>`:"")]})})};
+    /* separate: all women's events, then all men's; combined: each event with its women's and men's lists together */
+    if(comb){if(rows.length)B.push(sec("หญิงและชาย","Women and men"));evKeys.forEach(k=>["F","M"].forEach(g=>evTable(g,k)))}
+    else ["F","M"].forEach(g=>{if(!rows.some(r=>r.g===g))return;B.push(sec(g==="F"?"หญิง":"ชาย",g==="F"?"Women":"Men"));evKeys.forEach(k=>evTable(g,k))})}
   if(!rows.length)B.push({t:"html",html:`<p>ยังไม่มีนักกีฬาที่ผ่านเกณฑ์ · No swimmer has a qualifying time yet.</p>`});
   const miss=evKeys.flatMap(k=>["F","M"].filter(g=>L.times.some(x=>`${x.st}|${x.d}|${x.c}`===k&&(x.g===g||x.g==="X"))&&!cnt(g,k)).map(g=>{const[st,d,c]=k.split("|");return`${d}m ${SHORT[st]} ${g==="F"?"W":"M"}${showPool?" "+c:""}`}));
   B.push({t:"html",cls:"rp-note",html:`ใช้เวลาที่ดีที่สุดของนักกีฬาแต่ละคนในช่วงเวลาที่กำหนด รวมเวลาช่วงแรกของการว่ายผลัด (relay lead-off) · Each swimmer's best official time in the period is used, including relay lead-off splits; DNS, DSQ and DNF swims are not counted.`
@@ -4307,7 +4448,7 @@ async function downloadQualXlsx(L,thaiOnly,m){
   catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":"Couldn't save the file. Try again.",c==="declined")}
 }
 ["#qrList","#qrNat","#qrPool"].forEach(id=>$(id).addEventListener("change",renderQualCard));
-$("#qrGo").onclick=()=>{const L=qrList();if(L)openReport(()=>buildQualReport(L,$("#qrNat").value==="th",$("#qrNames").value,$("#qrBy").value,$("#qrPage").value==="land"),`Qualified_${fileSafe(L.name)}_${today()}.pdf`)};
+$("#qrGo").onclick=()=>{const L=qrList();if(L)openReport(()=>buildQualReport(L,$("#qrNat").value==="th",$("#qrNames").value,$("#qrBy").value,$("#qrPage").value==="land",{gender:$("#qrGender").value,age:$("#qrAge").value,cap:$("#qrCap").value}),`Qualified_${fileSafe(L.name)}_${today()}.pdf`)};
 $("#qrXlsx").onclick=()=>{const L=qrList();if(L)downloadQualXlsx(L,$("#qrNat").value==="th",$("#qrMsg"))};
 /* ---- Rankings as an Excel file: the lists on screen, with the same filters ---- */
 async function downloadRankingsXlsx(topN,m){
@@ -4385,6 +4526,39 @@ $("#ceFile").onchange=async e=>{const f=e.target.files[0],m=$("#ceMsg");e.target
     msg(m,`Saved ${R.swimmers} swimmers, including ${R.relayRows} relay swims from ${R.relays} relay teams.`+(R.over?` ${R.over} swimmer${R.over===1?" has":"s have"} more than 40 events; only the first 40 fit.`:""),true)}
   catch(err){const c=err&&err.code;msg(m,c==="declined"?"Download cancelled.":c==="rate_limited"?"A download prompt is already open. Finish it, then try again.":"Couldn't save the file. Try again.",c==="declined")}
 };
+/* ---- Swimmers with no club: suggest the team from their latest club meet (school/province/country teams never count) ---- */
+let ncRows=[],ncSel=new Set();
+function ncScan(){const out=[];state.swimmers.forEach(o=>{if(o.club||(o.locked||[]).includes("club"))return;
+  const L=resOf(o.id).filter(r=>(r.teamType||"C")==="C"&&r.team);if(!L.length)return;
+  const last=L.reduce((a,r)=>r.date>a.date?r:a);const others=[...new Set(L.map(r=>r.team))].filter(t=>t!==last.team);
+  const rep=[...new Set(resOf(o.id).filter(r=>(r.teamType||"C")!=="C"&&r.team).map(r=>r.team))];
+  out.push({sid:o.id,nameTh:o.nameTh||"",nameEn:o.nameEn||"",by:o.birthYear||"",club:last.team,code:last.teamCode||"",meet:last.meet||"",date:last.date||"",others,rep})});
+  return out.sort((a,b)=>b.date.localeCompare(a.date))}
+function ncRender(){const out=$("#ncOut");$("#ncCount").textContent=ncRows.length?`(${ncRows.length})`:"";
+  if(!ncRows.length){out.innerHTML=`<div class="msg ok">✓ Every swimmer who has swum for a club has a club.</div>`;return}
+  const list=ncRows.slice(0,300),allOn=list.every(r=>ncSel.has(r.sid));
+  out.innerHTML=`<div class="qcbar">${ncSel.size?`<span class="qcsel"><b>${ncSel.size} ticked</b> <span data-ncw><button type="button" class="primary" data-ncset>Set club for ${ncSel.size}</button></span> <button type="button" class="lnk" data-ncclear>Untick all</button></span>`:`<span class="hint">Tick swimmers, then set their clubs all at once.</span>`}</div>
+  <div style="max-height:520px;overflow:auto"><table class="rank"><thead><tr><th><input type="checkbox" data-ncall${allOn?" checked":""} aria-label="Tick all shown"></th><th>Swimmer</th><th>Club to set</th><th>Also swam for</th></tr></thead><tbody>${list.map(r=>`<tr data-ncrow="${esc(r.sid)}"${ncSel.has(r.sid)?' class="qcon"':""}><td><input type="checkbox" data-nc${ncSel.has(r.sid)?" checked":""} aria-label="Tick"></td><td><button type="button" class="lnk" data-open="${esc(r.sid)}">${esc(r.nameTh||r.nameEn)}</button><br><span class="hint">${esc(r.nameTh?r.nameEn:"")}${r.by?" · born "+r.by:""}</span></td><td><b>${esc(r.club)}</b>${r.code?` <span class="mono hint">${esc(r.code)}</span>`:""}<br><span class="hint">${esc(r.meet)} · ${esc(fdate(r.date))}</span></td><td class="hint">${r.others.length?"Clubs: "+esc(r.others.join(", "))+"<br>":""}${r.rep.length?"School / province: "+esc(r.rep.slice(0,3).join(", ")):""}</td></tr>`).join("")}</tbody></table></div>
+  ${ncRows.length>list.length?`<div class="hint">Showing ${list.length} of ${ncRows.length}.</div>`:""}`}
+$("#ncGo").onclick=()=>{if(!state.isStaff||state.demo){msg($("#ncMsg"),"Sign in as staff first.",false);return}ncRows=ncScan();ncSel.clear();$("#ncMsg").textContent="";ncRender()};
+$("#ncOut").addEventListener("change",e=>{const t=e.target;
+  if(t.matches("[data-ncall]")){ncRows.slice(0,300).forEach(r=>t.checked?ncSel.add(r.sid):ncSel.delete(r.sid));ncRender();return}
+  if(t.matches("[data-nc]")){const k=t.closest("[data-ncrow]").dataset.ncrow;t.checked?ncSel.add(k):ncSel.delete(k);ncRender()}});
+$("#ncOut").addEventListener("click",async e=>{
+  const op=e.target.closest("[data-open]");if(op){ui.sel=op.dataset.open;ui.pmode="overview";ui.ev=null;show("swimmers");window.scrollTo(0,0);return}
+  if(e.target.closest("[data-ncclear]")){ncSel.clear();ncRender();return}
+  if(e.target.closest("[data-ncset]")){e.target.closest("[data-ncw]").innerHTML=`<span class="confirm">Set the club for ${ncSel.size} swimmer${ncSel.size>1?"s":""}? <button type="button" class="yes" data-ncyes>Set club</button><button type="button" data-ncno>Cancel</button></span>`;return}
+  if(e.target.closest("[data-ncno]")){ncRender();return}
+  if(e.target.closest("[data-ncyes]")){const m=$("#ncMsg"),todo=ncRows.filter(r=>ncSel.has(r.sid));let ok=0,bad=0;const done=new Set();
+    for(const r of todo){msg(m,`Saving… ${ok+bad+1} of ${todo.length}`,true);try{await withRetry(()=>db.collection("swimmers").doc(r.sid).update({club:r.club,clubCode:r.code,updatedAt:new Date().toISOString()}));const o=swimmerById(r.sid);if(o){o.club=r.club;o.clubCode=r.code}done.add(r.sid);ok++}catch(err){bad++}}
+    ncRows=ncRows.filter(r=>!done.has(r.sid));ncSel.clear();ncRender();msg(m,`Club set for ${ok} swimmer${ok===1?"":"s"}${bad?`, ${bad} couldn't be saved (try again)`:""}. Publish the public data to update the coach app.`,!bad)}});
+/* ---- Club changes (from results) ---- */
+$("#chGo").onclick=()=>{const out=$("#chOut"),mo=+$("#chMonths").value,since=new Date(Date.now()-mo*30.44*864e5).toISOString().slice(0,10),L=[];
+  state.swimmers.forEach(o=>{const P=clubHistory(o.id);for(let i=P.length-1;i>0;i--){if(P[i].from<since)break;L.push({o,from:P[i-1],to:P[i]})}});
+  L.sort((a,b)=>b.to.from.localeCompare(a.to.from));$("#chCount").textContent=L.length?`(${L.length})`:"";
+  if(!L.length){out.innerHTML=`<div class="msg ok">No club changes in this period.</div>`;return}
+  const sh=L.slice(0,300);out.innerHTML=`<div style="max-height:520px;overflow:auto"><table class="rank"><thead><tr><th>Swimmer</th><th>From</th><th>To</th><th>First meet for the new club</th></tr></thead><tbody>${sh.map(x=>`<tr><td><button type="button" class="lnk" data-open="${esc(x.o.id)}">${esc(x.o.nameTh||x.o.nameEn)}</button><br><span class="hint">${esc(x.o.nameTh?x.o.nameEn||"":"")}${x.o.birthYear?" · born "+x.o.birthYear:""}</span></td><td>${esc(x.from.team)}<br><span class="hint">last meet ${esc(fdate(x.from.to))}</span></td><td><b>${esc(x.to.team)}</b></td><td>${esc(fdate(x.to.from))}</td></tr>`).join("")}</tbody></table></div>${L.length>sh.length?`<div class="hint">Showing ${sh.length} of ${L.length}.</div>`:""}`};
+$("#chOut").addEventListener("click",e=>{const op=e.target.closest("[data-open]");if(op){ui.sel=op.dataset.open;ui.pmode="overview";ui.ev=null;show("swimmers");window.scrollTo(0,0)}});
 /* ---- ID check over the whole app ---- */
 let idcRows=[];
 function idCheckAll(){
@@ -4394,6 +4568,8 @@ function idCheckAll(){
   state.swimmers.forEach(o=>{const byMeet=new Map();resOf(o.id).forEach(r=>{if(!r.team)return;const k=mKey(r);(byMeet.get(k)||byMeet.set(k,new Map()).get(k)).set(r.team,(byMeet.get(k).get(r.team)||[]).concat(r))});
     byMeet.forEach(teams=>{if(teams.size<2)return;const cid=(priv.get(o.id)||{}).cid||"";
       teams.forEach((rs,team)=>rows.push({cid,kind:"Swam for two teams at one meet",nameTh:o.nameTh||"",nameEn:o.nameEn||"",birth:(priv.get(o.id)||{}).dob||"",club:team,events:rs.map(evOf)}))})});
+  priv.forEach((v,sid)=>{const o=v&&v.cid&&swimmerById(sid);if(!o)return;const L=thaiIdIssues(v.cid,o.birthYear);if(!L.length)return;
+    rows.push({sid,cid:v.cid,kind:"Not a valid Thai ID: "+L.join("; "),nameTh:o.nameTh||"",nameEn:o.nameEn||"",birth:v.dob||"",club:o.club||"",events:[...new Set(resOf(sid).map(r=>r.meet))].slice(0,8)})});
   return rows;
 }
 $("#idcGo").onclick=()=>{const out=$("#idcOut");if(!state.isStaff||!priv.size&&!state.swimmers.length){msg($("#idcMsg"),"Nothing to check yet.",false);return}
@@ -4401,10 +4577,13 @@ $("#idcGo").onclick=()=>{const out=$("#idcOut");if(!state.isStaff||!priv.size&&!
   if(!idcRows.length){out.innerHTML=`<div class="msg ok">✓ No problems found: every ID number belongs to one swimmer, and nobody swam for two teams at one meet.</div>`;return}
   const n=new Set(idcRows.map(r=>r.cid+"|"+r.nameEn+r.nameTh)).size;
   out.innerHTML=`<div class="hint" style="margin-bottom:6px"><b style="color:var(--bad)">${idcRows.length} rows to check</b>. Open a swimmer to fix the ID, or merge or split the profiles.</div>
-    <div style="max-height:420px;overflow:auto"><table class="rank"><thead><tr><th>ID number</th><th>Problem</th><th>Swimmer</th><th>Team</th><th>Meets / events</th></tr></thead><tbody>${idcRows.slice(0,100).map(r=>`<tr><td class="mono">${esc(r.cid||"—")}</td><td class="hint">${esc(r.kind)}</td><td><b>${esc([r.nameTh,r.nameEn].filter(Boolean).join(" · "))}</b>${r.birth?`<br><span class="hint">born ${esc(fmtDob(r.birth))}</span>`:""}</td><td>${esc(r.club)}</td><td class="hint">${esc(r.events.join(", "))}</td></tr>`).join("")}</tbody></table></div>
+    <div style="max-height:420px;overflow:auto"><table class="rank"><thead><tr><th>ID number</th><th>Problem</th><th>Swimmer</th><th>Team</th><th>Meets / events</th></tr></thead><tbody>${idcRows.slice(0,100).map(r=>`<tr><td class="mono">${esc(r.cid||"—")}</td><td class="hint">${esc(r.kind)}</td><td><b>${esc([r.nameTh,r.nameEn].filter(Boolean).join(" · "))}</b>${r.birth?`<br><span class="hint">born ${esc(fmtDob(r.birth))}</span>`:""}${r.sid?` <button type="button" class="lnk" data-open="${esc(r.sid)}">Open</button>`:""}</td><td>${esc(r.club)}</td><td class="hint">${esc(r.events.join(", "))}</td></tr>`).join("")}</tbody></table></div>
     ${idcRows.length>100?`<div class="hint">First 100 of ${idcRows.length} rows shown; the Excel file has them all.</div>`:""}
     <div style="margin-top:8px"><button class="ghost" type="button" id="idcXlsx">Download (Excel)</button></div>`;
   $("#idcXlsx").onclick=()=>downloadIdReport(idcRows,`ID_check_all_swimmers_${today()}.xlsx`,$("#idcMsg"))};
+document.addEventListener("input",e=>{if(e.target.id!=="eCid")return;const o=$("#eCidChk");if(!o)return;const by=$("#eBirth")&&$("#eBirth").value?(parseDate($("#eBirth").value)||"").slice(0,4):e.target.dataset.by;
+  const L=thaiIdIssues(e.target.value,by);o.textContent=L.length?"⚠ Not a valid Thai ID: "+L.join("; ")+". Please check it against the ID card. You can still save.":""});
+$("#idcOut").addEventListener("click",e=>{const op=e.target.closest("[data-open]");if(op){ui.sel=op.dataset.open;ui.pmode="overview";ui.ev=null;show("swimmers");window.scrollTo(0,0)}});
 /* ---- Swimmer ID cards: each swimmer's events with heat, lane and the heat's scheduled start time, from a Splash start list (Lenex) ---- */
 function idCardRows(xmlText,lang){
   const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))throw new Error("bad xml");
@@ -4552,7 +4731,7 @@ function buildEntries(rows,ev,opt){
         club:(n=>enNameFix[n]||n)(norm(v("cl")))||(o&&o.club)||"",clubTyped:norm(v("cl")),code:norm(v("cc")).toUpperCase(),nation:norm(v("na")).toUpperCase()||(o&&o.nation)||"THA",entries:[],lines:[]};
       p.age=ageAt(p.birth);people.set(key,p);n++;
       const who=[p.fn,p.ln].filter(Boolean).join(" ")||[p.fe,p.le].join(" ");
-      if(cid&&/^\d{13}$/.test(cid)&&thaiCheck(cid.slice(0,12))!==cid[12])issues.push([line,who,`Citizen ID ${cid} is not a valid Thai ID (check digit). Please check it.`]);
+      {const L=cid?thaiIdIssues(cid,p.birth&&+String(p.birth).slice(0,4)):[];if(L.length)issues.push([line,who,`Citizen ID ${cid} is not a valid Thai ID: ${L.join("; ")}. Please check it.`])}
       if(idClash)issues.push([line,who,`Uses the same ID number (${cid}) as ${idClash.who} on row ${idClash.line}. Entered as two swimmers; please get the right ID from the club.`]);
       if(!cid&&byNm)issues.push([line,who,`No ID in the Excel; found in the app by name and birth date${p.cid?", so the ID from the app is used":""}.`]);
       else if(!cid&&p.nation==="THA")issues.push([line,who,"No citizen ID"]);
