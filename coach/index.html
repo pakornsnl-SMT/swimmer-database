@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.56 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.57 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -493,6 +493,14 @@ table.ttb .t{font:500 15px var(--mono)}
 .relink{background:none;border:0;padding:6px 4px;font:600 14px var(--body,inherit);color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .relink:hover{color:var(--red)}
 @media (max-width:600px){.addbtn{width:100%;padding:12px 16px 12px 12px}.addbtn .at b{font-size:20px}.mngbar.addsw{margin-bottom:14px}}
+
+/* v3.57 bigger "Add a new swimmer" */
+.nvbox{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:14px 0 0;padding:12px 14px;border:2px dashed #9fd3b4;border-radius:14px;background:#f2fbf5}
+.nvtx{display:flex;flex-direction:column;gap:2px}.nvtx b{font:700 16px var(--display);color:var(--ink)}.nvtx span{font-size:13.5px;color:var(--muted)}
+.nvbtn{display:inline-flex;align-items:center;gap:8px;font:700 16px var(--display);letter-spacing:.02em;color:#fff;background:var(--green,#1f8a4c);border:0;border-radius:12px;padding:11px 18px;cursor:pointer;min-height:44px;box-shadow:0 3px 10px rgba(31,138,76,.25)}
+.nvbtn span{font-size:20px;line-height:1}
+.nvbtn:hover{background:#18703d}
+@media (max-width:600px){.nvbtn{width:100%;justify-content:center}}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -621,7 +629,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.56 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.57 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1198,7 +1206,7 @@ function natSelect(id,cur){cur=natNorm(cur)||"THA";const known=NATS.some(n=>n[0]
 function natRead(id){const s=document.getElementById(id);if(!s)return"THA";return s.value==="__o"?natNorm((document.getElementById(id+"O")||{}).value):s.value}
 const cidOk=c=>{if(!/^\d{13}$/.test(c))return false;let t=0;for(let i=0;i<12;i++)t+=+c[i]*(13-i);return (11-t%11)%10===+c[12]};
 function newSwBox(full){if(CTX.expired)return"";const v=ui.nv||{};
-  if(!ui.nvOpen)return `<p class="hint" style="margin:10px 0 0">Not in SMT yet? ${full?"(package full)":`<button class="chip" id="nvOpen" style="cursor:pointer;border-color:var(--green);color:var(--green)">+ Add a new swimmer</button>`}</p>`;
+  if(!ui.nvOpen)return `<div class="nvbox"><div class="nvtx"><b>Not in SMT yet?</b><span>For a swimmer who has never raced in an SMT meet.</span></div>${full?`<span class="hint">All slots used</span>`:`<button type="button" class="nvbtn" id="nvOpen"><span aria-hidden="true">＋</span> Add a new swimmer</button>`}</div>`;
   const dups=ui.nvDups;
   return `<form id="nvForm" class="addm" style="margin-top:12px;border-left:4px solid var(--green)"><b style="font-family:var(--display);font-size:17px">New swimmer</b><span class="hint">Only for swimmers who have never raced in an SMT meet. Saved privately for ${esc(CLUB.short)}: other clubs and the public site can't see these details.</span>
    <div class="row" style="margin:0"><label class="hint">Thai first name<br><input id="nvThF" required value="${esc(v.thF||"")}" style="width:150px"></label><label class="hint">Thai surname<br><input id="nvThL" required value="${esc(v.thL||"")}" style="width:170px"></label></div>
