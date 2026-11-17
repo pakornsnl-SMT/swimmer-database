@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.59 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.60 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -514,6 +514,16 @@ table.ttb .t{font:500 15px var(--mono)}
 .nvtx b{display:flex;align-items:center}
 .nvbox{border-color:#9fd3b4}
 .nvtx .stepn{color:#fff;font-size:15px;width:26px;height:26px}
+
+/* v3.60 today's times in the relay list */
+.rltd{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:3px 6px;border-radius:6px;font:inherit;font-variant-numeric:tabular-nums}
+.rltd:hover{background:#eaf0fb;outline:1px dashed #9fb6e6}
+.rltd:focus-visible{outline:2px solid #1d4fb8}
+.rltd i{font:700 10.5px var(--display);font-style:normal;text-transform:uppercase;letter-spacing:.04em;color:#fff;background:#e07b14;border-radius:4px;padding:1px 5px}
+.rltd.on{color:#b35a00}
+.rltdin{width:78px!important;text-align:right}
+.rltdbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin:0 0 10px;padding:8px 12px;border-left:4px solid #e07b14;background:#fff6ec;border-radius:0;font-size:13.5px;color:var(--ink)}
+.tdtag{font:700 10px var(--display);text-transform:uppercase;letter-spacing:.04em;color:#fff;background:#e07b14;border-radius:4px;padding:1px 5px;vertical-align:middle}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -642,7 +652,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.59 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.60 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -776,8 +786,8 @@ function relayTeams(){
   const X=ui.rg==="X",order=RLEG[ui.rt],max=ui.rn==="max"?12:+ui.rn,TOT=ui.ra==="t",tLo=TOT?+ui.rtMin||0:0,tHi=TOT?+ui.rtMax||0:0;let pool=relayPool();const teams=[];
   for(let n=0;n<max;n++){
     const ids=new Set(pool.map(s=>s.i)),fu=new Set();
-    const fixed=order.map((st,l)=>{const i=ui.rfix[n+"-"+l];if(i==null||!ids.has(i)||fu.has(i))return null;const t=pbOf(sw[i],st,50);if(!t)return null;fu.add(i);return{s:sw[i],t,leg:SN[st],fixed:true}});
-    const cand=order.map(st=>{const r=g=>pool.filter(s=>!fu.has(s.i)&&(!g||s.g===g)).map(s=>({s,t:pbOf(s,st,50),leg:SN[st]})).filter(x=>x.t).sort((a,b)=>a.t-b.t);return X?[...r("M").slice(0,TOT?10:6),...r("F").slice(0,TOT?10:6)].sort((a,b)=>a.t-b.t):r().slice(0,TOT?14:ui.rt==="free"?8:6)});
+    const fixed=order.map((st,l)=>{const i=ui.rfix[n+"-"+l];if(i==null||!ids.has(i)||fu.has(i))return null;const t=rbT(sw[i],st);if(!t)return null;fu.add(i);return{s:sw[i],t,leg:SN[st],fixed:true}});
+    const cand=order.map(st=>{const r=g=>pool.filter(s=>!fu.has(s.i)&&(!g||s.g===g)).map(s=>({s,t:rbT(s,st),leg:SN[st]})).filter(x=>x.t).sort((a,b)=>a.t-b.t);return X?[...r("M").slice(0,TOT?10:6),...r("F").slice(0,TOT?10:6)].sort((a,b)=>a.t-b.t):r().slice(0,TOT?14:ui.rt==="free"?8:6)});
     let best=null;
     const go=(l,used,acc,sum)=>{
       if(l===4){if(TOT){const sa=acc.reduce((a,x)=>a+x.s.age,0);if((tLo&&sa<tLo)||(tHi&&sa>tHi))return}if(!best||sum<best.tot)best={legs:acc.slice(),tot:sum};return}
@@ -806,9 +816,9 @@ function relayView(){
     const earlier=new Set(teams.slice(0,n).flatMap(x=>x.legs.map(l=>l.s.i)));
     return `<div class="relaycard"><div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="teamtag t${n%4}">Team ${"ABCDEFGHIJKL"[n]}</span><span class="total">${fmt(t.tot)}</span></div>
     <div class="leg4">${t.legs.map((l,li)=>{const st=order[li],mine=new Set(t.legs.filter((x,j)=>j!==li).map(x=>x.s.i));
-      const opts=pool.filter(s=>!earlier.has(s.i)&&!mine.has(s.i)&&(!X||s.g===l.s.g)).map(s=>({s,t:pbOf(s,st,50)})).filter(x=>x.t).sort((a,b)=>a.t-b.t);
+      const opts=pool.filter(s=>!earlier.has(s.i)&&!mine.has(s.i)&&(!X||s.g===l.s.g)).map(s=>({s,t:rbT(s,st)})).filter(x=>x.t).sort((a,b)=>a.t-b.t);
       return `<span class="en">${li+1}. ${l.leg}</span><select class="rsel" id="rs${n}_${li}" data-rsel="${n}-${li}" aria-label="Team ${"ABCD"[n]||n+1} leg ${li+1}">${opts.map(o=>`<option value="${o.s.i}"${o.s.i===l.s.i?" selected":""}>${esc(o.s.th)} · ${X?(o.s.g==="M"?"B ":"G "):""}${o.s.age} · ${fmt(o.t)}</option>`).join("")}</select>
-       <span class="t">${fmt(l.t)}${l.fixed?' <span class="badge">set</span>':''}</span><button class="sick" data-sick="${l.s.i}" aria-label="${esc(l.s.en)} is away">Away</button>`}).join("")}</div>
+       <span class="t">${fmt(l.t)}${tdOf(l.s,order[li])?' <span class="tdtag">today</span>':''}${l.fixed?' <span class="badge">set</span>':''}</span><button class="sick" data-sick="${l.s.i}" aria-label="${esc(l.s.en)} is away">Away</button>`}).join("")}</div>
     <p class="hint" style="margin-bottom:0">Sum of ages <b>${t.legs.reduce((a,l)=>a+l.s.age,0)}</b>${ui.ra==="t"&&(ui.rtMin||ui.rtMax)?` (limit ${ui.rtMin&&ui.rtMax?ui.rtMin+"–"+ui.rtMax:ui.rtMax?ui.rtMax+" & under":ui.rtMin+" & over"})`:""} · estimate from 50 m PBs</p></div>`}).join("")}</div>`;
   if(want&&teams.length<want)h+=`<p class="hint">Only ${teams.length} team${teams.length>1?"s":""} possible with the swimmers available.</p>`;
   h+=`<div class="row" style="margin-top:12px"><button class="chip teal" id="goent" style="cursor:pointer;font:600 14px var(--display);padding:8px 16px">Use for meet entries →</button><span class="hint">Planning only here. The real relay entries are made in Meet entries → Relays.</span></div>`;
@@ -1709,7 +1719,7 @@ function relayList(teams){
   else{const g=GR.find(x=>x[0]===ag);if(g)inAge=a=>a>=g[2]&&a<=g[3];else inAge=a=>a===+ag}
   /* who is in which team and leg */
   const where={};teams.forEach((t,n)=>t.legs.forEach((l,li)=>{where[l.s.i]={n,li,st:order[li]}}));
-  const rows=sw.filter(s=>(X||s.g===ui.rg)&&inAge(s.age)).map(s=>({s,t:cols.map(st=>pbOf(s,st,50)),w:where[s.i],away:ui.rout.has(s.i)}));
+  const rows=sw.filter(s=>(X||s.g===ui.rg)&&inAge(s.age)).map(s=>({s,t:cols.map(st=>rbT(s,st)),td:cols.map(st=>tdOf(s,st)),w:where[s.i],away:ui.rout.has(s.i)}));
   /* fastest in each column (among swimmers shown and not away) */
   const best=cols.map((st,k)=>Math.min(...rows.filter(r=>!r.away&&r.t[k]).map(r=>r.t[k])));
   const so=ui.rls||"team",NO=1e9;
@@ -1724,11 +1734,12 @@ function relayList(teams){
     <b style="font-family:var(--display);font-size:18px">Swimmers for this relay</b>
     <label class="hint row" style="margin:0;gap:6px">Show ages <select id="rlAge" aria-label="Ages to show">${opt("same","Same as relay")}${opt("all","All ages")}${GR.map(g=>opt(g[0],g[1])).join("")}${ages.map(a=>opt(String(a),"Age "+a)).join("")}</select></label></div>
     <p class="hint" style="margin:0 0 8px">${X?"Boys and girls":ui.rg==="M"?"Boys":"Girls"} · 50 m personal bests${FREE?" (Freestyle)":""}. <b>Bold</b> = the time used in a team. Gold = fastest in that column. Tap a column title to sort.</p>
+    <div class="rltdbar"><span><b>Meet day?</b> Tap a time to type today's time. The teams rebuild with it. Today's times are only for planning relays, never official, and clear themselves after 3 days.</span>${Object.keys(tdLoad()).length?`<button type="button" class="chip" data-rltdclr="1" style="cursor:pointer">Clear today's times (${Object.keys(tdLoad()).length})</button>`:""}</div>
     <div class="tw"><table class="rlt"><thead><tr>${th("name","Swimmer")}${th("age","Age",1).replace("<th class=\"","<th class=\"hide-sm ")}${cols.map((st,k)=>th("c"+k,RLS[st]+`<span class="hide-sm"> 50</span>`,1)).join("")}${th("team","Team").replace("<th class=\"","<th class=\"hide-sm ")}<th class="num"></th></tr></thead><tbody>`;
   if(!rows.length)h+=`<tr><td colspan="${cols.length+4}" class="hint">No ${X?"":ui.rg==="M"?"boys ":"girls "}swimmers in this age group.</td></tr>`;
   h+=rows.map(r=>{const w=r.w;
     return `<tr class="${r.away?"rlaway":w?"rlin":""}"><td><span class="nm">${nmH(r.s.th)}</span><span class="hide-sm">${gTag(r.s)}</span><span class="ph rlsub">${w&&!r.away?`<span class="teamtag t${w.n%4} rltag">${"ABCDEFGHIJKL"[w.n]}</span> ${FREE?"Leg "+(w.li+1):RLS[w.st]} · `:""}${r.s.age}${gTag(r.s)}</span></td><td class="num hide-sm">${r.s.age}</td>
-    ${cols.map((st,k)=>{const t=r.t[k];if(!t)return `<td class="num hint">–</td>`;const used=w&&w.st===st,top=!r.away&&t===best[k];return `<td class="num t${used?" rlused":""}${top?" rlbest":""}">${fmt(t)}</td>`}).join("")}
+    ${cols.map((st,k)=>{const t=r.t[k],td=r.td[k],used=t&&w&&w.st===st,top=t&&!r.away&&t===best[k];return `<td class="num t${used?" rlused":""}${top?" rlbest":""}"><button type="button" class="rltd${td?" on":""}" data-rltd="${r.s.i}|${st}" title="Tap to type today's time">${t?fmt(t):"–"}${td?`<i>today</i>`:""}</button></td>`}).join("")}
     <td class="hide-sm">${r.away?`<span class="hint">Away</span>`:w?`<span class="teamtag t${w.n%4} rltag">${"ABCDEFGHIJKL"[w.n]}</span> <span class="en">${FREE?"Leg "+(w.li+1):RLS[w.st]}</span>`:`<span class="hint">–</span>`}</td>
     <td class="num">${r.away?`<button class="sick rlback" data-unsick="${r.s.i}" aria-label="Put ${esc(r.s.en)} back">↺ Back</button>`:`<button class="sick" data-sick="${r.s.i}" aria-label="${esc(r.s.en)} is away">Away</button>`}</td></tr>`}).join("");
   return h+`</tbody></table></div></div>`;
@@ -1737,6 +1748,24 @@ function relayList(teams){
 /* organiser badge for meets run by CNX / RaceSwim (v3.46) */
 function orgBadge(m){const o=m&&m.org;return o==="CNX"||o==="RaceSwim"?` <span class="orgb org-${o.toLowerCase()}" title="Entries through ${o}">${o}</span>`:""}
 
+
+/* ---------- Today's times on the meet day (v3.60): typed by the coach, used only by the Relay builder ---------- */
+function tdKey(s,st){return ((D.sw[s.i]||{}).id||s.i)+"|"+ui.course+"|"+st}
+function tdLoad(){if(ui.today)return ui.today;const v=(CTX.saved&&CTX.saved.today)||{},cut=Date.now()-3*864e5;ui.today={};for(const k in (v.t||{})){const x=v.t[k];if(x&&x[0]&&x[1]>=cut)ui.today[k]=x}return ui.today}
+function tdOf(s,st){const x=tdLoad()[tdKey(s,st)];return x?x[0]:null}
+function rbT(s,st){return tdOf(s,st)||pbOf(s,st,50)}
+function tdSave(){const v={t:tdLoad()};CTX.saved.today=v;if(CTX.saveToday)CTX.saveToday(v)}
+document.getElementById("view").addEventListener("click",e=>{if(ui.tab!=="relay")return;
+  if(e.target.closest("[data-rltdclr]")){ui.today={};tdSave();render();CTX.toast("Today's times cleared. The teams use personal bests again.");return}
+  const b=e.target.closest("[data-rltd]");if(!b||b.querySelector("input"))return;
+  const [i,st]=b.dataset.rltd.split("|").map(Number),s=sw[i],cur=tdOf(s,st);
+  b.innerHTML=`<input class="tin rltdin" inputmode="decimal" autocomplete="off" value="${cur?fmt(cur):""}" placeholder="${(()=>{const p=pbOf(s,st,50);return p?fmt(p):"time"})()}" aria-label="Today's time">`;
+  const inp=b.querySelector("input");inp.focus();inp.select();let done=false;
+  const fin=ok=>{if(done)return;done=true;if(!ok){render();return}const v=parseT(inp.value);if(v===null){CTX.toast("Type a time like 28.60 or 2860.",true);render();return}
+    const k=tdKey(s,st);if(!v)delete tdLoad()[k];else tdLoad()[k]=[v,Date.now()];tdSave();render();if(v)CTX.toast(`${s.th}: today's ${RLS[st]} 50 ${fmt(v)}. Teams rebuilt.`)};
+  inp.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();fin(true)}else if(ev.key==="Escape")fin(false)});
+  inp.addEventListener("blur",()=>fin(true));
+});
 
 
 /* ---------- Entry list PDF (v3.56): the club's entries for one meet, by event and by swimmer, compact A4 ---------- */
@@ -2410,12 +2439,12 @@ async function coachPage(clubId,PV){
   let pvIds=null;if(PV){const P=await loadPublic(),nm=PV.trim().toLowerCase(),y=String(new Date().getFullYear()-1),all=P.swimmers.filter(s=>String(s.club||"").trim().toLowerCase()===nm);pvIds=(all.some(s=>(s.lastMeet||"")>=y)?all.filter(s=>(s.lastMeet||"")>=y):all).map(s=>s.id)}
   const club=PV?{id:"preview",name:PV,short:PV,buys:[{n:Math.max(1,pvIds.length),start:"2000-01-01",end:"2999-12-31"}]}:await DB.getClub(clubId);if(!club){show("#scrLogin");$("#loginMsg").textContent="Club not found. Please contact SMT.";return}
   const FREE=club.plan==="free",EMPTY_PUB={swimmers:[],meets:{},records:[],standards:[],byId:new Map()};
-  const [ro,pub,cal,set,tr,meets,ppl]=PV?[pvIds.map(id=>({id})),await loadPublic(),null,null,[],[],null]:await Promise.all([DB.roster(clubId),FREE?Promise.resolve(EMPTY_PUB):loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]}),DB.getData(clubId,"people").catch(()=>null)]);
+  const [ro,pub,cal,set,tr,meets,ppl,tdy]=PV?[pvIds.map(id=>({id})),await loadPublic(),null,null,[],[],null,null]:await Promise.all([DB.roster(clubId),FREE?Promise.resolve(EMPTY_PUB):loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]}),DB.getData(clubId,"people").catch(()=>null),DB.getData(clubId,"today").catch(()=>null)]);
   setLoad("Working out rankings…");await new Promise(r=>setTimeout(r,0));
   const year=new Date().getFullYear(),today=dayLocal();
   PEOPLE=(ppl&&ppl.m)||{};let ids=ro.map(r=>r.id);const D=buildData(pub,ids,year);
   const CLUB={id:club.id,name:club.name||club.id,nameEn:club.nameEn||"",resultsName:club.resultsName||"",short:club.short||club.name||club.id,pkg:club.pkg||"",limit:FREE?0:slotsOn(club,today),expires:FREE?"":lastEnd(club),free:FREE,buys:FREE?[]:clubBuys(club),soon:FREE?[]:endingSoon(club,today,30),over:0};CLUB.over=FREE?0:Math.max(0,ro.length-CLUB.limit);
-  const CTX={year,saved:{calendar:cal,settings:set},myTransfers:tr,meets:meets.map(m=>({org:orgOf(m),n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a).filter(m=>m.b>=new Date().toISOString().slice(0,10)).sort((x,y)=>x.a.localeCompare(y.a)),
+  const CTX={year,saved:{calendar:cal,settings:set,today:tdy},myTransfers:tr,meets:meets.map(m=>({org:orgOf(m),n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a).filter(m=>m.b>=new Date().toISOString().slice(0,10)).sort((x,y)=>x.a.localeCompare(y.a)),
     expired:!FREE&&(clubBuys(club).length?!CLUB.limit:!!(CLUB.expires&&CLUB.expires<today)),toast,
     addSwimmer:async id=>{if(CLUB.limit&&ids.length>=CLUB.limit)return{full:true};const r=await DB.addToRoster(id,CLUB);if(r.ok){ids=ids.concat(id);APP.reload(buildData(pub,ids,year))}return r},
     releaseSwimmer:async id=>{await DB.release(id);ids=ids.filter(x=>x!==id);if(id[0]==="n"&&PEOPLE[id]){delete PEOPLE[id];await DB.setData(CLUB.id,"people",{m:PEOPLE}).catch(()=>{})}APP.reload(buildData(pub,ids,year))},
@@ -2429,6 +2458,7 @@ async function coachPage(clubId,PV){
       const r=await DB.addToRoster(id,CLUB);if(!r.ok)return r;PEOPLE[id]={...v,isNew:1,src:"coach",at:new Date().toISOString()};await DB.setData(CLUB.id,"people",{m:PEOPLE});ids=ids.concat(id);APP.reload(buildData(pub,ids,year));return{ok:true,id}},
     requestTransfer:async(id,reason,note,taken)=>{const s=pub.byId.get(id);await DB.requestTransfer({swimmerId:id,swimmerName:s?(s.nameTh||s.nameEn):id,toClub:CLUB.id,toClubName:CLUB.name,fromClub:taken.id||"",fromClubName:taken.name||"",reason,note});CTX.myTransfers=await DB.myTransfers(CLUB.id).catch(()=>CTX.myTransfers.concat({swimmerId:id,status:"open",swimmerName:s&&s.nameTh}))},
     saveCalendar:v=>DB.setData(CLUB.id,"calendar",v).catch(e=>toast("Couldn't save the calendar: "+friendly(e),true)),
+    saveToday:v=>DB.setData(CLUB.id,"today",v).catch(e=>toast("Couldn't save today's times: "+friendly(e),true)),
     saveSettings:v=>DB.setData(CLUB.id,"settings",v).catch(()=>{}),
     orgMeets:meets.filter(m=>orgOf(m)&&m.start&&(m.end||m.start)>=today).sort((x,y)=>x.start.localeCompare(y.start)),
     entryMeets:meets.filter(m=>!orgOf(m)&&m.start&&(m.end||m.start)>=today&&((m.events||[]).length||+m.cap>0)).sort((x,y)=>x.start.localeCompare(y.start)),
@@ -2440,7 +2470,7 @@ async function coachPage(clubId,PV){
     mcApply:(m,fn)=>DB.applyEntry(m.id,CLUB.id,cur=>({clubName:CLUB.name,...fn(cur)})),
     friendly,rankAt,get people(){return PEOPLE}};
   if(PV){const no=async()=>{toast("Preview only: nothing is saved.");return{ok:false,preview:true}};
-    ["addSwimmer","releaseSwimmer","suggestCorrection","editNewSwimmer","addNewSwimmer","requestTransfer","saveCalendar","mcRequest","mcSave","mcApply","syncTeam"].forEach(k=>CTX[k]=no);
+    ["addSwimmer","releaseSwimmer","suggestCorrection","editNewSwimmer","addNewSwimmer","requestTransfer","saveCalendar","saveToday","mcRequest","mcSave","mcApply","syncTeam"].forEach(k=>CTX[k]=no);
     CTX.saveSettings=async()=>{};CTX.loadCorrections=async()=>{};CTX.entryMeets=[];CTX.orgMeets=[];CTX.expired=false;CLUB.soon=[];CLUB.over=0}
   document.title=CLUB.short+" · SMT Coach";
   $("#clubName").textContent=CLUB.name;
