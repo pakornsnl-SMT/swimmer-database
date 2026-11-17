@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.57 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.58 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -501,6 +501,19 @@ table.ttb .t{font:500 15px var(--mono)}
 .nvbtn span{font-size:20px;line-height:1}
 .nvbtn:hover{background:#18703d}
 @media (max-width:600px){.nvbtn{width:100%;justify-content:center}}
+
+/* v3.58 search first, then add new */
+.stephd{display:flex;align-items:center;gap:8px;font-size:18px}
+.stepn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#1d4fb8;color:#fff;font:700 15px var(--display);flex:none;margin-right:8px}
+.stepn.off{background:#c3cad8}
+.mqwrap{position:relative}
+.mqwrap .mqico{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#1d4fb8;pointer-events:none}
+.mqwrap input{width:100%;min-height:54px;font-size:18px;padding:10px 14px 10px 46px;border:2px solid #1d4fb8;border-radius:14px;background:var(--surface);box-shadow:0 3px 12px rgba(29,79,184,.12)}
+.mqwrap input:focus{outline:3px solid #b9ccff;outline-offset:1px}
+.nvwait{display:flex;align-items:flex-start;gap:0;margin:14px 0 0;font-size:13.5px;color:var(--muted);line-height:1.5}
+.nvtx b{display:flex;align-items:center}
+.nvbox{border-color:#9fd3b4}
+.nvtx .stepn{color:#fff;font-size:15px;width:26px;height:26px}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -629,7 +642,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.57 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.58 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1180,7 +1193,7 @@ function manageView(){
   ${LIM&&n>LIM&&!CTX.expired?`<div class="lock" style="border-color:var(--red);color:var(--red);margin-bottom:12px"><b>Some coach slots have ended.</b> You have ${n} swimmers but ${LIM} slot${LIM===1?"":"s"} now. Please release ${Math.max(0,n-LIM)} swimmer${n-LIM===1?"":"s"} you don't need (their results and history stay), or ask SMT to renew.</div>`:""}
   ${(CLUB.soon||[]).length&&!CTX.expired?`<div class="lock" style="border-color:var(--gold);margin-bottom:12px">${CLUB.soon.map(b=>`${+b.n} slot${+b.n>1?"s":""} end on <b>${esc(new Date(b.end+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}))}</b>`).join(" · ")}. Ask SMT to renew so your swimmers stay in the team.</div>`:""}
   ${CTX.expired?`<div class="lock" style="border-color:var(--red);color:var(--red);margin-bottom:12px">This club's package has expired, so the team can't be changed. Contact SMT to renew.</div>`:""}
-  <div class="grid2"><div style="min-width:0"><h3 style="margin-top:0">Add a swimmer</h3><input type="search" id="mq" placeholder="Type a Thai or English name" value="${esc(ui.mq)}" style="width:100%" aria-label="Search all swimmers" autocomplete="off">
+  <div class="grid2"><div style="min-width:0"><h3 class="stephd" style="margin-top:0"><span class="stepn">1</span>Find the swimmer in SMT</h3><div class="mqwrap"><svg class="mqico" aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input type="search" id="mq" placeholder="Type a Thai or English name" value="${esc(ui.mq)}" aria-label="Search all swimmers in SMT" autocomplete="off"></div>
     <div class="tw" style="margin-top:8px"><table><tbody>${found.map(r=>{const id=r[6],tk=ui.taken[id],b=ui.busy[id];
       return `<tr><td><span class="nm">${nmH(r[0]||r[1])}</span> <span class="en">· ${r[3]||"?"}${r[1]&&r[0]?" · "+esc(r[1]):""}</span><div class="en"${tk?' style="color:var(--red)"':""}>${tk?`In ${esc(tk.name)}'s coach team. They must release this swimmer first.`:r[2]?"Results club: "+esc(r[2]):"&nbsp;"}</div></td>
       <td class="num">${b?`<span class="hint">${esc(b)}</span>`:tk?(mine.has(id)?`<span class="pill pill-gold">Transfer requested</span>`:ui.tform===id?"":`<button class="chip" data-treq="${id}" style="cursor:pointer;border-color:var(--blue);color:var(--blue)">Request transfer</button>`):(full||CTX.expired?'<span class="hint">No free slot</span>':`<button class="chip teal" data-addid="${id}" style="cursor:pointer">Add to ${esc(CLUB.short)}</button>`)}</td></tr>
@@ -1206,7 +1219,9 @@ function natSelect(id,cur){cur=natNorm(cur)||"THA";const known=NATS.some(n=>n[0]
 function natRead(id){const s=document.getElementById(id);if(!s)return"THA";return s.value==="__o"?natNorm((document.getElementById(id+"O")||{}).value):s.value}
 const cidOk=c=>{if(!/^\d{13}$/.test(c))return false;let t=0;for(let i=0;i<12;i++)t+=+c[i]*(13-i);return (11-t%11)%10===+c[12]};
 function newSwBox(full){if(CTX.expired)return"";const v=ui.nv||{};
-  if(!ui.nvOpen)return `<div class="nvbox"><div class="nvtx"><b>Not in SMT yet?</b><span>For a swimmer who has never raced in an SMT meet.</span></div>${full?`<span class="hint">All slots used</span>`:`<button type="button" class="nvbtn" id="nvOpen"><span aria-hidden="true">＋</span> Add a new swimmer</button>`}</div>`;
+  const qq=(ui.mq||"").trim();
+  if(!ui.nvOpen&&qq.length<2)return `<p class="nvwait"><span class="stepn off">2</span>Can't find them? Search first. If the swimmer has never raced in an SMT meet, you can add them as a new swimmer here.</p>`;
+  if(!ui.nvOpen)return `<div class="nvbox"><div class="nvtx"><b><span class="stepn">2</span>Can't find “${esc(qq)}”?</b><span>Only if the swimmer has never raced in an SMT meet. Check the list above first.</span></div>${full?`<span class="hint">All slots used</span>`:`<button type="button" class="nvbtn" id="nvOpen"><span aria-hidden="true">＋</span> Add as a new swimmer</button>`}</div>`;
   const dups=ui.nvDups;
   return `<form id="nvForm" class="addm" style="margin-top:12px;border-left:4px solid var(--green)"><b style="font-family:var(--display);font-size:17px">New swimmer</b><span class="hint">Only for swimmers who have never raced in an SMT meet. Saved privately for ${esc(CLUB.short)}: other clubs and the public site can't see these details.</span>
    <div class="row" style="margin:0"><label class="hint">Thai first name<br><input id="nvThF" required value="${esc(v.thF||"")}" style="width:150px"></label><label class="hint">Thai surname<br><input id="nvThL" required value="${esc(v.thL||"")}" style="width:170px"></label></div>
@@ -1226,7 +1241,9 @@ function newSwBox(full){if(CTX.expired)return"";const v=ui.nv||{};
   async function save(v){if(ui.nvBusy)return;const same=inTeam(v);if(same){CTX.toast(`${same.th} is already in your team. ${v.cid?"Same citizen ID":"Same name and birth date"}, so it wasn't added again.`,true);return}
     ui.nvBusy=true;render();try{const r=await CTX.addNewSwimmer(v);if(r.full)CTX.toast("Your package is full.",true);else if(!r.ok)CTX.toast("Couldn't add the swimmer. Try again.",true);else{CTX.toast(`${v.thF} ${v.thL} added to ${CLUB.short}.`);ui.nv=null;ui.nvOpen=false;ui.nvDups=null}}
     catch(err){CTX.toast(CTX.friendly?CTX.friendly(err):String(err),true)}ui.nvBusy=false;render()}
-  view.addEventListener("click",e=>{const t=e.target;if(t.id==="nvOpen"){ui.nvOpen=true;ui.nvDups=null;render()}else if(t.id==="nvCancel"){ui.nvOpen=false;ui.nv=null;ui.nvDups=null;render()}
+  view.addEventListener("click",e=>{const t=e.target;if(t.closest("#nvOpen")){ui.nvOpen=true;ui.nvDups=null;
+      /* start the form with the name the coach searched for */
+      if(!ui.nv){const w=(ui.mq||"").trim().split(/\s+/),th=/[\u0E00-\u0E7F]/.test(ui.mq||"");ui.nv=th?{thF:w[0]||"",thL:w.slice(1).join(" ")}:{enF:w[0]||"",enL:w.slice(1).join(" ")}}render()}else if(t.id==="nvCancel"){ui.nvOpen=false;ui.nv=null;ui.nvDups=null;render()}
     else if(t.id==="nvForce"){const v=read();ui.nv=v;save(v)}else if(t.closest("[data-addid]")&&t.closest("#nvForm")){ui.nvOpen=false;ui.nv=null;ui.nvDups=null}});
   view.addEventListener("submit",e=>{if(e.target.id!=="nvForm")return;e.preventDefault();e.stopPropagation();const v=read();ui.nv=v;
     if(!v.nat||v.nat.length!==3){CTX.toast("Nationality: choose a country, or type a 3-letter code (for example JPN).",true);return}
