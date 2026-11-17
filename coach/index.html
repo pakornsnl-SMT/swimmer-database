@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.58 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.59 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -642,7 +642,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.58 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.59 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1264,7 +1264,10 @@ function corrForm(s){const f=ui.corrF||"nameTh",nw=s.isNew;
    <label class="hint">What<br><select id="crF">${Object.entries(CF).map(([k,v])=>`<option value="${k}"${k===f?" selected":""}>${v}</option>`).join("")}</select></label>
    <span class="hint">Now: <b style="color:var(--ink)">${esc(corrOld(s,f))}</b></span><label class="hint">Should be<br>${inp}</label>${nw?"":`<label class="hint">Note for SMT<br><input id="crN" placeholder="optional" style="width:170px"></label>`}
    <button class="chip teal" style="cursor:pointer;padding:6px 14px">${nw?"Save":"Send to SMT"}</button><button type="button" class="sick" data-crx="1" style="color:var(--muted)">Cancel</button>${f==="cid"?`<div class="hint tidw" id="crW" style="width:100%">${(()=>{const P=(CTX.people||{})[s.id]||{},L=P.cid?(isThaiNat(s.nt)?tidIssues(P.cid,s.by):[]):[];return L.length?esc("Now: "+tidMsg(L)):""})()}</div>`:""}</form></td></tr>`}
-function corrList(){const L=(CTX.myCorrections||[]).slice(0,12);if(!L.length)return"";
+/* corrections history: waiting ones always show; accepted or declined ones drop off 30 days after SMT decided (v3.59) */
+function corrMs(t){if(!t)return 0;if(typeof t==="number")return t;if(t.toMillis)return t.toMillis();if(t.seconds)return t.seconds*1000;const d=Date.parse(t);return isNaN(d)?0:d}
+function corrList(){const cut=Date.now()-30*864e5;
+  const L=(CTX.myCorrections||[]).filter(c=>{if(c.status==="open")return true;const d=corrMs(c.decidedAt)||corrMs(c.createdAt);return !d||d>=cut}).slice(0,12);if(!L.length)return"";
   return `<h3 style="margin:14px 0 4px">Corrections sent to SMT</h3><div class="tw"><table><tbody>${L.map(c=>`<tr><td><span class="nm">${nmH(c.swimmerName||"")}</span> <span class="en">· ${CF[c.field]||c.field}: ${esc(c.old||"–")} → <b>${esc(c.value)}</b></span></td><td class="num">${c.status==="open"?'<span class="pill pill-gold">Waiting for SMT</span>':c.status==="accepted"?'<span class="pill pill-green">Accepted</span>':'<span class="pill">Declined</span>'}</td></tr>`).join("")}</tbody></table></div>`}
 (()=>{const view=document.getElementById("view");
   view.addEventListener("click",e=>{const b=e.target.closest("[data-corr],[data-crx]");if(!b)return;if(b.dataset.crx){ui.corr=null;render();return}ui.corr=ui.corr===b.dataset.corr?null:b.dataset.corr;ui.corrF=b.dataset.corrf||"nameTh";render();const fm=document.getElementById("crForm");if(fm)fm.scrollIntoView({block:"nearest"})});
