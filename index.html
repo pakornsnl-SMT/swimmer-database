@@ -832,7 +832,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
   <!-- MANAGE (owner only) -->
   <section id="view-meets" hidden>
     <div class="panel">
-      <div class="prof-hd" style="margin-bottom:4px"><h2>Upcoming meets</h2><span class="sub">Upcoming meets, and the teams whose places are confirmed for SMT meets. Meets marked CNX or RaceSwim take entries through the organiser. · รายการแข่งขันที่กำลังจะมาถึง และทีมที่ได้รับการยืนยันแล้ว</span></div>
+      <div class="prof-hd" style="margin-bottom:4px"><h2>Upcoming meets</h2><span class="sub">Upcoming meets, and the teams whose places are confirmed for SMT meets.<span id="umOrgNote" hidden> Meets marked CNX or RaceSwim take entries through the organiser.</span> · รายการแข่งขันที่กำลังจะมาถึง และทีมที่ได้รับการยืนยันแล้ว</span></div>
       <div id="umBody"><p class="hint">Loading…</p></div>
     </div>
   </section>
@@ -844,8 +844,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
         <div class="field full"><label class="lbl" for="iPick">Upload to</label><select id="iPick"></select></div>
         <div class="field"><label class="lbl" for="iMeet">Meet name</label><input type="text" id="iMeet" placeholder="e.g. Thailand Age Group Championships 2026"></div>
         <div class="field"><span class="lbl">Meet period</span><div class="period"><input type="date" min="1950-01-01" max="2100-12-31" id="iDate" aria-label="Start date"><span>to</span><input type="date" min="1950-01-01" max="2100-12-31" id="iEnd" aria-label="End date (optional)"></div><span class="hint">End date is optional for one-day meets.</span></div>
-        <div class="field"><label class="lbl" for="iTeam">Teams in this meet are</label><select id="iTeam"><option value="C">Clubs</option><option value="S">Schools</option><option value="P">Provinces</option><option value="R">Regions</option><option value="N">Countries</option></select><span class="hint">Only club meets change a swimmer's club.</span><label class="chk" style="margin-top:6px"><input type="checkbox" id="iThaiOnly"> Import Thai swimmers only</label></div>
-        <div class="field"><label class="lbl" for="iBy">Results by</label><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="iBy"></select><input type="text" id="iByOther" placeholder="Operator name" hidden style="max-width:200px"></div><span class="hint">Who ran the meet. Other operators are credited on the website and in portfolios.</span></div>
+        <div class="field"><label class="lbl" for="iTeam">Teams in this meet are</label><select id="iTeam"><option value="C">Clubs</option><option value="S">Schools</option><option value="P">Provinces</option><option value="R">Regions</option><option value="N">Countries</option></select><span class="hint">Only club meets change a swimmer's club.</span><label class="chk" style="margin-top:6px"><input type="checkbox" id="iThaiOnly"> Import Thai swimmers only</label><label class="chk" style="margin-top:4px"><input type="checkbox" id="iKnownOnly"> Only swimmers already in the app</label><span class="hint">Results of swimmers who aren't in SMT yet are skipped, so no new swimmers are added. Choose the file again after changing it.</span></div>
+        <div class="field"><label class="lbl" for="iBy">Results by</label><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="iBy"></select><input type="text" id="iByOther" placeholder="Operator name" hidden style="max-width:200px"></div><span class="hint">Who ran the meet. Other operators are credited on the website and in portfolios.</span><label class="chk" style="margin-top:6px"><input type="checkbox" id="iLead" checked> Count relay lead-off times</label><span class="hint">The first swimmer's split counts as an individual time. Untick it when the lead-off times in this file can't be trusted: the relays are then not imported. Ticked for SMT meets; unticked when Results by is CNX or RaceSwim (change it if you've checked them). Choose the file again after changing it.</span></div>
         <div class="field"><label class="lbl" for="iCourse">Pool, if the file has no COURSE</label><select id="iCourse"><option value="LCM">50 m (LCM)</option><option value="SCM">25 m (SCM)</option></select></div>
         <div class="field" style="justify-content:flex-end"><span class="hint">Leave these empty: when you choose the file, the meet name and dates are filled in from it (highlighted) for you to check. A SESSIONDATE or EVENTDATE column gives each swim its own day.</span></div>
         <label class="full replace" id="replaceRow" hidden><input type="checkbox" id="iReplace" checked> <span><b>Replace this meet's results</b><br><span class="hint">Times that are not in the new file are removed. Untick to only add and update.</span></span></label>
@@ -1397,7 +1397,9 @@ function renderProfile(){
 /* teams a swimmer swam for other than clubs: school, province, region, country */
 /* club periods from results at club meets (school/province/national teams never count), oldest first */
 function clubHistory(sid){const L=resOf(sid).filter(r=>(r.teamType||"C")==="C"&&r.team&&r.date).map(r=>({team:canonClub(r.team)||r.team,d:r.meetStart||r.date,m:mKey(r)})).sort((a,b)=>a.d.localeCompare(b.d));
-  const P=[];L.forEach(x=>{const k=clubKey(x.team);let p=P[P.length-1];if(!p||p.k!==k){p={k,team:x.team,from:x.d,to:x.d,meets:new Set()};P.push(p)}p.to=x.d;p.meets.add(x.m)});return P}
+  /* the same club when the names match, or one name is the other cut short by a results file (Hy-Tek keeps 30 letters) */
+  const same=(a,b)=>a===b||(Math.min(a.length,b.length)>=18&&(a.startsWith(b)||b.startsWith(a)));
+  const P=[];L.forEach(x=>{const k=clubKey(x.team);let p=P[P.length-1];if(!p||!same(p.k,k)){p={k,team:x.team,from:x.d,to:x.d,meets:new Set()};P.push(p)}else if(k.length>p.k.length){p.k=k;p.team=x.team}p.to=x.d;p.meets.add(x.m)});return P}
 function representation(s){
   const m=new Map();resOf(s.id).forEach(r=>{const t=r.teamType||"C";if(t==="C"||!r.team||isDns(r))return;const k=t+"|"+r.team;const o=m.get(k)||{t,team:r.team,years:new Set(),meets:new Set(),when:new Map()};o.years.add(r.date.slice(0,4));o.meets.add(r.meet);o.when.set(mKey(r),{meet:r.meet,date:r.meetStart||r.date});m.set(k,o)});
   const order="NRPS";return[...m.values()].map(o=>({...o,years:[...o.years].sort(),meets:[...o.meets],list:[...o.when.values()].sort((a,b)=>b.date.localeCompare(a.date))})).sort((a,b)=>order.indexOf(a.t)-order.indexOf(b.t)||a.team.localeCompare(b.team));
@@ -2841,6 +2843,7 @@ function renderUpcoming(){const B=$("#umBody");if(!B)return;
   if(!UM.busy&&(!UM.at||Date.now()-UM.at>(UM.err?2*60e3:5*60e3))){UM.busy=true;loadUpcoming().then(d=>{UM.data=d;UM.err=""}).catch(e=>{UM.err=String(e&&e.message||e)}).finally(()=>{UM.busy=false;UM.at=Date.now();if(ui.view==="meets")renderUpcoming()})}
   if(!UM.data){B.innerHTML=UM.err?`<p class="hint">Couldn't load the meet list right now. It will try again in 2 minutes. The list is on <b>www.smdata.in.th</b>.</p>`:`<p class="hint">Loading…</p>`;return}
   const today=new Date().toISOString().slice(0,10),M=UM.data.meets.filter(m=>(m.end||m.start||"")>=today).sort((a,b)=>String(a.start).localeCompare(String(b.start)));
+  {const on=$("#umOrgNote");if(on)on.hidden=!M.some(m=>m.org==="CNX"||m.org==="RaceSwim")}
   if(!M.length){B.innerHTML=`<p class="hint">No upcoming meets yet.</p>`;return}
   B.innerHTML=M.map(m=>{const T=UM.data.teams.filter(t=>t.meet===m.id).map(t=>t.name).sort((a,b)=>a.localeCompare(b,"th"));
     const org=m.org==="CNX"||m.org==="RaceSwim"?m.org:"";
@@ -3356,7 +3359,7 @@ async function readFile(file,quiet){
         autoNote=`<div class="autonote"><b>Meet name and dates are filled in from the file.</b> Check them in the boxes above${fM&&fS?"":" and fill in what's missing"}. If anything is wrong, correct it there and this preview updates.</div>`}
       else if(!wasAuto)["iMeet","iDate","iEnd"].forEach(id=>$("#"+id).classList.remove("autofill"));
     }
-    const meetForm=norm($("#iMeet").value),dateForm=$("#iDate").value,endForm=$("#iEnd").value,defCourse=$("#iCourse").value,teamType=$("#iTeam").value||"C",thaiOnly=$("#iThaiOnly").checked;
+    const meetForm=norm($("#iMeet").value),dateForm=$("#iDate").value,endForm=$("#iEnd").value,defCourse=$("#iCourse").value,teamType=$("#iTeam").value||"C",thaiOnly=$("#iThaiOnly").checked,countLead=$("#iLead").checked,knownOnly=$("#iKnownOnly").checked;
     if(dateForm&&endForm&&endForm<dateForm){pv.innerHTML=`<div class="msg err">The end date is before the start date. Fix the meet period, then choose the file again.</div>`;return}
     const salt=db?await getSalt():"local";const linkedIds=new Set();
     const aliases=db?await loadAliases():new Map();
@@ -3419,8 +3422,8 @@ async function readFile(file,quiet){
     if(meetMissing){pv.innerHTML=`<div class="msg err">Enter the meet name and start date above, then choose the file again.</div>`;return}
     /* Relays: the lead-off (first) swimmer's split counts as an official individual time.
        DISTANCE is the distance each swimmer swims (4×100 → 100). In a medley relay the lead-off swims backstroke. */
-    const thai=t=>/[฀-๿]/.test(t);
-    for(const{g,line,relayCount,swKey}of relayRows){
+    const thai=t=>/[฀-๿]/.test(t);const leadOff0=countLead?0:relayRows.length;
+    for(const{g,line,relayCount,swKey}of(countLead?relayRows:[])){
       const rs=String(g.STROKE??"");const relayStroke=/medley|ผสม|^5$/i.test(rs)?"IM":mapStroke(rs.replace(/relay|ผลัด/ig,""));
       const dRaw=String(g.DISTANCE??"");const leg=parseInt(/x/i.test(dRaw)?dRaw.split(/x/i).pop():dRaw.replace(/[^\d]/g,""),10);
       const n=relayCount||parseInt(/x/i.test(dRaw)?dRaw.split(/x/i)[0]:"",10)||4;
@@ -3454,6 +3457,11 @@ async function readFile(file,quiet){
       sw.get(sid).results[rid]=rec;recs.push({sid,rid,rec});leadOffs++;
     }
     if(teamType!=="C")sw.forEach(d=>{delete d.profile.club;delete d.profile.clubCode;d.fillOnly=true});   // a province/school/country is not the swimmer's club
+    /* "Only swimmers already in the app": drop everyone this file would add as a new swimmer, with their results */
+    let skipNew=0,skipNewRes=0;
+    if(knownOnly&&!state.demo){const ex=new Set(state.swimmers.map(o=>o.id)),drop=new Set([...sw.keys()].filter(id=>!ex.has(id)));skipNew=drop.size;
+      if(drop.size){const n0=recs.length;for(let k=recs.length-1;k>=0;k--)if(drop.has(recs[k].sid))recs.splice(k,1);skipNewRes=n0-recs.length;drop.forEach(id=>sw.delete(id))}
+      if(!recs.length){pv.innerHTML=`<div class="msg err">None of the swimmers in this file are in the app yet (${skipNew} swimmer${skipNew===1?"":"s"}). Untick "Only swimmers already in the app" to add them.</div>`;return}}
     if(!recs.length){pv.innerHTML=`<div class="msg err">No individual results or relay lead-off times found in this file.${skipped.length?` ${skipped.length} rows were skipped.`:""}</div>`;return}
     const existing=state.demo?new Set():new Set(state.swimmers.map(s=>s.id));
     const known=new Set(state.demo?[]:state.results.map(r=>r.id));
@@ -3563,7 +3571,7 @@ async function readFile(file,quiet){
       <div class="stat"><span class="v">${sw.size}</span><span class="lbl">Swimmers</span></div>
       <div class="stat"><span class="v">${newSw}</span><span class="lbl">New swimmers</span></div>
       <div class="stat"><span class="v">${pbs}</span><span class="lbl">New PBs</span></div>
-      ${leadOffs?`<div class="stat"><span class="v">${leadOffs}</span><span class="lbl">Relay lead-offs</span></div>`:""}
+      ${leadOffs?`<div class="stat"><span class="v">${leadOffs}</span><span class="lbl">Relay lead-offs</span></div>`:""}${skipNew?`<div class="stat"><span class="v">${skipNew}</span><span class="lbl">Not in app · skipped (${skipNewRes} result${skipNewRes===1?"":"s"})</span></div>`:""}${leadOff0?`<div class="stat"><span class="v">${leadOff0}</span><span class="lbl">Relay${leadOff0===1?"":"s"} not counted</span></div>`:""}
       ${dup?`<div class="stat"><span class="v">${dup}</span><span class="lbl">Already uploaded</span></div>`:""}
       ${toRemove?`<div class="stat"><span class="v down">${toRemove}</span><span class="lbl">Will be removed</span></div>`:""}</div>
       ${dup&&!reup?`<div class="hint">Results already in the app are updated, not added twice.</div>`:""}
@@ -3651,7 +3659,7 @@ $("#preview").addEventListener("click",async e=>{
   if(same.size||diff.length){m.className="msg";m.textContent="Remembering your duplicate choices…";
     try{const at=new Date().toISOString();await Promise.all([...[...same].map(([from,to])=>db.collection("aliases").doc(from).set({to,at})),diff.length?saveIgnoreMany(diff):null])}catch(e){console.error(e)}}
   msg(m,res.failed?`Saved ${res.done} swimmers. ${res.failed} couldn't be saved — upload the same file again to retry them.`:P.reup?`Done in ${res.took}. Changes saved for ${P.nChanges-skip.size} swimmer${P.nChanges-skip.size===1?"":"s"}${skip.size?`; ${skip.size} left as they were`:""}.`:`Done in ${res.took}. ${P.recs.length} result${P.recs.length===1?"":"s"} for ${P.sw.size} swimmer${P.sw.size===1?"":"s"} ${P.sw.size===1&&P.recs.length===1?"is":"are"} now in the app.${same.size?` ${same.size} matched to swimmers already in the app (no duplicates made).`:""}`,!res.failed);
-  pending=null;btn.hidden=true;$("#cancelImport").textContent="Upload another file";delete $("#iBy").dataset.touched;$("#iByOther").hidden=true;$("#iByOther").value="";
+  pending=null;btn.hidden=true;$("#cancelImport").textContent="Upload another file";delete $("#iBy").dataset.touched;$("#iByOther").hidden=true;$("#iByOther").value="";delete $("#iLead").dataset.touched;syncLead();
   if(!res.failed&&$("#iPick").value===""){$("#iMeet").value="";$("#iDate").value="";$("#iEnd").value="";autoFill=null;lastFile=null;["iMeet","iDate","iEnd"].forEach(id=>$("#"+id).classList.remove("autofill"))}
   /* finished: the file's details are cleared away; only a short "done" note stays, ready for the next file */
   if(!res.failed){const txt=m.textContent,meetTxt=[...new Set(P.recs.map(r=>r.rec.meet))].join(", ");
@@ -3753,9 +3761,10 @@ function syncPick(fill){
   if(ex&&fill!==false){const o=meetIndex.get(v);const[d,...rest]=v.split("|");$("#iDate").value=d;$("#iMeet").value=rest.join("|");$("#iEnd").value=o?o.end:"";$("#iTeam").value=o?o.t:"C"}
   $("#replaceRow").hidden=!ex;
 }
-$("#iPick").onchange=()=>{delete $("#iBy").dataset.touched;$("#iByOther").hidden=true;setTimeout(()=>{const pk=$("#iPick").value;const o=pk?meetIndex.get(pk):null;fillBy($("#iBy"),o?(meetsById.get(o.mid)||{}).by||"":"")},0);if($("#iPick").value===""){$("#iMeet").value="";$("#iDate").value="";$("#iEnd").value=""}syncPick();$("#preview").innerHTML="";pending=null;$("#fileName").textContent="or drop it here"};
+$("#iPick").onchange=()=>{delete $("#iBy").dataset.touched;$("#iByOther").hidden=true;setTimeout(()=>{const pk=$("#iPick").value;const o=pk?meetIndex.get(pk):null;fillBy($("#iBy"),o?(meetsById.get(o.mid)||{}).by||"":"");syncLead()},0);if($("#iPick").value===""){$("#iMeet").value="";$("#iDate").value="";$("#iEnd").value=""}syncPick();$("#preview").innerHTML="";pending=null;$("#fileName").textContent="or drop it here"};
 $("#iTeam").addEventListener("change",e=>{$("#iThaiOnly").checked=e.target.value==="N"});
-$("#iBy").addEventListener("change",e=>{e.target.dataset.touched="1";$("#iByOther").hidden=e.target.value!=="__other";if(e.target.value==="__other")$("#iByOther").focus()});
+$("#iLead").addEventListener("change",e=>{e.target.dataset.touched="1"});
+$("#iBy").addEventListener("change",e=>{e.target.dataset.touched="1";setTimeout(syncLead,0);$("#iByOther").hidden=e.target.value!=="__other";if(e.target.value==="__other")$("#iByOther").focus()});
 function clearAutoMeet(){if(autoFill&&$("#iPick").value===""&&(autoFill.m==="\u0000"||$("#iMeet").value===autoFill.m)&&$("#iDate").value===autoFill.s&&$("#iEnd").value===autoFill.e){$("#iMeet").value="";$("#iDate").value="";$("#iEnd").value=""}autoFill=null;["iMeet","iDate","iEnd"].forEach(id=>$("#"+id).classList.remove("autofill"))}
 ["iMeet","iDate","iEnd"].forEach(id=>$("#"+id).addEventListener("change",()=>{$("#"+id).classList.remove("autofill");
   if(autoFill)autoFill={m:"\u0000"};   // edited by hand: keep what was typed for this file
@@ -3781,9 +3790,11 @@ async function editMeet(k,name,start,end){
 }
 function fillBy(sel,val){const ops=operatorList();if(val&&!ops.includes(val))ops.push(val);
   sel.innerHTML=`<option value="">Swim Meets Thailand</option>`+ops.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join("")+`<option value="__other">Other…</option>`;sel.value=val||""}
+/* "Count relay lead-off times": ticked unless the meet is credited to CNX or RaceSwim, until staff change the box by hand */
+function syncLead(){const c=$("#iLead"),b=$("#iBy");if(!c||!b||c.dataset.touched)return;c.checked=!/cnx|race\s*swim/i.test(b.value==="__other"?($("#iByOther").value||""):b.value||"")}
 function renderMeets(){
   const list=state.demo?[]:meetList();
-  if($("#iBy")&&!$("#iBy").dataset.touched&&document.activeElement!==$("#iBy")){const pk=$("#iPick").value;const o=pk?meetIndex.get(pk):null;fillBy($("#iBy"),o?(meetsById.get(o.mid)||{}).by||"":"")}
+  if($("#iBy")&&!$("#iBy").dataset.touched&&document.activeElement!==$("#iBy")){const pk=$("#iPick").value;const o=pk?meetIndex.get(pk):null;fillBy($("#iBy"),o?(meetsById.get(o.mid)||{}).by||"":"");syncLead()}
   const cur=$("#iPick").value;
   $("#iPick").innerHTML=`<option value="">A new meet</option>`+list.map(o=>`<option value="${esc(o.k)}">${esc(o.meet||"(no name)")} · ${esc(o.period)} — ${o.n} results</option>`).join("");
   const keep=list.some(o=>o.k===cur);$("#iPick").value=keep?cur:"";
@@ -4859,22 +4870,22 @@ $("#enEvFile").onchange=async e=>{const f=e.target.files[0],m=$("#enMsg");e.targ
   const ind=enEv.events.filter(x=>x.legs===1).length;$("#enEvName").textContent=`${enEv.name} · ${fperiod(enEv.start,enEv.end)} · ${ind} individual events`;
   msg(m,`Event file loaded: ${enEv.events.length} events (${ind} individual), ${enEv.course==="LCM"?"50 m":"25 m"} pool, ages counted ${enEv.ageType==="YEAR"?"by year ("+enEv.ageDate.slice(0,4)+")":"on "+enEv.ageDate}.${enRows?"":" Now choose the Excel file."}`,true);enRun()};
 let ccJob=null;
-function ccRender(){const o=$("#ccOut");if(!ccJob){o.innerHTML="";return}const J=ccJob,FL={nameTh:"Thai name",nameEn:"English name",dob:"Birth date",gender:"Boy / girl",cid:"Citizen ID"};
+function ccRender(){const o=$("#ccOut");if(!ccJob){o.innerHTML="";return}const J=ccJob,FL={nameTh:"Thai name",nameEn:"English name",dob:"Birth date",gender:"Boy / girl",nat:"Nationality",cid:"Citizen ID / passport"};
   o.innerHTML=`${J.cor.length?`<h4 style="margin:12px 0 4px">Corrections (${J.cor.length})</h4><table class="rank"><thead><tr><th></th><th>Swimmer</th><th>What</th><th>In this app now</th><th>Coach says</th></tr></thead><tbody>${J.cor.map((c,i)=>`<tr><td>${c.can?`<input type="checkbox" class="ccK" data-k="c${i}"${c.on?" checked":""}>`:""}</td><td>${esc(c.now?c.now.nameTh||c.now.nameEn:c.swimmerName)}<div class="hint">${esc(c.club||"")}</div></td><td>${FL[c.field]||esc(c.field)}</td><td>${esc(c.cur)}</td><td><b>${esc(c.value)}</b>${c.why?`<div class="hint">${esc(c.why)}</div>`:""}</td></tr>`).join("")}</tbody></table>`:""}
-  ${J.nw.length?`<h4 style="margin:14px 0 4px">New swimmers from coaches (${J.nw.length})</h4><table class="rank"><thead><tr><th></th><th>Swimmer</th><th>Born</th><th>Club</th><th>In this app</th></tr></thead><tbody>${J.nw.map((n,i)=>`<tr><td><input type="checkbox" class="ccK" data-k="n${i}"${n.on?" checked":""}></td><td>${esc([n.thF,n.thL].join(" "))}<div class="hint">${esc([n.enF,n.enL].join(" "))} · ${n.g==="M"?"Boy":"Girl"}${n.cid?" · ID ✓":""}</div></td><td>${esc(n.dob)}</td><td>${esc(n.club||"")}</td><td>${n.match?`Same as <b>${esc(n.match.nameTh||n.match.nameEn)}</b> (${n.how}) → save birth date &amp; ID to that profile`:"Not in SMT → add as a new swimmer"}</td></tr>`).join("")}</tbody></table>`:""}
+  ${J.nw.length?`<h4 style="margin:14px 0 4px">New swimmers from coaches (${J.nw.length})</h4><table class="rank"><thead><tr><th></th><th>Swimmer</th><th>Born</th><th>Club</th><th>In this app</th></tr></thead><tbody>${J.nw.map((n,i)=>`<tr><td><input type="checkbox" class="ccK" data-k="n${i}"${n.on?" checked":""}></td><td>${esc([n.thF,n.thL].join(" "))}<div class="hint">${esc([n.enF,n.enL].join(" "))} · ${n.g==="M"?"Boy":"Girl"}${n.nat&&n.nat!=="THA"?" · "+esc(n.nat):""}${n.cid?" · ID ✓":""}</div></td><td>${esc(n.dob)}</td><td>${esc(n.club||"")}</td><td>${n.match?`Same as <b>${esc(n.match.nameTh||n.match.nameEn)}</b> (${n.how}) → save birth date &amp; ID to that profile`:"Not in SMT → add as a new swimmer"}</td></tr>`).join("")}</tbody></table>`:""}
   <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" type="button" id="ccGo">Apply ticked changes</button><button type="button" id="ccX">Cancel</button></div>`;
   o.querySelectorAll(".ccK").forEach(x=>x.onchange=()=>{const k=x.dataset.k,L=k[0]==="c"?J.cor:J.nw;L[+k.slice(1)].on=x.checked});
   $("#ccX").onclick=()=>{ccJob=null;ccRender();$("#ccMsg").textContent=""};
   $("#ccGo").onclick=async()=>{const m=$("#ccMsg"),b=$("#ccGo");b.disabled=true;m.className="msg";m.textContent="Saving…";let ok=0,bad=0;
     for(const c of J.cor.filter(x=>x.on&&x.can)){try{const sd=c.now;if(c.field==="dob"){const p=priv.get(sd.id)||{};if(!(await writePriv(new Map([[sd.id,{cid:p.cid||"",dob:c.value}]]))))throw 0;const by=+c.value.slice(0,4);if(by&&by!==+sd.birthYear)await db.collection("swimmers").doc(sd.id).update({birthYear:by,locked:[...new Set([...(sd.locked||[]),"birthYear"])],updatedAt:new Date().toISOString()})}
-        else{const k=c.field==="gender"?"gender":c.field,v=c.field==="gender"?(/boy|^m/i.test(c.value)?"M":"F"):norm(c.value);await db.collection("swimmers").doc(sd.id).update({[k]:v,locked:[...new Set([...(sd.locked||[]),k])],updatedAt:new Date().toISOString()})}ok++}catch(e){bad++}}
-    for(const n of J.nw.filter(x=>x.on)){try{if(n.match){const p=priv.get(n.match.id)||{};await writePriv(new Map([[n.match.id,{cid:p.cid||n.cid||"",dob:p.dob||n.dob||""}]]))}
-        else{const ref=db.collection("swimmers").doc();await ref.set({nameEn:norm([n.enF,n.enL].join(" ")),nameTh:norm([n.thF,n.thL].join(" ")),birthYear:+String(n.dob).slice(0,4)||null,gender:n.g,club:norm(n.club||""),rs:{},updatedAt:new Date().toISOString()});await writePriv(new Map([[ref.id,{cid:n.cid||"",dob:n.dob||""}]]))}ok++}catch(e){bad++}}
+        else{const k=c.field==="gender"?"gender":c.field==="nat"?"nation":c.field,v=c.field==="gender"?(/boy|^m/i.test(c.value)?"M":"F"):c.field==="nat"?String(c.value).toUpperCase().replace(/[^A-Z]/g,"").slice(0,3):norm(c.value);await db.collection("swimmers").doc(sd.id).update({[k]:v,locked:[...new Set([...(sd.locked||[]),k])],updatedAt:new Date().toISOString()})}ok++}catch(e){bad++}}
+    for(const n of J.nw.filter(x=>x.on)){try{const nat=String(n.nat||"THA").toUpperCase().replace(/[^A-Z]/g,"").slice(0,3)||"THA";if(n.match){const p=priv.get(n.match.id)||{};await writePriv(new Map([[n.match.id,{cid:p.cid||n.cid||"",dob:p.dob||n.dob||""}]]));if(nat!==(n.match.nation||"THA"))await db.collection("swimmers").doc(n.match.id).update({nation:nat,locked:[...new Set([...(n.match.locked||[]),"nation"])],updatedAt:new Date().toISOString()})}
+        else{const ref=db.collection("swimmers").doc();await ref.set({nameEn:norm([n.enF,n.enL].join(" ")),nameTh:norm([n.thF,n.thL].join(" ")),birthYear:+String(n.dob).slice(0,4)||null,gender:n.g,club:norm(n.club||""),nation:nat,...(nat!=="THA"?{locked:["nation"]}:{}),rs:{},updatedAt:new Date().toISOString()});await writePriv(new Map([[ref.id,{cid:n.cid||"",dob:n.dob||""}]]))}ok++}catch(e){bad++}}
     m.className=bad?"msg err":"msg ok";m.textContent=`Applied ${ok} change${ok===1?"":"s"}${bad?`, ${bad} failed (try again)`:""}. You can delete the file now.`;if(!bad){ccJob=null;ccRender()}else b.disabled=false}}
 $("#ccFile").onchange=async e=>{const f=e.target.files[0],m=$("#ccMsg");e.target.value="";if(!f)return;
   try{if(!state.isStaff)throw new Error("Staff only.");const J=JSON.parse(await f.text());if(J.kind!=="smt-coach-changes")throw new Error("This is not a coach app changes file.");
     const cidIdx=new Map();priv.forEach((v,id)=>{if(v&&v.cid)cidIdx.set(String(v.cid),id)});
-    const cor=(J.corrections||[]).map(c=>{const now=swimmerById(c.swimmerId),p=priv.get(c.swimmerId)||{};const cur=!now?"(not found)":c.field==="dob"?(p.dob||"born "+(now.birthYear||"?")):c.field==="cid"?(p.cid||"none"):c.field==="gender"?(now.gender==="M"?"Boy":"Girl"):(now[c.field]||"");
+    const cor=(J.corrections||[]).map(c=>{const now=swimmerById(c.swimmerId),p=priv.get(c.swimmerId)||{};const cur=!now?"(not found)":c.field==="dob"?(p.dob||"born "+(now.birthYear||"?")):c.field==="cid"?(p.cid||"none"):c.field==="gender"?(now.gender==="M"?"Boy":"Girl"):c.field==="nat"?(now.nation||"THA"):(now[c.field]||"");
       const can=!!now&&c.field!=="cid";return{...c,now,cur,can,on:can,why:!now?"This swimmer is not in the app any more.":c.field==="cid"?"Change the ID in the swimmer's Edit (it may merge profiles).":""}});
     const nw=(J.newSwimmers||[]).map(n=>{let match=null,how="";const id=n.cid&&cidIdx.get(String(n.cid));if(id){match=swimmerById(id);how="same citizen ID"}
       if(!match){const th=norm([n.thF,n.thL].join(" ")),en=norm([n.enF,n.enL].join(" ")).toLowerCase(),by=+String(n.dob).slice(0,4);
