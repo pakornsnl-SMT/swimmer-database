@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.61 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.62 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -535,6 +535,17 @@ table.ttb .t{font:500 15px var(--mono)}
 .feesub{border-top:1px dashed var(--line);padding-top:8px;margin-top:8px}
 .feecard{border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:12px;padding:10px 14px;margin:0 0 14px;background:var(--surface)}
 .feecard summary{cursor:pointer;font-size:16px}.feet{width:100%;max-width:560px;margin-top:8px;border-collapse:collapse}.feet td{padding:5px 4px;border-bottom:1px solid var(--line)}.feetot td{border-bottom:0;font-size:16px}
+/* training groups v3.62 */
+.grpp{display:inline-block;font:600 11px var(--body);line-height:16px;padding:0 7px;border-radius:999px;color:var(--gc);border:1px solid var(--gc);margin-left:4px;white-space:nowrap;vertical-align:1px;letter-spacing:0;text-transform:none}
+.grpsel{display:inline-flex;align-items:center;gap:6px;margin:0}.grpsel.on select{border-color:var(--teal);font-weight:600}
+.grpbtn{cursor:pointer;margin-left:auto;font:600 14px var(--body)!important;padding:7px 16px!important;border:1.5px solid var(--teal)!important;color:var(--teal)!important;background:var(--surface)!important;border-radius:999px}.grpbtn[aria-expanded="true"]{background:var(--teal)!important;color:#fff!important}
+.grped{margin:12px 0 16px;border-left:4px solid var(--teal)}
+.grplist{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}.grprow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grpdot{width:22px;height:22px;border-radius:50%;background:var(--gc);border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0;flex:none}
+.grpname{width:220px;max-width:60vw;font-weight:600}.grpn{min-width:84px}.grpbt{display:inline-flex;gap:6px}
+.grpadd{margin:4px 0 0}.grpadd input{width:220px;max-width:60vw}.grpbulk{margin:4px 0 6px}
+table.grpt select{min-width:150px}
+@media (max-width:760px){.grpbtn{margin-left:0}.grprow{flex-wrap:nowrap;gap:6px}.grpname{width:auto;flex:1;min-width:0}.grpn{display:none}table.grpt select{min-width:0;width:118px}table.grpt td,table.grpt th{padding-left:3px!important;padding-right:3px!important}}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -663,7 +674,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.61 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.62 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -720,7 +731,7 @@ function segBtns(key,opts){return `<div class="seg">${opts.map(([v,l])=>`<button
 
 function teamView(){
   ui.ts=ui.ts||"name";const rk=s=>{const b=bestEvents(s,1)[0];return b?b.r/b.t:9};
-  const list=sw.filter(s=>(ui.g==="all"||s.g===ui.g)&&(!ui.q||(s.th+" "+s.en).toLowerCase().includes(ui.q.toLowerCase()))).sort(ui.ts==="age"?(a,b)=>b.age-a.age||thCmp(a,b):ui.ts==="pbs"?(a,b)=>b.pbs-a.pbs||thCmp(a,b):ui.ts==="rank"?(a,b)=>rk(a)-rk(b)||thCmp(a,b):thCmp);
+  const list=sw.filter(s=>(ui.g==="all"||s.g===ui.g)&&grpOk(s)&&(!ui.q||(s.th+" "+s.en).toLowerCase().includes(ui.q.toLowerCase()))).sort(ui.ts==="age"?(a,b)=>b.age-a.age||thCmp(a,b):ui.ts==="pbs"?(a,b)=>b.pbs-a.pbs||thCmp(a,b):ui.ts==="rank"?(a,b)=>rk(a)-rk(b)||thCmp(a,b):thCmp);
   const tot=sw.reduce((a,s)=>a+s.pbs,0),active=sw.filter(s=>s.last>=YEAR+"-07").length;
   const allImp=sw.flatMap(s=>s.evs.filter(e=>e.imp!=null).map(e=>e.imp)),avg=allImp.length?allImp.reduce((a,b)=>a+b,0)/allImp.length:0;
   return `<div class="kpis">
@@ -731,9 +742,9 @@ function teamView(){
   ${(()=>{const n=D.sw.length,L=CLUB.limit||0,k=L?n-L:0,free=L?L-n:0;
   if(k>0)return `<div class="mngbar addsw"><button type="button" class="addbtn over" id="mngOpen"><span class="ai">👥</span><span class="at"><b>Release swimmers</b><small>${n} swimmers but ${L} slots · release ${k}</small></span></button></div>`;
   if(L&&free<=0)return `<div class="mngbar addsw"><button type="button" class="addbtn full" id="mngOpen"><span class="ai">👥</span><span class="at"><b>All ${L} slots used</b><small>Release a swimmer or buy more slots</small></span></button></div>`;
-  return `<div class="mngbar addsw"><button type="button" class="addbtn" id="mngOpen"><span class="ai">＋</span><span class="at"><b>Add swimmers</b><small>${L?`${free} coach slot${free===1?"":"s"} free · ${n} of ${L} used`:"Search by Thai or English name"}</small></span></button>${n?`<button type="button" class="relink" data-mngopen="1">Release a swimmer</button>`:""}</div>`})()}<div class="row">${segBtns("g",[["all","All"],["M","Boys"],["F","Girls"]])}<input type="search" id="q" placeholder="Search name" value="${esc(ui.q)}" aria-label="Search swimmer"><span class="hint">Sort</span>${segBtns("ts",[["name","Name ก–ฮ"],["age","Age"],["pbs","PBs 2026"],["rank","Best rank"]])}</div>
+  return `<div class="mngbar addsw"><button type="button" class="addbtn" id="mngOpen"><span class="ai">＋</span><span class="at"><b>Add swimmers</b><small>${L?`${free} coach slot${free===1?"":"s"} free · ${n} of ${L} used`:"Search by Thai or English name"}</small></span></button>${n?`<button type="button" class="relink" data-mngopen="1">Release a swimmer</button>`:""}</div>`})()}<div class="row">${segBtns("g",[["all","All"],["M","Boys"],["F","Girls"]])}${grpSel()}<input type="search" id="q" placeholder="Search name" value="${esc(ui.q)}" aria-label="Search swimmer"><span class="hint">Sort</span>${segBtns("ts",[["name","Name ก–ฮ"],["age","Age"],["pbs","PBs 2026"],["rank","Best rank"]])}<button type="button" class="chip grpbtn" data-grpopen="1" aria-expanded="${!!ui.grpEd}">👥 Groups${grpData().list.length?" ("+grpData().list.length+")":""}</button></div>${ui.grpEd?grpEditor():""}
   <div class="tw"><table class="swl"><thead><tr><th>Swimmer</th><th class="num">Age</th><th class="num hide-sm">Meets</th><th class="num"><span class="hide-sm">PBs ${YEAR}</span><span class="phi">PBs</span></th><th><span class="hide-sm">Biggest drop</span><span class="phi">Drop</span></th><th class="hide-sm">Best Thailand rank</th><th class="hide-sm">Last raced</th></tr></thead><tbody>
-  ${list.map(s=>`<tr class="click" data-sw="${s.i}"><td><div class="nm">${nmH(s.th)}</div><div class="en">${esc(s.en)}</div></td><td class="num">${s.age}</td><td class="num hide-sm">${s.meets}</td><td class="num">${s.pbs||"–"}</td>
+  ${list.map(s=>`<tr class="click" data-sw="${s.i}"><td><div class="nm">${nmH(s.th)}</div><div class="en">${esc(s.en)}${grpPill(s)}</div></td><td class="num">${s.age}</td><td class="num hide-sm">${s.meets}</td><td class="num">${s.pbs||"–"}</td>
     <td>${s.best&&s.best.imp>0?`<span class="up">−${(s.best.imp*100).toFixed(1)}%</span><div class="en hide-sm">${evLabel(s.best)}</div><div class="en ph">${evShort(s.best.k)}</div>`:`<span class="hint">–</span>`}</td><td class="hide-sm">${(b=>b?`${rkPill(b.r,b.t," · "+evShort(b.k))}`:'<span class="hint">–</span>')(bestEvents(s,1)[0])}</td><td class="hide-sm en">${s.last?shortDate(s.last):""}</td></tr>`).join("")}
   </tbody></table></div><p class="hint">Tap a swimmer for personal bests and a progress chart. Age by birth year.</p>`;
 }
@@ -779,11 +790,11 @@ function cptCard(e,s,i){const L=e.list;if(!L||!L.length)return"";let best=null;c
 function eventView(){
   const keys=[...new Set(sw.flatMap(s=>s.evs.map(e=>e.k)))].sort((a,b)=>{const[x,y]=a.split("-").map(Number),[p,q]=b.split("-").map(Number);return x-p||y-q});
   const ages=[...new Set(sw.map(s=>s.age))].sort((a,b)=>a-b);
-  const rows=sw.filter(s=>s.g===ui.eg&&(ui.ea==="all"||s.age==+ui.ea)).map(s=>({s,e:s.evs.find(e=>e.k===ui.ev)})).filter(x=>x.e).sort((a,b)=>a.e.pb.t-b.e.pb.t);
+  const rows=sw.filter(s=>s.g===ui.eg&&(ui.ea==="all"||s.age==+ui.ea)&&grpOk(s)).map(s=>({s,e:s.evs.find(e=>e.k===ui.ev)})).filter(x=>x.e).sort((a,b)=>a.e.pb.t-b.e.pb.t);
   return `<h2>Who is fastest in the team</h2><p class="hint" style="margin-top:0">Pick an event to rank ${CLUB.short} swimmers by personal best. <b>Thailand</b> shows where each swimmer ranks in the whole SMT system against swimmers of the same age (birth year) and gender, this season.</p>
   <div class="row"><select id="evSel" aria-label="Event">${keys.map(k=>{const[a,b]=k.split("-");return `<option value="${k}"${k===ui.ev?" selected":""}>${b} ${SN[a]}</option>`}).join("")}</select>
   ${segBtns("eg",[["M","Boys"],["F","Girls"]])}
-  <select id="eaSel" aria-label="Age"><option value="all">All ages</option>${ages.map(a=>`<option value="${a}"${ui.ea==a?" selected":""}>Age ${a}</option>`).join("")}</select></div>
+  <select id="eaSel" aria-label="Age"><option value="all">All ages</option>${ages.map(a=>`<option value="${a}"${ui.ea==a?" selected":""}>Age ${a}</option>`).join("")}</select>${grpSel()}</div>
   <div class="tw"><table class="rkt"><thead><tr><th class="num">#</th><th>Swimmer</th><th class="num">Age</th><th class="num pbc">PB</th><th class="num"><span class="hide-sm">Thailand ${YEAR}<br></span><span class="phi">Thai<br></span><span class="en" style="text-transform:none">same age</span></th><th class="num hide-sm">vs before ${YEAR}</th><th class="hide-sm">Meet</th></tr></thead><tbody>
   ${rows.length?rows.map((x,i)=>`<tr class="click" data-sw="${x.s.i}"><td class="num">${medal(i+1)}</td><td><div class="nm">${nmH(x.s.th)}</div><div class="en">${esc(x.s.en)}</div></td><td class="num">${x.s.age}</td><td class="num t pbc">${fmt(x.e.pb.t)}</td><td class="num">${natTxt(x.s,ui.ev)}</td>
    <td class="num hide-sm">${x.e.imp==null?'<span class="hint">–</span>':x.e.imp>0?`<span class="up">−${(x.e.imp*100).toFixed(1)}%</span>`:`<span class="down">+${(-x.e.imp*100).toFixed(1)}%</span>`}</td><td class="hide-sm en">${esc(meetName(x.e.pb.m))}</td></tr>`).join(""):`<tr><td colspan="7" class="hint">No ${ui.eg==="M"?"boys":"girls"} have swum this event yet.</td></tr>`}
@@ -792,7 +803,7 @@ function eventView(){
 
 const pbOf=(s,st,ds)=>{const e=s.evs.find(x=>x.st===st&&x.ds===ds);return e?e.pb.t:null};
 const RLEG={medley:[2,3,4,1],free:[1,1,1,1]};
-function relayPool(){const X=ui.rg==="X",C=ui.ra==="c",lo=C?+ui.raLo||0:0,lim=C?+ui.raHi||99:ui.ra==="open"||ui.ra==="t"?99:+ui.ra;return sw.filter(s=>(X||s.g===ui.rg)&&s.age>=lo&&s.age<=lim&&!ui.rout.has(s.i))}
+function relayPool(){const X=ui.rg==="X",C=ui.ra==="c",lo=C?+ui.raLo||0:0,lim=C?+ui.raHi||99:ui.ra==="open"||ui.ra==="t"?99:+ui.ra;return sw.filter(s=>(X||s.g===ui.rg)&&s.age>=lo&&s.age<=lim&&!ui.rout.has(s.i)&&grpOk(s))}
 function relayTeams(){
   const X=ui.rg==="X",order=RLEG[ui.rt],max=ui.rn==="max"?12:+ui.rn,TOT=ui.ra==="t",tLo=TOT?+ui.rtMin||0:0,tHi=TOT?+ui.rtMax||0:0;let pool=relayPool();const teams=[];
   for(let n=0;n<max;n++){
@@ -815,14 +826,14 @@ function relayView(){
   const ages=[...new Set(sw.map(s=>s.age))].sort((a,b)=>a-b),teams=relayTeams(),order=RLEG[ui.rt],X=ui.rg==="X",want=ui.rn==="max"?0:+ui.rn;
   const pool=relayPool(),out=[...ui.rout].map(i=>sw[i]);
   let h=`<h2>Relay builder</h2><p class="hint" style="margin-top:0">Picks the fastest team from personal bests, then the next team from who is left. Medley order: back, breast, fly, free. Mixed = 2 boys + 2 girls.</p>
-  <div class="row">${segBtns("rt",[["medley","4×50 Medley"],["free","4×50 Free"]])}${segBtns("rg",[["M","Boys"],["F","Girls"],["X","Mixed"]])}
+  <div class="row">${segBtns("rt",[["medley","4×50 Medley"],["free","4×50 Free"]])}${segBtns("rg",[["M","Boys"],["F","Girls"],["X","Mixed"]])}${grpSel()}
   <select id="raSel" aria-label="Age limit"><option value="open">Open (any age)</option>${ages.map(a=>`<option value="${a}"${ui.ra==a?" selected":""}>Age ${a} and under</option>`).join("")}<option value="c"${ui.ra==="c"?" selected":""}>Custom ages…</option><option value="t"${ui.ra==="t"?" selected":""}>Total age (4 swimmers added up)…</option></select>
   ${ui.ra==="t"?`<span class="row" style="margin:0;gap:6px"><span class="hint">Total age</span><input id="rtMin" type="number" min="0" max="400" inputmode="numeric" placeholder="from" value="${ui.rtMin||""}" style="width:72px" aria-label="Total age from"><span class="hint">to</span><input id="rtMax" type="number" min="0" max="400" inputmode="numeric" placeholder="up to" value="${ui.rtMax||""}" style="width:72px" aria-label="Total age up to"></span>`:""}
   ${ui.ra==="c"?`<span class="row" style="margin:0;gap:6px"><span class="hint">Ages</span><select id="raLo" aria-label="Youngest age">${ages.map(a=>`<option${+ui.raLo===a?" selected":""}>${a}</option>`).join("")}</select><span class="hint">to</span><select id="raHi" aria-label="Oldest age">${ages.map(a=>`<option${+ui.raHi===a?" selected":""}>${a}</option>`).join("")}</select></span>`:""}</div>
   <div class="row"><span class="hint">Teams</span>${segBtns("rn",[["1","A"],["2","A–B"],["3","A–C"],["4","A–D"],["max","As many as possible"]])}</div>`;
   h+=`<div class="row" style="align-items:flex-start"><span class="hint" style="padding-top:3px">Not swimming today</span>${out.length?out.map(s=>`<button class="chip" data-unsick="${s.i}" style="cursor:pointer;background:var(--surface);color:var(--bad);border-color:var(--bad)" aria-label="Put ${esc(s.en)} back">${esc(s.th)} ↺</button>`).join(""):`<span class="hint" style="padding-top:3px">Nobody. Tap <b>Away</b> next to a swimmer (sick, family trip, anything) to take them out and rebuild the teams.</span>`}
    ${out.length||Object.keys(ui.rfix).length?`<button class="chip" id="rreset" style="cursor:pointer;background:var(--surface);color:var(--ink)">Reset all changes</button>`:""}</div>`;
-  if(!teams.length)return h+`<div class="lock">Not enough swimmers with 50 m times for this relay. Try another age group.</div>`+relayList([]);
+  if(!teams.length)return h+`<div class="lock">Not enough swimmers with 50 m times for this relay. Try another age group${ui.grp&&ui.grp!=="all"&&grpData().list.length?" or choose All groups":""}.</div>`+relayList([]);
   h+=`<div class="grid2">${teams.map((t,n)=>{
     const earlier=new Set(teams.slice(0,n).flatMap(x=>x.legs.map(l=>l.s.i)));
     return `<div class="relaycard"><div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="teamtag t${n%4}">Team ${"ABCDEFGHIJKL"[n]}</span><span class="total">${fmt(t.tot)}</span></div>
@@ -1093,7 +1104,7 @@ function makeUp(){
    <div style="min-width:0" class="agcards">${G.map(x=>`<div class="kpi"><span style="font:600 13px var(--display);color:var(--ink)">${x.n}</span><b>${x.l.length} <small style="font:400 14px var(--body);color:var(--muted)">swimmers</small></b><span>${x.b} ${x.b===1?"boy":"boys"} · ${x.g} ${x.g===1?"girl":"girls"}</span>${x.p?`<span>avg top power <b style="display:inline;font:600 14px var(--body);color:var(--ink)">${x.p}</b></span>`:""}</div>`).join("")}</div></div>`;
 }
 function powerTabView(){
-  ui.pg=ui.pg||"all";const T=sw.filter(s=>ui.pg==="all"||s.g===ui.pg);
+  ui.pg=ui.pg||"all";const T=sw.filter(s=>(ui.pg==="all"||s.g===ui.pg)&&grpOk(s));
   const per=[1,2,3,4,5].map(st=>{const l=T.map(s=>({s,b:swStrokePts(s,st)})).filter(x=>x.b).sort((a,b)=>b.b.p-a.b.p);return{st,l,all:avg(l.map(x=>x.b.p)),top:avg(l.slice(0,5).map(x=>x.b.p)),n:l.length}});
   const has=per.filter(x=>x.n);if(!has.length)return `<h2>Team power</h2><p class="hint">No ${YEAR} swims yet.</p>`;
   const max=Math.max(300,Math.ceil(Math.max(...per.map(x=>x.top))/100)*100);
@@ -1107,7 +1118,7 @@ function powerTabView(){
   const heatRows=T.slice().sort(thCmp).map(s=>{const c=[1,2,3,4,5].map(st=>swStrokePts(s,st));const m=Math.max(...c.slice(0,4).map(b=>b?b.p:0));c.forEach((b,i)=>{if(b&&i<4&&b.p===m)b.main=true});return{s,c}}).filter(r=>r.c.some(Boolean));
   const cell=b=>{if(!b)return`<td class="hm0">–</td>`;const f=Math.min(1,b.p/max);return `<td class="hm${b.main?" main":""}" style="--f:${(0.12+f*.88).toFixed(2)}" title="${evShort(b.k)} ${fmt(b.t)}${b.main?" · main stroke":""}"><b>${b.p}</b>${b.main?" ★":""}</td>`};
   return `<h2>Team power</h2>${teamRecords()}<p class="hint" style="margin-top:0">What this team is good at, from each swimmer's ${YEAR} bests in World Aquatics points (${POOL()}). 1000 = world-class.</p>
-  <div class="row">${segBtns("pg",[["all","All"],["M","Boys"],["F","Girls"]])}</div>
+  <div class="row">${segBtns("pg",[["all","All"],["M","Boys"],["F","Girls"]])}${grpSel()}</div>
   <div class="relaycard" style="margin-bottom:14px;border-color:var(--gold)"><b style="font-family:var(--display)">Team identity</b><p style="margin:6px 0 0">${idTxt}</p></div>
   ${makeUp()}
   <div class="grid2"><div style="min-width:0"><h3 style="margin-top:0">Stroke spider</h3>${radar([{c:"var(--gold)",v:per.map(x=>x.top)},{c:"var(--teal)",v:per.map(x=>x.all)}],max)}
@@ -1730,7 +1741,7 @@ function relayList(teams){
   else{const g=GR.find(x=>x[0]===ag);if(g)inAge=a=>a>=g[2]&&a<=g[3];else inAge=a=>a===+ag}
   /* who is in which team and leg */
   const where={};teams.forEach((t,n)=>t.legs.forEach((l,li)=>{where[l.s.i]={n,li,st:order[li]}}));
-  const rows=sw.filter(s=>(X||s.g===ui.rg)&&inAge(s.age)).map(s=>({s,t:cols.map(st=>rbT(s,st)),td:cols.map(st=>tdOf(s,st)),w:where[s.i],away:ui.rout.has(s.i)}));
+  const rows=sw.filter(s=>(X||s.g===ui.rg)&&inAge(s.age)&&grpOk(s)).map(s=>({s,t:cols.map(st=>rbT(s,st)),td:cols.map(st=>tdOf(s,st)),w:where[s.i],away:ui.rout.has(s.i)}));
   /* fastest in each column (among swimmers shown and not away) */
   const best=cols.map((st,k)=>Math.min(...rows.filter(r=>!r.away&&r.t[k]).map(r=>r.t[k])));
   const so=ui.rls||"team",NO=1e9;
@@ -1777,6 +1788,51 @@ document.getElementById("view").addEventListener("click",e=>{if(ui.tab!=="relay"
   inp.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();fin(true)}else if(ev.key==="Escape")fin(false)});
   inp.addEventListener("blur",()=>fin(true));
 });
+
+
+/* ---------- Training groups (v3.62): the club's own groups (Beginner, Squad…), one per swimmer, private to the club ---------- */
+var GRP_COL=["#1d4fb8","#1f9d57","#c85a12","#c8102e","#6a3fb5","#0b7f8f"],grpT=null;
+function grpData(){const g=CTX.saved.groups;if(!g||!Array.isArray(g.list))CTX.saved.groups={list:[],of:{}};CTX.saved.groups.of=CTX.saved.groups.of||{};return CTX.saved.groups}
+function grpId(x){return x==null?null:x.id!=null?x.id:(D.sw[x.i]||{}).id}
+function grpOfS(x){const G=grpData(),id=G.of[grpId(x)];return id?G.list.find(g=>g.id===id)||null:null}
+function grpOk(x){const v=ui.grp||"all";if(v==="all"||!grpData().list.length)return true;const g=grpOfS(x);return v==="none"?!g:!!g&&g.id===v}
+function grpCol(g){return GRP_COL[(+g.c||0)%GRP_COL.length]}
+function grpPill(x){const g=grpOfS(x);return g?` <span class="grpp" style="--gc:${grpCol(g)}">${esc(g.name)}</span>`:""}
+function grpCount(id){return D.sw.filter(x=>{const g=grpOfS(x);return id?!!g&&g.id===id:!g}).length}
+function grpSel(){const G=grpData();if(!G.list.length)return "";if(ui.grp&&ui.grp!=="all"&&ui.grp!=="none"&&!G.list.some(g=>g.id===ui.grp))ui.grp="all";const v=ui.grp||"all";
+  return `<label class="grpsel${v!=="all"?" on":""}"><span class="hint">Group</span><select class="grpf" aria-label="Training group"><option value="all">All groups</option>${G.list.map(g=>`<option value="${esc(g.id)}"${v===g.id?" selected":""}>${esc(g.name)} (${grpCount(g.id)})</option>`).join("")}<option value="none"${v==="none"?" selected":""}>No group (${grpCount(null)})</option></select></label>`}
+function grpSave(){const G=grpData(),ids=new Set(D.sw.map(x=>x.id)),gs=new Set(G.list.map(g=>g.id));for(const k in G.of)if(!ids.has(k)||!gs.has(G.of[k]))delete G.of[k];
+  clearTimeout(grpT);grpT=setTimeout(()=>{if(CTX.saveGroups)CTX.saveGroups({list:G.list,of:G.of})},400)}
+function grpEditor(){const G=grpData(),opts=cur=>`<option value="">No group</option>`+G.list.map(g=>`<option value="${esc(g.id)}"${cur===g.id?" selected":""}>${esc(g.name)}</option>`).join("");
+  let h=`<div class="relaycard grped"><div class="row" style="justify-content:space-between;margin:0 0 4px"><b style="font-family:var(--display);font-size:18px">Training groups</b><button type="button" class="chip teal" data-grpclose="1" style="cursor:pointer;padding:6px 16px">Done</button></div>
+   <p class="hint" style="margin:0 0 10px">Your own groups. Only your club sees them. Each swimmer is in one group, and you can move them any time. Then choose a group at the top of Swimmers, Team, Ranking, Relay builder and Meet entries.</p>`;
+  if(!G.list.length)h+=`<button type="button" class="chip teal" data-grppreset="1" style="cursor:pointer;padding:7px 14px;margin:0 0 10px">Start with Beginner · Stroke development · Squad · Elite</button>`;
+  h+=`<div class="grplist">${G.list.map((g,k)=>`<div class="grprow"><button type="button" class="grpdot" style="--gc:${grpCol(g)}" data-grpcol="${k}" title="Change colour" aria-label="Change colour of ${esc(g.name)}"></button><input class="grpname" data-grpname="${k}" value="${esc(g.name)}" maxlength="30" aria-label="Group name"><span class="hint grpn">${grpCount(g.id)} swimmer${grpCount(g.id)===1?"":"s"}</span><span class="grpbt">${k?`<button type="button" class="sick" data-grpup="${k}" aria-label="Move ${esc(g.name)} up">↑</button>`:""}<button type="button" class="sick" data-grpdel="${k}">Delete</button></span></div>`).join("")}</div>
+   <div class="row grpadd"><input id="grpNew" placeholder="New group name" maxlength="30" aria-label="New group name"><button type="button" class="chip" data-grpadd="1" style="cursor:pointer;padding:6px 14px">+ Add group</button></div>`;
+  if(G.list.length){const L=D.sw.map((x,i)=>({x,i,g:grpOfS(x)})).sort((a,b)=>(a.g?G.list.indexOf(a.g):99)-(b.g?G.list.indexOf(b.g):99)||a.x.th.localeCompare(b.x.th,"th"));
+    h+=`<h4 style="margin:14px 0 4px">Put swimmers in groups</h4><div class="grpbulk row"><span class="hint">Tick swimmers, then</span><select id="grpTo" aria-label="Move ticked swimmers to">${opts(G.list[0].id)}</select><button type="button" class="chip" data-grpmove="1" style="cursor:pointer">Move ticked</button></div>
+    <div class="tw"><table class="grpt"><thead><tr><th><input type="checkbox" class="chk" data-grpall="1" aria-label="Tick all"></th><th>Swimmer</th><th class="num">Age</th><th>Group</th></tr></thead><tbody>${L.map(o=>`<tr><td><input type="checkbox" class="chk" data-grptick="${esc(o.x.id)}" aria-label="Tick ${esc(o.x.en)}"></td><td><span class="nm">${nmH(o.x.th)}</span> <span class="nmen">· ${o.x.g==="M"?"B":"G"}</span></td><td class="num">${(sw[o.i]||{}).age||""}</td><td><select data-grpset="${esc(o.x.id)}" aria-label="Group for ${esc(o.x.en)}"${o.g?` style="border-color:${grpCol(o.g)};color:${grpCol(o.g)};font-weight:600"`:""}>${opts(o.g&&o.g.id)}</select></td></tr>`).join("")}</tbody></table></div>`}
+  return h+`</div>`}
+function grpAdd(name){const G=grpData();name=String(name||"").trim().slice(0,30);if(!name)return false;if(G.list.some(g=>g.name.toLowerCase()===name.toLowerCase())){CTX.toast(`There is already a group called “${name}”.`,true);return false}
+  const used=new Set(G.list.map(g=>+g.c));let c=0;while(used.has(c)&&c<GRP_COL.length)c++;G.list.push({id:"g"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name,c:c%GRP_COL.length});return true}
+(()=>{const V=document.getElementById("view");
+V.addEventListener("click",e=>{const t=e.target.closest("[data-grpopen],[data-grpclose],[data-grppreset],[data-grpcol],[data-grpup],[data-grpdel],[data-grpadd],[data-grpmove]");if(!t)return;const G=grpData(),d=t.dataset;
+  if(d.grpopen){ui.grpEd=!ui.grpEd;render();if(ui.grpEd)setTimeout(()=>{const b=document.querySelector(".grped");if(b)b.scrollIntoView({behavior:"smooth",block:"start"})},30);return}
+  if(d.grpclose){ui.grpEd=false;render();return}
+  if(d.grppreset){["Beginner","Stroke development","Squad","Elite"].forEach(grpAdd);grpSave();render();return}
+  if(d.grpcol){const g=G.list[+d.grpcol];g.c=((+g.c||0)+1)%GRP_COL.length;grpSave();render();return}
+  if(d.grpup){const k=+d.grpup;[G.list[k-1],G.list[k]]=[G.list[k],G.list[k-1]];grpSave();render();return}
+  if(d.grpdel){const g=G.list[+d.grpdel],n=grpCount(g.id);if(n&&!confirm(`Delete the group “${g.name}”? Its ${n} swimmer${n>1?"s":""} will have no group. Nothing else changes.`))return;G.list.splice(+d.grpdel,1);if(ui.grp===g.id)ui.grp="all";grpSave();render();CTX.toast(`Group “${g.name}” deleted.`);return}
+  if(d.grpadd){const i=document.getElementById("grpNew");if(grpAdd(i&&i.value)){grpSave();render();const j=document.getElementById("grpNew");if(j)j.focus()}return}
+  if(d.grpmove){const to=(document.getElementById("grpTo")||{}).value||"",ids=[...document.querySelectorAll("[data-grptick]:checked")].map(x=>x.dataset.grptick);if(!ids.length){CTX.toast("Tick some swimmers first.",true);return}
+    ids.forEach(id=>{if(to)G.of[id]=to;else delete G.of[id]});grpSave();render();const g=G.list.find(x=>x.id===to);CTX.toast(`${ids.length} swimmer${ids.length>1?"s":""} moved to ${g?g.name:"no group"}.`)}});
+V.addEventListener("change",e=>{const t=e.target;if(!t.classList)return;const G=grpData();
+  if(t.classList.contains("grpf")){ui.grp=t.value;render();return}
+  if(t.dataset.grpname!=null){const g=G.list[+t.dataset.grpname],v=t.value.trim().slice(0,30);if(g&&v&&!G.list.some(x=>x!==g&&x.name.toLowerCase()===v.toLowerCase())){g.name=v;grpSave()}render();return}
+  if(t.dataset.grpset){if(t.value)G.of[t.dataset.grpset]=t.value;else delete G.of[t.dataset.grpset];grpSave();render();return}
+  if(t.dataset.grpall){document.querySelectorAll("[data-grptick]").forEach(x=>x.checked=t.checked)}});
+V.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="grpNew"){e.preventDefault();const b=document.querySelector("[data-grpadd]");if(b)b.click()}});
+})();
 
 
 /* ---------- Entry list PDF (v3.56): the club's entries for one meet, by event and by swimmer, compact A4 ---------- */
@@ -1950,8 +2006,8 @@ function smtEntriesView(m0,pre){
   else if(m.closed||CTX.expired)h+=`<p class="hint">${m.closed?"Entries are closed by SMT.":"Your package has expired."}</p>`;
   else if(overSlots())h+=overBox();
   else{h+=`<p class="hint" style="margin:4px 0 8px">${locked?`Names closed on ${dShort(G.namesDl)}. You can still <b>swap</b> a swimmer: untick one, then tick another.`:`Tick each swimmer who will swim, relay swimmers too. Saved automatically. You can change names until ${dShort(G.namesDl)}.`}${ageMode(m)==="date"?`<br><b>Ages are on ${dShort(m.ageDate)}.</b> For each named swimmer, choose the age: the older age if their birthday is on or before ${dShort(m.ageDate)}, otherwise the younger one.${noAge?` <b style="color:var(--gold)">${noAge} still to choose.</b>`:""}`:`<br>Ages by year of birth (age in ${ay}).`}${cap&&named>appr?` <b style="color:var(--red)">You have ${named-appr} more than approved. Untick ${named-appr}.</b>`:""}</p>
-    ${(()=>{const op=ui.emNL!=null?ui.emNL:(!named||(cap&&named<appr));ui._emNLop=op;return `<button type="button" class="namesbtn${op?" on":""}" data-emnl aria-expanded="${op}"><span class="nbi">👥</span><span class="nbt">${named?"Change swimmers":"Choose swimmers"}<small>${named} of ${cap?appr:D.sw.length} named</small></span><span class="nbo">${op?"Hide list ▲":"Show list ▼"}</span></button>`})()}<div id="emNamesBox"${ui._emNLop?"":" hidden"}><div class="tw"><table><thead><tr><th>${locked?"":`<input type="checkbox" class="chk" data-emnall="1"${named&&named>=Math.min(D.sw.length,can)?" checked":""} aria-label="Select all swimmers" title="Select all">`}</th><th>Swimmer${locked?"":` <span class="en" style="text-transform:none;letter-spacing:0">← select all</span>`}</th><th class="num">Age</th></tr></thead><tbody>${D.sw.slice().sort((a,b)=>a.th.localeCompare(b.th,"th")).map(x=>{const on=S.names.has(x.id),dis=!on&&named>=max;
-      return `<tr${dis?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emname="${esc(x.id)}"${on?" checked":""}${dis?" disabled":""} aria-label="Name ${esc(x.en)}"></td><td><span class="nm">${nmH(x.th)}</span> <span class="nmen">· ${esc(x.en)} · ${x.g==="M"?"B":"G"}</span></td><td class="num">${!x.by?"":ageMode(m)!=="date"?ay-x.by:dobOf(x)&&m.ageDate?exactAge(dobOf(x),m.ageDate):on?`<select data-emage="${esc(x.id)}" aria-label="Age on ${esc(m.ageDate)}" style="${S.ages[x.id]?"":"border-color:var(--gold);color:var(--gold)"}"><option value="">${ay-x.by-1} or ${ay-x.by}?</option>${[ay-x.by-1,ay-x.by].map(a=>`<option${S.ages[x.id]===a?" selected":""}>${a}</option>`).join("")}</select>`:`<span class="en">${ay-x.by-1}–${ay-x.by}</span>`}</td></tr>`}).join("")}</tbody></table></div><button type="button" class="chip" data-emnl style="margin-top:8px;cursor:pointer">Done · hide list ▲</button></div>
+    ${(()=>{const op=ui.emNL!=null?ui.emNL:(!named||(cap&&named<appr));ui._emNLop=op;return `<button type="button" class="namesbtn${op?" on":""}" data-emnl aria-expanded="${op}"><span class="nbi">👥</span><span class="nbt">${named?"Change swimmers":"Choose swimmers"}<small>${named} of ${cap?appr:D.sw.length} named</small></span><span class="nbo">${op?"Hide list ▲":"Show list ▼"}</span></button>`})()}<div id="emNamesBox"${ui._emNLop?"":" hidden"}>${grpData().list.length?`<div class="row" style="margin:8px 0 4px">${grpSel()}${ui.grp&&ui.grp!=="all"?`<span class="hint">Showing one group. “Select all” ticks only this group.</span>`:""}</div>`:""}<div class="tw"><table><thead><tr><th>${locked?"":`<input type="checkbox" class="chk" data-emnall="1"${named&&named>=Math.min(D.sw.length,can)?" checked":""} aria-label="Select all swimmers" title="Select all">`}</th><th>Swimmer${locked?"":` <span class="en" style="text-transform:none;letter-spacing:0">← select all</span>`}</th><th class="num">Age</th></tr></thead><tbody>${D.sw.slice().sort((a,b)=>a.th.localeCompare(b.th,"th")).filter(x=>grpOk(x)).map(x=>{const on=S.names.has(x.id),dis=!on&&named>=max;
+      return `<tr${dis?' style="opacity:.5"':""}><td><input type="checkbox" class="chk" data-emname="${esc(x.id)}"${on?" checked":""}${dis?" disabled":""} aria-label="Name ${esc(x.en)}"></td><td><span class="nm">${nmH(x.th)}</span> <span class="nmen">· ${esc(x.en)} · ${x.g==="M"?"B":"G"}</span>${grpPill(x)}</td><td class="num">${!x.by?"":ageMode(m)!=="date"?ay-x.by:dobOf(x)&&m.ageDate?exactAge(dobOf(x),m.ageDate):on?`<select data-emage="${esc(x.id)}" aria-label="Age on ${esc(m.ageDate)}" style="${S.ages[x.id]?"":"border-color:var(--gold);color:var(--gold)"}"><option value="">${ay-x.by-1} or ${ay-x.by}?</option>${[ay-x.by-1,ay-x.by].map(a=>`<option${S.ages[x.id]===a?" selected":""}>${a}</option>`).join("")}</select>`:`<span class="en">${ay-x.by-1}–${ay-x.by}</span>`}</td></tr>`}).join("")}</tbody></table></div><button type="button" class="chip" data-emnl style="margin-top:8px;cursor:pointer">Done · hide list ▲</button></div>
     <p class="hint" id="emSaved" style="min-height:1.2em">${S.saving?"Saving…":S.saved?"Saved ✓":""}</p>`}
   h+=`</div>`+evCard(m,S,G,cap);
   return h+wdBox(m,G,req||appr||named||nEnt);
@@ -1978,11 +2034,11 @@ document.getElementById("view").addEventListener("change",e=>{if(ui.tab!=="entri
   if(t.dataset.emname||t.dataset.emnall){const m=CTX.entryMeets.find(x=>x.id===ui.emid),S=MS[m.id];if(ui.emNL==null)ui.emNL=true;
     const drop=id=>{S.names.delete(id);delete S.ent[id];for(const k in S.rel)S.rel[k].forEach(tm=>tm.legs=tm.legs.map(q=>q===id?"":q))};
     if(t.dataset.emnall){const max=ui._emMax??Infinity;
-      if(t.checked){const L=D.sw.slice().sort((a,b)=>a.th.localeCompare(b.th,"th"));let cut=0;for(const x of L){if(S.names.has(x.id))continue;if(S.names.size>=max){cut++;continue}S.names.add(x.id)}
+      if(t.checked){const L=D.sw.slice().sort((a,b)=>a.th.localeCompare(b.th,"th")).filter(x=>grpOk(x));let cut=0;for(const x of L){if(S.names.has(x.id))continue;if(S.names.size>=max){cut++;continue}S.names.add(x.id)}
         if(cut)CTX.toast(`Ticked up to your approved number. ${cut} swimmer${cut>1?"s were":" was"} left out.`,true)}
       else{const withEv=[...S.names].filter(id=>Object.keys(S.ent[id]||{}).length).length;
         if(withEv&&!confirm(`Untick all swimmers? ${withEv} swimmer${withEv>1?"s have":" has"} events ticked; those events will be removed too.`)){t.checked=true;return}
-        [...S.names].forEach(drop)}}
+        [...S.names].filter(id=>grpOk({id})).forEach(drop)}}
     else if(t.checked)S.names.add(t.dataset.emname);else drop(t.dataset.emname);
     S.saved=false;S.saving=true;render();
     clearTimeout(emT);emT=setTimeout(async()=>{const names=msNames(S);
@@ -2476,12 +2532,12 @@ async function coachPage(clubId,PV){
   let pvIds=null;if(PV){const P=await loadPublic(),nm=PV.trim().toLowerCase(),y=String(new Date().getFullYear()-1),all=P.swimmers.filter(s=>String(s.club||"").trim().toLowerCase()===nm);pvIds=(all.some(s=>(s.lastMeet||"")>=y)?all.filter(s=>(s.lastMeet||"")>=y):all).map(s=>s.id)}
   const club=PV?{id:"preview",name:PV,short:PV,buys:[{n:Math.max(1,pvIds.length),start:"2000-01-01",end:"2999-12-31"}]}:await DB.getClub(clubId);if(!club){show("#scrLogin");$("#loginMsg").textContent="Club not found. Please contact SMT.";return}
   const FREE=club.plan==="free",EMPTY_PUB={swimmers:[],meets:{},records:[],standards:[],byId:new Map()};
-  const [ro,pub,cal,set,tr,meets,ppl,tdy]=PV?[pvIds.map(id=>({id})),await loadPublic(),null,null,[],[],null,null]:await Promise.all([DB.roster(clubId),FREE?Promise.resolve(EMPTY_PUB):loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]}),DB.getData(clubId,"people").catch(()=>null),DB.getData(clubId,"today").catch(()=>null)]);
+  const [ro,pub,cal,set,tr,meets,ppl,tdy,grp]=PV?[pvIds.map(id=>({id})),await loadPublic(),null,null,[],[],null,null,null]:await Promise.all([DB.roster(clubId),FREE?Promise.resolve(EMPTY_PUB):loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]}),DB.getData(clubId,"people").catch(()=>null),DB.getData(clubId,"today").catch(()=>null),DB.getData(clubId,"groups").catch(()=>null)]);
   setLoad("Working out rankings…");await new Promise(r=>setTimeout(r,0));
   const year=new Date().getFullYear(),today=dayLocal();
   PEOPLE=(ppl&&ppl.m)||{};let ids=ro.map(r=>r.id);const D=buildData(pub,ids,year);
   const CLUB={id:club.id,name:club.name||club.id,nameEn:club.nameEn||"",resultsName:club.resultsName||"",short:club.short||club.name||club.id,pkg:club.pkg||"",limit:FREE?0:slotsOn(club,today),expires:FREE?"":lastEnd(club),free:FREE,buys:FREE?[]:clubBuys(club),soon:FREE?[]:endingSoon(club,today,30),over:0};CLUB.over=FREE?0:Math.max(0,ro.length-CLUB.limit);
-  const CTX={feeCalc,feeOn,baht,year,saved:{calendar:cal,settings:set,today:tdy},myTransfers:tr,meets:meets.map(m=>({org:orgOf(m),n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a).filter(m=>m.b>=new Date().toISOString().slice(0,10)).sort((x,y)=>x.a.localeCompare(y.a)),
+  const CTX={feeCalc,feeOn,baht,year,saved:{calendar:cal,settings:set,today:tdy,groups:grp},myTransfers:tr,meets:meets.map(m=>({org:orgOf(m),n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a).filter(m=>m.b>=new Date().toISOString().slice(0,10)).sort((x,y)=>x.a.localeCompare(y.a)),
     expired:!FREE&&(clubBuys(club).length?!CLUB.limit:!!(CLUB.expires&&CLUB.expires<today)),toast,
     addSwimmer:async id=>{if(CLUB.limit&&ids.length>=CLUB.limit)return{full:true};const r=await DB.addToRoster(id,CLUB);if(r.ok){ids=ids.concat(id);APP.reload(buildData(pub,ids,year))}return r},
     releaseSwimmer:async id=>{await DB.release(id);ids=ids.filter(x=>x!==id);if(id[0]==="n"&&PEOPLE[id]){delete PEOPLE[id];await DB.setData(CLUB.id,"people",{m:PEOPLE}).catch(()=>{})}APP.reload(buildData(pub,ids,year))},
@@ -2495,6 +2551,7 @@ async function coachPage(clubId,PV){
       const r=await DB.addToRoster(id,CLUB);if(!r.ok)return r;PEOPLE[id]={...v,isNew:1,src:"coach",at:new Date().toISOString()};await DB.setData(CLUB.id,"people",{m:PEOPLE});ids=ids.concat(id);APP.reload(buildData(pub,ids,year));return{ok:true,id}},
     requestTransfer:async(id,reason,note,taken)=>{const s=pub.byId.get(id);await DB.requestTransfer({swimmerId:id,swimmerName:s?(s.nameTh||s.nameEn):id,toClub:CLUB.id,toClubName:CLUB.name,fromClub:taken.id||"",fromClubName:taken.name||"",reason,note});CTX.myTransfers=await DB.myTransfers(CLUB.id).catch(()=>CTX.myTransfers.concat({swimmerId:id,status:"open",swimmerName:s&&s.nameTh}))},
     saveCalendar:v=>DB.setData(CLUB.id,"calendar",v).catch(e=>toast("Couldn't save the calendar: "+friendly(e),true)),
+    saveGroups:v=>DB.setData(CLUB.id,"groups",v).catch(e=>toast("Couldn't save the groups: "+friendly(e),true)),
     saveToday:v=>DB.setData(CLUB.id,"today",v).catch(e=>toast("Couldn't save today's times: "+friendly(e),true)),
     saveSettings:v=>DB.setData(CLUB.id,"settings",v).catch(()=>{}),
     orgMeets:meets.filter(m=>orgOf(m)&&m.start&&(m.end||m.start)>=today).sort((x,y)=>x.start.localeCompare(y.start)),
@@ -2507,7 +2564,7 @@ async function coachPage(clubId,PV){
     mcApply:(m,fn)=>DB.applyEntry(m.id,CLUB.id,cur=>({clubName:CLUB.name,...fn(cur)})),
     friendly,rankAt,get people(){return PEOPLE}};
   if(PV){const no=async()=>{toast("Preview only: nothing is saved.");return{ok:false,preview:true}};
-    ["addSwimmer","releaseSwimmer","suggestCorrection","editNewSwimmer","addNewSwimmer","requestTransfer","saveCalendar","saveToday","mcRequest","mcSave","mcApply","syncTeam"].forEach(k=>CTX[k]=no);
+    ["addSwimmer","releaseSwimmer","suggestCorrection","editNewSwimmer","addNewSwimmer","requestTransfer","saveCalendar","saveToday","saveGroups","mcRequest","mcSave","mcApply","syncTeam"].forEach(k=>CTX[k]=no);
     CTX.saveSettings=async()=>{};CTX.loadCorrections=async()=>{};CTX.entryMeets=[];CTX.orgMeets=[];CTX.expired=false;CLUB.soon=[];CLUB.over=0}
   document.title=CLUB.short+" · SMT Coach";
   $("#clubName").textContent=CLUB.name;
