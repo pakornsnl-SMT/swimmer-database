@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.62 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.63 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -546,6 +546,20 @@ table.ttb .t{font:500 15px var(--mono)}
 .grpadd{margin:4px 0 0}.grpadd input{width:220px;max-width:60vw}.grpbulk{margin:4px 0 6px}
 table.grpt select{min-width:150px}
 @media (max-width:760px){.grpbtn{margin-left:0}.grprow{flex-wrap:nowrap;gap:6px}.grpname{width:auto;flex:1;min-width:0}.grpn{display:none}table.grpt select{min-width:0;width:118px}table.grpt td,table.grpt th{padding-left:3px!important;padding-right:3px!important}}
+/* "Who is good at what" v3.63 */
+table.heat{border-collapse:separate;border-spacing:3px}
+table.heat td.hm2{background:color-mix(in srgb,#1d4fb8 var(--f),#fff);color:#0b1b3f;border-radius:6px;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;border:0;position:relative;padding:8px 6px}
+table.heat td.hm2.dk{color:#fff}
+table.heat td.hm2.hm0{background:transparent;color:var(--muted);font-weight:400}
+.hmstar{display:inline-block;background:#ffd34d;color:#3b2a00;border-radius:999px;padding:1px 9px;font-weight:800;box-shadow:0 0 0 2px #fff}
+.hmstar i{font-style:normal;color:#b07800}
+.hmtop{display:block;font:700 9px var(--body);letter-spacing:.06em;text-transform:uppercase;opacity:.75;margin-top:1px}
+table.heat td.hm2:not(.dk) .hmtop{color:#1d4fb8;opacity:1}
+.hmkey{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:8px 0 0;font-size:12px;color:var(--muted)}
+.hmbar{display:inline-block;width:110px;height:10px;border-radius:5px;background:linear-gradient(90deg,color-mix(in srgb,#1d4fb8 6%,#fff),color-mix(in srgb,#1d4fb8 90%,#fff));border:1px solid var(--line)}
+.hmkey .hmstar{font-size:12px;padding:0 8px}.hmkey .hmtop{display:inline;color:#1d4fb8;opacity:1}
+@media (max-width:760px){table.heat{border-spacing:2px}table.heat td.hm2{font-size:13px;padding:6px 2px}.hmstar{padding:0 5px}}
+table.heat th:not(:first-child),table.heat td.hm2{width:13%}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -674,7 +688,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.62 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.63 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1116,7 +1130,8 @@ function powerTabView(){
   const fav=T.map(s=>{const c=[1,2,3,4].map(st=>({st,b:swStrokePts(s,st)})).filter(x=>x.b).sort((a,b)=>b.b.p-a.b.p)[0];return c?c.st:0}).filter(Boolean),favN=[1,2,3,4].map(st=>({st,n:fav.filter(x=>x===st).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
   const idTxt=`Most ${CLUB.short} ${who==="team"?"swimmers":who} are strongest at <b>${STN[favN[0].st]}</b> (${favN[0].n} of ${fav.length})${favN[1]?`, then ${STN[favN[1].st]} (${favN[1].n})`:""}. Weakest stroke across the ${who}: <b>${STN[weak.st]}</b> (average ${weak.all} points).${bTop?` Best over <b>${bTop.n.toLowerCase()}</b> races (${bTop.l}, average ${bTop.v} points).`:""}${fewDist?` Only ${fewDist} swimmers race 400 m or more.`:""}${races[4]<rt*.08?` IM is rarely raced (${races[4]} of ${rt} races in ${YEAR}).`:""}`;
   const heatRows=T.slice().sort(thCmp).map(s=>{const c=[1,2,3,4,5].map(st=>swStrokePts(s,st));const m=Math.max(...c.slice(0,4).map(b=>b?b.p:0));c.forEach((b,i)=>{if(b&&i<4&&b.p===m)b.main=true});return{s,c}}).filter(r=>r.c.some(Boolean));
-  const cell=b=>{if(!b)return`<td class="hm0">–</td>`;const f=Math.min(1,b.p/max);return `<td class="hm${b.main?" main":""}" style="--f:${(0.12+f*.88).toFixed(2)}" title="${evShort(b.k)} ${fmt(b.t)}${b.main?" · main stroke":""}"><b>${b.p}</b>${b.main?" ★":""}</td>`};
+  const hv=heatRows.flatMap(r=>r.c.filter(Boolean).map(b=>b.p)),hLo=Math.min(...hv),hHi=Math.max(...hv),colTop=[0,1,2,3,4].map(k=>Math.max(0,...heatRows.map(r=>r.c[k]?r.c[k].p:0)));
+  const cell=(b,k)=>{if(!b)return`<td class="hm2 hm0"><span>–</span></td>`;const f=hHi>hLo?(b.p-hLo)/(hHi-hLo):1,top=b.p===colTop[k];return `<td class="hm2${f>.66?" dk":""}" style="--f:${(6+f*84).toFixed(0)}%" title="${evShort(b.k)} ${fmt(b.t)}${b.main?" · main stroke":""}"><span class="${b.main?"hmstar":""}">${b.p}${b.main?" <i>★</i>":""}</span></td>`};
   return `<h2>Team power</h2>${teamRecords()}<p class="hint" style="margin-top:0">What this team is good at, from each swimmer's ${YEAR} bests in World Aquatics points (${POOL()}). 1000 = world-class.</p>
   <div class="row">${segBtns("pg",[["all","All"],["M","Boys"],["F","Girls"]])}${grpSel()}</div>
   <div class="relaycard" style="margin-bottom:14px;border-color:var(--gold)"><b style="font-family:var(--display)">Team identity</b><p style="margin:6px 0 0">${idTxt}</p></div>
@@ -1126,9 +1141,10 @@ function powerTabView(){
    <div style="min-width:0"><h3 style="margin-top:0">Sprint or distance?</h3><div class="pw">${bands.map(b=>`<span class="pwl">${b.n}<br><span class="en" style="font-weight:400">${b.l}</span></span><span class="bar"><i style="width:${Math.min(100,b.v/max*100)}%"></i></span><span class="pwv">${b.c?`<b>${b.v}</b> <span class="en">${b.c} swimmers</span>`:'<span class="hint">none</span>'}</span>`).join("")}</div>
     <h3>Where we race (${YEAR})</h3><div class="pw">${races.map((n,i)=>`<span class="pwl">${STN[i+1]}</span><span class="bar"><i style="width:${n/rt*100}%;background:var(--teal)"></i></span><span class="pwv"><b>${n}</b> <span class="en">${Math.round(n/rt*100)}%</span></span>`).join("")}</div>
     <h3>Stroke leaders</h3><div class="row">${has.map(x=>`<span class="chip" style="font-size:13px;padding:5px 12px">${STN[x.st]} · <b>${esc(x.l[0].s.th)}</b> ${x.l[0].b.p}</span>`).join("")}</div></div></div>
-  <h3 style="margin-top:20px">Who is good at what</h3><p class="hint" style="margin-top:0">Each swimmer's best points per stroke in ${YEAR}. Darker = stronger, ★ = their main stroke. Tap a name for their page.</p>
+  <h3 style="margin-top:20px">Who is good at what</h3><p class="hint" style="margin-top:0">Each swimmer's best points per stroke in ${YEAR}. Darker blue = stronger. Gold <b>★</b> = their main stroke. Tap a name for their page.</p>
   <div class="tw"><table class="heat"><thead><tr><th>Swimmer</th>${[1,2,3,4,5].map(st=>`<th class="num">${STN[st]}</th>`).join("")}</tr></thead><tbody>
-  ${heatRows.map(r=>`<tr class="click" data-sw="${r.s.i}"><td><span class="nm">${nmH(r.s.th)}</span> <span class="en">· ${r.s.age}</span></td>${r.c.map(cell).join("")}</tr>`).join("")}</tbody></table></div>`;
+  ${heatRows.map(r=>`<tr class="click" data-sw="${r.s.i}"><td><span class="nm">${nmH(r.s.th)}</span> <span class="en">· ${r.s.age}</span></td>${r.c.map((b,k)=>cell(b,k)).join("")}</tr>`).join("")}</tbody></table></div>
+  <div class="hmkey"><span>weaker</span><i class="hmbar"></i><span>stronger</span><span class="hmstar">★ main stroke</span></div>`;
 }
 /* ---------- Swimmer page: every swim with splits, and split comparison ---------- */
 const spMed=sp=>{const v=sp.filter(x=>x>0).sort((a,b)=>a-b);return v[Math.floor(v.length/2)]||0},spBad=(sp,x)=>!x||x>1.5*spMed(sp),spOk=sp=>!!sp&&sp.length>1&&!sp.some(x=>spBad(sp,x));
