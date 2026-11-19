@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.64 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.65 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -563,6 +563,9 @@ table.heat td.hm2:not(.dk) .hmtop{color:#1d4fb8;opacity:1}
 .hmkey .hmstar{font-size:12px;padding:0 8px}.hmkey .hmtop{display:inline;color:#1d4fb8;opacity:1}
 @media (max-width:760px){table.heat{border-spacing:2px}table.heat td.hm2{font-size:13px;padding:6px 2px}.hmstar{padding:0 5px}}
 table.heat th:not(:first-child),table.heat td.hm2{width:13%}
+/* admin tab badges v3.65 */
+.abadge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:#c8102e;color:#fff;font:700 12px/1 var(--body);vertical-align:2px;box-shadow:0 0 0 2px var(--surface)}
+.abadge.soft{background:#ffe58a;color:#6b4a00}
 .nw{white-space:nowrap}.ph,.phi{display:none}
 @media (max-width:760px){
  .ph{display:block;margin-top:2px}.phi{display:inline}
@@ -691,7 +694,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.64 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.65 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -2695,7 +2698,9 @@ async function adminPage(){
     const [clubs,users,trs,mts,cors]=await Promise.all([DB.listClubs(),DB.listUsers(),DB.allTransfers().catch(()=>[]),DB.listMeets().catch(()=>[]),DB.allCorrections().catch(()=>[])]);A.cors=cors;mts.sort((a,b)=>String(a.start).localeCompare(String(b.start)));
     const counts=await Promise.all(clubs.map(c=>DB.rosterCount(c.id).catch(()=>"?")));
     const open=trs.filter(t=>t.status==="open");
-    let h=`<div class="row" style="margin-bottom:14px"><div class="seg">${[["clubs","Clubs"],["meets","Upcoming meets"],["corr","Corrections"],["coaches","Coach accounts"],["transfers",`Transfer requests${open.length?" ("+open.length+")":""}`]].map(([v,l])=>`<button data-at="${v}" aria-pressed="${A.tab===v}">${l}</button>`).join("")}</div></div>`;
+    const nCorr=cors.filter(x=>x.status==="open").length,nExp=cors.filter(x=>x.status==="accepted"&&!x.exported).length;
+    const abadge=v=>v==="corr"?(nCorr?`<span class="abadge" title="${nCorr} correction${nCorr>1?"s":""} waiting for you">${nCorr}</span>`:nExp?`<span class="abadge soft" title="${nExp} accepted, not yet sent to the staff app">${nExp}</span>`:""):v==="transfers"&&open.length?`<span class="abadge" title="${open.length} transfer request${open.length>1?"s":""} waiting">${open.length}</span>`:"";
+    let h=`<div class="row" style="margin-bottom:14px"><div class="seg">${[["clubs","Clubs"],["meets","Upcoming meets"],["corr","Corrections"],["coaches","Coach accounts"],["transfers","Transfer requests"]].map(([v,l])=>`<button data-at="${v}" aria-pressed="${A.tab===v}">${l}${abadge(v)}</button>`).join("")}</div></div>`;
     if(A.tab==="clubs"){const e=A.edit?clubs.find(c=>c.id===A.edit)||{}:{};
       h+=`<div class="addm" style="margin:0 0 14px"><b style="font-family:var(--display);font-size:16px">Preview any team</b>
         <p class="hint" style="margin:0">See any club in the results as a coach would: team, swimmers, rankings, goals, relays and reports, for example to show a club before it signs up. Read-only: nothing is saved and no coach slots are used. Meet entries are hidden.</p>
