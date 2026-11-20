@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.67 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.68 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -710,6 +710,12 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
 @media (max-width:760px){table.emev .tin{width:64px;padding:5px 4px}table.emev th{letter-spacing:0}}
 @media (max-width:760px){th{white-space:normal!important}td.cmd{white-space:normal!important}}
 @media (max-width:760px){.dbar{width:64px}}
+
+/* v3.68 new swimmer form: room from the green line, required marks */
+#nvForm.nvform{padding:14px 18px 16px 20px!important;border-radius:0 12px 12px 0;background:var(--surface)}
+#nvForm.nvform{display:flex;flex-direction:column;gap:10px}#nvForm.nvform>b{display:block;font-size:19px!important}#nvForm .row{gap:10px 14px}
+.rq{color:#c8102e;font-weight:700}.nvreq{display:block;margin-top:2px}
+#nvForm input.nvbad,#nvForm select.nvbad{border-color:#c8102e!important;box-shadow:0 0 0 3px rgba(200,16,46,.15)}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -717,7 +723,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.67 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.68 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1300,10 +1306,10 @@ function newSwBox(full){if(CTX.expired)return"";const v=ui.nv||{};
   if(!ui.nvOpen&&qq.length<2)return `<p class="nvwait"><span class="stepn off">2</span>Can't find them? Search first. If the swimmer has never raced in an SMT meet, you can add them as a new swimmer here.</p>`;
   if(!ui.nvOpen)return `<div class="nvbox"><div class="nvtx"><b><span class="stepn">2</span>Can't find “${esc(qq)}”?</b><span>Only if the swimmer has never raced in an SMT meet. Check the list above first.</span></div>${full?`<span class="hint">All slots used</span>`:`<button type="button" class="nvbtn" id="nvOpen"><span aria-hidden="true">＋</span> Add as a new swimmer</button>`}</div>`;
   const dups=ui.nvDups;
-  return `<form id="nvForm" class="addm" style="margin-top:12px;border-left:4px solid var(--green)"><b style="font-family:var(--display);font-size:17px">New swimmer</b><span class="hint">Only for swimmers who have never raced in an SMT meet. Saved privately for ${esc(CLUB.short)}: other clubs and the public site can't see these details.</span>
-   <div class="row" style="margin:0"><label class="hint">Thai first name<br><input id="nvThF" required value="${esc(v.thF||"")}" style="width:150px"></label><label class="hint">Thai surname<br><input id="nvThL" required value="${esc(v.thL||"")}" style="width:170px"></label></div>
-   <div class="row" style="margin:0"><label class="hint">English first name<br><input id="nvEnF" required value="${esc(v.enF||"")}" style="width:150px"></label><label class="hint">English surname<br><input id="nvEnL" required value="${esc(v.enL||"")}" style="width:170px"></label></div>
-   <div class="row" style="margin:0"><label class="hint">Boy / girl<br><select id="nvG" required><option value="">Choose…</option><option value="M"${v.g==="M"?" selected":""}>Boy</option><option value="F"${v.g==="F"?" selected":""}>Girl</option></select></label><label class="hint">Birth date<br><input id="nvDob" type="date" required value="${esc(v.dob||"")}" max="${new Date().toISOString().slice(0,10)}"></label><label class="hint">Nationality<br>${natSelect("nvNat",v.nat)}</label><label class="hint"><span id="nvCidL">${isThaiNat(v.nat)?"Citizen ID (13 digits)":"Passport or ID number"}</span><br><input id="nvCid" ${isThaiNat(v.nat)?'inputmode="numeric" maxlength="17"':'maxlength="20"'} value="${esc(v.cid||"")}" style="width:160px" placeholder="optional"><span class="tidw" id="nvW" style="display:block"></span></label></div>
+  return `<form id="nvForm" class="addm nvform" style="margin-top:12px;border-left:4px solid var(--green)"><b style="font-family:var(--display);font-size:17px">New swimmer</b><span class="hint">Only for swimmers who have never raced in an SMT meet. Saved privately for ${esc(CLUB.short)}: other clubs and the public site can't see these details.</span><span class="hint nvreq"><b class="rq">*</b> Every box marked * must be filled in. Non-Thai swimmers: English name and passport number (Thai name only if they have one).</span>
+   <div class="row" style="margin:0"><label class="hint">Thai first name<span class="rq nvthq"${isThaiNat(v.nat)?"":" hidden"}> *</span><br><input id="nvThF"${isThaiNat(v.nat)?" required":""} value="${esc(v.thF||"")}" style="width:150px"></label><label class="hint">Thai surname<span class="rq nvthq"${isThaiNat(v.nat)?"":" hidden"}> *</span><br><input id="nvThL"${isThaiNat(v.nat)?" required":""} value="${esc(v.thL||"")}" style="width:170px"></label></div>
+   <div class="row" style="margin:0"><label class="hint">English first name<span class="rq"> *</span><br><input id="nvEnF" required value="${esc(v.enF||"")}" style="width:150px"></label><label class="hint">English surname<span class="rq"> *</span><br><input id="nvEnL" required value="${esc(v.enL||"")}" style="width:170px"></label></div>
+   <div class="row" style="margin:0"><label class="hint">Boy / girl<span class="rq"> *</span><br><select id="nvG" required><option value="">Choose…</option><option value="M"${v.g==="M"?" selected":""}>Boy</option><option value="F"${v.g==="F"?" selected":""}>Girl</option></select></label><label class="hint">Birth date<span class="rq"> *</span><br><input id="nvDob" type="date" required value="${esc(v.dob||"")}" max="${new Date().toISOString().slice(0,10)}"></label><label class="hint">Nationality<span class="rq"> *</span><br>${natSelect("nvNat",v.nat)}</label><label class="hint"><span id="nvCidL">${isThaiNat(v.nat)?"Citizen ID (13 digits)":"Passport number"}</span><span class="rq"> *</span><br><input id="nvCid" required ${isThaiNat(v.nat)?'inputmode="numeric" maxlength="17"':'maxlength="20"'} value="${esc(v.cid||"")}" style="width:170px" placeholder="${isThaiNat(v.nat)?"13 digits":"as on the passport"}"><span class="tidw" id="nvW" style="display:block"></span></label></div>
    ${dups&&dups.length?`<div class="lock" style="border-style:solid;border-color:var(--gold);text-align:left"><b style="color:var(--ink);font-family:var(--display)">Is this the same swimmer?</b> SMT already has ${dups.length===1?"a swimmer":"swimmers"} with a similar name:
      <div class="tw" style="margin-top:6px"><table><tbody>${dups.map(d=>{const mineT=D.sw.some(x=>x.id===d.id);return `<tr><td><span class="nm">${nmH(d.th||d.en)}</span> <span class="en">· ${esc(d.en)} · born ${d.by||"?"}${d.club?" · "+esc(d.club):""}${d.last?" · last raced "+esc(d.last):""}</span></td><td class="num">${mineT?'<span class="hint">Already in your team</span>':`<button type="button" class="chip teal" data-addid="${esc(d.id)}" style="cursor:pointer">Yes, add this swimmer</button>`}</td></tr>`}).join("")}</tbody></table></div>
      <div class="row" style="margin:6px 0 0"><button type="button" class="chip" id="nvForce" style="cursor:pointer">No, it's someone new: save</button></div></div>`:dups?'<p class="hint" style="color:var(--green)">No similar swimmer in SMT.</p>':""}
@@ -1323,13 +1329,24 @@ function newSwBox(full){if(CTX.expired)return"";const v=ui.nv||{};
       if(!ui.nv){const w=(ui.mq||"").trim().split(/\s+/),th=/[\u0E00-\u0E7F]/.test(ui.mq||"");ui.nv=th?{thF:w[0]||"",thL:w.slice(1).join(" ")}:{enF:w[0]||"",enL:w.slice(1).join(" ")}}render()}else if(t.id==="nvCancel"){ui.nvOpen=false;ui.nv=null;ui.nvDups=null;render()}
     else if(t.id==="nvForce"){const v=read();ui.nv=v;save(v)}else if(t.closest("[data-addid]")&&t.closest("#nvForm")){ui.nvOpen=false;ui.nv=null;ui.nvDups=null}});
   view.addEventListener("submit",e=>{if(e.target.id!=="nvForm")return;e.preventDefault();e.stopPropagation();const v=read();ui.nv=v;
+    const bad=(id,m)=>{CTX.toast(m,true);const el=document.getElementById(id);if(el){el.classList.add("nvbad");el.focus()}},thN=isThaiNat(v.nat);
+    if(!v.enF||!v.enL){bad(!v.enF?"nvEnF":"nvEnL","Fill in both the English first name and surname.");return}
+    if(!/^[A-Za-z][A-Za-z .'\-]*$/.test(v.enF)||!/^[A-Za-z][A-Za-z .'\-]*$/.test(v.enL)){bad(/^[A-Za-z][A-Za-z .'\-]*$/.test(v.enF)?"nvEnL":"nvEnF","English name: use English letters only.");return}
+    if(thN&&(!v.thF||!v.thL)){bad(!v.thF?"nvThF":"nvThL","Fill in both the Thai first name and surname.");return}
+    if(thN&&!/[\u0E00-\u0E7F]/.test(v.thF+v.thL)){bad("nvThF","Thai name: type it in Thai letters.");return}
+    if((v.thF&&!v.thL)||(!v.thF&&v.thL)){bad(v.thF?"nvThL":"nvThF","Fill in both Thai names, or leave both empty.");return}
+    if(!v.g){bad("nvG","Choose boy or girl.");return}
+    if(!v.dob){bad("nvDob","Fill in the birth date.");return}
+    if(!v.cid){bad("nvCid",thN?"Fill in the 13-digit citizen ID.":"Fill in the passport number.");return}
+    if(!thN&&!/^[A-Z0-9]{5,20}$/.test(v.cid)){bad("nvCid","Check the passport number: 5 to 20 letters and numbers.");return}
+    if(!thN&&!v.thF&&!v.thL){v.thF=v.enF;v.thL=v.enL}
     if(!v.nat||v.nat.length!==3){CTX.toast("Nationality: choose a country, or type a 3-letter code (for example JPN).",true);return}
-    if(v.cid&&isThaiNat(v.nat)){const L=tidIssues(v.cid,(v.dob||"").slice(0,4));if(String(v.cid).replace(/\D/g,"").length!==13||L.length){CTX.toast(L.length?tidMsg(L):"A Thai citizen ID has 13 digits.",true);return}}
+    if(v.cid&&isThaiNat(v.nat)){if(String(v.cid).replace(/\D/g,"").length!==13){bad("nvCid","A Thai citizen ID has 13 digits.");return}const L=tidIssues(v.cid,(v.dob||"").slice(0,4));if(String(v.cid).replace(/\D/g,"").length!==13||L.length){CTX.toast(L.length?tidMsg(L):"A Thai citizen ID has 13 digits.",true);return}}
     const age=(Date.now()-Date.parse(v.dob))/31557600000;if(!(age>=3&&age<=90)){CTX.toast("Check the birth date.",true);return}
     const d=CTX.dupCheck(v);if(d.length){ui.nvDups=d;render();return}save(v)},true);
-  view.addEventListener("input",e=>{if(e.target.closest&&e.target.closest("#nvForm")){ui.nv=read();if(ui.nvDups){ui.nvDups=null}}});
+  view.addEventListener("input",e=>{if(e.target.closest&&e.target.closest("#nvForm")){e.target.classList.remove("nvbad");ui.nv=read();if(ui.nvDups){ui.nvDups=null}}});
   view.addEventListener("change",e=>{const t=e.target;if(!t.classList||!t.classList.contains("natsel"))return;const o=document.getElementById(t.id+"O");if(o){o.style.display=t.value==="__o"?"":"none";if(t.value==="__o")o.focus()}
-    if(t.id==="nvNat"){const th=isThaiNat(natRead("nvNat")),L=document.getElementById("nvCidL"),c=document.getElementById("nvCid"),w=document.getElementById("nvW");if(L)L.textContent=th?"Citizen ID (13 digits)":"Passport or ID number";if(c){if(th){c.setAttribute("inputmode","numeric");c.maxLength=17}else{c.removeAttribute("inputmode");c.maxLength=20}}if(w)w.textContent="";if(document.getElementById("nvForm"))ui.nv=read()}});})();
+    if(t.id==="nvNat"){const th=isThaiNat(natRead("nvNat")),L=document.getElementById("nvCidL"),c=document.getElementById("nvCid"),w=document.getElementById("nvW");if(L)L.textContent=th?"Citizen ID (13 digits)":"Passport number";if(c){c.placeholder=th?"13 digits":"as on the passport";if(th){c.setAttribute("inputmode","numeric");c.maxLength=17}else{c.removeAttribute("inputmode");c.maxLength=20}}["nvThF","nvThL"].forEach(id=>{const x=document.getElementById(id);if(x)x.required=th});document.querySelectorAll(".nvthq").forEach(x=>x.hidden=!th);if(w)w.textContent="";if(document.getElementById("nvForm"))ui.nv=read()}});})();
 
 /* ---------- corrections: SMT swimmers → request to SMT; new swimmers → edit directly ---------- */
 const CF={nameTh:"Thai name",nameEn:"English name",dob:"Birth date",gender:"Boy / girl",nat:"Nationality",cid:"Citizen ID / passport"};
