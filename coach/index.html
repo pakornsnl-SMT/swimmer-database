@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.69 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.70 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -736,6 +736,19 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
 /* v3.69 Edit button in Manage team */
 .edbtn{display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:4px 12px!important;font:600 13px var(--body)!important;color:var(--teal,#1d4fb8)!important;border:1.5px solid color-mix(in srgb,var(--teal,#1d4fb8) 45%,transparent)!important;background:var(--surface,#fff)!important}
 .edbtn:hover{background:color-mix(in srgb,var(--teal,#1d4fb8) 10%,var(--surface,#fff))!important}
+
+/* v3.69 entry list PDF: two balanced columns, tighter rows */
+.epgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 12px;align-items:start}
+.epc{min-width:0}
+@media print{
+ .epdoc{font-size:10px!important;line-height:1.25!important}
+ .epev{margin:0 0 4px!important;border-radius:4px!important}
+ .epeh{padding:1.5px 6px!important;font-size:10px!important}
+ .eprow{padding:0.5px 6px!important}
+ .eplegs{padding:0 6px 1.5px 12px!important;font-size:9px!important}
+ .epday{margin:5px 0 4px!important;padding:1.5px 8px!important}
+ .ephd{margin-bottom:5px!important}
+}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -743,7 +756,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.69 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.70 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -830,8 +843,12 @@ function swimmerView(){
   <div style="min-width:0"><h3>Progress · ${e?evLabel(e):""}</h3>${e?chart(e,s):""}
   </div></div>${swimsBlock(s,e)}${swTimesToBeat(s)}${swInsights(s)}${swTargets(s)}`;
 }
+/* one point per day: the fastest swim that day (heat or final); the other swims that day go in the tooltip */
+function chartDays(list){const by=new Map();list.forEach(r=>{const k=String(r.d).slice(0,10),o=by.get(k);if(!o)by.set(k,{best:r,all:[r]});else{o.all.push(r);if(r.t<o.best.t)o.best=r}});
+  return [...by.values()].map(o=>Object.assign(Object.create(o.best),{_all:o.all,_src:o.best}))}
+const rdName=r=>({PRE:"Heat",FIN:"Final",SOP:"Swim-off"})[r&&r.rd]||"";
 function chart(e,s){
-  const W=460,H=200,P={l:(window.innerWidth||1000)<760&&!document.body.classList.contains("printing")?70:52,r:14,t:14,b:28},pts=e.list;
+  const W=460,H=200,P={l:(window.innerWidth||1000)<760&&!document.body.classList.contains("printing")?70:52,r:14,t:14,b:28},pts=chartDays(e.list);
   const ts=pts.map(p=>p.t),mn=Math.min(...ts),mx=Math.max(...ts),pad=Math.max((mx-mn)*0.15,50),y0=mn-pad,y1=mx+pad;
   const d0=+new Date(pts[0].d),d1=+new Date(pts[pts.length-1].d),span=Math.max(d1-d0,1);
   const X=p=>pts.length===1?(P.l+W-P.r)/2:P.l+(+new Date(p.d)-d0)/span*(W-P.l-P.r);
@@ -843,8 +860,8 @@ function chart(e,s){
    ${ticks.map(t=>`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"/><text x="${P.l-6}" y="${Y(t)+4}" text-anchor="end">${fmt(Math.round(t))}</text>`).join("")}
    <text x="${P.l}" y="${H-8}">${shortDate(pts[0].d)}</text><text x="${W-P.r}" y="${H-8}" text-anchor="end">${shortDate(pts[pts.length-1].d)}</text>
    <path d="${line}" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
-   ${pts.map((p,i)=>`<g class="cpt"><circle cx="${X(p)}" cy="${Y(p.t)}" r="13" fill="transparent"/><circle cx="${X(p)}" cy="${Y(p.t)}" r="${p===e.pb?5.5:3.5}" fill="${p===e.pb?'var(--gold)':'var(--teal)'}"/><title>${shortDate(p.d)} · ${esc(meetName(p.m))} · ${fmt(p.t)}</title></g>`).join("")}
-  </svg><p class="hint" style="margin:2px 0 8px">Lower on the chart is slower. Gold dot is the personal best. Point at a dot to see its meet and time.</p>`;
+   ${pts.map((p,i)=>`<g class="cpt"><circle cx="${X(p)}" cy="${Y(p.t)}" r="13" fill="transparent"/><circle cx="${X(p)}" cy="${Y(p.t)}" r="${p._src===e.pb?5.5:3.5}" fill="${p._src===e.pb?'var(--gold)':'var(--teal)'}"/><title>${shortDate(p.d)} · ${esc(meetName(p.m))} · ${rdName(p)?rdName(p)+" ":""}${fmt(p.t)}${p._all.length>1?" ("+p._all.filter(x=>x!==p._src).map(x=>(rdName(x)?rdName(x).toLowerCase()+" ":"")+fmt(x.t)).join(", ")+")":""}</title></g>`).join("")}
+  </svg><p class="hint" style="margin:2px 0 8px">Lower on the chart is slower. Each dot is the fastest swim that day (heat or final). Gold dot is the personal best. Point at a dot to see its meet and time.</p>`;
 }
 /* history of this one event under the chart (like Summary of times, one event): tap a row or a dot */
 function cptCard(e,s,i){const L=e.list;if(!L||!L.length)return"";let best=null;const rows=L.map((p,k)=>{const prev=L[k-1],pb=best==null||p.t<best;if(pb)best=p.t;return{p,k,d:prev?(p.t-prev.t)/100:null,pb}}).reverse();
@@ -1918,6 +1935,10 @@ V.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="grpNew"){e.p
 
 
 /* ---------- Entry list PDF (v3.56): the club's entries for one meet, by event and by swimmer, compact A4 ---------- */
+/* two balanced columns that read down the left, then the right; works the same in every browser's print (v3.69) */
+function epCols(blocks){if(!blocks.length)return "";const w=blocks.map(h=>(h.match(/class="eprow"/g)||[]).length+(h.match(/class="eplegs"/g)||[]).length*0.9+1.7),tot=w.reduce((a,b)=>a+b,0);
+  let acc=0,cut=blocks.length;for(let i=0;i<blocks.length;i++){if(acc+w[i]/2>tot/2){cut=i;break}acc+=w[i]}if(cut===0)cut=1;
+  return `<div class="epgrid"><div class="epc">${blocks.slice(0,cut).join("")}</div><div class="epc">${blocks.slice(cut).join("")}</div></div>`}
 function epDoc(m,S,mode){
   const sw=id=>D.sw.find(x=>x.id===id),G={M:"Boys",F:"Girls",X:"Mixed"},T=cs=>cs?fmt(cs):"NT";
   const named=D.sw.filter(x=>S.names.has(x.id)).sort((a,b)=>a.th.localeCompare(b.th,"th"));
@@ -1930,15 +1951,15 @@ function epDoc(m,S,mode){
   const evHead=e=>`<span class="epno">#${esc(e.no)}</span> ${esc(evName(e))} <span class="epg">${G[e.g]||""}</span>`;
   const swLine=y=>`<span class="epnm">${esc(y.th)}</span><span class="epag">${y.g==="M"?"B":"G"}${ageOf(m,y)||""}</span>`;
   /* by event: days, then each event with its swimmers (fastest entry first) or relay teams */
-  const byEvent=()=>days.map(d=>`${days.length>1||m.end&&m.end!==m.start?`<div class="epday">Day ${d} · ${dayDate(m,d)}</div>`:""}<div class="epcols">${used.filter(e=>(e.day||1)===d).map(e=>{
+  const byEvent=()=>days.map(d=>`${days.length>1||m.end&&m.end!==m.start?`<div class="epday">Day ${d} · ${dayDate(m,d)}</div>`:""}${epCols(used.filter(e=>(e.day||1)===d).map(e=>{
       if(e.r>1)return `<div class="epev"><div class="epeh">${evHead(e)}</div>${teams(e).map((t,i)=>{const g=(e.ags||[]).find(q=>q.id===t.ag);return `<div class="eprow"><span class="epnm"><b>Team ${"ABCDEFGHIJKL"[i]}</b>${g?` <span class="epag">${esc(agLbl(g))}</span>`:""}</span><span class="ept">${(()=>{let v=t.t;if(!v){try{v=typeof relSeed==="function"?relSeed(m,e,t):0}catch(_){v=0}}return T(v)})()}</span></div><div class="eplegs">${t.legs.map((id,l)=>{const y=id&&sw(id);return `<b>${e.st===5?RLEGS[l]:l+1}</b> ${y?esc(y.th):"–"}`}).join(" &nbsp;·&nbsp; ")}</div>`}).join("")}</div>`;
-      return `<div class="epev"><div class="epeh">${evHead(e)}</div>${ind(e).map(o=>`<div class="eprow">${swLine(o.y)}<span class="ept">${T(o.v[0])}</span></div>`).join("")}</div>`}).join("")}</div>`).join("");
+      return `<div class="epev"><div class="epeh">${evHead(e)}</div>${ind(e).map(o=>`<div class="eprow">${swLine(o.y)}<span class="ept">${T(o.v[0])}</span></div>`).join("")}</div>`}))}`).join("");
   /* by swimmer: each named swimmer with every event and relay leg */
-  const byName=()=>`<div class="epcols">${named.map(y=>{const mine=evs.filter(e=>e.r<=1&&(S.ent[y.id]||{})[e.no]);
+  const byName=()=>`${epCols(named.map(y=>{const mine=evs.filter(e=>e.r<=1&&(S.ent[y.id]||{})[e.no]);
       const rel=used.filter(e=>e.r>1).flatMap(e=>teams(e).map((t,i)=>({e,i,l:t.legs.indexOf(y.id)})).filter(o=>o.l>=0));
       return `<div class="epev"><div class="epeh">${swLine(y)} <span class="epen">${esc(y.en||"")}</span>${FC?`<span class="epfee">${CTX.baht(FC.per[y.id]||0)}</span>`:""}</div>${mine.map(e=>`<div class="eprow"><span class="epnm">${days.length>1?`<span class="epd">D${e.day||1}</span>`:""}<span class="epno">#${esc(e.no)}</span> ${esc(evName(e))}</span><span class="ept">${T(S.ent[y.id][e.no][0])}</span></div>`).join("")}
         ${rel.map(o=>`<div class="eprow"><span class="epnm">${days.length>1?`<span class="epd">D${o.e.day||1}</span>`:""}<span class="epno">#${esc(o.e.no)}</span> ${esc(evName(o.e))} · Team ${"ABCDEFGHIJKL"[o.i]}</span><span class="ept epleg">${o.e.st===5?RLEGS[o.l]:"Leg "+(o.l+1)}</span></div>`).join("")}
-        ${!mine.length&&!rel.length?`<div class="eprow"><span class="epnm" style="color:#9aa3b5">No events</span></div>`:""}</div>`}).join("")}</div>`;
+        ${!mine.length&&!rel.length?`<div class="eprow"><span class="epnm" style="color:#9aa3b5">No events</span></div>`:""}</div>`}))}`;
   const FC=CTX.feeOn&&CTX.feeOn(m)?feeCalc0(m,S):null;
   const when=dShort(m.start)+(m.end&&m.end!==m.start?" – "+dShort(m.end):"");
   const head=t=>`<div class="ephd"><div><div class="epclub">${esc(CLUB.name)}</div><div class="epmeet">${esc(m.name)}</div><div class="epsub">${when}${m.city?" · "+esc(m.city):""} · ${m.course==="SCM"?"25 m pool":"50 m pool"}</div></div>
