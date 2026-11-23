@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.72 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.73 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -471,7 +471,7 @@ table.ttb .t{font:500 15px var(--mono)}
 
 /* v3.46 organiser badges */
 .orgb{display:inline-block;font:700 11px var(--display);letter-spacing:.03em;color:#fff;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle;white-space:nowrap}
-.orgb.org-cnx{background:#6b3fa0}.orgb.org-nc{background:#6b7785}
+.orgb.org-cnx{background:#6b3fa0}.orgb.org-nc{background:#6b7785}.orgb.org-tasa{background:#1f9d55}
 .ncnote{margin:8px 0 10px;padding:9px 12px;border-radius:10px;border-left:5px solid #6b7785;background:rgba(107,119,133,.12);font-size:14px;line-height:1.5}.orgb.org-raceswim{background:#d9611c}
 
 /* v3.47 meet entries: organiser filter and sort */
@@ -763,7 +763,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.72 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.73 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1288,7 +1288,7 @@ function calendarView(){calInit();
   <div class="grid2" style="margin-top:18px"><div style="min-width:0"><h3 style="margin-top:0">Meets</h3><div class="tw"><table><tbody>${ui.cmeets.slice().sort((a,b)=>a.a.localeCompare(b.a)).filter(m=>m.a.startsWith(String(y))).map(m=>`<tr${m.b<today?' style="opacity:.6"':""}><td style="white-space:nowrap" class="en cmd">${shortDate(m.a)}${m.b!==m.a?"–<wbr>"+shortDate(m.b):""}</td><td><b class="ymeet pr${m.pr}" style="position:static">${m.pr}</b> ${esc(m.n)}${m.ex?' <span class="badge">example</span>':""}${orgBadge(m)}</td><td class="num" style="white-space:nowrap">${m.b<today?'<span class="hint">raced</span>':(k=>ui.mAsk===k?`<span class="hint">Remove?</span> <button class="sick" data-mdel="${k}">Yes</button> <button class="sick" data-mno="1" style="color:var(--muted)">No</button>`:`<button class="sick" data-mask="${k}" style="color:var(--muted)">Remove</button>`)(ui.cmeets.indexOf(m))}</td></tr>`).join("")}</tbody></table></div>
      ${(()=>{const have=new Set(ui.cmeets.map(m=>m.n+"|"+m.a)),list=SMT_LIST.map((m,i)=>({m,i})).filter(({m})=>!have.has(m.n+"|"+m.a)&&m.b>=iso(new Date()));const sel=ui.amSel??(list[0]?String(list[0].i):"custom"),cus=sel==="custom",pick=cus?null:SMT_LIST[+sel];
     return `<form class="addm" id="addMeet"><label class="hint" for="amS">Add a meet</label><select id="amS" style="width:100%">${list.length?`<optgroup label="SMT meet list">${list.map(({m,i})=>`<option value="${i}"${String(i)===sel?" selected":""}>${shortDate(m.a)}${m.b!==m.a?"–"+shortDate(m.b):""} · ${esc(m.n)}${m.ex?" (example)":""}${m.org?" · "+m.org:""}${m.nc?" · not certified":""}</option>`).join("")}</optgroup>`:""}<option value="custom"${cus?" selected":""}>Other meet (type it in)…</option></select>
-     ${cus?`<div class="row" style="margin:0"><input id="amN" placeholder="Meet name" required style="flex:1 1 180px"><label class="hint">From <input id="amA" type="date" required></label><label class="hint">To <input id="amB" type="date"></label></div>`:`<div class="hint">${pick?`${esc(pick.city||"")}${pick.city?" · ":""}${pick.c===2?"25 m":"50 m"} pool${pick.org?` · ${orgBadge(pick)} entries through ${pick.org}`:`${pick.nc?" · "+orgBadge(pick):""}${pick.dl?" · entries close "+shortDate(pick.dl):""}`}`:""}</div>`}
+     ${cus?`<div class="row" style="margin:0"><input id="amN" placeholder="Meet name" required style="flex:1 1 180px"><label class="hint">From <input id="amA" type="date" required></label><label class="hint">To <input id="amB" type="date"></label></div>`:`<div class="hint">${pick?`${esc(pick.city||"")}${pick.city?" · ":""}${pick.c===2?"25 m":"50 m"} pool${pick.org?` · ${orgBadge(pick)} entries through ${pick.org}`:` · ${orgBadge(pick)}${pick.dl?" · entries close "+shortDate(pick.dl):""}`}`:""}</div>`}
      <div class="row" style="margin:0"><span class="hint">Priority</span><select id="amP" aria-label="Priority">${["A","B","C"].map(p=>`<option value="${p}"${(pick?pick.pr:"C")===p?" selected":""}>${p} ${{A:"main",B:"important",C:"practice"}[p]}</option>`).join("")}</select><button class="chip teal" style="cursor:pointer;padding:6px 14px">Add to calendar</button></div></form>`})()}</div>
    <div style="min-width:0"><h3 style="margin-top:0">Training phases</h3><div class="tw"><table><tbody>${ui.phases.map((p,i)=>({p,i})).filter(({p})=>p.b>=`${y}-01-01`&&p.a<=`${y}-12-31`).map(({p,i})=>`<tr><td><span class="phdot" style="background:${PH_COL[p.c]}"></span>${esc(p.n)}</td><td class="en" style="white-space:nowrap">${shortDate(p.a)} – ${shortDate(p.b)}</td><td class="en">${(n=>n<7?n+" days":Math.round(n/7)+" wk")(Math.round((new Date(p.b)-new Date(p.a))/864e5)+1)}</td><td><button class="sick" data-delph="${i}" style="color:var(--muted)">Remove</button></td></tr>`).join("")}</tbody></table></div>
      ${(()=>{const last=ui.phases.map(p=>p.b).sort().pop(),from=last?addDays(last,1):iso(new Date()),c=ui.apC||"base",[n,u]=PH_LEN[c];
@@ -1476,7 +1476,7 @@ const s=e.target.closest('[data-seg]');if(s){ui[s.dataset.seg]=s.dataset.v;if(s.
 });
 view.addEventListener('submit',e=>{e.preventDefault();const f=e.target;
   if(f.id==='addMeet'){const s=f.querySelector('#amS').value,pr=f.querySelector('#amP').value;let m;
-    if(s==='custom'){const a=f.querySelector('#amA').value,b=f.querySelector('#amB').value||a;m={n:f.querySelector('#amN').value.trim(),a,b:b<a?a:b,pr}}else{const p=SMT_LIST[+s];m={n:p.n,a:p.a,b:p.b,pr,ex:p.ex,org:p.org||"",...(p.nc?{nc:true}:{})}}
+    if(s==='custom'){const a=f.querySelector('#amA').value,b=f.querySelector('#amB').value||a;m={n:f.querySelector('#amN').value.trim(),a,b:b<a?a:b,pr}}else{const p=SMT_LIST[+s];m={n:p.n,a:p.a,b:p.b,pr,ex:p.ex,org:p.org||"",...(p.nc?{nc:true}:p.org?{}:{tasa:true})}}
     ui.cmeets.push(m);ui.amSel=null;const d=new Date(m.a);ui.cy=d.getFullYear();ui.cm=d.getMonth();render()}
   if(f.id==='tfm'){const id=f.dataset.id,tk=ui.taken[id]||{};mngDo(id,"Sending…",async()=>{await CTX.requestTransfer(id,f.querySelector('#trR').value,f.querySelector('#trN').value.trim(),tk);ui.tform=null;CTX.toast("Request sent to SMT.")})}
   if(f.id==='addPh'){const a=f.querySelector('#apA').value,b=f.querySelector('#apB').value;if(b<a)return;const c=f.querySelector('#apC').value;ui.phases.push({n:{base:'Base',build:'Build',specific:'Specific',taper:'Taper',race:'Championship',rest:'Rest'}[c],c,a,b});render()}});
@@ -1874,7 +1874,7 @@ function relayList(teams){
 }
 
 /* organiser badge for meets run by CNX / RaceSwim (v3.46) */
-function orgBadge(m){const o=m&&m.org;return (o==="CNX"||o==="RaceSwim"?` <span class="orgb org-${o.toLowerCase()}" title="Entries through ${o}">${o}</span>`:"")+(m&&m.nc?` <span class="orgb org-nc" title="Not TASA certified: times won't count for personal bests, rankings, records or qualifying">Not certified</span>`:"")}
+function orgBadge(m){const o=m&&m.org;const smt=m&&!o&&!m.nc&&(m.tasa||m.id||((typeof CTX!=="undefined"&&CTX.meets)||[]).some(x=>x.n===m.n&&x.a===m.a&&!x.org));return (smt?` <span class="orgb org-tasa" title="Times from this meet count for personal bests, rankings, records and qualifying">TASA certified</span>`:"")+(o==="CNX"||o==="RaceSwim"?` <span class="orgb org-${o.toLowerCase()}" title="Entries through ${o}">${o}</span>`:"")+(m&&m.nc?` <span class="orgb org-nc" title="Times from this meet won't count for personal bests, rankings, records or qualifying">Not TASA certified</span>`:"")}
 
 
 /* ---------- Today's times on the meet day (v3.60): typed by the coach, used only by the Relay builder ---------- */
@@ -2082,7 +2082,7 @@ function smtEntriesView(m0,pre){
   const L=CTX.entryMeets;if(!m0&&(!ui.emid||!L.find(m=>m.id===ui.emid)))ui.emid=L[0].id;
   const m=m0||L.find(x=>x.id===ui.emid),S=msLoad(m),G=msStage(m);
   let h=`${pre!=null?pre:L.length>1?meetBlocks(L,m):""}
-  <h2 style="margin-bottom:2px">${esc(m.name)}${m.nc?orgBadge({nc:1}):""}</h2><p class="hint" style="margin-top:0">${dShort(m.start)}${m.end&&m.end!==m.start?" – "+dShort(m.end):""}${m.city?" · "+esc(m.city):""} · ${m.course==="SCM"?"25 m pool":"50 m pool"}${(m.events||[]).length?" · "+m.events.length+" events":""}${m.closed?' · <b style="color:var(--red)">entries closed by SMT</b>':""}</p>`;
+  <h2 style="margin-bottom:2px">${esc(m.name)}${orgBadge(m.nc?{nc:1}:{tasa:1})}</h2><p class="hint" style="margin-top:0">${dShort(m.start)}${m.end&&m.end!==m.start?" – "+dShort(m.end):""}${m.city?" · "+esc(m.city):""} · ${m.course==="SCM"?"25 m pool":"50 m pool"}${(m.events||[]).length?" · "+m.events.length+" events":""}${m.closed?' · <b style="color:var(--red)">entries closed by SMT</b>':""}</p>`;
   if(m.nc)h+=`<div class="ncnote"><b>Not TASA certified.</b> Entries work as usual, but times from this meet won't count for personal bests, rankings, records or qualifying, and the results are not kept.</div>`;
   {const T=tmLoad(m),n=T.list.length;h+=`<div class="teamsline"><button type="button" class="chip" data-emteams style="cursor:pointer">👥 <b>${T.loading&&!n?"…":n}</b> team${n===1?"":"s"} confirmed · ${ui.emTL?"hide":"show"}</button>${ui.emTL?`<div class="teamsgrid">${n?T.list.map(x=>`<span>${esc(x)}</span>`).join(""):`<span class="hint">No team confirmed yet.</span>`}</div><p class="hint" style="margin:4px 0 0">Teams appear here (and on smdata.in.th) once their places are confirmed. Names only.</p>`:""}</div>`}
   if(S.loading)return h+`<p class="hint">Loading your club's entry…</p>`;
@@ -2656,7 +2656,7 @@ async function coachPage(clubId,PV){
   const year=new Date().getFullYear(),today=dayLocal();
   PEOPLE=(ppl&&ppl.m)||{};let ids=ro.map(r=>r.id);const D=buildData(pub,ids,year);
   const CLUB={id:club.id,name:club.name||club.id,nameEn:club.nameEn||"",resultsName:club.resultsName||"",short:club.short||club.name||club.id,pkg:club.pkg||"",limit:FREE?0:slotsOn(club,today),expires:FREE?"":lastEnd(club),free:FREE,buys:FREE?[]:clubBuys(club),soon:FREE?[]:endingSoon(club,today,30),over:0};CLUB.over=FREE?0:Math.max(0,ro.length-CLUB.limit);
-  const CTX={feeCalc,feeOn,baht,year,saved:{calendar:cal,settings:set,today:tdy,groups:grp},myTransfers:tr,meets:meets.map(m=>({org:orgOf(m),nc:!orgOf(m)&&!!m.nc,n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a).filter(m=>m.b>=new Date().toISOString().slice(0,10)).sort((x,y)=>x.a.localeCompare(y.a)),
+  const CTX={feeCalc,feeOn,baht,year,saved:{calendar:cal,settings:set,today:tdy,groups:grp},myTransfers:tr,meets:meets.map(m=>({org:orgOf(m),nc:!orgOf(m)&&!!m.nc,tasa:!orgOf(m)&&!m.nc,n:m.name||m.n,a:m.start||m.a,b:m.end||m.b||m.start||m.a,city:m.city||"",c:m.course==="SCM"?2:1,dl:m.deadline||"",pr:m.priority||"B"})).filter(m=>m.n&&m.a).filter(m=>m.b>=new Date().toISOString().slice(0,10)).sort((x,y)=>x.a.localeCompare(y.a)),
     expired:!FREE&&(clubBuys(club).length?!CLUB.limit:!!(CLUB.expires&&CLUB.expires<today)),toast,
     addSwimmer:async id=>{if(CLUB.limit&&ids.length>=CLUB.limit)return{full:true};const r=await DB.addToRoster(id,CLUB);if(r.ok){ids=ids.concat(id);APP.reload(buildData(pub,ids,year))}return r},
     releaseSwimmer:async id=>{await DB.release(id);ids=ids.filter(x=>x!==id);if(id[0]==="n"&&PEOPLE[id]){delete PEOPLE[id];await DB.setData(CLUB.id,"people",{m:PEOPLE}).catch(()=>{})}APP.reload(buildData(pub,ids,year))},
@@ -2758,7 +2758,7 @@ const evTxt=e=>`${G_TXT[e.g]} ${e.r>1?"4×":""}${e.d} ${e.r>1&&e.st===5?"Medley"
 /* meets run by another organiser (v3.46): shown in calendars with a badge, no entries through SMT */
 const ORGS={CNX:"CNX",RaceSwim:"RaceSwim"};
 function orgOf(m){const o=m&&(m.org||m.o);return o&&ORGS[o]?o:""}
-function orgBadge(m){return orgBadge0(m)+(m&&m.nc&&!orgOf(m)?` <span class="orgb org-nc" title="Not TASA certified: times won't count for personal bests, rankings, records or qualifying">Not certified</span>`:"")}
+function orgBadge(m){return orgBadge0(m)+(m&&!orgOf(m)?(m.nc?` <span class="orgb org-nc" title="Times from this meet won't count for personal bests, rankings, records or qualifying">Not TASA certified</span>`:` <span class="orgb org-tasa" title="Times from this meet count for personal bests, rankings, records and qualifying">TASA certified</span>`):"")}
 function orgBadge0(m){const o=orgOf(m);return o?` <span class="orgb org-${o.toLowerCase()}" title="Entries through ${o}">${o}</span>`:""}
 /* ---------- entry fees (v3.61) ----------
    m.fees: team (per club) · sw (per swimmer) or swAge [{to,fee}] by age · incl (events included in the swimmer fee)
