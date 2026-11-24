@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.77 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.78 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -244,6 +244,9 @@ table.sttab tbody tr:nth-child(even) td{background:#e9f0fc}table.sttab tbody tr:
  .epag{color:#5a6886;font-size:9.5px;margin-left:5px}
  .epd{display:inline-block;font-size:9px;font-weight:700;color:#1f8a4c;margin-right:4px}
  .epexp{display:inline-flex;align-items:center;gap:4px;font-size:13px;margin:0 6px;white-space:nowrap}
+.epg2{font-weight:600;color:#5a6886;font-size:9.5px}.epcolh{margin-left:auto;display:flex;gap:6px;font-size:8.5px;font-weight:600;color:#5a6886;text-transform:none}
+.ephT{min-width:52px;text-align:right}.ephX{min-width:46px;text-align:right;color:#1d4ed8}
+.ept{min-width:52px;text-align:right}
 .epx{min-width:46px;text-align:right;font-variant-numeric:tabular-nums;color:#1d4ed8;font-weight:700;white-space:nowrap;font-size:.95em}.epx i{font-style:normal;color:#0f6e56;font-size:.8em;margin-left:3px}
 .ept{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
  .epleg{font-weight:600;color:#5a6886}
@@ -774,7 +777,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.77 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.78 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1967,12 +1970,13 @@ function epDoc(m,S,mode,EX){
   const nInd=named.reduce((a,y)=>a+Object.keys(S.ent[y.id]||{}).length,0),nRel=used.filter(e=>e.r>1).reduce((a,e)=>a+teams(e).length,0);
   const days=[...new Set(used.map(e=>e.day||1))];
   const evHead=e=>`<span class="epno">#${esc(e.no)}</span> ${esc(evName(e))} <span class="epg">${G[e.g]||""}</span>`;
+  const evHeadX=e=>`<span class="epno">#${esc(e.no)}</span> ${esc(evName(e))} <span class="epg2">· ${G[e.g]||""}</span><span class="epcolh"><span class="ephT">Entry</span><span class="ephX">Expected</span></span>`;
   const CC=m.course==="SCM"?2:1,XC=(y,e)=>{if(!EX)return "";const p=expT(y,CC,e.st,e.d,m.start);return p?`<span class="epx">${p.rough?"~":""}${fmt1(p.t)}${p.pbLikely?'<i>PB?</i>':""}</span>`:'<span class="epx"></span>'};
   const swLine=y=>`<span class="epnm">${esc(y.th)}</span><span class="epag">${y.g==="M"?"B":"G"}${ageOf(m,y)||""}</span>`;
   /* by event: days, then each event with its swimmers (fastest entry first) or relay teams */
   const byEvent=()=>days.map(d=>`${days.length>1||m.end&&m.end!==m.start?`<div class="epday">Day ${d} · ${dayDate(m,d)}</div>`:""}${epCols(used.filter(e=>(e.day||1)===d).map(e=>{
       if(e.r>1)return `<div class="epev"><div class="epeh">${evHead(e)}</div>${teams(e).map((t,i)=>{const g=(e.ags||[]).find(q=>q.id===t.ag);return `<div class="eprow"><span class="epnm"><b>Team ${"ABCDEFGHIJKL"[i]}</b>${g?` <span class="epag">${esc(agLbl(g))}</span>`:""}</span><span class="ept">${(()=>{let v=t.t;if(!v){try{v=typeof relSeed==="function"?relSeed(m,e,t):0}catch(_){v=0}}return T(v)})()}</span></div><div class="eplegs">${t.legs.map((id,l)=>{const y=id&&sw(id);return `<b>${e.st===5?RLEGS[l]:l+1}</b> ${y?esc(y.th):"–"}`}).join(" &nbsp;·&nbsp; ")}</div>`}).join("")}</div>`;
-      return `<div class="epev"><div class="epeh">${evHead(e)}</div>${ind(e).map(o=>`<div class="eprow">${swLine(o.y)}<span class="ept">${T(o.v[0])}</span>${XC(o.y,e)}</div>`).join("")}</div>`}))}`).join("");
+      return `<div class="epev"><div class="epeh">${EX?evHeadX(e):evHead(e)}</div>${ind(e).map(o=>`<div class="eprow">${swLine(o.y)}<span class="ept">${T(o.v[0])}</span>${XC(o.y,e)}</div>`).join("")}</div>`}))}`).join("");
   /* by swimmer: each named swimmer with every event and relay leg */
   const byName=()=>`${epCols(named.map(y=>{const mine=evs.filter(e=>e.r<=1&&(S.ent[y.id]||{})[e.no]);
       const rel=used.filter(e=>e.r>1).flatMap(e=>teams(e).map((t,i)=>({e,i,l:t.legs.indexOf(y.id)})).filter(o=>o.l>=0));
