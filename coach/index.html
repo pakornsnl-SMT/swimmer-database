@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.78 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.79 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -770,6 +770,12 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
  .epday{margin:5px 0 4px!important;padding:1.5px 8px!important}
  .ephd{margin-bottom:5px!important}
 }
+/* v3.79: report tabs look like buttons, so coaches see they can be clicked */
+.rptabs .seg{display:flex;flex-wrap:wrap;gap:8px;border:0;padding:0;background:none;box-shadow:none;overflow:visible;max-width:none}
+.rptabs .seg button{border:1.5px solid var(--teal);background:color-mix(in srgb,var(--teal) 8%,var(--surface));color:var(--teal);font-weight:700;font-size:15px;padding:9px 18px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.10);transition:background .15s,transform .15s,box-shadow .15s;white-space:nowrap}
+.rptabs .seg button:hover{background:color-mix(in srgb,var(--teal) 18%,var(--surface));transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.14)}
+.rptabs .seg button[aria-pressed="true"]{background:var(--teal);color:var(--surface);box-shadow:0 3px 10px color-mix(in srgb,var(--teal) 40%,transparent)}
+@media (max-width:600px){.rptabs .seg{gap:6px}.rptabs .seg button{font-size:14px;padding:8px 13px;flex:1 1 calc(50% - 6px)}}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
@@ -777,7 +783,7 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
   <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
   <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.78 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.79 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -1613,7 +1619,7 @@ document.getElementById("view").addEventListener("click",e=>{if(e.target.id!=="s
   const pg=document.createElement("style");pg.id="stPage";pg.textContent="@page{size:A4 landscape;margin:9mm}";document.head.appendChild(pg);
   const done=()=>{document.body.classList.remove("printing","land");document.title=old;pg.remove();window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(()=>window.print(),80))});
-function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint" style="margin-bottom:12px">${segBtns("rpk",[["meet","Meet Report"],["st","Summary of times"],["yr","My Swim Year"],["pf","Portfolio"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():ui.rpk==="yr"?`<h2>My Swim Year ${YEAR}</h2>`+yirView():ui.rpk==="pf"?`<h2 class="noprint">Portfolio</h2>`+portfolioView():meetReportView())}
+function reportsView(){ui.rpk=ui.rpk||"meet";return `<div class="noprint rptabs" style="margin-bottom:14px">${segBtns("rpk",[["meet","Meet Report"],["st","Summary of times"],["yr","My Swim Year"],["pf","Portfolio"]])}</div>`+(ui.rpk==="st"?`<h2>Summary of times</h2>`+summaryTimesView():ui.rpk==="yr"?`<h2>My Swim Year ${YEAR}</h2>`+yirView():ui.rpk==="pf"?`<h2 class="noprint">Portfolio</h2>`+portfolioView():meetReportView())}
 
 /* ---------- Reports: My Swim Year (year-in-review picture per swimmer, 1080×1350, 11 Nov 2026) ---------- */
 function yirData(s){const now=ALL.filter(x=>x.s===s&&x.r.d.startsWith(YEAR));if(!now.length)return null;const z=season(s);
