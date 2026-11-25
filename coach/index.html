@@ -286,7 +286,7 @@ tr.grph.gr2 td{border-top-color:var(--red);background:var(--red-soft);color:var(
 /* v3.4 tabs: each tab has its own colour */
 #tabs button[data-t="power"]{--tc:#1d4fb8}#tabs button[data-t="team"]{--tc:#c8102e}#tabs button[data-t="event"]{--tc:#a87708}#tabs button[data-t="calendar"]{--tc:#1f9d57}
 #tabs button[data-t="entries"]{--tc:#6a3fb5}#tabs button[data-t="relay"]{--tc:#0b7f8f}#tabs button[data-t="goals"]{--tc:#c85a12}#tabs button[data-t="reports"]{--tc:#3b4a66}
-#tabs button[data-t="cert"]{--tc:#b8860b}
+#tabs button[data-t="cert"]{--tc:#b8860b;display:none}body.isparent #tabs button[data-t="cert"]{display:inline-block}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #tabs button{filter:brightness(1.6) saturate(.9)}:root:not([data-theme="light"]) #tabs button[aria-selected="true"]{filter:none}}
 :root[data-theme="dark"] #tabs button{filter:brightness(1.6) saturate(.9)}:root[data-theme="dark"] #tabs button[aria-selected="true"]{filter:none}
 #tabs{gap:6px;border-bottom:3px solid var(--line);scrollbar-width:thin}
@@ -1520,9 +1520,9 @@ async function certCanvas(C){
   try{if(document.fonts){await Promise.all(["700 40px \"Barlow Condensed\"","400 14px Sarabun","700 30px Sarabun","800 14px Sarabun"].map(f=>document.fonts.load(f).catch(()=>{})))}}catch(e){}
   const logo=await cImg(CERT_LOGO),cv=document.createElement("canvas"),S=2;cv.width=CW*S;cv.height=CH*S;const x=cv.getContext("2d");x.scale(S,S);
   const n=C.rows.length,R=C.rounds,X0=18+56,TW=CW-2*X0,cols=R?[.31,.15,.17,.17,.20]:[.37,.18,.21,.24],FT=CH-18-178;
-  const lay=k=>{const z={k,logo:70*k+18,ti:46+40*k,sub:11+6*k,pres:10+3*k,nm:22+16*k,who:11+4*k,meet:13+6*k,info:10+3*k,kn:14+10*k,kl:10+3*k,tb:8.5+5*k,th:7.5+3*k,pad:1+5*k};
+  const lay=k=>{const z={k,logo:70*k+18,ti:46+40*k,sub:11+6*k,pres:10+3*k,nm:18+9*k,who:11+3*k,meet:13+6*k,info:10+3*k,kn:14+10*k,kl:10+3*k,tb:8.5+5*k,th:7.5+3*k,pad:1+5*k};
     let y=18+96+14*k;z.yLogo=y;y+=z.logo+4*k;z.yTi=y+z.ti*.82;y+=z.ti*.95;z.ySub=y+4*k+z.sub;y+=4*k+z.sub+10*k;
-    z.yPres=y+z.pres;y+=z.pres*1.45;z.yNm=y+z.nm*.95;y+=z.nm*1.25;z.yWho=y+z.who;y+=z.who*1.45;
+    z.yPres=y+z.pres;y+=z.pres*1.45;z.yNm=y+z.nm*1.05;y+=z.nm*1.45;z.yWho=y+z.who;y+=z.who*1.45;
     y+=8+6*k;z.bp=6*k+4;z.yBox=y;z.bh=z.meet*1.3+z.info*1.7+z.kn*1.15+z.kl*1.3+2*z.bp;y+=z.bh;
     y+=8+8*k;z.yTab=y;z.hh=z.th*1.25*2+2*(3+3*k);z.rh=z.tb*1.3+2*z.pad;y+=z.hh+n*z.rh;
     if(C.recs.length){y+=6+C.recs.length*z.tb*1.45}z.end=y;return z};
@@ -1544,7 +1544,7 @@ async function certCanvas(C){
   [[-1],[1]].forEach(([d])=>{const a=cx+d*(sw/2+12);x.beginPath();x.moveTo(a,z.ySub-z.sub*.35);x.lineTo(a+d*50,z.ySub-z.sub*.35);x.stroke()});
   cText(x,"This certificate is presented to",z.pres,z.yPres,{x:cx,c:"#5a6886"});
   const nmS=cFitW(x,C.s.th||C.s.en,z.nm,{w:700},TW);cText(x,C.s.th||C.s.en,nmS,z.yNm,{x:cx,w:700,c:"#173f9e"});
-  const who=[C.s.th&&C.s.en?C.s.en:"",CLUB.name].filter(Boolean);x.font=`500 ${z.who}px ${CFB}`;
+  const who=[C.s.th&&C.s.en?C.s.en:"",CLUB.name].filter(Boolean);let wS=z.who;const wW=()=>{x.font=`500 ${wS}px ${CFB}`;const a=who.length>1?x.measureText(who[0]+" · ").width:0;x.font=`700 ${wS}px ${CFB}`;return a+x.measureText(who[who.length-1]).width};while(wS>8&&wW()>TW)wS-=.5;z.who=wS;x.font=`500 ${z.who}px ${CFB}`;
   const w1=who.length>1?x.measureText(who[0]+" · ").width:0;x.font=`700 ${z.who}px ${CFB}`;const w2=x.measureText(who[who.length-1]).width;let wx=cx-(w1+w2)/2;
   if(who.length>1)cText(x,who[0]+" · ",z.who,z.yWho,{x:wx,a:"left",w:500,c:"#5a6886"});cText(x,who[who.length-1],z.who,z.yWho,{x:wx+w1,a:"left",w:700});
   /* meet box */
@@ -3021,7 +3021,7 @@ async function coachPage(clubId,PV,PAR){
   $("#pkgChips").innerHTML=`${CLUB.limit?`<span class="chip teal">${CLUB.limit} coach slots</span>`:""}${CTX.expired?`<span class="chip" style="color:var(--red);border-color:var(--red)">Expired${CLUB.expires?" "+escH(dShow(CLUB.expires)):""}</span>`:CLUB.soon.length?CLUB.soon.map(b=>`<span class="chip" style="color:var(--red);border-color:var(--red)" title="Ask SMT to renew">${+b.n} slot${+b.n>1?"s":""} end ${escH(dShow(b.end))}</span>`).join(""):nextEnd?`<span class="chip gold">Valid to ${escH(dShow(nextEnd))}</span>`:""}${CLUB.over&&!CTX.expired?`<span class="chip" id="overChip" style="color:#fff;background:var(--red);border-color:var(--red)">Release ${CLUB.over} swimmer${CLUB.over>1?"s":""}</span>`:""}`;
   $("#userBar").innerHTML=`<span class="hint">${escH(USER.email||"")}</span>${PROFILE&&PROFILE.role==="admin"?` <a class="chip" href="?${MOCK?"mock=1&":""}${QS.get("data")?"data="+encodeURIComponent(QS.get("data"))+"&":""}">Admin</a>`:""} <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
   CTX.loadCorrections();
-  if(PAR)CTX.parent=true;
+  if(PAR){CTX.parent=true;document.body.classList.add("isparent")}
   if(PAR){$("#pkgChips").innerHTML=PAR.preview?`<span class="chip" style="background:#fff4d6;border-color:#c98a00;color:#7a5200;font-weight:700">Parent preview · read-only</span>`:"";document.title=PAR.preview?"Parent preview · SMT":"SMT Parent"}
   else if(PV){$("#pkgChips").innerHTML=`<span class="chip" style="background:#fff4d6;border-color:#c98a00;color:#7a5200;font-weight:700">Preview · read-only · ${ids.length} swimmer${ids.length===1?"":"s"} from public results</span>`;document.title=CLUB.short+" · Preview · SMT Coach"}
   show("#scrApp");APP=window.startCoachApp(D,CTX,CLUB);
