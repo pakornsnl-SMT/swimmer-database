@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SMT COACH APP v3.79 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
+<!-- SMT COACH APP v3.80 · upload to: swimmer-database / coach / index.html  (NOT the main website) -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SMT Coach</title><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><meta name="apple-mobile-web-app-title" content="SMT Coach"><meta name="theme-color" content="#1d4fb8"><meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -770,26 +770,42 @@ table.pbt th{white-space:normal!important;line-height:1.15;vertical-align:bottom
  .epday{margin:5px 0 4px!important;padding:1.5px 8px!important}
  .ephd{margin-bottom:5px!important}
 }
-/* v3.79: report tabs look like buttons, so coaches see they can be clicked */
+/* v3.80: report tabs look like buttons, so coaches see they can be clicked */
 .rptabs .seg{display:flex;flex-wrap:wrap;gap:8px;border:0;padding:0;background:none;box-shadow:none;overflow:visible;max-width:none}
 .rptabs .seg button{border:1.5px solid var(--teal);background:color-mix(in srgb,var(--teal) 8%,var(--surface));color:var(--teal);font-weight:700;font-size:15px;padding:9px 18px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.10);transition:background .15s,transform .15s,box-shadow .15s;white-space:nowrap}
 .rptabs .seg button:hover{background:color-mix(in srgb,var(--teal) 18%,var(--surface));transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.14)}
 .rptabs .seg button[aria-pressed="true"]{background:var(--teal);color:var(--surface);box-shadow:0 3px 10px color-mix(in srgb,var(--teal) 40%,transparent)}
 @media (max-width:600px){.rptabs .seg{gap:6px}.rptabs .seg button{font-size:14px;padding:8px 13px;flex:1 1 calc(50% - 6px)}}
-/* v3.79: clubs list tools */
+/* v3.80: clubs list tools */
 .actool{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:4px 0 10px}
 .actool .acq{display:flex;align-items:center;gap:6px;flex:1 1 300px;max-width:440px;border:1.5px solid var(--teal);border-radius:999px;padding:6px 12px;background:var(--surface)}
 .actool .acq input{border:0;outline:0;flex:1;font:inherit;font-size:15px;background:none;min-width:0}
 .actool .acs{display:flex;align-items:center;gap:6px;margin:0}.actool select{font:inherit;font-size:14px;padding:5px 8px}
 .actot td{border-top:2px solid var(--teal);background:color-mix(in srgb,var(--teal) 6%,var(--surface));padding-top:10px;padding-bottom:10px}
+/* v3.80: parent and coach sign-up screens */
+.xview{max-width:520px}.xform{display:flex;flex-direction:column;gap:12px}
+.xstep{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface)}
+.xkids{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow:auto}
+.xkid{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;cursor:pointer}.xkid input{width:auto!important}
+.xkid.on{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 8%,var(--surface))}
+.xmode{display:flex;max-width:none}.xmode button{flex:1}
+.xor{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.xor:before,.xor:after{content:"";flex:1;border-top:1px solid var(--line)}
+.xgoogle{display:flex;align-items:center;justify-content:center;gap:8px;font:600 15px var(--body);padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer}.xgoogle b{color:#4285f4;font-size:17px}
+.xok{background:color-mix(in srgb,#1a8a4a 12%,var(--surface));color:#14683a;border-radius:10px;padding:10px 12px;font-weight:700}
+.xreq{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.xreq:first-of-type{border-top:0}
+.pill.ok{background:#e3f4ea;color:#14683a}.pill.bad{background:#fde8ea;color:#a3142b}.pill.wait{background:#fff4d6;color:#7a5200}
+/* v3.80: parent QR box */
+.pqin{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-top:8px}.pqimg{width:200px;min-height:200px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:12px}.pqimg img{width:196px;height:196px;image-rendering:pixelated}
+.pqmsg{white-space:pre-wrap;font:13px/1.5 var(--body);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0 0}
 </style>
 </head><body>
 <div id="scrLoad" class="wrap"><div class="loadbox"><div class="spin"></div><div id="loadMsg">Starting…</div></div></div>
 <div id="scrLogin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><form id="loginForm" class="login"><p class="brand">SMT Coach</p><p class="hint" style="margin:0">Swim Meets Thailand · for club coaches</p>
   <label class="hint" for="lgEmail">Email</label><input id="lgEmail" type="email" autocomplete="username" required><label class="hint" for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required>
-  <button class="go" type="submit">Log in</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
-  <p class="hint">No account? Coach accounts are created by SMT. Contact SMT to join.</p></form></div>
-<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.79 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
+  <button class="go" type="submit">Log in</button><button type="button" class="xgoogle" id="lgGoogle"><b aria-hidden="true">G</b> Continue with Google</button><button class="lnk2" type="button" id="lgForgot">Forgot password?</button><div id="loginMsg" class="hint" role="status" style="min-height:1.5em"></div>
+  <p class="hint" id="lgCoachLine" style="margin:6px 0 0">New coach? <button class="lnk2" type="button" id="lgNewCoach" style="font-weight:700">Create your login</button> · SMT links it to your club.</p><p class="hint" id="lgParLine" style="margin:0">Parent? Scan the QR code from your club, or <button class="lnk2" type="button" id="lgParent">log in as a parent</button>.</p></form></div>
+<div id="scrX" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><div id="xView" class="login xview"></div></div>
+<div id="scrAdmin" class="wrap" hidden><div class="stripe" aria-hidden="true"></div><header><div><h1>SMT Coach · Admin</h1><div class="sub">Clubs, upcoming meets, coach accounts and transfer requests · coach app v3.80 · <span id="rdCount" title="Database reads made by this browser today. Firebase's free limit is 50,000 reads a day for everyone together."></span></div></div><div class="pkg" id="adminUser"></div></header><main id="adminView" class="panel"></main></div>
 <div id="scrApp" class="wrap" hidden>
   <div class="stripe" aria-hidden="true"></div>
   <header>
@@ -2430,15 +2446,15 @@ const DATA_URL=QS.get("data")||(/smdata\.in\.th$/.test(location.hostname)?"/data
 const MOCK=QS.get("mock")==="1";
 const $=s=>document.querySelector(s);
 const escH=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const show=id=>{["#scrLoad","#scrLogin","#scrAdmin","#scrApp"].forEach(x=>$(x).hidden=x!==id)};
+const show=id=>{["#scrLoad","#scrLogin","#scrX","#scrAdmin","#scrApp"].forEach(x=>$(x).hidden=x!==id)};
 const setLoad=t=>{$("#loadMsg").textContent=t};
 function toast(t,bad){const el=$("#toast");el.textContent=t;el.className="toast"+(bad?" bad":"");el.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>el.hidden=true,bad?6000:3000)}
-const friendly=err=>{const c=(err&&err.code)||"";if(/wrong-password|invalid-credential|user-not-found|invalid-email/.test(c))return"Email or password is not right.";if(/too-many-requests/.test(c))return"Too many tries. Wait a few minutes and try again.";if(/network/.test(c))return"No internet connection. Check it and try again.";if(/permission-denied/.test(c))return"You don't have permission for this.";return(err&&err.message)||"Something went wrong. Try again."};
+const friendly=err=>{const c=(err&&err.code)||"";if(/wrong-password|invalid-credential|user-not-found|invalid-email/.test(c))return"Email or password is not right.";if(/too-many-requests/.test(c))return"Too many tries. Wait a few minutes and try again.";if(/network/.test(c))return"No internet connection. Check it and try again.";if(/permission-denied/.test(c))return"You don't have permission for this.";if(/email-already-in-use/.test(c))return"This email already has a login. Choose “I already have a login”.";if(/weak-password/.test(c))return"The password needs at least 6 characters.";if(/popup-closed|cancelled-popup/.test(c))return"Google sign-in was closed before it finished.";if(/popup-blocked/.test(c))return"The browser blocked the Google window. Allow pop-ups and try again.";if(/operation-not-allowed|admin-restricted/.test(c))return"New logins aren't switched on yet. Please tell SMT.";if(c==="smt/fill")return"Type your email and a password.";return(err&&err.message)||"Something went wrong. Try again."};
 
 /* ---------- database layer: real Firebase, or an in-browser test copy with ?mock=1 ---------- */
 let DB;
 /* read counter: database reads made by this browser today (shown in Admin), to see what uses the free daily limit */
-const RD_KEYS=["getUser","getClub","listClubs","listUsers","roster","rosterCount","getData","myTransfers","allTransfers","myCorrections","allCorrections","listMeets","meetClub","meetClubs","count","teamsFor"];
+const RD_KEYS=["getUser","getClub","listClubs","listUsers","roster","rosterCount","getData","myTransfers","allTransfers","myCorrections","allCorrections","listMeets","meetClub","meetClubs","count","teamsFor","getQR","myParentReqs","parentReqs","getParent","listParents","myCoachReq","coachReqs"];
 function rdLoad(){const day=dayLocal();try{const o=JSON.parse(localStorage.getItem("smt.reads")||"{}");return o.day===day?o:{day,n:0}}catch(e){return{day,n:0}}}
 function rdAdd(n){const o=rdLoad();o.n+=n;try{localStorage.setItem("smt.reads",JSON.stringify(o))}catch(e){}const el=document.getElementById("rdCount");if(el)el.textContent=`${o.n.toLocaleString("en-US")} database reads from this browser today`}
 function rdWrap(){for(const k of RD_KEYS){const f=DB[k];if(typeof f!=="function")continue;DB[k]=async(...a)=>{const r=await f(...a);rdAdd(Array.isArray(r)?Math.max(1,r.length):1);return r}}rdAdd(0)}
@@ -2454,6 +2470,24 @@ async function initDB(){
     signIn:(e,p)=>auth.signInWithEmailAndPassword(au,e,p),
     signOut:()=>auth.signOut(au),
     reset:e=>auth.sendPasswordResetEmail(au,e),
+    /* parent app + coach sign-up (v3.80) */
+    signUp:(e,p)=>auth.createUserWithEmailAndPassword(au,e,p),
+    google:()=>auth.signInWithPopup(au,new auth.GoogleAuthProvider()),
+    getQR:async t=>{const s=await F.getDoc(d("parentQR",t));return s.exists()?{id:t,...s.data()}:null},
+    setQR:(t,v)=>F.setDoc(d("parentQR",t),v),
+    delQR:t=>F.deleteDoc(d("parentQR",t)).catch(()=>{}),
+    addParentReq:(id,v)=>F.setDoc(d("parentReq",id),{...v,status:"waiting",at:Date.now()}),
+    myParentReqs:uid=>list(F.query(c("parentReq"),F.where("uid","==",uid))),
+    parentReqs:()=>list(F.query(c("parentReq"),F.where("status","==","waiting"))),
+    decideParentReq:(id,status)=>F.updateDoc(d("parentReq",id),{status,decidedAt:Date.now(),dob:F.deleteField()}),
+    getParent:async uid=>{const s=await F.getDoc(d("parents",uid));return s.exists()?{id:uid,...s.data()}:null},
+    listParents:()=>list(c("parents")),
+    linkKid:(uid,email,sid,info)=>F.setDoc(d("parents",uid),{email,kids:{[sid]:info}},{merge:true}),
+    unlinkKid:(uid,sid)=>F.updateDoc(d("parents",uid),{["kids."+sid]:F.deleteField()}),
+    addCoachReq:(uid,v)=>F.setDoc(d("coachReq",uid),{...v,status:"waiting",at:Date.now()}),
+    myCoachReq:async uid=>{try{const s=await F.getDoc(d("coachReq",uid));return s.exists()?{id:uid,...s.data()}:null}catch(e){return null}},
+    coachReqs:()=>list(F.query(c("coachReq"),F.where("status","==","waiting"))),
+    decideCoachReq:(uid,status)=>F.updateDoc(d("coachReq",uid),{status,decidedAt:Date.now()}),
     getUser:async uid=>{const s=await F.getDoc(d("users",uid));return s.exists()?s.data():null},
     getClub:async id=>{const s=await F.getDoc(d("clubs",id));return s.exists()?{id,...s.data()}:null},
     listClubs:()=>list(c("clubs")),
@@ -2511,7 +2545,21 @@ function mockDB(){ /* test copy kept in this browser only (for checking screens 
   const K="smt.mockdb",load=()=>{try{return JSON.parse(localStorage.getItem(K))||null}catch(e){return null}};
   let S=load()||{users:{admin1:{role:"admin",email:"admin@test"},coach1:{role:"coach",clubId:"jfin",email:"coach@test"}},clubs:{jfin:{name:"J-Fin Swimming Club",short:"J-Fin",pkg:"30 coach slots",limit:30,expires:"2026-12-31",resultsName:"J-Fin Swimming Club"}},rosters:{},data:{},transfers:{},meets:{},mc:{},cnt:{}};
   const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};save();let cb=null,cur=(()=>{try{return JSON.parse(sessionStorage.getItem('smt.mockuser'))}catch(e){return null}})();const keep=()=>{try{sessionStorage.setItem('smt.mockuser',JSON.stringify(cur))}catch(e){}};const wait=v=>new Promise(r=>setTimeout(()=>r(v),60));
-  return{onAuth:f=>{cb=f;setTimeout(()=>f(cur),0)},signIn:async e=>{const uid=e.startsWith("admin")?"admin1":e.startsWith("coach")?"coach1":null;if(!uid)throw{code:"auth/invalid-credential"};cur={uid,email:e};keep();cb&&cb(cur);return cur},signOut:async()=>{cur=null;keep();cb&&cb(null)},reset:async()=>wait(),
+  return{onAuth:f=>{cb=f;setTimeout(()=>f(cur),0)},signIn:async e=>{const uid=e.startsWith("admin")?"admin1":e.startsWith("coach")?"coach1":(S.auth||{})[e]||null;if(!uid)throw{code:"auth/invalid-credential"};cur={uid,email:e};keep();cb&&cb(cur);return cur},signOut:async()=>{cur=null;keep();cb&&cb(null)},reset:async()=>wait(),
+    signUp:async(e,p)=>{S.auth=S.auth||{};if(S.auth[e])throw{code:"auth/email-already-in-use"};if(String(p).length<6)throw{code:"auth/weak-password"};const uid="u"+Date.now().toString(36);S.auth[e]=uid;save();cur={uid,email:e};keep();cb&&cb(cur);return{user:cur}},
+    google:async()=>{S.auth=S.auth||{};const e="parent.google@test";const uid=S.auth[e]||(S.auth[e]="g"+Date.now().toString(36));save();cur={uid,email:e};keep();cb&&cb(cur);return{user:cur}},
+    getQR:async t=>wait((S.qr||{})[t]?{id:t,...S.qr[t]}:null),setQR:async(t,v)=>{(S.qr=S.qr||{})[t]=v;save()},delQR:async t=>{delete (S.qr||{})[t];save()},
+    addParentReq:async(id,v)=>{(S.preq=S.preq||{})[id]={...v,status:"waiting",at:Date.now()};save()},
+    myParentReqs:async uid=>wait(Object.entries(S.preq||{}).filter(([,v])=>v.uid===uid).map(([id,v])=>({id,...v}))),
+    parentReqs:async()=>wait(Object.entries(S.preq||{}).filter(([,v])=>v.status==="waiting").map(([id,v])=>({id,...v}))),
+    decideParentReq:async(id,status)=>{const r=S.preq[id];r.status=status;r.decidedAt=Date.now();delete r.dob;save()},
+    getParent:async uid=>wait((S.par||{})[uid]?{id:uid,...S.par[uid]}:null),listParents:async()=>wait(Object.entries(S.par||{}).map(([id,v])=>({id,...v}))),
+    linkKid:async(uid,email,sid,info)=>{S.par=S.par||{};const p=S.par[uid]||(S.par[uid]={email,kids:{}});p.email=email;p.kids[sid]=info;save()},
+    unlinkKid:async(uid,sid)=>{delete ((S.par||{})[uid]||{kids:{}}).kids[sid];save()},
+    addCoachReq:async(uid,v)=>{(S.creq=S.creq||{})[uid]={...v,status:"waiting",at:Date.now()};save()},
+    myCoachReq:async uid=>wait((S.creq||{})[uid]?{id:uid,...S.creq[uid]}:null),
+    coachReqs:async()=>wait(Object.entries(S.creq||{}).filter(([,v])=>v.status==="waiting").map(([id,v])=>({id,...v}))),
+    decideCoachReq:async(uid,status)=>{S.creq[uid].status=status;save()},
     getUser:async uid=>wait(S.users[uid]||null),getClub:async id=>wait(S.clubs[id]?{id,...S.clubs[id]}:null),listClubs:async()=>wait(Object.entries(S.clubs).map(([id,v])=>({id,...v}))),saveClub:async(id,v)=>{S.clubs[id]={...(S.clubs[id]||{}),...v};save()},
     listUsers:async()=>wait(Object.entries(S.users).map(([id,v])=>({id,...v}))),setUser:async(uid,v)=>{S.users[uid]=v;save()},delUser:async uid=>{delete S.users[uid];save()},
     roster:async cl=>wait(Object.entries(S.rosters).filter(([,v])=>v.clubId===cl).map(([id,v])=>({id,...v}))),rosterCount:async cl=>Object.values(S.rosters).filter(v=>v.clubId===cl).length,
@@ -2604,12 +2652,97 @@ setInterval(()=>{if(idleOver())idleOut()},60000);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&idleOver())idleOut()});
 window.addEventListener("offline",()=>toast("No internet right now. You can still look at your swimmers; saving changes needs internet.",true));
 window.addEventListener("online",()=>toast("Back online."));
+/* ---------- parent app + coach sign-up (v3.80, 25 Nov 2026) ----------
+   Parents: scan the club QR → pick their child + birth date → make a login → SMT approves in Admin → Requests.
+   New coaches: "Create your login" → SMT links it to a club in Admin → Requests. Nothing for coaches to do. */
+const IS_PARENT=QS.has("parent")||QS.has("j")||/\/parent(\/|$)/.test(location.pathname);
+const keepQ=extra=>{const q=[MOCK?"mock=1":"",QS.get("data")?"data="+encodeURIComponent(QS.get("data")):"",extra].filter(Boolean).join("&");return q?"?"+q:""};
+let JOINING=false,JX=null;
+const thSort=(a,b)=>String(a.th||a.en||"").localeCompare(String(b.th||b.en||""),"th");
+const kidLabel=k=>`<b>${escH(k.th||k.en||"")}</b>${k.th&&k.en?`<span class="hint"> · ${escH(k.en)}</span>`:""}`;
+const xLoad=()=>`<div class="loadbox"><div class="spin"></div><div>Loading…</div></div>`;
+function xShow(html){$("#xView").innerHTML=html;show("#scrX");window.scrollTo(0,0)}
+const xHead=(t,sub)=>`<p class="brand">${t}</p>${sub?`<p class="hint" style="margin:0">${sub}</p>`:""}`;
+const xOut=()=>USER?`<p class="hint" style="margin:0">${escH(USER.email||"")} · <button class="lnk2" type="button" data-logout="1">Log out</button></p>`:"";
+function authFields(mode){if(USER)return`<p class="hint" style="margin:0">Logged in as <b>${escH(USER.email||"")}</b> · <button class="lnk2" type="button" data-logout="1">not you?</button></p>`;
+  return`<div class="seg xmode"><button type="button" data-xm="new" aria-pressed="${mode!=="old"}">New login</button><button type="button" data-xm="old" aria-pressed="${mode==="old"}">I already have a login</button></div>
+  <label class="hint" for="xEmail">Email</label><input id="xEmail" type="email" autocomplete="username" value="${escH(JX&&JX.em||"")}">
+  <label class="hint" for="xPass">Password${mode==="old"?"":" · at least 6 characters"}</label><input id="xPass" type="password" autocomplete="${mode==="old"?"current-password":"new-password"}">
+  <div class="xor"><span>or</span></div><button type="button" class="xgoogle" data-xgoogle="1"><b aria-hidden="true">G</b> Continue with Google</button>`}
+async function xAuth(google){if(USER)return USER;if(google){const r=await DB.google();return r.user||r}
+  const em=($("#xEmail")||{}).value||"",pw=($("#xPass")||{}).value||"";if(!em.trim()||!pw)throw{code:"smt/fill"};
+  const r=JX.mode==="old"?await DB.signIn(em.trim(),pw):await DB.signUp(em.trim(),pw);return r.user||r}
+function parentLook(){const b=document.querySelector("#loginForm .brand");if(b)b.textContent="SMT Parent";const h=b&&b.nextElementSibling;if(h)h.textContent="Swim Meets Thailand · follow your child's swimming";["#lgCoachLine","#lgParLine"].forEach(x=>{const e=$(x);if(e)e.hidden=true});const n=document.createElement("p");n.className="hint";n.style.margin="6px 0 0";n.textContent="New here? Scan the QR code from your child's club.";$("#loginForm").appendChild(n)}
+/* the club QR page */
+async function joinScreen(token){xShow(xLoad());let qr=null;try{qr=await DB.getQR(token)}catch(e){}
+  if(!qr){xShow(xHead("SMT Parent")+`<p>This QR code doesn't work anymore. Please ask your club for the new one.</p>`+xOut());return}
+  JX={kind:"parent",qr,token,sid:"",dob:"",mode:"new",q:"",em:""};renderJoin()}
+function joinKids(){const q=JX.q.trim().toLowerCase(),L=(JX.qr.kids||[]).slice().sort(thSort).filter(k=>!q||(String(k.th||"")+" "+String(k.en||"")).toLowerCase().includes(q));
+  return L.length?L.map(k=>`<label class="xkid${JX.sid===k.id?" on":""}"><input type="radio" name="jKid" value="${escH(k.id)}"${JX.sid===k.id?" checked":""}> ${kidLabel(k)}</label>`).join(""):`<p class="hint">No name matches. Try fewer letters, or ask the coach to add your child to the team.</p>`}
+function renderJoin(){const qr=JX.qr;
+  xShow(xHead("SMT Parent",`Follow your child's swimming · <b>${escH(qr.clubName||"")}</b>`)+`<form id="joinForm" class="xform" novalidate>
+   <div class="xstep"><b>1 · Your child</b><input id="jQ" placeholder="Type part of the name" autocomplete="off" value="${escH(JX.q)}"><div class="xkids" id="jKids">${joinKids()}</div></div>
+   <div class="xstep"><b>2 · Your child's birth date</b><span class="hint">So SMT can check it's your child. It's never shown in the app.</span><input id="jDob" type="date" value="${escH(JX.dob)}" max="${dayLocal()}"></div>
+   <div class="xstep"><b>3 · Your login</b>${authFields(JX.mode)}</div>
+   <button class="go" type="submit">Send to SMT</button><div id="xMsg" class="hint" role="status"></div>
+   <p class="hint" style="margin:0">SMT checks each request, usually within a day. You'll see your child's swims once it's approved.</p></form>`)}
+async function joinSend(google){const m=$("#xMsg");if(!JX.sid){m.textContent="Choose your child first.";return}if(!JX.dob){m.textContent="Type your child's birth date.";return}
+  m.textContent="Sending…";JOINING=true;
+  try{const u=await xAuth(google);USER=u;const mine=await DB.myParentReqs(u.uid).catch(()=>[]),old=mine.find(r=>r.sid===JX.sid);
+    if(old&&old.status!=="declined"){JOINING=false;history.replaceState(null,"",location.pathname+keepQ("parent=1"));await parentHome(u,old.status==="approved"?"":"sent");return}
+    const k=(JX.qr.kids||[]).find(x=>x.id===JX.sid)||{};
+    await DB.addParentReq(u.uid+"_"+JX.sid,{uid:u.uid,email:u.email||"",club:JX.qr.club,clubName:JX.qr.clubName||"",sid:JX.sid,kidTh:k.th||"",kidEn:k.en||"",dob:JX.dob,token:JX.token});
+    JOINING=false;history.replaceState(null,"",location.pathname+keepQ("parent=1"));await parentHome(u,"sent")}
+  catch(err){JOINING=false;m.textContent=friendly(err);if(USER&&!$("#xEmail"))return;if(USER)renderJoin()}}
+/* signed in but not a coach: the parent's home (waiting / their children) */
+const reqPill=st=>st==="approved"?`<span class="pill ok">Approved ✓</span>`:st==="declined"?`<span class="pill bad">Not approved · please contact your club</span>`:`<span class="pill wait">Waiting for SMT</span>`;
+async function parentHome(u,note){xShow(xLoad());
+  const [P,R]=await Promise.all([DB.getParent(u.uid).catch(()=>null),DB.myParentReqs(u.uid).catch(()=>[])]);const ids=P&&P.kids?Object.keys(P.kids):[];
+  if(ids.length&&!note){await coachPage("parent",(Object.values(P.kids)[0]||{}).clubName||"My swimmers",{ids,kids:P.kids});return}
+  if(!R.length&&!ids.length){const C=await DB.myCoachReq(u.uid);if(C){coachWait(C);return}
+    xShow(xHead(IS_PARENT?"SMT Parent":"SMT Coach")+`<p>Your login works, but it isn't linked to a child or a club yet.</p><p class="hint"><b>Parent:</b> scan the QR code from your child's club.<br><b>Coach:</b> <button class="lnk2" type="button" data-xcoach="1">ask SMT to link you to your club</button>.</p>`+xOut());return}
+  xShow(xHead("SMT Parent")+(note==="sent"?`<div class="xok">Sent ✓ SMT will check it soon.</div>`:"")+
+    `<div class="xstep"><b>Your requests</b>${R.sort((a,b)=>(b.at||0)-(a.at||0)).map(r=>`<div class="xreq"><div>${kidLabel({th:r.kidTh,en:r.kidEn})}<div class="hint">${escH(r.clubName||"")}</div></div>${reqPill(r.status)}</div>`).join("")}</div>`+
+    (ids.length?`<button class="go" type="button" data-popen="1">See my child${ids.length>1?"ren":""}</button>`:`<button class="chip teal" type="button" data-xreload="1" style="cursor:pointer;align-self:flex-start;padding:8px 16px">Check again</button>`)+
+    `<p class="hint" style="margin:0">To add another child, scan the club's QR code again.</p>`+xOut())}
+/* new coach: make a login, SMT links it to a club */
+function coachSignup(){JX={kind:"coach",mode:"new",em:""};renderCoachUp()}
+function renderCoachUp(){xShow(xHead("SMT Coach","Create your coach login · SMT links it to your club")+`<form id="cupForm" class="xform" novalidate>
+   <label class="hint" for="cuName">Your name</label><input id="cuName" autocomplete="name" value="${escH(JX.name||"")}">
+   <label class="hint" for="cuPhone">Phone or LINE ID</label><input id="cuPhone" value="${escH(JX.phone||"")}">
+   <label class="hint" for="cuClub">Your club</label><input id="cuClub" placeholder="J-Fin Swimming Club" value="${escH(JX.club||"")}">
+   <div class="xstep"><b>Your login</b>${authFields(JX.mode)}</div>
+   <button class="go" type="submit">Send to SMT</button><div id="xMsg" class="hint" role="status"></div>
+   ${USER?"":`<button class="lnk2" type="button" data-xback="1">← Back to log in</button>`}</form>`)}
+async function coachSend(google){const m=$("#xMsg"),g=id=>($("#"+id)||{}).value||"";JX.name=g("cuName").trim();JX.phone=g("cuPhone").trim();JX.club=g("cuClub").trim();
+  if(!JX.name||!JX.club){m.textContent="Type your name and your club.";return}m.textContent="Sending…";JOINING=true;
+  try{const u=await xAuth(google);USER=u;const v={uid:u.uid,email:u.email||"",name:JX.name,phone:JX.phone,clubText:JX.club};await DB.addCoachReq(u.uid,v);JOINING=false;coachWait({...v,status:"waiting"})}
+  catch(err){JOINING=false;m.textContent=friendly(err)}}
+function coachWait(C){xShow(xHead("SMT Coach")+(C.status==="declined"?`<p>SMT couldn't link this login to a club. Please contact SMT.</p>`:`<div class="xok">Sent ✓</div><p>SMT will link your login to <b>${escH(C.clubText||"your club")}</b>. Open the app again after that and you're in.</p>`)+
+  `<button class="chip teal" type="button" data-xreload="1" style="cursor:pointer;align-self:flex-start;padding:8px 16px">Check again</button>`+xOut())}
+document.addEventListener("input",e=>{if(!JX)return;if(e.target.id==="jQ"){JX.q=e.target.value;$("#jKids").innerHTML=joinKids()}else if(e.target.id==="jDob")JX.dob=e.target.value;else if(e.target.id==="xEmail")JX.em=e.target.value});
+document.addEventListener("change",e=>{if(JX&&e.target.name==="jKid"){JX.sid=e.target.value;document.querySelectorAll(".xkid").forEach(l=>l.classList.toggle("on",l.querySelector("input").checked))}});
+document.addEventListener("submit",e=>{if(e.target.id==="joinForm"){e.preventDefault();joinSend(false)}else if(e.target.id==="cupForm"){e.preventDefault();coachSend(false)}});
+document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.xm&&JX){JX.mode=t.dataset.xm;JX.kind==="coach"?(coachSendKeep(),renderCoachUp()):renderJoin()}
+  else if(t.dataset.xgoogle&&JX)JX.kind==="coach"?coachSend(true):joinSend(true);
+  else if(t.dataset.xreload)location.reload();
+  else if(t.dataset.popen&&USER)parentHome(USER);
+  else if(t.dataset.xcoach)coachSignup();
+  else if(t.dataset.xback)show("#scrLogin");
+  else if(t.id==="lgNewCoach")coachSignup();
+  else if(t.id==="lgGoogle"){const m=$("#loginMsg");m.textContent="Signing in…";actSet();DB.google().then(()=>{m.textContent=""}).catch(err=>{m.textContent=friendly(err)})}
+  else if(t.id==="lgParent")location.href=location.pathname+keepQ("parent=1")});
+function coachSendKeep(){const g=id=>($("#"+id)||{}).value;if(g("cuName")!=null){JX.name=g("cuName");JX.phone=g("cuPhone");JX.club=g("cuClub")}}
 async function boot(){
   show("#scrLoad");setLoad("Starting…");
   try{await initDB()}catch(e){setLoad("Couldn't connect. Check the internet connection and reload the page.");return}
-  DB.onAuth(async u=>{USER=u;if(!u){show("#scrLogin");try{if(sessionStorage.getItem("smt.idle")){$("#loginMsg").textContent="You were signed out after 3 hours without using the app. Please sign in again."}}catch(e){}return}
+  DB.onAuth(async u=>{USER=u;if(JOINING)return;const J0=QS.get("j");
+    if(!u&&J0){await joinScreen(J0);return}
+    if(!u&&IS_PARENT)parentLook();
+    if(!u){show("#scrLogin");try{if(sessionStorage.getItem("smt.idle")){$("#loginMsg").textContent="You were signed out after 3 hours without using the app. Please sign in again."}}catch(e){}return}
     try{show("#scrLoad");setLoad("Checking your account…");PROFILE=await DB.getUser(u.uid);
-      if(!PROFILE){show("#scrLogin");$("#loginMsg").innerHTML=`Your login works, but no SMT account is linked to it yet.<br>Send this code to SMT: <code>${escH(u.uid)}</code>`;return}
+      if(!PROFILE){if(J0){await joinScreen(J0);return}await parentHome(u);return}
       if(idleOver()){await idleOut();return}actSet();try{sessionStorage.removeItem("smt.idle")}catch(e){}
       const want=QS.get("club"),pv=QS.get("preview");
       if(PROFILE.role==="admin"&&pv){await coachPage("preview",pv);return}
@@ -2621,7 +2754,7 @@ $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const m=$
   try{actSet();await DB.signIn($("#lgEmail").value.trim(),$("#lgPass").value);m.textContent=""}catch(err){m.textContent=friendly(err)}});
 $("#lgForgot").addEventListener("click",async()=>{const em=$("#lgEmail").value.trim(),m=$("#loginMsg");if(!em){m.textContent="Type your email first, then tap Forgot password.";return}
   try{await DB.reset(em);m.textContent="If this email has an account, a reset link is on its way. Check your inbox and spam folder."}catch(err){m.textContent=friendly(err)}});
-document.addEventListener("click",async e=>{if(e.target.closest("[data-logout]")){await DB.signOut();location.href=location.pathname+(MOCK?"?mock=1"+(QS.get("data")?"&data="+encodeURIComponent(QS.get("data")):""):"")}});
+document.addEventListener("click",async e=>{if(e.target.closest("[data-logout]")){await DB.signOut();location.href=location.pathname+keepQ(IS_PARENT?"parent=1":"")}});
 
 /* national ranking at a date: rank of one swimmer among same gender + birth year, season bests from 1 Jan to `until` */
 /* possible duplicates of a "new" swimmer: similar Thai or English name, same gender, birth year within one year */
@@ -2696,11 +2829,11 @@ function rankAt(sid,st,d,course,until){const ck=sid+"|"+st+"|"+d+"|"+course+"|"+
 function rankAt0(sid,st,d,course,until){const me=PUB.byId.get(sid);if(!me||!me.birthYear)return null;const L=rankIndex().get(me.gender+"|"+me.birthYear+"|"+st+"-"+d+"|"+course)||[],from=until.slice(0,4)+"-01-01",best=new Map();
   for(const [t,dt,id] of L)if(dt>=from&&dt<=until&&(!best.has(id)||t<best.get(id)))best.set(id,t);
   if(!best.has(sid))return null;const times=[...best.values()].sort((a,b)=>a-b),mine=best.get(sid);return{rank:times.indexOf(mine)+1,total:times.length,times,mine}}
-async function coachPage(clubId,PV){
+async function coachPage(clubId,PV,PAR){
   if(!clubId){show("#scrLogin");$("#loginMsg").textContent="Your account isn't linked to a club yet. Please contact SMT.";return}
   setLoad(PV?"Loading the preview…":"Loading your club…");
   /* PV = admin preview of any team, built from public results only: read-only, nothing is saved */
-  let pvIds=null;if(PV){const P=await loadPublic(),nm=PV.trim().toLowerCase(),y=String(new Date().getFullYear()-1),all=P.swimmers.filter(s=>String(s.club||"").trim().toLowerCase()===nm);pvIds=(all.some(s=>(s.lastMeet||"")>=y)?all.filter(s=>(s.lastMeet||"")>=y):all).map(s=>s.id)}
+  let pvIds=PAR?PAR.ids.slice():null;if(PV&&!PAR){const P=await loadPublic(),nm=PV.trim().toLowerCase(),y=String(new Date().getFullYear()-1),all=P.swimmers.filter(s=>String(s.club||"").trim().toLowerCase()===nm);pvIds=(all.some(s=>(s.lastMeet||"")>=y)?all.filter(s=>(s.lastMeet||"")>=y):all).map(s=>s.id)}
   const club=PV?{id:"preview",name:PV,short:PV,buys:[{n:Math.max(1,pvIds.length),start:"2000-01-01",end:"2999-12-31"}]}:await DB.getClub(clubId);if(!club){show("#scrLogin");$("#loginMsg").textContent="Club not found. Please contact SMT.";return}
   const FREE=club.plan==="free",EMPTY_PUB={swimmers:[],meets:{},records:[],standards:[],byId:new Map()};
   const [ro,pub,cal,set,tr,meets,ppl,tdy,grp]=PV?[pvIds.map(id=>({id})),await loadPublic(),null,null,[],[],null,null,null]:await Promise.all([DB.roster(clubId),FREE?Promise.resolve(EMPTY_PUB):loadPublic(),DB.getData(clubId,"calendar"),DB.getData(clubId,"settings"),DB.myTransfers(clubId).catch(()=>[]),DB.listMeets().catch(e=>{console.error(e);setTimeout(()=>toast("Couldn't load the SMT meet list: "+friendly(e)+" ("+(e&&e.code||"")+")",true),1500);return[]}),DB.getData(clubId,"people").catch(()=>null),DB.getData(clubId,"today").catch(()=>null),DB.getData(clubId,"groups").catch(()=>null)]);
@@ -2741,11 +2874,13 @@ async function coachPage(clubId,PV){
   $("#clubName").textContent=CLUB.name;
   const nextEnd=CLUB.buys.filter(b=>buyOn(b,today)&&b.end).map(b=>b.end).sort()[0]||"";
   $("#pkgChips").innerHTML=`${CLUB.limit?`<span class="chip teal">${CLUB.limit} coach slots</span>`:""}${CTX.expired?`<span class="chip" style="color:var(--red);border-color:var(--red)">Expired${CLUB.expires?" "+escH(dShow(CLUB.expires)):""}</span>`:CLUB.soon.length?CLUB.soon.map(b=>`<span class="chip" style="color:var(--red);border-color:var(--red)" title="Ask SMT to renew">${+b.n} slot${+b.n>1?"s":""} end ${escH(dShow(b.end))}</span>`).join(""):nextEnd?`<span class="chip gold">Valid to ${escH(dShow(nextEnd))}</span>`:""}${CLUB.over&&!CTX.expired?`<span class="chip" id="overChip" style="color:#fff;background:var(--red);border-color:var(--red)">Release ${CLUB.over} swimmer${CLUB.over>1?"s":""}</span>`:""}`;
-  $("#userBar").innerHTML=`<span class="hint">${escH(USER.email||"")}</span>${PROFILE.role==="admin"?` <a class="chip" href="?${MOCK?"mock=1&":""}${QS.get("data")?"data="+encodeURIComponent(QS.get("data"))+"&":""}">Admin</a>`:""} <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
+  $("#userBar").innerHTML=`<span class="hint">${escH(USER.email||"")}</span>${PROFILE&&PROFILE.role==="admin"?` <a class="chip" href="?${MOCK?"mock=1&":""}${QS.get("data")?"data="+encodeURIComponent(QS.get("data"))+"&":""}">Admin</a>`:""} <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
   CTX.loadCorrections();
-  if(PV){$("#pkgChips").innerHTML=`<span class="chip" style="background:#fff4d6;border-color:#c98a00;color:#7a5200;font-weight:700">Preview · read-only · ${ids.length} swimmer${ids.length===1?"":"s"} from public results</span>`;document.title=CLUB.short+" · Preview · SMT Coach"}
+  if(PAR){$("#pkgChips").innerHTML="";document.title="SMT Parent"}
+  else if(PV){$("#pkgChips").innerHTML=`<span class="chip" style="background:#fff4d6;border-color:#c98a00;color:#7a5200;font-weight:700">Preview · read-only · ${ids.length} swimmer${ids.length===1?"":"s"} from public results</span>`;document.title=CLUB.short+" · Preview · SMT Coach"}
   show("#scrApp");APP=window.startCoachApp(D,CTX,CLUB);
-  if(PV){const st=document.createElement("style");st.textContent='#tabs button[data-t="entries"],.mngbar{display:none!important}';document.head.appendChild(st)}
+  if(PV){const st=document.createElement("style");st.textContent='#tabs button[data-t="entries"],.mngbar{display:none!important}'+(PAR?'#tabs button:not([data-t="team"]):not([data-t="goals"]){display:none!important}':'');document.head.appendChild(st)}
+  if(PAR){const sb=document.querySelector("#scrApp header .sub");if(sb)sb.firstChild.textContent="Parent view · ";const tb=document.querySelector('#tabs button[data-t="team"]');if(tb)tb.click();if(PAR.ids.length===1)setTimeout(()=>{const r=document.querySelector('#view tr[data-sw]');if(r)r.click()},60)}
   /* free account: meet places only (number of swimmers per meet); the other tools are for paying clubs */
   document.querySelectorAll("#tabs button").forEach(b=>b.hidden=FREE&&b.dataset.t!=="entries");const ps=$("#poolSw");if(ps)ps.hidden=FREE;if(FREE){const tb=document.querySelector('#tabs button[data-t="entries"]');if(tb)tb.click()}
   (window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>{try{rankIndex()}catch(e){}});
@@ -2843,15 +2978,74 @@ async function adminPage(){
   const mfKeep=()=>{const mf=A.mform;if(!mf||!$("#mfName"))return;const g=id=>{const x=$("#"+id);return x?x.value:undefined};
     Object.assign(mf,{org:g("mfOrg"),nc:g("mfNc")==="1",name:g("mfName"),city:g("mfCity"),start:g("mfStart"),end:g("mfEnd"),course:g("mfCourse"),deadline:g("mfDl"),ageDate:g("mfAge"),ageMode:g("mfAgeMode"),cap:+g("mfCap")||0,alloc:g("mfAlloc"),swimUp:g("mfSwimUp"),numDl:g("mfNumDl"),namesDl:g("mfNamesDl"),lim:{meet:+g("mfLm")||0,day:+g("mfLd")||0,relay:+g("mfLr")||0}});if($("#fTeam"))mf.fees=feeRead(mf.fees)};
   const qs=extra=>"?"+[MOCK?"mock=1":"",QS.get("data")?"data="+encodeURIComponent(QS.get("data")):"",extra].filter(Boolean).join("&");
+
+  /* ---------- parent QR + requests (v3.80) ---------- */
+  const pqUrl=t=>/smdata\.in\.th$/.test(location.hostname)?`${location.origin}/parent/?j=${t}&openExternalBrowser=1`:`${location.origin}${location.pathname}${keepQ("j="+t)}`;
+  const pqMsg=q=>`สวัสดีครับ ผู้ปกครองนักว่ายน้ำ ${q.clubName}\nติดตามผลการว่ายน้ำของลูกได้ในแอป SMT Parent\n1. เปิดลิงก์หรือสแกน QR code\n2. เลือกชื่อลูก ใส่วันเกิดของลูก\n3. สร้างล็อกอิน (อีเมล หรือ Google)\nSMT จะตรวจสอบและอนุมัติให้ภายใน 1 วัน\n\nFollow your child's swimming in the SMT Parent app: open the link, pick your child, type the birth date and make a login. SMT approves it within a day.\n${q.url}`;
+  const newTok=()=>Array.from(crypto.getRandomValues(new Uint8Array(9)),b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");
+  async function pqOpen(cid,fresh){const c=A.clubs.find(x=>x.id===cid);if(!c)return;toast("Making the QR code…");
+    let tok=c.pqr||"";if(fresh&&tok){await DB.delQR(tok);tok=""}if(!tok){tok=newTok();await DB.saveClub(cid,{pqr:tok});c.pqr=tok}
+    const [ro,P,ppl]=await Promise.all([DB.roster(cid),loadPublic().catch(()=>null),DB.getData(cid,"people").catch(()=>null)]),pm=(ppl&&ppl.m)||{};
+    const kids=ro.map(r=>{const s=P&&P.byId&&P.byId.get(r.id),p=pm[r.id]||{};return{id:r.id,th:s?s.nameTh||"":[p.thF,p.thL].filter(Boolean).join(" "),en:s?s.nameEn||"":[p.enF,p.enL].filter(Boolean).join(" ")}}).filter(k=>k.th||k.en);
+    const clubName=c.name||cid;await DB.setQR(tok,{club:cid,clubName,kids,ids:kids.map(k=>k.id),at:Date.now()});
+    A.pq={club:cid,clubName,tok,url:pqUrl(tok),kids};draw()}
+  function pqLib(){return window.qrcode?Promise.resolve():new Promise((ok,no)=>{const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)})}
+  async function pqDraw(){const box=$("#pqImg");if(!box)return;try{await pqLib();const q=qrcode(0,"M");q.addData(A.pq.url);q.make();A.pq.img=q.createDataURL(8,4);box.innerHTML=`<img src="${A.pq.img}" alt="QR code for ${escH(A.pq.clubName)} parents">`}catch(e){box.innerHTML=`<p class="hint">Couldn't draw the QR picture here. The link works the same.</p>`}}
+  const copyTxt=async t=>{try{await navigator.clipboard.writeText(t);toast("Copied.")}catch(e){toast("Couldn't copy. Select the text and copy it.",true)}};
+  /* birth date check: what the parent typed vs the private birth date SMT has for that swimmer */
+  async function dobCheck(reqs){const clubs=[...new Set(reqs.map(r=>r.club))],P={},pub=await loadPublic().catch(()=>null);
+    await Promise.all(clubs.map(async c=>{P[c]=((await DB.getData(c,"people").catch(()=>null))||{}).m||{}}));
+    return new Map(reqs.map(r=>{const on=(P[r.club][r.sid]||{}).dob||"",s=pub&&pub.byId&&pub.byId.get(r.sid),by=s&&s.birthYear;
+      const st=on?(on===r.dob?"ok":"bad"):by?(String(by)===String(r.dob||"").slice(0,4)?"year":"bad"):"none";return[r.id,{st,on,by}]}))}
+  async function reqTab(clubs,preqs,creqs){const chk=await dobCheck(preqs),pars=await DB.listParents().catch(()=>[]);A.chk=chk;
+    const lab={ok:'<span class="pill ok">✓ Birth date matches</span>',year:'<span class="pill wait">Birth year matches · no full date on file</span>',bad:'<span class="pill bad">✗ Doesn\'t match</span>',none:'<span class="pill wait">No birth date on file</span>'};
+    const nOk=preqs.filter(r=>chk.get(r.id).st==="ok").length;
+    let h=`<div class="row" style="justify-content:space-between;align-items:center;margin:0 0 6px"><h2 style="margin:0">Parent requests</h2>${nOk?`<button class="chip teal" data-prall="1" style="cursor:pointer;padding:8px 16px">Approve all ✓ (${nOk})</button>`:""}</div>
+      <p class="hint" style="margin-top:0">Parents who scanned a club's Parent QR (Admin → Clubs). Approve when the birth date matches; check with the coach when it doesn't.</p>
+      <div class="tw"><table><thead><tr><th>Parent</th><th>Child</th><th>Birth date check</th><th></th></tr></thead><tbody>${preqs.sort((a,b)=>(a.at||0)-(b.at||0)).map(r=>{const c=chk.get(r.id);
+        return`<tr><td>${escH(r.email)}<div class="en">${r.at?escH(new Date(r.at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})):""}</div></td><td><b>${escH(r.kidTh||r.kidEn)}</b><div class="en">${escH(r.kidEn||"")} · ${escH(r.clubName||r.club)}</div></td>
+        <td>${lab[c.st]}<div class="en">Typed ${escH(r.dob||"–")}${c.st==="bad"&&c.on?" · on file "+escH(c.on):c.st==="bad"&&c.by?" · born "+c.by:""}</div></td>
+        <td class="num" style="white-space:nowrap"><button class="chip teal" data-prok="${escH(r.id)}" style="cursor:pointer">Approve</button> <button class="chip" data-prno="${escH(r.id)}" style="cursor:pointer">Decline</button></td></tr>`}).join("")||`<tr><td colspan="4" class="hint">No parent requests waiting.</td></tr>`}</tbody></table></div>`;
+    const cl=[...clubs].sort((a,b)=>String(a.nameEn||a.name).localeCompare(String(b.nameEn||b.name))),guess=t=>{t=String(t||"").toLowerCase().replace(/\s+/g,"");if(!t)return"";const m=cl.find(c=>[c.name,c.nameEn,c.short,c.id].some(x=>x&&(String(x).toLowerCase().replace(/\s+/g,"").includes(t)||t.includes(String(x).toLowerCase().replace(/\s+/g,"")))));return m?m.id:""};
+    h+=`<h2 style="margin:22px 0 6px">New coach requests</h2><p class="hint" style="margin-top:0">Coaches who made their own login. Choose their club and approve; they can use the coach app at once.</p>
+      <div class="tw"><table><thead><tr><th>Coach</th><th>Club they typed</th><th>Link to club</th><th></th></tr></thead><tbody>${creqs.map(r=>{const gs=guess(r.clubText);return`<tr><td><b>${escH(r.name||"")}</b><div class="en">${escH(r.email)}${r.phone?" · "+escH(r.phone):""}</div></td><td>${escH(r.clubText||"")}</td>
+        <td><select data-crclub="${escH(r.id)}" style="max-width:240px"><option value="">Choose a club…</option>${cl.map(c=>`<option value="${escH(c.id)}"${c.id===gs?" selected":""}>${escH(c.nameEn||c.name)}${c.nameEn&&c.name!==c.nameEn?" · "+escH(c.name):""}</option>`).join("")}</select></td>
+        <td class="num" style="white-space:nowrap"><button class="chip teal" data-crok="${escH(r.id)}" style="cursor:pointer">Approve</button> <button class="chip" data-crno="${escH(r.id)}" style="cursor:pointer">Decline</button></td></tr>`}).join("")||`<tr><td colspan="4" class="hint">No coach requests waiting.</td></tr>`}</tbody></table></div>`;
+    const rows=pars.flatMap(p=>Object.entries(p.kids||{}).map(([sid,k])=>({uid:p.id,email:p.email,sid,...k}))).sort((a,b)=>String(a.clubName).localeCompare(String(b.clubName))||thSort(a,b));
+    h+=`<h2 style="margin:22px 0 6px">Parents with access · ${rows.length}</h2><div class="tw"><table><thead><tr><th>Parent</th><th>Child</th><th>Club</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${escH(x.email||"")}</td><td><b>${escH(x.th||x.en||x.sid)}</b><div class="en">${escH(x.en||"")}</div></td><td>${escH(x.clubName||x.club||"")}</td><td class="num"><button class="chip" data-prdel="${escH(x.uid)}|${escH(x.sid)}" style="cursor:pointer">Remove</button></td></tr>`).join("")||`<tr><td colspan="4" class="hint">No parents yet.</td></tr>`}</tbody></table></div>`;
+    return h}
+  async function prApprove(r){await DB.linkKid(r.uid,r.email||"",r.sid,{club:r.club,clubName:r.clubName||"",th:r.kidTh||"",en:r.kidEn||"",at:Date.now()});await DB.decideParentReq(r.id,"approved")}
+  async function reqClick(t){const d=t.dataset;
+    if(d.pqr){try{await pqOpen(d.pqr)}catch(err){toast(friendly(err),true)}return true}
+    if(d.pqclose){A.pq=null;draw();return true}
+    if(d.pqnew){if(!confirmTwice(t,"Press again: the old QR code will stop working"))return true;try{await pqOpen(A.pq.club,true);toast("New QR code made. Post the new one in the parent group.")}catch(err){toast(friendly(err),true)}return true}
+    if(d.pqcopy){copyTxt(d.pqcopy==="msg"?pqMsg(A.pq):A.pq.url);return true}
+    if(d.pqsave){if(!A.pq.img){toast("The QR picture isn't ready.",true);return true}const a=document.createElement("a");a.href=A.pq.img;a.download=`Parent-QR-${A.pq.clubName}.gif`;a.click();return true}
+    if(d.prok||d.prno){const r=(A.preqs||[]).find(x=>x.id===(d.prok||d.prno));if(!r)return true;t.disabled=true;
+      try{if(d.prok){await prApprove(r);toast("Approved. The parent can see their child now.")}else{await DB.decideParentReq(r.id,"declined");toast("Declined.")}draw()}catch(err){t.disabled=false;toast(friendly(err),true)}return true}
+    if(d.prall){const L=(A.preqs||[]).filter(r=>A.chk&&A.chk.get(r.id)&&A.chk.get(r.id).st==="ok");t.disabled=true;let n=0;
+      for(const r of L){try{await prApprove(r);n++}catch(err){toast(friendly(err),true);break}}toast(`Approved ${n} parent${n===1?"":"s"}.`);draw();return true}
+    if(d.prdel){if(!confirmTwice(t,"Press again to remove"))return true;const [uid,sid]=d.prdel.split("|");try{await DB.unlinkKid(uid,sid);toast("Removed.");draw()}catch(err){toast(friendly(err),true)}return true}
+    if(d.crok||d.crno){const r=(A.creqs||[]).find(x=>x.id===(d.crok||d.crno));if(!r)return true;
+      if(d.crok){const sel=document.querySelector(`[data-crclub="${CSS.escape(r.id)}"]`),cid=sel&&sel.value;if(!cid){toast("Choose the coach's club first.",true);return true}
+        t.disabled=true;try{await DB.setUser(r.uid||r.id,{role:"coach",email:r.email||"",clubId:cid});await DB.decideCoachReq(r.id,"approved");toast("Approved. The coach can use the app now.");draw()}catch(err){t.disabled=false;toast(friendly(err),true)}}
+      else{t.disabled=true;try{await DB.decideCoachReq(r.id,"declined");toast("Declined.");draw()}catch(err){t.disabled=false;toast(friendly(err),true)}}return true}
+    return false}
+  function confirmTwice(t,msg){if(t.dataset.sure==="1")return true;t.dataset.sure="1";const o=t.textContent;t.textContent=msg;setTimeout(()=>{if(t.isConnected){t.dataset.sure="";t.textContent=o}},4000);return false}
   async function draw(){const el=$("#adminView");el.innerHTML=`<p class="hint">Loading…</p>`;
     try{
-    const [clubs,users,trs,mts,cors]=await Promise.all([DB.listClubs(),DB.listUsers(),DB.allTransfers().catch(()=>[]),DB.listMeets().catch(()=>[]),DB.allCorrections().catch(()=>[])]);A.cors=cors;mts.sort((a,b)=>String(a.start).localeCompare(String(b.start)));
+    const [clubs,users,trs,mts,cors,preqs,creqs]=await Promise.all([DB.listClubs(),DB.listUsers(),DB.allTransfers().catch(()=>[]),DB.listMeets().catch(()=>[]),DB.allCorrections().catch(()=>[]),DB.parentReqs().catch(()=>[]),DB.coachReqs().catch(()=>[])]);A.cors=cors;A.preqs=preqs;A.creqs=creqs;mts.sort((a,b)=>String(a.start).localeCompare(String(b.start)));
     const counts=await Promise.all(clubs.map(c=>DB.rosterCount(c.id).catch(()=>"?")));
     const open=trs.filter(t=>t.status==="open");
     const nCorr=cors.filter(x=>x.status==="open").length,nExp=cors.filter(x=>x.status==="accepted"&&!x.exported).length;
-    const abadge=v=>v==="corr"?(nCorr?`<span class="abadge" title="${nCorr} correction${nCorr>1?"s":""} waiting for you">${nCorr}</span>`:nExp?`<span class="abadge soft" title="${nExp} accepted, not yet sent to the staff app">${nExp}</span>`:""):v==="transfers"&&open.length?`<span class="abadge" title="${open.length} transfer request${open.length>1?"s":""} waiting">${open.length}</span>`:"";
-    let h=`<div class="row" style="margin-bottom:14px"><div class="seg">${[["clubs","Clubs"],["meets","Upcoming meets"],["corr","Corrections"],["coaches","Coach accounts"],["transfers","Transfer requests"]].map(([v,l])=>`<button data-at="${v}" aria-pressed="${A.tab===v}">${l}${abadge(v)}</button>`).join("")}</div></div>`;
+    const abadge=v=>v==="corr"?(nCorr?`<span class="abadge" title="${nCorr} correction${nCorr>1?"s":""} waiting for you">${nCorr}</span>`:nExp?`<span class="abadge soft" title="${nExp} accepted, not yet sent to the staff app">${nExp}</span>`:""):v==="req"&&(preqs.length+creqs.length)?`<span class="abadge" title="${preqs.length} parent and ${creqs.length} coach request${preqs.length+creqs.length>1?"s":""} waiting">${preqs.length+creqs.length}</span>`:v==="transfers"&&open.length?`<span class="abadge" title="${open.length} transfer request${open.length>1?"s":""} waiting">${open.length}</span>`:"";
+    let h=`<div class="row" style="margin-bottom:14px"><div class="seg">${[["clubs","Clubs"],["req","Requests"],["meets","Upcoming meets"],["corr","Corrections"],["coaches","Coach accounts"],["transfers","Transfer requests"]].map(([v,l])=>`<button data-at="${v}" aria-pressed="${A.tab===v}">${l}${abadge(v)}</button>`).join("")}</div></div>`;
     if(A.tab==="clubs"){const e=A.edit?clubs.find(c=>c.id===A.edit)||{}:{};
+      if(A.pq){const q=A.pq,msg=pqMsg(q);h+=`<div class="addm pqbox" style="margin:0 0 14px;border-color:var(--teal)"><div class="row" style="justify-content:space-between;margin:0"><b style="font-family:var(--display);font-size:17px">Parent QR · ${escH(q.clubName)}</b><button class="chip" data-pqclose="1" style="cursor:pointer">Close</button></div>
+        <div class="pqin"><div id="pqImg" class="pqimg" aria-label="QR code"></div><div style="flex:1;min-width:240px"><p class="hint" style="margin:0">Post this once in the club's parent LINE group. Parents scan it, pick their child, type the birth date and make a login. You approve them in <b>Requests</b>. ${q.kids.length} swimmer${q.kids.length===1?"":"s"} on the list (updated now).</p>
+        <input readonly value="${escH(q.url)}" style="width:100%;margin:8px 0;font-size:13px" onclick="this.select()">
+        <div class="row" style="margin:0"><button class="chip teal" data-pqcopy="link" style="cursor:pointer">Copy link</button><button class="chip teal" data-pqcopy="msg" style="cursor:pointer">Copy LINE message</button><button class="chip" data-pqsave="1" style="cursor:pointer">Save QR picture</button><button class="chip" data-pqnew="1" style="cursor:pointer;color:var(--red);border-color:var(--red)">New QR code (old one stops working)</button></div>
+        <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">LINE message</summary><pre class="pqmsg">${escH(msg)}</pre></details></div></div></div>`}
       h+=`<div class="addm" style="margin:0 0 14px"><b style="font-family:var(--display);font-size:16px">Preview any team</b>
         <p class="hint" style="margin:0">See any club in the results as a coach would: team, swimmers, rankings, goals, relays and reports, for example to show a club before it signs up. Read-only: nothing is saved and no coach slots are used. Meet entries are hidden.</p>
         <div class="row" style="margin:6px 0 0;align-items:center"><input type="text" id="pvName" placeholder="Type part of a club name" style="min-width:280px" autocomplete="off"><button class="chip teal" data-pvfind="1" style="cursor:pointer;padding:7px 14px">Find</button></div><div id="pvList" style="margin-top:6px"></div></div>`;
@@ -2863,7 +3057,7 @@ async function adminPage(){
       if(soon.length||over.length)h+=`<div class="addm" style="margin:0 0 14px;border-color:var(--red)"><b style="font-family:var(--display);font-size:16px;color:var(--red)">Coach slots to renew</b>
         ${soon.map(({c,b})=>`<div class="row" style="margin:4px 0 0;align-items:center"><span><b>${escH(c.name)}</b> · ${+b.n} slot${+b.n>1?"s":""} end <b>${escH(dShow(b.end))}</b> <span class="hint">(in ${Math.round((Date.parse(b.end)-Date.parse(DAY))/864e5)} days · ${+b.n} × ${SLOT_RATE} = ${baht(+b.n*SLOT_RATE)})</span></span><button class="chip teal" data-aedit="${escH(c.id)}" style="cursor:pointer">Renew…</button></div>`).join("")}
         ${over.map(x=>`<div class="hint" style="margin-top:4px;color:var(--red)">${escH(x.c.name)}: ${x.n} swimmers but ${x.s} slots now. The coach has been asked to release ${x.n-x.s}.</div>`).join("")}</div>`;
-      /* v3.79: sort and find in the clubs list (no extra database reads) */
+      /* v3.80: sort and find in the clubs list (no extra database reads) */
       if(!A.csort){try{A.csort=localStorage.getItem("smt-acsort")||"en"}catch(e){A.csort="en"}}
       const thC=new Intl.Collator("th"),enOf=c=>String(c.nameEn||c.name||"").trim().toLowerCase(),endOf=c=>{const a=clubBuys(c).filter(b=>buyState(b,DAY)==="active"&&b.end).map(b=>b.end).sort();return c.plan==="free"||!a.length?"9999":a[0]};
       const ord=clubs.map((c,i)=>i).sort((x,y)=>{const a=clubs[x],b=clubs[y];
@@ -2874,7 +3068,7 @@ async function adminPage(){
         <label class="hint acs">Sort by <select id="acSort">${[["en","Name A–Z (English)"],["th","Name ก–ฮ (Thai)"],["sw","Most swimmers"],["sl","Most coach slots"],["end","Slots ending soonest"],["code","Club code"]].map(([v,l])=>`<option value="${v}"${A.csort===v?" selected":""}>${l}</option>`).join("")}</select></label>
         <span class="hint" id="acN">${clubs.length} clubs</span></div>`;
       h+=`<div class="tw"><table><thead><tr><th>Club</th><th>Coach slots</th><th class="num">Swimmers</th><th>Purchases (slots to end date)</th><th></th></tr></thead><tbody>${ord.map(i=>[clubs[i],i]).map(([c,i])=>`<tr data-acq="${escH([c.name,c.nameEn,c.id,c.short,c.resultsName].filter(Boolean).join(" ").toLowerCase())}"><td><b>${escH(c.name)}</b><div class="en">${escH(c.id)}${c.short?" · "+escH(c.short):""}${c.nameEn?" · "+escH(c.nameEn):""}</div></td><td>${c.plan==="free"?'<span class="pill">Free · meet places only</span>':`<b>${slotsOn(c,DAY)}</b> now`}</td><td class="num"${c.plan!=="free"&&+counts[i]>slotsOn(c,DAY)?' style="color:var(--red);font-weight:700"':""}>${counts[i]} / ${c.plan==="free"?"–":slotsOn(c,DAY)}</td><td class="en">${c.plan==="free"?"":clubBuys(c).map(b=>`<div${buyState(b,DAY)==="ended"?' style="opacity:.5;text-decoration:line-through"':""}>${+b.n} to ${escH(dShow(b.end)||"no end")}${buyState(b,DAY).startsWith("starts")?" · "+buyState(b,DAY):""}</div>`).join("")}</td>
-        <td class="num" style="white-space:nowrap"><a class="chip teal" href="${qs("club="+encodeURIComponent(c.id))}">Open coach view</a> <button class="chip" data-aedit="${escH(c.id)}" style="cursor:pointer">Edit</button> <button class="chip" data-afill="${escH(c.id)}" style="cursor:pointer">Fill team from results</button></td></tr>`).join("")||`<tr><td class="hint" colspan="5">No clubs yet. Add the first one below.</td></tr>`}</tbody>${clubs.length?(()=>{const paid=clubs.map((c,i)=>[c,+counts[i]||0]).filter(([c])=>c.plan!=="free"),sl=paid.reduce((t,[c])=>t+slotsOn(c,DAY),0),used=paid.reduce((t,[,n])=>t+n,0),fr=clubs.length-paid.length,pc=sl?Math.round(used/sl*100):0;
+        <td class="num" style="white-space:nowrap"><a class="chip teal" href="${qs("club="+encodeURIComponent(c.id))}">Open coach view</a> <button class="chip" data-aedit="${escH(c.id)}" style="cursor:pointer">Edit</button> <button class="chip" data-afill="${escH(c.id)}" style="cursor:pointer">Fill team from results</button> <button class="chip" data-pqr="${escH(c.id)}" style="cursor:pointer" title="One QR code for the club's parents">Parent QR</button></td></tr>`).join("")||`<tr><td class="hint" colspan="5">No clubs yet. Add the first one below.</td></tr>`}</tbody>${clubs.length?(()=>{const paid=clubs.map((c,i)=>[c,+counts[i]||0]).filter(([c])=>c.plan!=="free"),sl=paid.reduce((t,[c])=>t+slotsOn(c,DAY),0),used=paid.reduce((t,[,n])=>t+n,0),fr=clubs.length-paid.length,pc=sl?Math.round(used/sl*100):0;
         return`<tfoot><tr class="actot"><td><b>Total · ${clubs.length} team${clubs.length===1?"":"s"}</b>${fr?`<div class="en">${paid.length} with coach slots · ${fr} free</div>`:""}</td><td><b>${sl.toLocaleString()}</b> slots</td><td class="num"><b>${used.toLocaleString()} / ${sl.toLocaleString()}</b><div class="en">${pc}% used</div></td><td class="en">${Math.max(0,sl-used).toLocaleString()} slots not used yet</td><td></td></tr></tfoot>`})():""}</table></div>
         <form id="clubForm" class="addm" style="margin-top:14px"><b style="font-family:var(--display);font-size:17px">${A.edit?"Edit club":"Add a club"}</b>
          <div class="row" style="margin:0"><label class="hint">Club name (Thai)<br><input id="cfName" required value="${escH(e.name||"")}" style="width:260px"></label><label class="hint">Club name (English) · for Hytek<br><input id="cfEn" value="${escH(e.nameEn||"")}" placeholder="Kru Saman Swimming Club" style="width:260px"></label><label class="hint">Short name · Hytek team code<br><input id="cfShort" value="${escH(e.short||"")}" placeholder="SMC" style="width:120px"> <span id="cfCode" class="en" style="font-weight:700">${hyCode(e.short)?"Hytek: "+escH(hyCode(e.short)):""}</span></label><label class="hint">Club code (ID)<br><input id="cfId" required value="${escH(e.id||"")}" ${A.edit?"readonly":""} placeholder="jfin" style="width:110px" pattern="[a-z0-9-]+" title="lowercase letters, numbers and -"></label></div>
@@ -2928,9 +3122,10 @@ async function adminPage(){
          <ol class="hint" style="margin:0;padding-left:18px"><li>In Firebase → Authentication → Users → <b>Add user</b>, create the coach's email and password.</li><li>Copy their <b>User UID</b> and paste it here, choose the club, and save.</li><li>Send the coach the address www.smdata.in.th/coach/, their email and password.</li></ol>
          <div class="row" style="margin:0"><label class="hint">User UID<br><input id="ufUid" required style="width:280px;font-family:var(--mono)"></label><label class="hint">Email<br><input id="ufEmail" type="email" style="width:220px"></label><label class="hint">Role<br><select id="ufRole"><option value="coach">Coach</option><option value="admin">Admin (SMT staff)</option></select></label><label class="hint">Club<br><select id="ufClub">${clubs.map(c=>`<option value="${escH(c.id)}">${escH(c.name)}</option>`).join("")}</select></label></div>
          <div class="row" style="margin:0"><button class="chip teal" style="cursor:pointer;padding:7px 16px">Save</button></div></form>`}
+    if(A.tab==="req"){h+=await reqTab(clubs,preqs,creqs)}
     if(A.tab==="transfers"){h+=`<div class="tw"><table><thead><tr><th>Swimmer</th><th>From</th><th>To</th><th>Reason</th><th></th></tr></thead><tbody>${trs.sort((a,b)=>(a.status==="open"?0:1)-(b.status==="open"?0:1)).map(t=>`<tr><td><b>${escH(t.swimmerName||t.swimmerId)}</b></td><td>${escH(t.fromClubName||t.fromClub||"")}</td><td>${escH(t.toClubName||t.toClub)}</td><td class="en">${escH(t.reason||"")}${t.note?" · "+escH(t.note):""}</td>
         <td class="num" style="white-space:nowrap">${t.status==="open"?`<button class="chip teal" data-aok="${escH(t.id)}" style="cursor:pointer">Approve (move swimmer)</button> <button class="chip" data-ano="${escH(t.id)}" style="cursor:pointer">Decline</button>`:`<span class="pill ${t.status==="approved"?"pill-green":"pill-blue"}">${escH(t.status)}</span>`}</td></tr>`).join("")||`<tr><td class="hint" colspan="5">No transfer requests.</td></tr>`}</tbody></table></div>`}
-    el.innerHTML=h;A.clubs=clubs;A.trs=trs;A.mts=mts;cfPriceShow()}
+    el.innerHTML=h;A.clubs=clubs;A.trs=trs;A.mts=mts;cfPriceShow();if(A.pq&&A.tab==="clubs")pqDraw()}
     catch(err){el.innerHTML=`<div class="lock" style="color:var(--red)">${escH(friendly(err))}</div>`}}
   $("#adminUser").innerHTML=`<span class="hint">${escH(USER.email||"")}</span> <button class="chip" data-logout="1" style="cursor:pointer">Log out</button>`;
   const el=$("#adminView");
@@ -2939,6 +3134,7 @@ async function adminPage(){
   el.addEventListener("change",e=>{if(e.target.id==="acSort"){A.csort=e.target.value;try{localStorage.setItem("smt-acsort",A.csort)}catch(err){}draw()}});
   new MutationObserver(()=>{if(A.cq&&el.querySelector("#acQ"))acFilter()}).observe(el,{childList:true});
   el.onclick=async e=>{const t=e.target.closest("button");if(!t)return;
+    if(await reqClick(t))return;
     if(t.dataset.at){A.tab=t.dataset.at;A.edit=null;A.medit=null;A.mform=null;A.mview=null;draw()}
     else if(t.dataset.cacc||t.dataset.cdec){t.disabled=true;try{await DB.setCorrection(t.dataset.cacc||t.dataset.cdec,{status:t.dataset.cacc?"accepted":"declined",decidedAt:Date.now()});toast(t.dataset.cacc?"Accepted. Include it in the next file for the staff app.":"Declined.");draw()}catch(err){toast(friendly(err),true);t.disabled=false}}
     else if(t.dataset.cexp){t.disabled=true;try{const ac=(A.cors||[]).filter(x=>x.status==="accepted"&&!x.exported),nw=[];
