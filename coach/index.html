@@ -2879,7 +2879,7 @@ async function coachPage(clubId,PV,PAR){
   if(PAR){$("#pkgChips").innerHTML="";document.title="SMT Parent"}
   else if(PV){$("#pkgChips").innerHTML=`<span class="chip" style="background:#fff4d6;border-color:#c98a00;color:#7a5200;font-weight:700">Preview · read-only · ${ids.length} swimmer${ids.length===1?"":"s"} from public results</span>`;document.title=CLUB.short+" · Preview · SMT Coach"}
   show("#scrApp");APP=window.startCoachApp(D,CTX,CLUB);
-  if(PV){const st=document.createElement("style");st.textContent='#tabs button[data-t="entries"],.mngbar{display:none!important}'+(PAR?'#tabs button:not([data-t="team"]):not([data-t="goals"]){display:none!important}':'');document.head.appendChild(st)}
+  if(PV){const st=document.createElement("style");st.textContent='#tabs button[data-t="entries"],.mngbar{display:none!important}'+(PAR?'#tabs button:not([data-t="team"]):not([data-t="goals"]),.insbox{display:none!important}':'');document.head.appendChild(st)}
   if(PAR){const sb=document.querySelector("#scrApp header .sub");if(sb)sb.firstChild.textContent="Parent view · ";const tb=document.querySelector('#tabs button[data-t="team"]');if(tb)tb.click();if(PAR.ids.length===1)setTimeout(()=>{const r=document.querySelector('#view tr[data-sw]');if(r)r.click()},60)}
   /* free account: meet places only (number of swimmers per meet); the other tools are for paying clubs */
   document.querySelectorAll("#tabs button").forEach(b=>b.hidden=FREE&&b.dataset.t!=="entries");const ps=$("#poolSw");if(ps)ps.hidden=FREE;if(FREE){const tb=document.querySelector('#tabs button[data-t="entries"]');if(tb)tb.click()}
