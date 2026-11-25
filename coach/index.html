@@ -2406,10 +2406,10 @@ return CTX;
 const FB_CONFIG={apiKey:"AIzaSyC6vuDi3FnUd-JRAgfvG_RGFKhVCBVkX7s",authDomain:"smdata-th.firebaseapp.com",projectId:"smdata-th",storageBucket:"smdata-th.firebasestorage.app",messagingSenderId:"221166535254",appId:"1:221166535254:web:6134eee1b038c0fffe31f7"};
 const FB_V="10.14.1";
 const QS=new URLSearchParams(location.search);
-/* coach slot pricing (changed 16 Nov 2026, was 349): one price, 299 ฿ per slot per year, no minimum (from 1 slot). Each purchase has its own start and end date.
+/* coach slot pricing (changed 25 Nov 2026, was 299; free parent app included): one price, 349 ฿ per slot per year, no minimum (from 1 slot). Each purchase has its own start and end date.
    The rate for the team's total number of slots applies to every slot; slots added during the year use the rate for the new total
    and end on the same date. */
-const SLOT_MIN=1,SLOT_RATE=299,slotRate=()=>SLOT_RATE,slotPrice=n=>n*slotRate(n),baht=n=>Math.round(n).toLocaleString("en-US")+" ฿";
+const SLOT_MIN=1,SLOT_RATE=349,slotRate=()=>SLOT_RATE,slotPrice=n=>n*slotRate(n),baht=n=>Math.round(n).toLocaleString("en-US")+" ฿";
 /* coach slots are bought in purchases; each purchase has its own start and end date (agreed 11 Nov 2026).
    club.buys=[{n,start,end,rc}]. Old clubs with only limit+expires count as one purchase. */
 const dayLocal=()=>new Date().toLocaleDateString("en-CA"),
